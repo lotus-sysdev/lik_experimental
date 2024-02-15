@@ -1,8 +1,7 @@
-# urls.py
-
 from django.urls import path
-from .views import add_customer
+from .views import *
 
 urlpatterns = [
-    path('my-form/', add_customer, name='my-form'),
+    path('', placeholder,name='index'),
+    path('my-form/', my_view, name='my-form'),
 ]
