@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from .forms import CustomerForm,PIC_Forms
 from django.http import HttpResponse
-from .models import Customer
+from .models import *
 # Create your views here.
 def placeholder(request):
     return HttpResponse("Hello World")
@@ -20,4 +20,8 @@ def my_view(request):
 
 def display_customer(request):
     customers = Customer.objects.all()
-    return render(request, 'display.html', {'customers': customers})
+    return render(request, 'display_customer.html', {'customers': customers})
+
+def display_supplier(request):
+    suppliers = Supplier.objects.all()
+    return render(request, 'display_supplier.html', {'suppliers': suppliers})
