@@ -1,0 +1,47 @@
+<!-- yourapp/templates/yourapp/display_customers.html -->
+<html>
+<head>
+    <title>Data Tables</title>
+    <meta charset="UTF-8">	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+	<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready( function () {
+            $('#customerTable').DataTable();
+        } );
+    </script>
+</head>
+<body>
+    <h1>Customer List</h1>
+    <table id="customerTable" border="1">
+        <thead>
+            <tr>
+                <th data-order="asc">Cust ID</th>
+                <th data-order="asc">Nama PT</th>
+                <th data-order="asc">Alamat Penagihan</th>
+                <th data-order="asc">Alamat Pengiriman</th>
+                <th data-order="asc">Telp</th>
+                <th data-order="asc">Terms of Payment</th>
+                <th data-order="asc">Pengiriman</th>
+                <th data-order="asc">NPWP</th>
+                <th data-order="asc">Faktur</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+                <tr>
+                    <td>{{ customer.cust_id }}</td>
+                    <td>{{ customer.nama_pt }}</td>
+                    <td>{{ customer.alamat_penagihan }}</td>
+                    <td>{{ customer.alamat_pengiriman }}</td>
+                    <td>{{ customer.telp }}</td>
+                    <td>{{ customer.terms_of_payment }}</td>
+                    <td>{{ customer.pengiriman }}</td>
+                    <td>{{ customer.npwp }}</td>
+                    <td>{% if customer.faktur %}Yes{% else %}No{% endif %}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
