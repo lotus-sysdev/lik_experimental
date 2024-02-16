@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import CustomerForm,PIC_Forms
+from .forms import *
 from django.http import HttpResponse, JsonResponse  
 from .models import *
 # Create your views here.
 def placeholder(request):
     return HttpResponse("Hello World")
-def my_view(request):
+def add_customer(request):
     customer_form = CustomerForm(request.POST or None)
     pic_form = PIC_Forms(request.POST or None)
     if request.method == 'POST':
@@ -16,7 +16,18 @@ def my_view(request):
     else:
         form = CustomerForm()
 
-    return render(request, 'page1.html', {'customer_form': customer_form})
+    return render(request, 'add_cust.html', {'customer_form': customer_form})
+def add_supplier(request):
+    supplier_form = SupplierForm(request.POST or None)
+    if request.method == 'POST':
+        form = SupplierForm(request.POST)
+        if form.is_valid():
+            form.save()
+            # return redirect('success_url')  # Replace 'success_url' with the URL you want to redirect to after successfully adding a customer
+    else:
+        form = SupplierForm()
+
+    return render(request, 'add_supp.html', {'supplier_form': supplier_form})
 
 def display_customer(request):
     customers = Customer.objects.all()
@@ -44,7 +55,7 @@ def edit_customer(request, cust_id):
     else:
         form = CustomerForm(instance=customer)
 
-    return render(request, 'yourapp/edit_customer.html', {'form': form})
+    return render(request, 'edit_customer.html', {'form': form})
 
 # yourapp/views.py
 def delete_customer(request, cust_id):
@@ -56,32 +67,32 @@ def delete_customer(request, cust_id):
     else:
         return JsonResponse({'success': False, 'message': 'Invalid request method'})
     
-def supplier_detail(request, cust_id):
-    customer = get_object_or_404(Supplier, cust_id=cust_id)
-    form = SupplierForm(instance=customer)
-    return render(request, 'customer_detail.html', {'customer': customer, 'form': form})
+def supplier_detail(request, supp_id):
+    supplier = get_object_or_404(Supplier, supp_id=supp_id)
+    form = SupplierForm(instance=supplier)
+    return render(request, 'supplier_detail.html', {'supplier': supplier, 'form': form})
 
-def edit_supplier(request, cust_id):
-    customer = get_object_or_404(Supplier, cust_id=cust_id)
+def edit_supplier(request, supp_id):
+    supplier = get_object_or_404(Supplier, supp_id=supp_id)
 
     if request.method == 'POST':
-        form = SupplierForm(request.POST, instance=customer)
+        form = SupplierForm(request.POST, instance=supplier)
         if form.is_valid():
             form.save()
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'success': False, 'errors': form.errors})
     else:
-        form = SupplierForm(instance=customer)
+        form = SupplierForm(instance=supplier)
 
-    return render(request, 'yourapp/edit_customer.html', {'form': form})
+    return render(request, 'edit_supplier.html', {'form': form})
 
 # yourapp/views.py
-def delete_supplier(request, cust_id):
-    customer = get_object_or_404(Supplier, cust_id=cust_id)
+def delete_supplier(request, supp_id):
+    supplier = get_object_or_404(Supplier, supp_id=supp_id)
 
     if request.method == 'POST':
-        customer.delete()
+        supplier.delete()
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False, 'message': 'Invalid request method'})

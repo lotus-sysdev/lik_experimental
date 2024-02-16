@@ -1,18 +1,18 @@
-<!-- yourapp/templates/yourapp/customer_detail.html -->
+<!-- yourapp/templates/yourapp/supplier_detail.html -->
 <html>
 <head>
-    <title>Customer Detail</title>
+    <title>Supplier Detail</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <h1>Customer Detail</h1>
-    <a href="/display_customer">Back</a>
-    <form id="editForm" method="post" data-action="{% url 'edit_customer' customer.cust_id %}">
+    <h1>Supplier Detail</h1>
+    <a href="/display_supplier">Back</a>
+    <form id="editForm" method="post" data-action="{% url 'edit_supplier' supplier.supp_id %}">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Update</button>
     </form>
-    <form id="deleteForm" method="post" action="{% url 'delete_customer' customer.cust_id %}" onclick="return confirmDelete();">
+    <form id="deleteForm" method="post" action="{% url 'delete_supplier' supplier.supp_id %}" onclick="return confirmDelete();">
         {% csrf_token %}
         <button type="submit">Delete</button>
     </form>
@@ -29,29 +29,29 @@
                     url: $(this).data('action'),
                     data: $(this).serialize(),
                     success: function () {
-                        alert('Customer details updated successfully!');
+                        alert('supplier details updated successfully!');
                         // You can optionally update the page or perform additional actions here
                     },
                     error: function () {
-                        alert('Error updating customer details.');
+                        alert('Error updating supplier details.');
                     }
                 });
             });
         });
 
         function confirmDelete() {
-            if(confirm('Are you sure you want to delete this customer?')) {
+            if(confirm('Are you sure you want to delete this supplier?')) {
                 $.ajax({
                     type: 'POST',
                     url: $('#deleteForm').attr('action'),
                     data: $('#deleteForm').serialize(),
                     success: function () {
-                        alert('Customer deleted successfully!');
-                        // Navigate back to the customer list
-                        window.location.href = "/display_customer";
+                        alert('supplier deleted successfully!');
+                        // Navigate back to the supplier list
+                        window.location.href = "/display_supplier";
                     },
                     error: function () {
-                        alert('Error deleting customer.');
+                        alert('Error deleting supplier.');
                     }
                 });
             }
