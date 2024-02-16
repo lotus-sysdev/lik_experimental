@@ -30,7 +30,7 @@
         <tbody>
             {% for s in suppliers %}
                 <tr>
-                    <td>{{ s.cust_id }}</td>
+                    <td>{{ s.supp_id }}</td>
                     <td>{{ s.nama_pt }}</td>
                     <td>{{ s.alamat_penagihan }}</td>
                     <td>{{ s.alamat_pengiriman }}</td>
@@ -39,6 +39,9 @@
                     <td>{{ s.pengiriman }}</td>
                     <td>{{ s.npwp }}</td>
                     <td>{% if s.faktur %}Yes{% else %}No{% endif %}</td>
+                    <td>
+                        <a href="{% url 'supplier_detail' s.supp_id %}">View</a>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>

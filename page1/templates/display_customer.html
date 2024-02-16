@@ -39,6 +39,9 @@
                     <td>{{ customer.pengiriman }}</td>
                     <td>{{ customer.npwp }}</td>
                     <td>{% if customer.faktur %}Yes{% else %}No{% endif %}</td>
+                    <td>
+                        <a href="{% url 'customer_detail' customer.cust_id %}">View</a>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
