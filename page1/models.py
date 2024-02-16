@@ -23,7 +23,6 @@ class Supplier(models.Model):
     telp = PhoneNumberField()
     # pic = models.ForeignKey('PIC', on_delete=models.CASCADE, related_name='customers', null=True)
     terms_of_payment = models.CharField(max_length=10)
-    pengiriman = models.CharField(max_length=50)
     npwp = models.CharField(max_length=255)
     faktur = models.BooleanField()
 
@@ -33,3 +32,11 @@ class PIC(models.Model):
     email = models.EmailField()
     telp = PhoneNumberField()
     Role = models.CharField(max_length=50)
+
+class Items(models.Model):
+    SKU = models.IntegerField(primary_key = True, unique = True)
+    Category = models.CharField(max_length=255)
+    Quantity = models.IntegerField()
+    Price = models.IntegerField()
+    Gambar = models.ImageField()
+    Sumber = models.CharField(max_length=255)

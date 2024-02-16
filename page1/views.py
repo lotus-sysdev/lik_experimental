@@ -3,7 +3,7 @@ from .forms import *
 from django.http import HttpResponse, JsonResponse  
 from .models import *
 # Create your views here.
-def placeholder(request):
+def placeholder():
     return HttpResponse("Hello World")
 def add_customer(request):
     customer_form = CustomerForm(request.POST or None)
@@ -28,6 +28,30 @@ def add_supplier(request):
         form = SupplierForm()
 
     return render(request, 'add_supp.html', {'supplier_form': supplier_form})
+
+def add_pic (request):
+    pic_form = PIC_Forms(request.POST or None)
+    if request.method == 'POST':
+        form = PIC_Forms(request.POST)
+        if form.is_valid():
+            form.save()
+            # return redirect('success_url')  # Replace 'success_url' with the URL you want to redirect to after successfully adding a customer
+    else:
+        form = PIC_Forms()
+
+    return render(request, 'add_pic.html', {'pic_form': pic_form})
+
+def add_items(request):
+    item_form = ItemForm(request.POST or None)
+    if request.method == 'POST':
+        form = ItemForm(request.POST)
+        if form.is_valid():
+            form.save()
+            # return redirect('success_url')  # Replace 'success_url' with the URL you want to redirect to after successfully adding a customer
+    else:
+        form = ItemForm()
+
+    return render(request, 'add_items.html', {'item_form': item_form})
 
 def display_customer(request):
     customers = Customer.objects.all()
