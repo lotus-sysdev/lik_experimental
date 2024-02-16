@@ -120,3 +120,7 @@ def delete_supplier(request, supp_id):
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False, 'message': 'Invalid request method'})
+    
+def display_item(request):
+    items = Items.objects.all()
+    return render(request, 'display_item.html', {'items': items})

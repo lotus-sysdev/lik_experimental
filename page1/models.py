@@ -35,8 +35,9 @@ class PIC(models.Model):
 
 class Items(models.Model):
     SKU = models.IntegerField(primary_key = True, unique = True)
-    Category = models.CharField(max_length=255)
-    Quantity = models.IntegerField()
-    Price = models.IntegerField()
-    Gambar = models.ImageField()
-    Sumber = models.CharField(max_length=255)
+    nama = models.CharField(max_length=255)
+    category = models.CharField(max_length=255)
+    quantity = models.IntegerField()
+    price = models.IntegerField()
+    gambar = models.ImageField()
+    sumber = models.CharField(max_length=255)
