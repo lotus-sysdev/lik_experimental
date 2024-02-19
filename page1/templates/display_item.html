@@ -1,4 +1,5 @@
-<!-- yourapp/templates/yourapp/display_customers.html -->
+{% extends 'base.html' %}
+
 <html>
 <head>
     <title>Item Data Table</title>
@@ -12,6 +13,7 @@
     </script>
 </head>
 <body>
+    {% block content %}
     <h1>Item List</h1>
     <table id="itemTable" border="1">
         <thead>
@@ -41,5 +43,6 @@
         </tbody>
     </table>
     <a href="/add_item">Add Item</a><br/><br/>
+    {% endblock %}
 </body>
 </html>

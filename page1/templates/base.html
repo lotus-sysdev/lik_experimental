@@ -31,7 +31,7 @@
             }
 
         </style>
-        <title>{% block title %}Test{% endblock %}</title>
+        <title>{% block title %}Sidebar{% endblock %}</title>
     </head>
     <body>
         <div class="sidenav">
@@ -41,7 +41,7 @@
             <a href="/display_item">Display Items</a>
         </div>
 
-        <div id="content", name="content">
+        <div id="content", name="content" class="main">
             {% block content %}
             {% endblock %}
         </div>
