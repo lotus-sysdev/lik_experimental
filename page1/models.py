@@ -46,3 +46,29 @@ class Items(models.Model):
     price = models.IntegerField()
     gambar = models.ImageField()
     sumber = models.CharField(max_length=255)
+
+class CustomerAlamat(models.Model):
+    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    TYPE_CHOICES = (
+        ('penagihan', 'Alamat Penagihan'),
+        ('pengiriman', 'Alamat Pengiriman'),
+    )
+    type = models.CharField(max_length=15, choices=TYPE_CHOICES)
+    provinsi = models.CharField(max_length=255)
+    kota = models.CharField(max_length=50)
+    kecamatan = models.CharField(max_length=50)
+    kelurahan = models.CharField(max_length=50)
+    detail = models.CharField(max_length=50)
+
+class SupplierAlamat(models.Model):
+    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    TYPE_CHOICES = (
+        ('penagihan', 'Alamat Penagihan'),
+        ('pengiriman', 'Alamat Pengiriman'),
+    )
+    type = models.CharField(max_length=15, choices=TYPE_CHOICES)
+    provinsi = models.CharField(max_length=255)
+    kota = models.CharField(max_length=50)
+    kecamatan = models.CharField(max_length=50)
+    kelurahan = models.CharField(max_length=50)
+    detail = models.CharField(max_length=50)

@@ -177,3 +177,27 @@ def delete_item(request, SKU):
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False, 'message': 'Invalid request method'})
+    
+def add_customer_alamat(request, cust_id):
+    customer = get_object_or_404(Customer, cust_id=cust_id)
+    if request.method == 'POST':
+        form = Cust_PIC_Forms(request.POST)
+        if form.is_valid():
+            # Set the customer_id field of the form to the customer ID
+            form.instance.customer_id = cust_id
+            form.save()
+    else:
+        form = Cust_PIC_Forms(initial={'customer_id': cust_id})
+    return render(request, 'add_cust_alamat.html', {'customer':customer,'form': form, 'cust_id':cust_id})
+
+def add_supplier_alamat(request, supp_id):
+    supplier = get_object_or_404(Supplier, supp_id=supp_id)
+    if request.method == 'POST':
+        form = Supp_PIC_Forms(request.POST)
+        if form.is_valid():
+            # Set the customer_id field of the form to the customer ID
+            form.instance.supplier_id = supp_id
+            form.save()
+    else:
+        form = Supp_PIC_Forms(initial={'supplier_id': supp_id})
+    return render(request, 'add_supp_alamat.html', {'supplier':supplier,'form': form,'supp_id':supp_id})

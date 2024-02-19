@@ -64,6 +64,18 @@ class Supp_PIC_Forms(forms.ModelForm):
         fields = '__all__'
         exclude = ['supplier_id']
 
+class Cust_Alamat_Forms(forms.ModelForm):
+    class Meta:
+        model = CustomerAlamat
+        fields = '__all__'
+        exclude = ['customer_id']
+
+class Supp_Alamat_Forms(forms.ModelForm):
+    class Meta:
+        model = SupplierAlamat
+        fields = '__all__'
+        exclude = ['supplier_id']
+
 class ItemForm(forms.ModelForm):
 
     class Meta:
