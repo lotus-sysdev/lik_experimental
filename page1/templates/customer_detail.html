@@ -2,12 +2,12 @@
 
 <html>
 <head>
-    <title>{% block title %}Customer Detail{% endblock %}</title>
+    {% block title %}Customer Detail{% endblock %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     {% block content %}
-    <h1>Customer Detail:</h1>
+    <h1>Customer Detail</h1>
     <a href="/display_customer">Back</a>
     <form id="editForm" method="post" data-action="{% url 'edit_customer' customer.cust_id %}">
         {% csrf_token %}

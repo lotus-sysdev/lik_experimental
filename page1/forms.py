@@ -51,6 +51,19 @@ class Cust_PIC_Forms(forms.ModelForm):
         fields = '__all__'
         exclude = ['customer_id']
 
+class Supp_PIC_Forms(forms.ModelForm):
+    Role_Options = (
+        (1, 'Option 1'),
+        (2, 'Option 2'),
+        (3, 'Option 3'),
+    )
+    Role = forms.ChoiceField(choices=Role_Options)
+
+    class Meta:
+        model = SupplierPIC
+        fields = '__all__'
+        exclude = ['supplier_id']
+
 class ItemForm(forms.ModelForm):
 
     class Meta:

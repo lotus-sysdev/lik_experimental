@@ -1,19 +1,17 @@
-{% extends 'base.html' %}
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-   {% block title %}Add Supplier{% endblock %}
+    <meta charset="UTF-8">
+    {% block title %}Add Supplier PIC{% endblock %}
 </head>
 <body>
-    {% block content %}
-    <h2>Add Supplier</h2>
+    {% block content %} 
+    <h1>Add Supplier PIC</h1>
     <form method="post">
         {% csrf_token %}
-        {{ supplier_form.as_p }}
+        {{ form.as_p }}
         <button type="submit">Submit</button>
     </form>
     {% endblock %}
 </body>
 </html>
-

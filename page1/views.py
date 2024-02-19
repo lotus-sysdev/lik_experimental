@@ -67,6 +67,20 @@ def goto_add_pic(request, cust_id):
     customer = get_object_or_404(Customer, cust_id=cust_id)
     return render(request, 'add_cust_pic.html',{'customer' : customer})
 
+def add_supplier_pic(request, supp_id):
+    supp_id = Supplier.objects.get(supp_id=supp_id)
+    if request.method == 'POST':
+        form = Supp_PIC_Forms(request.POST)
+        if form.is_valid():
+            # Set the customer_id field of the form to the customer ID
+            form.instance.supplier_id = supp_id
+            form.save()
+    else:
+        form = Supp_PIC_Forms(initial={'supplier_id': supp_id})
+    return render(request, 'add_supp_pic.html', {'form': form})
+def goto_add_pic2(request, supp_id):
+    supplier = get_object_or_404(Supplier, supp_id=supp_id)
+    return render(request, 'add_supp_pic.html',{'supplier' : supplier})
 # Displaying Tables
 def display_customer(request):
     customers = Customer.objects.all()

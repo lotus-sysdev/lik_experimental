@@ -1,15 +1,18 @@
+{% extends 'base.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Add Customer PIC</title>
+    {% block title %}Add Customer PIC{% endblock %}
 </head>
 <body>
+    {% block content %}
     <h1>Add Customer PIC</h1>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Submit</button>
     </form>
+    {% endblock %}
 </body>
 </html>
