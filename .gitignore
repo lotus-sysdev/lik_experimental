@@ -23,4 +23,3 @@ local_settings.py
 /staticfiles/
 /static/
 
-**/migrations/
