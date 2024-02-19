@@ -31,6 +31,9 @@ urlpatterns = [
     path('supp_pic_list/<int:supp_id>/', supp_pic_list, name='supp_pic_list'),
 
     # Items
-    path('display_item/', display_item, name="Item Data")
+    path('display_item/', display_item, name="Item Data"),
+    path('item_detail/<int:SKU>', item_detail, name='item_detail'),
+    path('edit_item/<int:SKU>/', edit_item, name='edit_item'),
+    path('delete_item/<int:SKU>/', delete_item, name='delete_item'),	
     
 ]

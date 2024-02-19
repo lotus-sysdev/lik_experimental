@@ -148,3 +148,32 @@ def delete_supplier(request, supp_id):
     else:
         return JsonResponse({'success': False, 'message': 'Invalid request method'})
     
+# Item Details, Edit, and Delete
+def item_detail(request, SKU):
+    item = get_object_or_404(Items, SKU=SKU)
+    form = ItemForm(instance=item)
+    return render(request, 'item_detail.html', {'item': item, 'form': form})    
+
+def edit_item(request, SKU):
+    item = get_object_or_404(Items, SKU=SKU)
+
+    if request.method == 'POST':
+        form = ItemForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        form = ItemForm(instance=item)
+
+    return render(request, 'edit_item.html', {'form': form})
+
+def delete_item(request, SKU):
+    item = get_object_or_404(Items, SKU=SKU)
+
+    if request.method == 'POST':
+        item.delete()
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False, 'message': 'Invalid request method'})
