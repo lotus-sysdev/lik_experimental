@@ -9,7 +9,6 @@ class Customer(models.Model):
     alamat_penagihan = models.CharField(max_length=255)
     alamat_pengiriman = models.CharField(max_length=255)
     telp = PhoneNumberField()
-    # pic = models.ForeignKey('PIC', on_delete=models.CASCADE, related_name='customers', null=True)
     terms_of_payment = models.CharField(max_length=10)
     pengiriman = models.CharField(max_length=50)
     npwp = models.CharField(max_length=255)
@@ -26,8 +25,8 @@ class Supplier(models.Model):
     npwp = models.CharField(max_length=255)
     faktur = models.BooleanField()
 
-class PIC(models.Model):
-    PIC_Id = models.IntegerField(primary_key = True, unique = True)
+class CustomerPIC(models.Model):
+    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
     nama = models.CharField(max_length=255)
     email = models.EmailField()
     telp = PhoneNumberField()

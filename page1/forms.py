@@ -38,7 +38,7 @@ class SupplierForm(forms.ModelForm):
         fields = '__all__'
         exclude=['supp_id']
 
-class PIC_Forms(forms.ModelForm):
+class Cust_PIC_Forms(forms.ModelForm):
     Role_Options = (
         (1, 'Option 1'),
         (2, 'Option 2'),
@@ -47,9 +47,9 @@ class PIC_Forms(forms.ModelForm):
     Role = forms.ChoiceField(choices=Role_Options)
 
     class Meta:
-        model = PIC
+        model = CustomerPIC
         fields = '__all__'
-        exclude = ['PIC_Id']
+        exclude = ['customer_id']
 
 class ItemForm(forms.ModelForm):
 
