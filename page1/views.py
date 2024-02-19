@@ -3,8 +3,9 @@ from .forms import *
 from django.http import HttpResponse, JsonResponse  
 from .models import *
 # Create your views here.
-def placeholder():
+def placeholder(request):
     return HttpResponse("Hello World")
+
 def add_customer(request):
     customer_form = CustomerForm(request.POST or None)
     pic_form = PIC_Forms(request.POST or None)
@@ -41,7 +42,7 @@ def add_pic (request):
 
     return render(request, 'add_pic.html', {'pic_form': pic_form})
 
-def add_items(request):
+def add_item(request):
     item_form = ItemForm(request.POST or None)
     if request.method == 'POST':
         form = ItemForm(request.POST)
@@ -51,7 +52,7 @@ def add_items(request):
     else:
         form = ItemForm()
 
-    return render(request, 'add_items.html', {'item_form': item_form})
+    return render(request, 'add_item.html', {'item_form': item_form})
 
 def display_customer(request):
     customers = Customer.objects.all()

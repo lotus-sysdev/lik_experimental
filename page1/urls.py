@@ -7,8 +7,8 @@ urlpatterns = [
     # form urls
     path('add_customer/', add_customer, name='add_customer'),
     path('add_supplier/', add_supplier, name='add_supplier'),
-    path('add_pic',add_pic, name='add_pic'),
-    path('add_item',add_items, name='add_item'),
+    path('add_pic/',add_pic, name='add_pic'),
+    path('add_item/',add_item, name='add_item'),
 
     # display customer and supplier tables
     path('display_customer/',display_customer, name='Customer Data'),
@@ -25,5 +25,6 @@ urlpatterns = [
     path('delete_supplier/<int:supp_id>/', delete_supplier, name='delete_supplier'),
 
     # Items
-    path('display_item', display_item, name="Item Data")
+    path('display_item/', display_item, name="Item Data")
+    
 ]
