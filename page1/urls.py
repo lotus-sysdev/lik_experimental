@@ -27,6 +27,8 @@ urlpatterns = [
     # PIC urls
     path('add_pic_cust/<int:cust_id>',add_customer_pic,name='add_pic_cust'),
     path('add_pic_supp/<int:supp_id>',add_supplier_pic,name='add_pic_supp'),
+    path('cust_pic_list/<int:cust_id>/', cust_pic_list, name='cust_pic_list'),
+    path('supp_pic_list/<int:supp_id>/', supp_pic_list, name='supp_pic_list'),
 
     # Items
     path('display_item/', display_item, name="Item Data")

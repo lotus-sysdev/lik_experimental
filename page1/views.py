@@ -29,17 +29,15 @@ def add_supplier(request):
 
     return render(request, 'add_supp.html', {'supplier_form': supplier_form})
 
-# def add_pic (request):
-#     pic_form = PIC_Forms(request.POST or None)
-#     if request.method == 'POST':
-#         form = PIC_Forms(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             # return redirect('success_url')  # Replace 'success_url' with the URL you want to redirect to after successfully adding a customer
-#     else:
-#         form = PIC_Forms()
+def cust_pic_list(request, cust_id):
+    customer = get_object_or_404(Customer, cust_id=cust_id)
+    customer_pics = CustomerPIC.objects.filter(customer_id=cust_id)
+    return render(request, 'cust_pic_list.html', {'customer': customer, 'customer_pics': customer_pics})
 
-#     return render(request, 'add_pic.html', {'pic_form': pic_form})
+def supp_pic_list(request, supp_id):
+    supplier = get_object_or_404(Supplier, supp_id=supp_id)
+    supplier_pics = SupplierPIC.objects.filter(supplier_id=supp_id)
+    return render(request, 'supp_pic_list.html', {'supplier': supplier, 'supplier_pics': supplier_pics})
 
 def add_item(request):
     item_form = ItemForm(request.POST or None)
@@ -53,7 +51,7 @@ def add_item(request):
 
     return render(request, 'add_item.html', {'item_form': item_form})
 def add_customer_pic(request, cust_id):
-    cust_id = Customer.objects.get(cust_id=cust_id)
+    customer = get_object_or_404(Customer, cust_id=cust_id)
     if request.method == 'POST':
         form = Cust_PIC_Forms(request.POST)
         if form.is_valid():
@@ -62,13 +60,10 @@ def add_customer_pic(request, cust_id):
             form.save()
     else:
         form = Cust_PIC_Forms(initial={'customer_id': cust_id})
-    return render(request, 'add_cust_pic.html', {'form': form})
-def goto_add_pic(request, cust_id):
-    customer = get_object_or_404(Customer, cust_id=cust_id)
-    return render(request, 'add_cust_pic.html',{'customer' : customer})
+    return render(request, 'add_cust_pic.html', {'customer':customer,'form': form, 'cust_id':cust_id})
 
 def add_supplier_pic(request, supp_id):
-    supp_id = Supplier.objects.get(supp_id=supp_id)
+    supplier = get_object_or_404(Supplier, supp_id=supp_id)
     if request.method == 'POST':
         form = Supp_PIC_Forms(request.POST)
         if form.is_valid():
@@ -77,10 +72,8 @@ def add_supplier_pic(request, supp_id):
             form.save()
     else:
         form = Supp_PIC_Forms(initial={'supplier_id': supp_id})
-    return render(request, 'add_supp_pic.html', {'form': form})
-def goto_add_pic2(request, supp_id):
-    supplier = get_object_or_404(Supplier, supp_id=supp_id)
-    return render(request, 'add_supp_pic.html',{'supplier' : supplier})
+    return render(request, 'add_supp_pic.html', {'supplier':supplier,'form': form,'supp_id':supp_id})
+
 # Displaying Tables
 def display_customer(request):
     customers = Customer.objects.all()
@@ -98,7 +91,8 @@ def display_item(request):
 def customer_detail(request, cust_id):
     customer = get_object_or_404(Customer, cust_id=cust_id)
     form = CustomerForm(instance=customer)
-    return render(request, 'customer_detail.html', {'customer': customer, 'form': form})
+    context = {'customer': customer, 'form': form, 'cust_id': cust_id}
+    return render(request, 'customer_detail.html', context)
 
 def edit_customer(request, cust_id):
     customer = get_object_or_404(Customer, cust_id=cust_id)

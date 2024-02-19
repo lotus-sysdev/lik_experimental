@@ -1,0 +1,6 @@
+<h1>{{ company.name }}</h1>
+<ul>
+    {% for pic in company.pics.all %}
+        <li>{{ pic.name }}</li>
+    {% endfor %}
+</ul>
