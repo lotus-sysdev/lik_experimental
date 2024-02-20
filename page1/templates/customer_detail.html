@@ -19,6 +19,7 @@
         <button type="submit">Delete</button>
     </form>
     <a href="{% url 'add_pic_cust' cust_id=customer.cust_id %}">Add PIC</a>
+    <a href="{% url 'add_customer_alamat' cust_id=customer.cust_id %}">Add Alamat</a>
 
     <script>
         $(document).ready(function () {

@@ -61,7 +61,7 @@ class CustomerAlamat(models.Model):
     detail = models.CharField(max_length=50)
 
 class SupplierAlamat(models.Model):
-    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    supplier_id = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     TYPE_CHOICES = (
         ('penagihan', 'Alamat Penagihan'),
         ('pengiriman', 'Alamat Pengiriman'),

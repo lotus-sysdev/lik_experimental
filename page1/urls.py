@@ -32,8 +32,12 @@ urlpatterns = [
 
     # Items
     path('display_item/', display_item, name="Item Data"),
-    path('item_detail/<int:SKU>', item_detail, name='item_detail'),
+    path('item_detail/<int:SKU>/', item_detail, name='item_detail'),
     path('edit_item/<int:SKU>/', edit_item, name='edit_item'),
     path('delete_item/<int:SKU>/', delete_item, name='delete_item'),	
-    
+
+    #Alamat
+    path('add_customer_alamat/<int:cust_id>/', add_customer_alamat, name='add_customer_alamat'),
+    path('add_supplier_alamat/<int:supp_id>/', add_supplier_alamat, name='add_supplier_alamat'),
+
 ]
