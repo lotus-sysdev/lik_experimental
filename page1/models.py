@@ -42,10 +42,6 @@ class Items(models.Model):
     price = models.IntegerField()
     gambar = models.ImageField()
     sumber = models.CharField(max_length=255)
-    # gambar_resized = models.CharField(max_length=255, blank=True, null=True)
-
-    # def path(self):
-    #     return self.gambar.url
 
 class CustomerAlamat(models.Model):
     customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)

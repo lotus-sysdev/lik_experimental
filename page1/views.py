@@ -59,13 +59,18 @@ def add_item(request):
                 img = img.resize((100, 100))  # Change the dimensions as needed
                 
                 # Save the resized image
-                resized_image_name = f"{item.nama}_resized.jpg"  # Rename the file to avoid overwriting the original
-                resized_image_path = os.path.join(settings.MEDIA_ROOT, 'resized_images', resized_image_name)
+                # image_name = f"{item.nama}.{image.name.split('.')[-1]}"
+                # image_path = os.path.join(settings.MEDIA_ROOT, image_name)
+                resized_image_name = f"{item.nama}_resized.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
+                resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
                 img.save(resized_image_path)
 
-                item.gambar = os.path.join('resized_images', resized_image_name)
+                # os.remove(image_path)
+
+                item.gambar = resized_image_name
                 print(item.gambar)
                 item.save()
+
     else:
         form = ItemForm()
     

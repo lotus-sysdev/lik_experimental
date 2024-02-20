@@ -35,7 +35,7 @@
                     <td>{{ i.category }}</td>
                     <td>{{ i.quantity }}</td>
                     <td>{{ i.price }}</td>
-                    <td><img src="{{ i.gambar }}" alt="{{ i.nama }}"></td>
+                    <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}"></td>
                     <td>{{ i.sumber }}</td>
                     <td>
                         <a href="{% url 'item_detail' i.SKU %}">View</a>
