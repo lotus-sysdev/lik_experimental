@@ -6,8 +6,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 class Customer(models.Model):
     cust_id = models.IntegerField(primary_key=True)
     nama_pt = models.CharField(max_length=255)
-    alamat_penagihan = models.CharField(max_length=255)
-    alamat_pengiriman = models.CharField(max_length=255)
     telp = PhoneNumberField()
     terms_of_payment = models.CharField(max_length=10)
     pengiriman = models.CharField(max_length=50)
@@ -17,8 +15,6 @@ class Customer(models.Model):
 class Supplier(models.Model):
     supp_id = models.IntegerField(primary_key = True)
     nama_pt = models.CharField(max_length=255)
-    alamat_penagihan = models.CharField(max_length=255)
-    alamat_pengiriman = models.CharField(max_length=255)
     telp = PhoneNumberField()
     terms_of_payment = models.CharField(max_length=10)
     npwp = models.CharField(max_length=255)

@@ -1,53 +1,57 @@
-<html>
-    <head>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-        <style type="text/css">
-            .sidenav {
-                height: 100%;
-                width: 160px;
-                position: fixed;
-                z-index: 1;
-                top: 0;
-                left: 0;
-                background-color: #111;
-                overflow-x: hidden;
-                padding-top: 20px;
-            }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <style type="text/css">
+        .sidenav {
+            height: 100%;
+            width: 160px;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            overflow-x: hidden;
+            padding-top: 20px;
+        }
 
-            .sidenav a {
-                padding: 6px 8px 6px 16px;
-                text-decoration: none;
-                font-size: 25px;
-                color: #818181;
-                display:block;
-            }
+        .sidenav a {
+            padding: 6px 8px 6px 16px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #818181;
+            display:block;
+        }
 
-            .sidenave:hover {
-                color: #f1f1f1;
-            }
+        .sidenav:hover {
+            color: #f1f1f1;
+        }
 
-            .main {
-                margin-left: 160px;
-                padding: 0px 10px;
-            }
+        .main {
+            margin-left: 160px;
+            padding: 0px 10px;
+        }
 
-        </style>
-        <title>{% block title %}Sidebar{% endblock %}</title>
-    </head>
-    <body>
-        <div class="sidenav">
-            <a href="/">Home</a>
-            <a href="/display_customer">Display Customers</a>
-            <a href="/display_supplier">Display Suppliers</a>
-            <a href="/display_item">Display Items</a>
-        </div>
+    </style>
+    <title>{% block title %}Sidebar{% endblock %}</title>
+</head>
+<body>
+    <div class="sidenav">
+        <a href="/">Home</a>
+        <a href="/display_customer">Display Customers</a>
+        <a href="/display_supplier">Display Suppliers</a>
+        <a href="/display_item">Display Items</a>
+    </div>
 
-        <div id="content", name="content" class="main">
-            {% block content %}
-            {% endblock %}
-        </div>
-        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-Q1Hb7eFtA6dD8lL+5mghCcdtP3U4j3m8R9dU4jLlFxTqyu7O6o3P3I2G5i7QIwGj" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shPvqD+8n6CzoEV3+6a8h2I+hKkRVRbl3IR6x" crossorigin="anonymous"></script>
-    </body>
+    <div id="content" name="content" class="main">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-Q1Hb7eFtA6dD8lL+5mghCcdtP3U4j3m8R9dU4jLlFxTqyu7O6o3P3I2G5i7QIwGj" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shPvqD+8n6CzoEV3+6a8h2I+hKkRVRbl3IR6x" crossorigin="anonymous"></script>
+</body>
 </html>

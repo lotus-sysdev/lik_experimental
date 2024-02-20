@@ -12,7 +12,7 @@
     <form id="editForm" method="post" data-action="{% url 'edit_supplier' supplier.supp_id %}">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Update</button>
+        <button type="submit" onclick="updateSupplier()">Update</button>
     </form>
     <form id="deleteForm" method="post" action="{% url 'delete_supplier' supplier.supp_id %}" onclick="return confirmDelete();">
         {% csrf_token %}
@@ -22,35 +22,33 @@
     <a href="{% url 'add_supplier_alamat' supp_id=supplier.supp_id %}">Add Alamat</a>
 
     <script>
-        $(document).ready(function () {
-            // Intercept form submission
-            $('#editForm').submit(function (e) {
-                e.preventDefault();  // Prevent the default form submission
-
-                // Perform AJAX request
-                $.ajax({
-                    type: 'POST',
-                    url: $(this).data('action'),
-                    data: $(this).serialize(),
-                    success: function () {
-                        alert('supplier details updated successfully!');
-                        // You can optionally update the page or perform additional actions here
-                    },
-                    error: function () {
-                        alert('Error updating supplier details.');
-                    }
-                });
+        function updateSupplier() {
+            // Perform AJAX request for updating supplier details
+            $.ajax({
+                type: 'POST',
+                url: $('#editForm').attr('action'),
+                data: $('#editForm').serialize(),
+                success: function () {
+                    alert('Supplier details updated successfully!');
+                    // You can optionally update the page or perform additional actions here
+                    // Example: $('#supplierName').text($('#id_name').val());
+                },
+                error: function () {
+                    alert('Error updating supplier details.');
+                }
             });
-        });
+        }
 
         function confirmDelete() {
-            if(confirm('Are you sure you want to delete this supplier?')) {
+            if (confirm('Are you sure you want to delete this supplier?')) {
+                // Perform AJAX request for deleting supplier
                 $.ajax({
                     type: 'POST',
                     url: $('#deleteForm').attr('action'),
                     data: $('#deleteForm').serialize(),
                     success: function () {
-                        alert('supplier deleted successfully!');
+                        alert('Supplier deleted successfully!');
+                        // You can optionally update the page or perform additional actions here
                         // Navigate back to the supplier list
                         window.location.href = "/display_supplier";
                     },
@@ -59,7 +57,7 @@
                     }
                 });
             }
-            return false
+            return false;
         }
     </script>
     {% endblock %}

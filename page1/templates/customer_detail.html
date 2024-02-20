@@ -9,48 +9,46 @@
     {% block content %}
     <h1>Customer Detail</h1>
     <a href="/display_customer">Back</a>
-    <form id="editForm" method="post" data-action="{% url 'edit_customer' customer.cust_id %}">
+    <form id="editForm" method="post" action="{% url 'edit_customer' customer.cust_id %}">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Update</button>
+        <button type="button" onclick="updateCustomer()">Update</button>
     </form>
     <form id="deleteForm" method="post" action="{% url 'delete_customer' customer.cust_id %}" onclick="return confirmDelete();">
         {% csrf_token %}
-        <button type="submit">Delete</button>
+        <button type="button">Delete</button>
     </form>
     <a href="{% url 'add_pic_cust' cust_id=customer.cust_id %}">Add PIC</a>
     <a href="{% url 'add_customer_alamat' cust_id=customer.cust_id %}">Add Alamat</a>
 
     <script>
-        $(document).ready(function () {
-            // Intercept form submission
-            $('#editForm').submit(function (e) {
-                e.preventDefault();  // Prevent the default form submission
-
-                // Perform AJAX request
-                $.ajax({
-                    type: 'POST',
-                    url: $(this).data('action'),
-                    data: $(this).serialize(),
-                    success: function () {
-                        alert('Customer details updated successfully!');
-                        // You can optionally update the page or perform additional actions here
-                    },
-                    error: function () {
-                        alert('Error updating customer details.');
-                    }
-                });
+        function updateCustomer() {
+            // Perform AJAX request for updating customer details
+            $.ajax({
+                type: 'POST',
+                url: $('#editForm').attr('action'),
+                data: $('#editForm').serialize(),
+                success: function () {
+                    alert('Customer details updated successfully!');
+                    // You can optionally update the page or perform additional actions here
+                    // Example: $('#customerName').text($('#id_name').val());
+                },
+                error: function () {
+                    alert('Error updating customer details.');
+                }
             });
-        });
+        }
 
         function confirmDelete() {
-            if(confirm('Are you sure you want to delete this customer?')) {
+            if (confirm('Are you sure you want to delete this customer?')) {
+                // Perform AJAX request for deleting customer
                 $.ajax({
                     type: 'POST',
                     url: $('#deleteForm').attr('action'),
                     data: $('#deleteForm').serialize(),
                     success: function () {
                         alert('Customer deleted successfully!');
+                        // You can optionally update the page or perform additional actions here
                         // Navigate back to the customer list
                         window.location.href = "/display_customer";
                     },
@@ -59,7 +57,7 @@
                     }
                 });
             }
-            return false
+            return false;
         }
     </script>
     {% endblock %}
