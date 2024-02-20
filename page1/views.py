@@ -184,7 +184,34 @@ def item_detail(request, SKU):
     return entity_detail(request, Items, ItemForm, 'SKU', SKU, 'item_detail.html')
 
 def edit_item(request, SKU):
-    return edit_entity(request, Items, ItemForm, 'SKU', SKU)
+    entity = get_object_or_404(Items,SKU=SKU)
+
+    if request.method == 'POST':
+        form = ItemForm(request.POST, request.FILES, instance=entity)
+        if form.is_valid():
+            # Check if a new image file is provided
+            new_image = request.FILES.get('gambar')
+            
+            if new_image:
+                # Process the new image file (similar to the logic in your add_item view)
+                img = Image.open(new_image)
+                img = img.resize((100, 100))
+                resized_image_name = f"{entity.nama}_resized.{new_image.name.split('.')[-1]}"
+                resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
+                img.save(resized_image_path)
+                
+                # Update the item's image field with the new image path
+                form.instance.gambar = resized_image_name
+
+            form.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        form = ItemForm(instance=entity)
+
+    return render(request, 'edit_item.html', {'form': form})
+
 
 def delete_item(request, SKU):
     return delete_entity(request, Items, 'SKU', SKU)
