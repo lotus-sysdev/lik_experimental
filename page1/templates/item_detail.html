@@ -9,46 +9,44 @@
     {% block content %} 
     <h1>Item Detail</h1>
     <a href="/display_item">Back</a>
-    <form id="editForm" method="post" data-action="{% url 'edit_item' item.SKU %}">
+    <form id="editForm" method="post" data-action="{% url 'edit_item' entity.SKU %}">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Update</button>
+        <button type="button" onclick="updateItem()">Update</button>
     </form>
-    <form id="deleteForm" method="post" action="{% url 'delete_item' item.SKU %}" onclick="return confirmDelete();">
+    <form id="deleteForm" method="post" action="{% url 'delete_item' entity.SKU %}" onclick="return confirmDelete();">
         {% csrf_token %}
-        <button type="submit">Delete</button>
+        <button type="button">Delete</button>
     </form>
 
     <script>
-        $(document).ready(function () {
-            // Intercept form submission
-            $('#editForm').submit(function (e) {
-                e.preventDefault();  // Prevent the default form submission
-
-                // Perform AJAX request
-                $.ajax({
-                    type: 'POST',
-                    url: $(this).data('action'),
-                    data: $(this).serialize(),
-                    success: function () {
-                        alert('item details updated successfully!');
-                        // You can optionally update the page or perform additional actions here
-                    },
-                    error: function () {
-                        alert('Error updating item details.');
-                    }
-                });
+        function updateItem() {
+            // Perform AJAX request for updating item details
+            $.ajax({
+                type: 'POST',
+                url: $('#editForm').attr('data-action'),
+                data: $('#editForm').serialize(),
+                success: function () {
+                    alert('Itme details updated successfully!');
+                    // You can optionally update the page or perform additional actions here
+                    // Example: $('#itemName').text($('#id_name').val());
+                },
+                error: function () {
+                    alert('Error updating Item details.');
+                }
             });
-        });
+        }
 
         function confirmDelete() {
-            if(confirm('Are you sure you want to delete this item?')) {
+            if (confirm('Are you sure you want to delete this item?')) {
+                // Perform AJAX request for deleting item
                 $.ajax({
                     type: 'POST',
                     url: $('#deleteForm').attr('action'),
                     data: $('#deleteForm').serialize(),
                     success: function () {
-                        alert('item deleted successfully!');
+                        alert('Item deleted successfully!');
+                        // You can optionally update the page or perform additional actions here
                         // Navigate back to the item list
                         window.location.href = "/display_item";
                     },
@@ -57,7 +55,7 @@
                     }
                 });
             }
-            return false
+            return false;
         }
     </script>
     {% endblock %}

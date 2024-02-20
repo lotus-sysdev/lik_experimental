@@ -9,17 +9,17 @@
     {% block content %}
     <h1>Customer Detail</h1>
     <a href="/display_customer">Back</a>
-    <form id="editForm" method="post" action="{% url 'edit_customer' customer.cust_id %}">
+    <form id="editForm" method="post" action="{% url 'edit_customer' entity.cust_id %}">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="button" onclick="updateCustomer()">Update</button>
     </form>
-    <form id="deleteForm" method="post" action="{% url 'delete_customer' customer.cust_id %}" onclick="return confirmDelete();">
+    <form id="deleteForm" method="post" action="{% url 'delete_customer' entity.cust_id %}" onclick="return confirmDelete();">
         {% csrf_token %}
         <button type="button">Delete</button>
     </form>
-    <a href="{% url 'add_pic_cust' cust_id=customer.cust_id %}">Add PIC</a>
-    <a href="{% url 'add_customer_alamat' cust_id=customer.cust_id %}">Add Alamat</a>
+    <a href="{% url 'add_pic_cust' cust_id=entity.cust_id %}">Add PIC</a>
+    <a href="{% url 'add_customer_alamat' cust_id=entity.cust_id %}">Add Alamat</a>
 
     <script>
         function updateCustomer() {

@@ -7,34 +7,101 @@ from django.http import HttpResponse, JsonResponse
 from .forms import *
 from .models import *
 
-
-# Create your views here.
+# -------------------- Placeholder for homepage --------------------#
 def placeholder(request):
     return render(request, 'home.html')
 
+
+# -------------------- Common Functions --------------------#
+# Adding entity (Customer and Supplier)
+def add_entity_view(request, entity_form, template_name):
+    entity_form_instance = entity_form(request.POST or None)
+    if request.method == 'POST':
+        form = entity_form(request.POST)
+        if form.is_valid():
+            form.save()
+    else:
+        form = entity_form()
+
+    return render(request, template_name, {'entity_form': entity_form_instance})
+
+
+# Common add_entity function for adding alamat and pic
+def add_entity(request, entity_id, entity_model, form_class, template_name, entity_field, entity_form_field, initial_data=None):
+    entity = get_object_or_404(entity_model, **{entity_field: entity_id})
+
+    if request.method == 'POST':
+        form = form_class(request.POST)
+        if form.is_valid():
+            setattr(form.instance, entity_form_field, entity)
+            form.save()
+    else:
+        form = form_class(initial=initial_data)
+
+    return render(request, template_name, {'entity': entity, 'form': form, 'entity_id': entity_id})
+
+
+# Display entities for displaying tables
+def display_entities(request, entity_model, template_name):
+    entities = entity_model.objects.all()
+    return render(request, template_name, {'entities': entities})
+
+
+# -------------------- Common Functions for Detail, Edit, and Delete -------------------- #
+def entity_detail(request, entity_model, entity_form, entity_id_field, entity_id, template_name):
+    entity = get_object_or_404(entity_model, **{entity_id_field: entity_id})
+    form = entity_form(instance=entity)
+    context = {'entity': entity, 'form': form, 'entity_id': entity_id}
+    return render(request, template_name, context)
+
+def edit_entity(request, entity_model, entity_form, entity_id_field, entity_id):
+    entity = get_object_or_404(entity_model, **{entity_id_field: entity_id})
+
+    if request.method == 'POST':
+        form = entity_form(request.POST, instance=entity)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        form = entity_form(instance=entity)
+
+    return render(request, 'edit_entity.html', {'form': form})
+
+def delete_entity(request, entity_model, entity_id_field, entity_id):
+    entity = get_object_or_404(entity_model, **{entity_id_field: entity_id})
+
+    if request.method == 'POST':
+        entity.delete()
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+
+# -------------------- Add Customer and Supplier Views -------------------- #
 def add_customer(request):
-    customer_form = CustomerForm(request.POST or None)
-    if request.method == 'POST':
-        form = CustomerForm(request.POST)
-        if form.is_valid():
-            form.save()
-            # return redirect('success_url')  # Replace 'success_url' with the URL you want to redirect to after successfully adding a customer
-    else:
-        form = CustomerForm()
+    return add_entity_view(request, CustomerForm, 'add_cust.html')
 
-    return render(request, 'add_cust.html', {'customer_form': customer_form})
 def add_supplier(request):
-    supplier_form = SupplierForm(request.POST or None)
-    if request.method == 'POST':
-        form = SupplierForm(request.POST)
-        if form.is_valid():
-            form.save()
-            # return redirect('success_url')  # Replace 'success_url' with the URL you want to redirect to after successfully adding a customer
-    else:
-        form = SupplierForm()
+    return add_entity_view(request, SupplierForm, 'add_supp.html')
 
-    return render(request, 'add_supp.html', {'supplier_form': supplier_form})
 
+# -------------------- Add Alamat and PIC -------------------- #
+def add_customer_pic(request, cust_id):
+    return add_entity(request, cust_id, Customer, Cust_PIC_Forms, 'add_cust_pic.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
+
+def add_supplier_pic(request, supp_id):
+    return add_entity(request, supp_id, Supplier, Supp_PIC_Forms, 'add_supp_pic.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
+
+def add_customer_alamat(request, cust_id):
+    return add_entity(request, cust_id, Customer, Cust_Alamat_Forms, 'add_customer_alamat.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
+
+def add_supplier_alamat(request, supp_id):
+    return add_entity(request, supp_id, Supplier, Supp_Alamat_Forms, 'add_supplier_alamat.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
+
+
+# -------------------- PIC Listing for Customer and Supplier -------------------- #
 def cust_pic_list(request, cust_id):
     customer = get_object_or_404(Customer, cust_id=cust_id)
     customer_pics = CustomerPIC.objects.filter(customer_id=cust_id)
@@ -45,6 +112,8 @@ def supp_pic_list(request, supp_id):
     supplier_pics = SupplierPIC.objects.filter(supplier_id=supp_id)
     return render(request, 'supp_pic_list.html', {'supplier': supplier, 'supplier_pics': supplier_pics})
 
+
+# -------------------- Add Item -------------------- #
 def add_item(request):
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES)
@@ -75,154 +144,47 @@ def add_item(request):
         form = ItemForm()
     
     return render(request, 'add_item.html', {'item_form': form})
-def add_customer_pic(request, cust_id):
-    customer = get_object_or_404(Customer, cust_id=cust_id)
-    if request.method == 'POST':
-        form = Cust_PIC_Forms(request.POST)
-        if form.is_valid():
-            # Set the customer_id field of the form to the customer ID
-            form.instance.customer_id = cust_id
-            form.save()
-    else:
-        form = Cust_PIC_Forms(initial={'customer_id': cust_id})
-    return render(request, 'add_cust_pic.html', {'customer':customer,'form': form, 'cust_id':cust_id})
 
-def add_supplier_pic(request, supp_id):
-    supplier = get_object_or_404(Supplier, supp_id=supp_id)
-    if request.method == 'POST':
-        form = Supp_PIC_Forms(request.POST)
-        if form.is_valid():
-            # Set the customer_id field of the form to the customer ID
-            form.instance.supplier_id = supp_id
-            form.save()
-    else:
-        form = Supp_PIC_Forms(initial={'supplier_id': supp_id})
-    return render(request, 'add_supp_pic.html', {'supplier':supplier,'form': form,'supp_id':supp_id})
 
-# Displaying Tables
+# -------------------- Display Tables -------------------- #
 def display_customer(request):
-    customers = Customer.objects.all()
-    return render(request, 'display_customer.html', {'customers': customers})
+    return display_entities(request, Customer, 'display_customer.html')
 
 def display_supplier(request):
-    suppliers = Supplier.objects.all()
-    return render(request, 'display_supplier.html', {'suppliers': suppliers})
+    return display_entities(request, Supplier, 'display_supplier.html')
 
 def display_item(request):
-    items = Items.objects.all()
-    return render(request, 'display_item.html', {'items': items})
+    return display_entities(request, Items, 'display_item.html')
 
-# Customer Details, Edit, and Delete
+
+# -------------------- Customer Functions -------------------- #
 def customer_detail(request, cust_id):
-    customer = get_object_or_404(Customer, cust_id=cust_id)
-    form = CustomerForm(instance=customer)
-    context = {'customer': customer, 'form': form, 'cust_id': cust_id}
-    return render(request, 'customer_detail.html', context)
+    return entity_detail(request, Customer, CustomerForm, 'cust_id', cust_id, 'customer_detail.html')
 
 def edit_customer(request, cust_id):
-    customer = get_object_or_404(Customer, cust_id=cust_id)
-
-    if request.method == 'POST':
-        form = CustomerForm(request.POST, instance=customer)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({'success': True})
-        else:
-            return JsonResponse({'success': False, 'errors': form.errors})
-    else:
-        form = CustomerForm(instance=customer)
-
-    return render(request, 'edit_customer.html', {'form': form})
+    return edit_entity(request, Customer, CustomerForm, 'cust_id', cust_id)
 
 def delete_customer(request, cust_id):
-    customer = get_object_or_404(Customer, cust_id=cust_id)
+    return delete_entity(request, Customer, 'cust_id', cust_id)
 
-    if request.method == 'POST':
-        customer.delete()
-        return JsonResponse({'success': True})
-    else:
-        return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
-# Supplier Details, Edit, and Delete
+# -------------------- Customer Functions -------------------- #
 def supplier_detail(request, supp_id):
-    supplier = get_object_or_404(Supplier, supp_id=supp_id)
-    form = SupplierForm(instance=supplier)
-    return render(request, 'supplier_detail.html', {'supplier': supplier, 'form': form})
+    return entity_detail(request, Supplier, SupplierForm, 'supp_id', supp_id, 'supplier_detail.html')
 
 def edit_supplier(request, supp_id):
-    supplier = get_object_or_404(Supplier, supp_id=supp_id)
-
-    if request.method == 'POST':
-        form = SupplierForm(request.POST, instance=supplier)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({'success': True})
-        else:
-            return JsonResponse({'success': False, 'errors': form.errors})
-    else:
-        form = SupplierForm(instance=supplier)
-
-    return render(request, 'edit_supplier.html', {'form': form})
+    return edit_entity(request, Supplier, SupplierForm, 'supp_id', supp_id)
 
 def delete_supplier(request, supp_id):
-    supplier = get_object_or_404(Supplier, supp_id=supp_id)
+    return delete_entity(request, Supplier, 'supp_id', supp_id)
 
-    if request.method == 'POST':
-        supplier.delete()
-        return JsonResponse({'success': True})
-    else:
-        return JsonResponse({'success': False, 'message': 'Invalid request method'})
-    
-# Item Details, Edit, and Delete
+
+# -------------------- Item Functions -------------------- #
 def item_detail(request, SKU):
-    item = get_object_or_404(Items, SKU=SKU)
-    form = ItemForm(instance=item)
-    return render(request, 'item_detail.html', {'item': item, 'form': form})    
+    return entity_detail(request, Items, ItemForm, 'SKU', SKU, 'item_detail.html')
 
 def edit_item(request, SKU):
-    item = get_object_or_404(Items, SKU=SKU)
-
-    if request.method == 'POST':
-        form = ItemForm(request.POST, instance=item)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({'success': True})
-        else:
-            return JsonResponse({'success': False, 'errors': form.errors})
-    else:
-        form = ItemForm(instance=item)
-
-    return render(request, 'edit_item.html', {'form': form})
+    return edit_entity(request, Items, ItemForm, 'SKU', SKU)
 
 def delete_item(request, SKU):
-    item = get_object_or_404(Items, SKU=SKU)
-
-    if request.method == 'POST':
-        item.delete()
-        return JsonResponse({'success': True})
-    else:
-        return JsonResponse({'success': False, 'message': 'Invalid request method'})
-    
-def add_customer_alamat(request, cust_id):
-    customer = get_object_or_404(Customer, cust_id=cust_id)
-    if request.method == 'POST':
-        form = Cust_Alamat_Forms(request.POST)
-        if form.is_valid():
-            # Set the customer_id field of the form to the customer ID
-            form.instance.customer_id = customer
-            form.save()
-    else:
-        form = Cust_Alamat_Forms(initial={'customer_id': cust_id})
-    return render(request, 'add_customer_alamat.html', {'customer':customer,'form': form, 'cust_id':cust_id})
-
-def add_supplier_alamat(request, supp_id):
-    supplier = get_object_or_404(Supplier, supp_id=supp_id)
-    if request.method == 'POST':
-        form = Supp_Alamat_Forms(request.POST)
-        if form.is_valid():
-            # Set the customer_id field of the form to the customer ID
-            form.instance.supplier_id = supplier
-            form.save()
-    else:
-        form = Supp_Alamat_Forms(initial={'supplier_id': supp_id})
-    return render(request, 'add_supplier_alamat.html', {'supplier':supplier,'form': form,'supp_id':supp_id})
+    return delete_entity(request, Items, 'SKU', SKU)

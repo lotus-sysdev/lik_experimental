@@ -10,7 +10,7 @@
     <h2>Add Customer</h2>
     <form method="post">
         {% csrf_token %}
-        {{ customer_form.as_p }}
+        {{ entity_form.as_p }}
         <button type="submit">Submit</button>
     </form>
     {% endblock %}
