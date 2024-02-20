@@ -1,7 +1,13 @@
+import os
+from PIL import Image
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import *
+from django.conf import settings
+from django.core.files import File
 from django.http import HttpResponse, JsonResponse
+from .forms import *
 from .models import *
+
+
 # Create your views here.
 def placeholder(request):
     return render(request, 'home.html')
@@ -40,16 +46,30 @@ def supp_pic_list(request, supp_id):
     return render(request, 'supp_pic_list.html', {'supplier': supplier, 'supplier_pics': supplier_pics})
 
 def add_item(request):
-    item_form = ItemForm(request.POST or None)
     if request.method == 'POST':
-        form = ItemForm(request.POST)
+        form = ItemForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            # return redirect('success_url')  # Replace 'success_url' with the URL you want to redirect to after successfully adding a customer
+            item = form.save(commit=False)
+            image = item.gambar
+            if image:
+                # Open the image
+                img = Image.open(image)
+                
+                # Resize the image
+                img = img.resize((100, 100))  # Change the dimensions as needed
+                
+                # Save the resized image
+                resized_image_name = f"{item.nama}_resized.jpg"  # Rename the file to avoid overwriting the original
+                resized_image_path = os.path.join(settings.MEDIA_ROOT, 'resized_images', resized_image_name)
+                img.save(resized_image_path)
+
+                item.gambar = os.path.join('resized_images', resized_image_name)
+                print(item.gambar)
+                item.save()
     else:
         form = ItemForm()
-
-    return render(request, 'add_item.html', {'item_form': item_form})
+    
+    return render(request, 'add_item.html', {'item_form': form})
 def add_customer_pic(request, cust_id):
     customer = get_object_or_404(Customer, cust_id=cust_id)
     if request.method == 'POST':

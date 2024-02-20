@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,10 +7,10 @@
 <body>
     {% block content %}
     <h2>Add Item</h2>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ item_form.as_p }}
-        <button type="submit">Submit</button>
+        <button type="submit">Upload</button>
     </form>
     {% endblock %}
 </body>

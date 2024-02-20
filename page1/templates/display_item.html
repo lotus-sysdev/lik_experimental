@@ -22,6 +22,7 @@
                 <th data-order="asc">Nama</th>
                 <th data-order="asc">Category</th>
                 <th data-order="asc">Quantity</th>
+                <th data-order="asc">Price</th>
                 <th data-order="asc">Gambar</th>
                 <th data-order="asc">Sumber</th>
             </tr>
@@ -33,7 +34,8 @@
                     <td>{{ i.nama }}</td>
                     <td>{{ i.category }}</td>
                     <td>{{ i.quantity }}</td>
-                    <td>{{ i.gambar }}</td>
+                    <td>{{ i.price }}</td>
+                    <td><img src="{{ i.gambar }}" alt="{{ i.nama }}"></td>
                     <td>{{ i.sumber }}</td>
                     <td>
                         <a href="{% url 'item_detail' i.SKU %}">View</a>

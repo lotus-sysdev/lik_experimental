@@ -81,7 +81,7 @@ class ItemForm(forms.ModelForm):
     class Meta:
         model = Items
         fields = '__all__'
-        exclude = ['SKU']
+        exclude = ['SKU','gambar_resized']
 
 
 
