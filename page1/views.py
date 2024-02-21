@@ -89,16 +89,16 @@ def add_supplier(request):
 
 # -------------------- Add Alamat and PIC -------------------- #
 def add_customer_pic(request, cust_id):
-    return add_entity(request, cust_id, Customer, Cust_PIC_Forms, 'add_cust_pic.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
+    return add_entity(request, cust_id, Customer, CustPICForms, 'add_cust_pic.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
 
 def add_supplier_pic(request, supp_id):
-    return add_entity(request, supp_id, Supplier, Supp_PIC_Forms, 'add_supp_pic.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
+    return add_entity(request, supp_id, Supplier, SuppPICForms, 'add_supp_pic.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
 
 def add_customer_alamat(request, cust_id):
-    return add_entity(request, cust_id, Customer, Cust_Alamat_Forms, 'add_customer_alamat.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
+    return add_entity(request, cust_id, Customer, CustAlamatForms, 'add_customer_alamat.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
 
 def add_supplier_alamat(request, supp_id):
-    return add_entity(request, supp_id, Supplier, Supp_Alamat_Forms, 'add_supplier_alamat.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
+    return add_entity(request, supp_id, Supplier, SuppAlamattForms, 'add_supplier_alamat.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
 
 
 # -------------------- Add Item -------------------- #

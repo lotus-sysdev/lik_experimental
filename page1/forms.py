@@ -15,7 +15,7 @@ class CustomerForm(forms.ModelForm):
         (True, 'Yes'),
         (False, 'No'),
     )
-    pengiriman = forms.ChoiceField(choices=PENGIRIMAN_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}))
+    pengiriman = forms.ChoiceField(choices=PENGIRIMAN_CHOICES)
 
     npwp = forms.IntegerField(required=True)
 
@@ -38,7 +38,7 @@ class SupplierForm(forms.ModelForm):
         fields = '__all__'
         exclude=['supp_id']
 
-class Cust_PIC_Forms(forms.ModelForm):
+class CustPICForms(forms.ModelForm):
     Role_Options = (
         (1, 'Option 1'),
         (2, 'Option 2'),
@@ -51,7 +51,7 @@ class Cust_PIC_Forms(forms.ModelForm):
         fields = '__all__'
         exclude = ['customer_id']
 
-class Supp_PIC_Forms(forms.ModelForm):
+class SuppPICForms(forms.ModelForm):
     Role_Options = (
         (1, 'Option 1'),
         (2, 'Option 2'),
@@ -64,13 +64,13 @@ class Supp_PIC_Forms(forms.ModelForm):
         fields = '__all__'
         exclude = ['supplier_id']
 
-class Cust_Alamat_Forms(forms.ModelForm):
+class CustAlamatForms(forms.ModelForm):
     class Meta:
         model = CustomerAlamat
         fields = '__all__'
         exclude = ['customer_id']
 
-class Supp_Alamat_Forms(forms.ModelForm):
+class SuppAlamattForms(forms.ModelForm):
     class Meta:
         model = SupplierAlamat
         fields = '__all__'
@@ -82,7 +82,3 @@ class ItemForm(forms.ModelForm):
         model = Items
         fields = '__all__'
         exclude = ['SKU','gambar_resized']
-
-
-
-
