@@ -89,3 +89,17 @@ class SumberForm(forms.ModelForm):
         model = ItemSumber
         fields = '__all__'
         exclude = ['item']
+
+class PurchaseForm(forms.ModelForm):
+
+    class Meta:
+        model = PurchaseOrder
+        fields = '__all__'
+        exclude=['supplier_id','item','status']
+
+class WorkForm(forms.ModelForm):
+
+    class Meta:
+        model = WorkOrder
+        fields = '__all__'
+        exclude=['supplier_id','item','status']

@@ -18,6 +18,7 @@
                 <th>Quantity</th>
                 <th>Price</th>
                 <th>Gambar</th>
+                <th>Sumber</th>
                 <th></th>
             </tr>
         </thead>
@@ -30,6 +31,7 @@
                     <td>{{ i.quantity }}</td>
                     <td>{{ i.price }}</td>
                     <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}"></td>
+                    <td>{{ i.sumber }}</td>
                     <td>
                         <a href="{% url 'item_detail' i.SKU %}">View</a>
                     </td>

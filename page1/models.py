@@ -41,12 +41,13 @@ class Items(models.Model):
     quantity = models.IntegerField()
     price = models.IntegerField()
     gambar = models.ImageField()
+    sumber = models.CharField(max_length=255)
 
 class ItemSumber(models.Model):
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
     TYPE_CHOICES = (
-        ('online', 'Online Store'),
-        ('pabrik', 'Pabrik'),
+        ('penagihan', 'Alamat Penagihan'),
+        ('pengiriman', 'Alamat Pengiriman'),
     )
     jenis_sumber = models.CharField(max_length=30, choices=TYPE_CHOICES)
     nama_perusahaan = models.CharField(max_length=255)
@@ -79,3 +80,37 @@ class SupplierAlamat(models.Model):
     kecamatan = models.CharField(max_length=50)
     kelurahan = models.CharField(max_length=50)
     detail = models.CharField(max_length=50)
+
+class PurchaseOrder(models.Model):
+    supplier_id = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    item = models.ForeignKey(Items, on_delete=models.CASCADE)
+    revenue_PO = models.IntegerField()
+    nomor_PO = models.IntegerField()
+    tanggal_PO = models.DateField()
+    tanggal_process = models.DateField()
+    tanggal_input_accurate = models.DateField()
+    tanggal_pengiriman_barang = models.DateField()
+    tanggal_pengiriman_invoice = models.DateField()
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+        ('Cancelled', 'Cancelled')
+    )
+    status = models.CharField(max_length=30,choices = STATUS_CHOICES) 
+
+class WorkOrder(models.Model):
+    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    item = models.ForeignKey(Items, on_delete=models.CASCADE)
+    revenue_PO = models.IntegerField()
+    nomor_PO = models.IntegerField()
+    tanggal_PO = models.DateField()
+    tanggal_process = models.DateField()
+    tanggal_input_accurate = models.DateField()
+    tanggal_pengiriman_barang = models.DateField()
+    tanggal_pengiriman_invoice = models.DateField()
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+        ('Cancelled', 'Cancelled')
+    )
+    status = models.CharField(max_length=30,choices = STATUS_CHOICES) 
