@@ -7,19 +7,64 @@
 </head>
 <body>
     {% block content %}
-    <h1>Customer Detail</h1>
-    <a href="/display_customer">Back</a>
-    <form id="editForm" method="post" action="{% url 'edit_customer' entity.cust_id %}">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="button" onclick="updateCustomer()">Update</button>
-    </form>
-    <form id="deleteForm" method="post" action="{% url 'delete_customer' entity.cust_id %}" onclick="return confirmDelete();">
-        {% csrf_token %}
-        <button type="button">Delete</button>
-    </form>
-    <a href="{% url 'add_pic_cust' cust_id=entity.cust_id %}">Add PIC</a>
-    <a href="{% url 'add_customer_alamat' cust_id=entity.cust_id %}">Add Alamat</a>
+    <div class="container mt-4">
+        
+        <div class="row">
+            <!-- Left column for the form -->
+            <div class="col-md-6">
+                <h1>Customer Detail</h1>
+                <a href="/display_customer">Back</a>
+                <form id="editForm" method="post" action="{% url 'edit_customer' entity.cust_id %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                </form>
+                <div class="d-flex">
+                    <button type="button" onclick="updateCustomer()" class="btn btn-primary mr-2">Update</button>
+                    <form id="deleteForm" method="post" action="{% url 'delete_customer' entity.cust_id %}" onclick="return confirmDelete();">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right column for customer pictures -->
+            <div class="col-md-6">
+                <h2>PIC:</h2>
+                <ul>
+                    {% for pic in customer_pics %}
+                        <li>{{ pic.nama }} - {{ pic.email }} - {{ pic.telp }} - {{ pic.Role }}</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'add_pic_cust' cust_id=entity.cust_id %}" class="mt-2 btn btn-success">Add PIC</a>
+                <h2 class="mt-3">Alamat:</h2>
+                {% if customer_alamat %}
+                    <ul>
+                        {% for alamat in customer_alamat %}
+                            <li>
+                                {% if alamat.type == 'penagihan' %}
+                                    Penagihan: 
+                                {% elif alamat.type == 'pengiriman' %}
+                                    Pengiriman: 
+                                    {% else %}
+                                    Unknown Type: 
+                                {% endif %}
+                                
+                                {% if alamat.detail and alamat.kelurahan and alamat.kecamatan and alamat.kota and alamat.provinsi %}
+                                    {{ alamat.detail }}, {{ alamat.kelurahan }}, {{ alamat.kecamatan }}, {{ alamat.kota }}, {{ alamat.provinsi }}
+                                {% else %}
+                                No address details yet.
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No addresses yet.</p>
+                {% endif %}
+                <a href="{% url 'add_customer_alamat' cust_id=entity.cust_id %}" class="mt-2 btn btn-info">Add Alamat</a>
+            </div>
+            
+        </div>
+
 
     <script>
         function updateCustomer() {

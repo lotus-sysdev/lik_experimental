@@ -159,7 +159,12 @@ def display_item(request):
 
 # -------------------- Customer Functions -------------------- #
 def customer_detail(request, cust_id):
-    return entity_detail(request, Customer, CustomerForm, 'cust_id', cust_id, 'customer_detail.html')
+    entity = get_object_or_404(Customer, cust_id=cust_id)
+    customer_pics = CustomerPIC.objects.filter(customer_id=cust_id)
+    customer_alamat = CustomerAlamat.objects.filter(customer_id=cust_id)
+    form = CustomerForm(instance=entity)
+    context = {'entity':entity, 'customer_pics':customer_pics, 'form':form, 'customer_alamat':customer_alamat}
+    return render(request, 'customer_detail.html', context )
 
 def edit_customer(request, cust_id):
     return edit_entity(request, Customer, CustomerForm, 'cust_id', cust_id)
@@ -170,7 +175,12 @@ def delete_customer(request, cust_id):
 
 # -------------------- Customer Functions -------------------- #
 def supplier_detail(request, supp_id):
-    return entity_detail(request, Supplier, SupplierForm, 'supp_id', supp_id, 'supplier_detail.html')
+    entity = get_object_or_404(Supplier, supp_id=supp_id)
+    supplier_pics = SupplierPIC.objects.filter(supplier_id=supp_id)
+    supplier_alamat = SupplierAlamat.objects.filter(supplier_id=supp_id)
+    form = SupplierForm(instance=entity)
+    context = {'entity':entity, 'supplier_pics':supplier_pics, 'form':form, 'supplier_alamat':supplier_alamat}
+    return render(request, 'supplier_detail.html', context )
 
 def edit_supplier(request, supp_id):
     return edit_entity(request, Supplier, SupplierForm, 'supp_id', supp_id)
