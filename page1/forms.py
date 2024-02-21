@@ -82,3 +82,10 @@ class ItemForm(forms.ModelForm):
         model = Items
         fields = '__all__'
         exclude = ['SKU','gambar_resized']
+
+class SumberForm(forms.ModelForm):
+
+    class Meta:
+        model = ItemSumber
+        fields = '__all__'
+        exclude = ['item']

@@ -43,6 +43,18 @@ class Items(models.Model):
     gambar = models.ImageField()
     sumber = models.CharField(max_length=255)
 
+class ItemSumber(models.Model):
+    item = models.ForeignKey(Items, on_delete=models.CASCADE)
+    TYPE_CHOICES = (
+        ('penagihan', 'Alamat Penagihan'),
+        ('pengiriman', 'Alamat Pengiriman'),
+    )
+    jenis_sumber = models.CharField(max_length=30, choices=TYPE_CHOICES)
+    nama_perusahaan = models.CharField(max_length=255)
+    telp = PhoneNumberField(blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    url = models.URLField(blank=True, null=True)
+    
 class CustomerAlamat(models.Model):
     customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
     TYPE_CHOICES = (

@@ -213,3 +213,6 @@ def edit_item(request, SKU):
 
 def delete_item(request, SKU):
     return delete_entity(request, Items, 'SKU', SKU)
+
+def add_sumber(request, SKU):
+    return add_entity(request, SKU, Items, SumberForm, 'add_sumber.html', 'SKU', 'item')

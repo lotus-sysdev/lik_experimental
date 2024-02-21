@@ -7,8 +7,8 @@ urlpatterns = [
     # form urls
     path('add_customer/', add_customer, name='add_customer'),
     path('add_supplier/', add_supplier, name='add_supplier'),
-    # path('add_pic/',add_pic, name='add_pic'),
     path('add_item/',add_item, name='add_item'),
+    
 
     # display customer, supplier, and item tables
     path('display_customer/',display_customer, name='Customer Data'),
@@ -33,6 +33,8 @@ urlpatterns = [
     # PIC urls
     path('add_pic_cust/<int:cust_id>',add_customer_pic,name='add_pic_cust'),
     path('add_pic_supp/<int:supp_id>',add_supplier_pic,name='add_pic_supp'),
+
+    path('add_sumber/<int:SKU>',add_sumber, name='add_sumber'),
 
     # Alamat urls
     path('add_customer_alamat/<int:cust_id>/', add_customer_alamat, name='add_customer_alamat'),

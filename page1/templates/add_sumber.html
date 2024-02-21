@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% block title %}Add Item Source{% endblock %}
+</head>
+<body>
+    {% block content %} 
+    <h1>Add Item Source</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+    <a href="{% url 'item_detail' SKU=entity.SKU %}">Back</a>
+    {% endblock %}
+</body>
+</html>
