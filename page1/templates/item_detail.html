@@ -8,18 +8,29 @@
 <body>
     {% block content %} 
     <div class="container mt-4 custom-container">
-        <h1>Item Detail</h1>
-        <a href="/display_item">Back</a>
-        <form id="editForm" method="post"enctype="multipart/form-data" data-action="{% url 'edit_item' entity.SKU %}">
-            {% csrf_token %}
-            {{ form.as_p }}
-        </form>
-        <div class="d-flex">
-            <button type="button" onclick="updateItem()" class="btn btn-primary mr-2">Update</button>
-            <form id="deleteForm" method="post" action="{% url 'delete_item' entity.SKU %}" onclick="return confirmDelete();">
-                {% csrf_token %}
-                <button type="button" class="btn btn-danger">Delete</button>
-            </form>
+        <div class="row">
+            <div class="col-md-6">
+                <h1>Item Detail</h1>
+                <a href="/display_item">Back</a>
+                <form id="editForm" method="post"enctype="multipart/form-data" data-action="{% url 'edit_item' entity.SKU %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                </form>
+                <div class="d-flex">
+                    <button type="button" onclick="updateItem()" class="btn btn-primary mr-2">Update</button>
+                    <form id="deleteForm" method="post" action="{% url 'delete_item' entity.SKU %}" onclick="return confirmDelete();">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h2>Sumber:</h2>
+                {% for i in item_sumber %}
+                    <p>{{i.jenis_sumber}} - {{i.nama_perusahaan}} {{i.telp}}, {{i.email}} {{i.url}}</p>
+                {% endfor %}
+                <a href="{% url 'add_sumber' SKU=entity.SKU %}" class="mt-2 btn btn-success">Add Sumber</a>
+            </div>
         </div>
     </div>
 

@@ -41,13 +41,12 @@ class Items(models.Model):
     quantity = models.IntegerField()
     price = models.IntegerField()
     gambar = models.ImageField()
-    sumber = models.CharField(max_length=255)
 
 class ItemSumber(models.Model):
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
     TYPE_CHOICES = (
-        ('penagihan', 'Alamat Penagihan'),
-        ('pengiriman', 'Alamat Pengiriman'),
+        ('online', 'Online Store'),
+        ('pabrik', 'Pabrik'),
     )
     jenis_sumber = models.CharField(max_length=30, choices=TYPE_CHOICES)
     nama_perusahaan = models.CharField(max_length=255)

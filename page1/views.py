@@ -48,10 +48,14 @@ def display_entities(request, entity_model, template_name):
 
 
 # -------------------- Common Functions for Detail, Edit, and Delete -------------------- #
-def entity_detail(request, entity_model, entity_form, entity_id_field, entity_id, template_name):
+def entity_detail(request, entity_model, entity_form, entity_id_field, entity_id, template_name, extra_context=None):
     entity = get_object_or_404(entity_model, **{entity_id_field: entity_id})
     form = entity_form(instance=entity)
     context = {'entity': entity, 'form': form, 'entity_id': entity_id}
+
+    if extra_context:
+        context.update(extra_context)
+
     return render(request, template_name, context)
 
 def edit_entity(request, entity_model, entity_form, entity_id_field, entity_id):
@@ -147,12 +151,10 @@ def display_item(request):
 
 # -------------------- Customer Functions -------------------- #
 def customer_detail(request, cust_id):
-    entity = get_object_or_404(Customer, cust_id=cust_id)
     customer_pics = CustomerPIC.objects.filter(customer_id=cust_id)
     customer_alamat = CustomerAlamat.objects.filter(customer_id=cust_id)
-    form = CustomerForm(instance=entity)
-    context = {'entity':entity, 'customer_pics':customer_pics, 'form':form, 'customer_alamat':customer_alamat}
-    return render(request, 'customer_detail.html', context )
+    extra_context = {'customer_pics':customer_pics, 'customer_alamat':customer_alamat}
+    return entity_detail(request, Customer, CustomerForm, 'cust_id', cust_id, 'customer_detail.html', extra_context)
 
 def edit_customer(request, cust_id):
     return edit_entity(request, Customer, CustomerForm, 'cust_id', cust_id)
@@ -163,12 +165,11 @@ def delete_customer(request, cust_id):
 
 # -------------------- Customer Functions -------------------- #
 def supplier_detail(request, supp_id):
-    entity = get_object_or_404(Supplier, supp_id=supp_id)
     supplier_pics = SupplierPIC.objects.filter(supplier_id=supp_id)
     supplier_alamat = SupplierAlamat.objects.filter(supplier_id=supp_id)
-    form = SupplierForm(instance=entity)
-    context = {'entity':entity, 'supplier_pics':supplier_pics, 'form':form, 'supplier_alamat':supplier_alamat}
-    return render(request, 'supplier_detail.html', context )
+    extra_context = {'supplier_pics':supplier_pics, 'supplier_alamat':supplier_alamat}
+    return entity_detail(request, Supplier, SupplierForm, 'supp_id', supp_id, 'supplier_detail.html', extra_context)
+
 
 def edit_supplier(request, supp_id):
     return edit_entity(request, Supplier, SupplierForm, 'supp_id', supp_id)
@@ -179,7 +180,9 @@ def delete_supplier(request, supp_id):
 
 # -------------------- Item Functions -------------------- #
 def item_detail(request, SKU):
-    return entity_detail(request, Items, ItemForm, 'SKU', SKU, 'item_detail.html')
+    item_sumber = ItemSumber.objects.filter(item=SKU)
+    extra_context = {'item_sumber':item_sumber}
+    return entity_detail(request, Items, ItemForm, 'SKU', SKU, 'item_detail.html', extra_context)
 
 def edit_item(request, SKU):
     entity = get_object_or_404(Items,SKU=SKU)
@@ -214,5 +217,7 @@ def edit_item(request, SKU):
 def delete_item(request, SKU):
     return delete_entity(request, Items, 'SKU', SKU)
 
+
+# -------------------- Item Sumber Functions -------------------- #
 def add_sumber(request, SKU):
     return add_entity(request, SKU, Items, SumberForm, 'add_sumber.html', 'SKU', 'item')
