@@ -24,5 +24,5 @@ local_settings.py
 /static/
 
 # Media Folder
-media/
+media/*
 
