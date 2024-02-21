@@ -3,28 +3,23 @@
 <html>
 <head>
     {% block title %}Item Data Table{% endblock %}
-    <meta charset="UTF-8">	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
-	<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
-	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-    <script>
-        $(document).ready( function () {
-            $('#itemTable').DataTable();
-        } );
-    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.0/css/dataTables.bootstrap4.css">
 </head>
 <body>
     {% block content %}
     <h1>Item List</h1>
-    <table id="itemTable" border="1">
+    <table id="itemTable" class="table table-bordered table-striped">
         <thead>
             <tr>
-                <th data-order="asc">SKU</th>
-                <th data-order="asc">Nama</th>
-                <th data-order="asc">Category</th>
-                <th data-order="asc">Quantity</th>
-                <th data-order="asc">Price</th>
-                <th data-order="asc">Gambar</th>
-                <th data-order="asc">Sumber</th>
+                <th>SKU</th>
+                <th>Nama</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Gambar</th>
+                <th>Sumber</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -44,6 +39,9 @@
             {% endfor %}
         </tbody>
     </table>
+    <script>
+        new DataTable('#itemTable');
+    </script>
     <a href="/add_item">Add Item</a><br/><br/>
     {% endblock %}
 </body>

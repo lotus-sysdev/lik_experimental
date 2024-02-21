@@ -101,18 +101,6 @@ def add_supplier_alamat(request, supp_id):
     return add_entity(request, supp_id, Supplier, Supp_Alamat_Forms, 'add_supplier_alamat.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
 
 
-# -------------------- PIC Listing for Customer and Supplier -------------------- #
-def cust_pic_list(request, cust_id):
-    customer = get_object_or_404(Customer, cust_id=cust_id)
-    customer_pics = CustomerPIC.objects.filter(customer_id=cust_id)
-    return render(request, 'cust_pic_list.html', {'customer': customer, 'customer_pics': customer_pics})
-
-def supp_pic_list(request, supp_id):
-    supplier = get_object_or_404(Supplier, supp_id=supp_id)
-    supplier_pics = SupplierPIC.objects.filter(supplier_id=supp_id)
-    return render(request, 'supp_pic_list.html', {'supplier': supplier, 'supplier_pics': supplier_pics})
-
-
 # -------------------- Add Item -------------------- #
 def add_item(request):
     if request.method == 'POST':
