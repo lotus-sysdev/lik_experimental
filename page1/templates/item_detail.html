@@ -9,7 +9,7 @@
     {% block content %} 
     <h1>Item Detail</h1>
     <a href="/display_item">Back</a>
-    <form id="editForm" method="post" data-action="{% url 'edit_item' entity.SKU %}">
+    <form id="editForm" method="post"enctype="multipart/form-data" data-action="{% url 'edit_item' entity.SKU %}">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="button" onclick="updateItem()">Update</button>
@@ -21,15 +21,20 @@
 
     <script>
         function updateItem() {
-            // Perform AJAX request for updating item details
+            var form = document.getElementById('editForm');
+            var formData = new FormData(form);
+            
+            // Append the file input data manually
+            formData.append('gambar', form.querySelector('input[type="file"]').files[0]);
+
             $.ajax({
                 type: 'POST',
-                url: $('#editForm').attr('data-action'),
-                data: $('#editForm').serialize(),
+                url: form.getAttribute('data-action'),
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function () {
-                    alert('Itme details updated successfully!');
-                    // You can optionally update the page or perform additional actions here
-                    // Example: $('#itemName').text($('#id_name').val());
+                    alert('Item details updated successfully!');
                 },
                 error: function () {
                     alert('Error updating Item details.');
