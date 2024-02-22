@@ -8,12 +8,14 @@
 </head>
 <body>
     {% block content %} 
-    <h1>Add Purchase Order</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit</button>
-    </form>
+    <h2>Add Purchase Order</h2>
+    <div class="form-group w-50">
+        <form method="post" class="mt-3">
+            {% csrf_token %}
+            {{ entity_form.as_p }}
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
     {% endblock %}
 
     {% block scripts %}

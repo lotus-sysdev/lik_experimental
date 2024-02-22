@@ -3,18 +3,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    {% block title %}Add Supplier PIC{% endblock %}
+    {% block title %}Add Item Source{% endblock %}
 </head>
 <body>
-    {% block content %}
-    <h2>Add Supplier's Alamat</h2>
+    {% block content %} 
+    <h2>Add Item Source</h2>
     <div class="form-group w-50">
         <form method="post" class="mt-3">
             {% csrf_token %}
             {{ form.as_p }}
             <div>
                 <button type="submit" class="btn btn-primary">Submit</button>
-                <a href="{% url 'supplier_detail' supp_id=entity.supp_id %}" class="btn btn-secondary ml-2">Back</a>
+                <a href="{% url 'item_detail' SKU=entity.SKU %}" class="btn btn-secondary ml-2">Back</a>
             </div>
         </form>
     </div>
