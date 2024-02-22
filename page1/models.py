@@ -46,8 +46,8 @@ class Items(models.Model):
 class ItemSumber(models.Model):
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
     TYPE_CHOICES = (
-        ('penagihan', 'Alamat Penagihan'),
-        ('pengiriman', 'Alamat Pengiriman'),
+        ('online', 'Online Store'),
+        ('pabrik', 'Pabrik'),
     )
     jenis_sumber = models.CharField(max_length=30, choices=TYPE_CHOICES)
     nama_perusahaan = models.CharField(max_length=255)
