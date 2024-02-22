@@ -85,24 +85,24 @@ def delete_entity(request, entity_model, entity_id_field, entity_id):
 
 # -------------------- Add Customer and Supplier Views -------------------- #
 def add_customer(request):
-    return add_entity_view(request, CustomerForm, 'add_cust.html')
+    return add_entity_view(request, CustomerForm, 'customer/add_cust.html')
 
 def add_supplier(request):
-    return add_entity_view(request, SupplierForm, 'add_supp.html')
+    return add_entity_view(request, SupplierForm, 'supplier/add_supp.html')
 
 
 # -------------------- Add Alamat and PIC -------------------- #
 def add_customer_pic(request, cust_id):
-    return add_entity(request, cust_id, Customer, CustPICForms, 'add_cust_pic.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
+    return add_entity(request, cust_id, Customer, CustPICForms, 'pic/add_cust_pic.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
 
 def add_supplier_pic(request, supp_id):
-    return add_entity(request, supp_id, Supplier, SuppPICForms, 'add_supp_pic.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
+    return add_entity(request, supp_id, Supplier, SuppPICForms, 'pic/add_supp_pic.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
 
 def add_customer_alamat(request, cust_id):
-    return add_entity(request, cust_id, Customer, CustAlamatForms, 'add_customer_alamat.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
+    return add_entity(request, cust_id, Customer, CustAlamatForms, 'alamat/add_customer_alamat.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
 
 def add_supplier_alamat(request, supp_id):
-    return add_entity(request, supp_id, Supplier, SuppAlamattForms, 'add_supplier_alamat.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
+    return add_entity(request, supp_id, Supplier, SuppAlamattForms, 'alamat/add_supplier_alamat.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
 
 
 # -------------------- Add Item -------------------- #
@@ -140,13 +140,13 @@ def add_item(request):
 
 # -------------------- Display Tables -------------------- #
 def display_customer(request):
-    return display_entities(request, Customer, 'display_customer.html')
+    return display_entities(request, Customer, 'customer/display_customer.html')
 
 def display_supplier(request):
-    return display_entities(request, Supplier, 'display_supplier.html')
+    return display_entities(request, Supplier, 'supplier/display_supplier.html')
 
 def display_item(request):
-    return display_entities(request, Items, 'display_item.html')
+    return display_entities(request, Items, 'item/display_item.html')
 
 
 # -------------------- Customer Functions -------------------- #
@@ -154,7 +154,7 @@ def customer_detail(request, cust_id):
     customer_pics = CustomerPIC.objects.filter(customer_id=cust_id)
     customer_alamat = CustomerAlamat.objects.filter(customer_id=cust_id)
     extra_context = {'customer_pics':customer_pics, 'customer_alamat':customer_alamat}
-    return entity_detail(request, Customer, CustomerForm, 'cust_id', cust_id, 'customer_detail.html', extra_context)
+    return entity_detail(request, Customer, CustomerForm, 'cust_id', cust_id, 'customer/customer_detail.html', extra_context)
 
 def edit_customer(request, cust_id):
     return edit_entity(request, Customer, CustomerForm, 'cust_id', cust_id)
@@ -168,7 +168,7 @@ def supplier_detail(request, supp_id):
     supplier_pics = SupplierPIC.objects.filter(supplier_id=supp_id)
     supplier_alamat = SupplierAlamat.objects.filter(supplier_id=supp_id)
     extra_context = {'supplier_pics':supplier_pics, 'supplier_alamat':supplier_alamat}
-    return entity_detail(request, Supplier, SupplierForm, 'supp_id', supp_id, 'supplier_detail.html', extra_context)
+    return entity_detail(request, Supplier, SupplierForm, 'supp_id', supp_id, 'supplier/supplier_detail.html', extra_context)
 
 def edit_supplier(request, supp_id):
     return edit_entity(request, Supplier, SupplierForm, 'supp_id', supp_id)
@@ -181,7 +181,7 @@ def delete_supplier(request, supp_id):
 def item_detail(request, SKU):
     item_sumber = ItemSumber.objects.filter(item=SKU)
     extra_context = {'item_sumber':item_sumber}
-    return entity_detail(request, Items, ItemForm, 'SKU', SKU, 'item_detail.html', extra_context)
+    return entity_detail(request, Items, ItemForm, 'SKU', SKU, 'item/item_detail.html', extra_context)
 
 def edit_item(request, SKU):
     entity = get_object_or_404(Items,SKU=SKU)
@@ -210,7 +210,7 @@ def edit_item(request, SKU):
     else:
         form = ItemForm(instance=entity)
 
-    return render(request, 'edit_item.html', {'form': form})
+    return render(request, 'item/edit_item.html', {'form': form})
 
 
 def delete_item(request, SKU):
