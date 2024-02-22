@@ -41,7 +41,6 @@ class Items(models.Model):
     quantity = models.IntegerField()
     price = models.IntegerField()
     gambar = models.ImageField()
-    sumber = models.CharField(max_length=255)
     
     def __str__(self):
         return self.nama
