@@ -7,11 +7,13 @@
 <body>
     {% block content %}
     <h2>Add Item</h2>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ item_form.as_p }}
-        <button type="submit">Upload</button>
-    </form>
+    <div class="form-group w-50">
+        <form method="post">
+            {% csrf_token %}
+            {{ item_form.as_p }}
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
     {% endblock %}
 </body>
 </html>

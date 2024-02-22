@@ -1,40 +1,98 @@
 from django import forms
 from django_select2.forms import Select2Widget
 from .models import *
-
+# from django.core.validators import FileExtensionValidator
 
 class CustomerForm(forms.ModelForm):
+    nama_pt = forms.CharField(
+        max_length=255, 
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'PT. Lotus Lestari Raya'}),
+        label='Nama Perusahaan'
+    )
+    
+    telp = forms.CharField(
+        max_length=15, 
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'+628xxxxxxxxxx'}),
+        label='No. Telpon'
+    )
+    
     # Define choices for terms_of_payment field
     TERMS_OF_PAYMENT_CHOICES = (
         (1, 'Option 1'),
         (2, 'Option 2'),
         (3, 'Option 3'),
     )
-    terms_of_payment = forms.ChoiceField(choices=TERMS_OF_PAYMENT_CHOICES)
+    terms_of_payment = forms.ChoiceField(
+        choices=TERMS_OF_PAYMENT_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Terms of Payment'
+    )
 
     # Define choices for pengiriman field
     PENGIRIMAN_CHOICES = (
         (True, 'Yes'),
         (False, 'No'),
     )
-    pengiriman = forms.ChoiceField(choices=PENGIRIMAN_CHOICES)
+    pengiriman = forms.ChoiceField(
+        choices=PENGIRIMAN_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Pengiriman'
+    )
 
-    npwp = forms.IntegerField(required=True)
+    npwp = forms.CharField(
+        max_length=20,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'xx.xxx.xxx.x-xxx.xxx'}),
+        label='NPWP'
+    )
+    
+    faktur = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
+        label='Faktur Pajak',
+        required=False
+    )
 
     class Meta:
         model = Customer
         fields = '__all__'
-        exclude=['cust_id']
+        exclude = ['cust_id']
 
 class SupplierForm(forms.ModelForm):
+    nama_pt = forms.CharField(
+        max_length=255, 
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'PT. Lotus Lestari Raya'}),
+        label='Nama Perusahaan'
+    )
+    
+    telp = forms.CharField(
+        max_length=15, 
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder':'+628xxxxxxxxxx'}),
+        label='No. Telpon'
+    )
+    
     # Define choices for terms_of_payment field
     TERMS_OF_PAYMENT_CHOICES = (
         (1, 'Option 1'),
         (2, 'Option 2'),
         (3, 'Option 3'),
     )
-    terms_of_payment = forms.ChoiceField(choices=TERMS_OF_PAYMENT_CHOICES)
-    npwp = forms.IntegerField(required=True)
+    terms_of_payment = forms.ChoiceField(
+        choices=TERMS_OF_PAYMENT_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Terms of Payment'
+    )
+
+    npwp = forms.CharField(
+        max_length=20,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder':'xx.xxx.xxx.x-xxx.xxx'}),
+        label='NPWP'
+    )
+    
+    faktur = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
+        label='Faktur Pajak',
+        required=False
+    )
+
     class Meta:
         model = Supplier
         fields = '__all__'
@@ -79,6 +137,35 @@ class SuppAlamattForms(forms.ModelForm):
         exclude = ['supplier_id']
 
 class ItemForm(forms.ModelForm):
+    nama = forms.CharField(
+        max_length=255, 
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'PT. Lotus Lestari Raya'}),
+        label='Nama Barang'
+    )
+
+    category = forms.CharField(
+        max_length=255, 
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Office Supplies'}),
+        label='Kategori'
+    )
+
+    quantity = forms.CharField(
+        max_length=255, 
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder':'1, 2, 3, ...'}),
+        label='Kuantitas'
+    )
+
+    price = forms.CharField(
+        max_length=255, 
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder':'100000'}),
+        label='Harga'
+    )
+    
+    gambar = forms.FileField( 
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control-file', 'accept':'image/*'}),
+        label='Gambar',
+        # validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])]
+    )
 
     class Meta:
         model = Items

@@ -135,7 +135,7 @@ def add_item(request):
     else:
         form = ItemForm()
     
-    return render(request, 'add_item.html', {'item_form': form})
+    return render(request, 'item/add_item.html', {'item_form': form})
 
 
 # -------------------- Display Tables -------------------- #
