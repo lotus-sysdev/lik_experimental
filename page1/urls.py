@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import *
+from django_select2.views import AutoResponseView
 
 urlpatterns = [
     path('', placeholder,name='index'),
@@ -40,4 +41,7 @@ urlpatterns = [
     path('add_customer_alamat/<int:cust_id>/', add_customer_alamat, name='add_customer_alamat'),
     path('add_supplier_alamat/<int:supp_id>/', add_supplier_alamat, name='add_supplier_alamat'),
 
+    path('add_PO/', add_PO, name='add_PO'),
+
+    path('select2/', AutoResponseView.as_view(model='Items'), name='select2_view'),
 ]

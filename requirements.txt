@@ -1,1 +1,5 @@
 django
+django-phonenumber-field
+django-phonenumbers
+django-select2
+pillow
