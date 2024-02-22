@@ -220,3 +220,15 @@ def delete_item(request, SKU):
 # -------------------- Item Sumber Functions -------------------- #
 def add_sumber(request, SKU):
     return add_entity(request, SKU, Items, SumberForm, 'add_sumber.html', 'SKU', 'item')
+
+def add_PO(request):
+    if request.method == 'POST':
+        form = PurchaseForm(request.POST)
+        if form.is_valid():
+            form.save()
+    else:
+        form = PurchaseForm()
+
+    return render(request, 'add_PO.html', {'form': form})
+
+    

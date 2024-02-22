@@ -42,6 +42,9 @@ class Items(models.Model):
     price = models.IntegerField()
     gambar = models.ImageField()
     sumber = models.CharField(max_length=255)
+    
+    def __str__(self):
+        return self.nama
 
 class ItemSumber(models.Model):
     item = models.ForeignKey(Items, on_delete=models.CASCADE)

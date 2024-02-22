@@ -1,5 +1,7 @@
 from django import forms
+from django_select2.forms import Select2Widget
 from .models import *
+
 
 class CustomerForm(forms.ModelForm):
     # Define choices for terms_of_payment field
@@ -91,12 +93,18 @@ class SumberForm(forms.ModelForm):
         exclude = ['item']
 
 class PurchaseForm(forms.ModelForm):
-
+    tanggal_PO = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    tanggal_process = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    tanggal_input_accurate = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    tanggal_pengiriman_barang = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    tanggal_pengiriman_invoice = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     class Meta:
         model = PurchaseOrder
         fields = '__all__'
-        exclude=['supplier_id','item','status']
-
+        exclude=['supplier_id','status']
+        widgets = {
+            'item': Select2Widget,
+        }
 class WorkForm(forms.ModelForm):
 
     class Meta:
