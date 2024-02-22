@@ -20,9 +20,9 @@ local_settings.py
 *.sqlite3
 
 # Static files
-/staticfiles/
-/static/
+# /staticfiles/
+# /static/
 
 # Media Folder
-media/*
+# media/*
 
