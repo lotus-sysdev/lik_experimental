@@ -1,11 +1,12 @@
 import os
 from PIL import Image
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.conf import settings
 from django.core.files import File
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse, HttpResponseNotFound
 from .forms import *
 from .models import *
+
 
 # -------------------- Placeholder for homepage --------------------#
 def placeholder(request):
@@ -231,4 +232,12 @@ def add_PO(request):
 
     return render(request, 'add_PO.html', {'form': form})
 
-    
+def add_WO(request):
+    if request.method == 'POST':
+        form = WorkForm(request.POST)
+        if form.is_valid():
+            form.save()
+    else:
+        form = WorkForm()
+
+    return render(request, 'add_WO.html', {'form': form})

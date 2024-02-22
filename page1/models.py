@@ -13,6 +13,9 @@ class Customer(models.Model):
     npwp = models.CharField(max_length=255)
     faktur = models.BooleanField()
 
+    def __str__(self):
+        return self.nama_pt
+
 class Supplier(models.Model):
     supp_id = models.IntegerField(primary_key = True)
     nama_pt = models.CharField(max_length=255)
@@ -108,15 +111,15 @@ class PurchaseOrder(models.Model):
     status = models.CharField(max_length=30,choices = STATUS_CHOICES) 
 
 class WorkOrder(models.Model):
-    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer= models.ForeignKey(Customer, on_delete=models.CASCADE)
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
-    revenue_PO = models.IntegerField()
-    nomor_PO = models.IntegerField()
-    tanggal_PO = models.DateField()
-    tanggal_process = models.DateField()
-    tanggal_input_accurate = models.DateField()
-    tanggal_pengiriman_barang = models.DateField()
-    tanggal_pengiriman_invoice = models.DateField()
+    revenue_PO = models.IntegerField(blank=True, null=True, default=0)
+    nomor_PO = models.IntegerField(blank=True, null=True, default=0)
+    tanggal_PO = models.DateField(blank=True, null=True, default=default_date)
+    tanggal_process = models.DateField(blank=True, null=True, default=default_date)
+    tanggal_input_accurate = models.DateField(blank=True, null=True, default=default_date)
+    tanggal_pengiriman_barang = models.DateField(blank=True, null=True, default=default_date)
+    tanggal_pengiriman_invoice = models.DateField(blank=True, null=True, default=default_date)
     STATUS_CHOICES = (
         ('Pending', 'Pending'),
         ('Completed', 'Completed'),

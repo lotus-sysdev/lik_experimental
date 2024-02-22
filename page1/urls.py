@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from .views import *
 from django_select2.views import AutoResponseView
 
@@ -42,6 +42,5 @@ urlpatterns = [
     path('add_supplier_alamat/<int:supp_id>/', add_supplier_alamat, name='add_supplier_alamat'),
 
     path('add_PO/', add_PO, name='add_PO'),
-
-    path('select2/', AutoResponseView.as_view(model='Items'), name='select2_view'),
+    path('add_WO/', add_WO, name='add_WO'),
 ]

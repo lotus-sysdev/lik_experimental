@@ -65,7 +65,7 @@ class SupplierForm(forms.ModelForm):
     
     telp = forms.CharField(
         max_length=15, 
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder':'+628xxxxxxxxxx'}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'+628xxxxxxxxxx'}),
         label='No. Telpon'
     )
     
@@ -205,8 +205,18 @@ class PurchaseForm(forms.ModelForm):
     #         cleaned_data['status'] = 'Pending'
     #     return cleaned_data
 class WorkForm(forms.ModelForm):
+    revenue_PO = forms.IntegerField(required=False)
+    nomor_PO = forms.IntegerField(required=False)
+    tanggal_PO = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}), )
+    tanggal_process = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    tanggal_input_accurate = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    tanggal_pengiriman_barang = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    tanggal_pengiriman_invoice = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
 
     class Meta:
         model = WorkOrder
-        fields = '__all__'
-        exclude=['supplier_id','item','status']
+        exclude = ['status']
+        widgets = {
+            'customer': Select2Widget,
+            'item': Select2Widget,
+        }
