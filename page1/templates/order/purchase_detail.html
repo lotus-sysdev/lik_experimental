@@ -20,7 +20,7 @@
                 </form>
                 <div class="d-flex">
                     <button type="button" onclick="updatePO()" class="btn btn-primary mr-2">Update</button>
-                    <form id="deleteForm" method="post" action="{% url 'delete_customer' entity.id %}" onclick="return confirmDelete();">
+                    <form id="deleteForm" method="post" action="{% url 'delete_purchase' entity.id %}" onclick="return confirmDelete();">
                         {% csrf_token %}
                         <button type="button" class="btn btn-danger">Delete</button>
                     </form>
