@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 import uuid
 from phonenumber_field.modelfields import PhoneNumberField
@@ -19,6 +20,9 @@ class Supplier(models.Model):
     terms_of_payment = models.CharField(max_length=10)
     npwp = models.CharField(max_length=255)
     faktur = models.BooleanField()
+
+    def __str__(self):
+        return self.nama_pt
 
 class CustomerPIC(models.Model):
     customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
@@ -83,16 +87,19 @@ class SupplierAlamat(models.Model):
     kelurahan = models.CharField(max_length=50)
     detail = models.CharField(max_length=50)
 
+def default_date():
+    return datetime.date(1900, 1, 1)
+
 class PurchaseOrder(models.Model):
-    supplier_id = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    supplier= models.ForeignKey(Supplier, on_delete=models.CASCADE)
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
-    revenue_PO = models.IntegerField()
-    nomor_PO = models.IntegerField()
-    tanggal_PO = models.DateField()
-    tanggal_process = models.DateField()
-    tanggal_input_accurate = models.DateField()
-    tanggal_pengiriman_barang = models.DateField()
-    tanggal_pengiriman_invoice = models.DateField()
+    revenue_PO = models.IntegerField(blank=True, null=True, default=0)
+    nomor_PO = models.IntegerField(blank=True, null=True, default=0)
+    tanggal_PO = models.DateField(blank=True, null=True, default=default_date)
+    tanggal_process = models.DateField(blank=True, null=True, default=default_date)
+    tanggal_input_accurate = models.DateField(blank=True, null=True, default=default_date)
+    tanggal_pengiriman_barang = models.DateField(blank=True, null=True, default=default_date)
+    tanggal_pengiriman_invoice = models.DateField(blank=True, null=True, default=default_date)
     STATUS_CHOICES = (
         ('Pending', 'Pending'),
         ('Completed', 'Completed'),

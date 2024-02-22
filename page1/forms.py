@@ -180,18 +180,30 @@ class SumberForm(forms.ModelForm):
         exclude = ['item']
 
 class PurchaseForm(forms.ModelForm):
-    tanggal_PO = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    tanggal_process = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    tanggal_input_accurate = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    tanggal_pengiriman_barang = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    tanggal_pengiriman_invoice = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    revenue_PO = forms.IntegerField(required=False)
+    nomor_PO = forms.IntegerField(required=False)
+    tanggal_PO = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}), )
+    tanggal_process = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    tanggal_input_accurate = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    tanggal_pengiriman_barang = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    tanggal_pengiriman_invoice = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+
     class Meta:
         model = PurchaseOrder
-        fields = '__all__'
-        exclude=['supplier_id','status']
+        exclude = ['status']
         widgets = {
+            'supplier': Select2Widget,
             'item': Select2Widget,
         }
+
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     # Check if any of the tanggal fields are filled
+    #     if any(cleaned_data.get(field) for field in ['tanggal_PO', 'tanggal_process', 'tanggal_input_accurate', 'tanggal_pengiriman_barang', 'tanggal_pengiriman_invoice']):
+    #         cleaned_data['status'] = 'Completed'
+    #     else:
+    #         cleaned_data['status'] = 'Pending'
+    #     return cleaned_data
 class WorkForm(forms.ModelForm):
 
     class Meta:
