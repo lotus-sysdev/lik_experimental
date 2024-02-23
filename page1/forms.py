@@ -198,15 +198,7 @@ class PurchaseForm(forms.ModelForm):
             'supplier': Select2Widget,
             'item': Select2Widget,
         }
-
-    # def clean(self):
-    #     cleaned_data = super().clean()
-    #     # Check if any of the tanggal fields are filled
-    #     if any(cleaned_data.get(field) for field in ['tanggal_PO', 'tanggal_process', 'tanggal_input_accurate', 'tanggal_pengiriman_barang', 'tanggal_pengiriman_invoice']):
-    #         cleaned_data['status'] = 'Completed'
-    #     else:
-    #         cleaned_data['status'] = 'Pending'
-    #     return cleaned_data
+        
 class WorkForm(forms.ModelForm):
     revenue_PO = forms.IntegerField(required=False)
     nomor_PO = forms.IntegerField(required=False)

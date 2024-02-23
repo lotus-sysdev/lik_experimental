@@ -104,11 +104,31 @@ class PurchaseOrder(models.Model):
     tanggal_pengiriman_barang = models.DateField(blank=True, null=True, default=default_date)
     tanggal_pengiriman_invoice = models.DateField(blank=True, null=True, default=default_date)
     STATUS_CHOICES = (
-        ('Pending', 'Pending'),
-        ('Completed', 'Completed'),
-        ('Cancelled', 'Cancelled')
+        ('order', 'Order Created'),
+        ('pending', 'Pending'),
+        ('process', 'Process'),
+        ('accurate', 'Accurate'),
+        ('pengiriman', 'Pengiriman Barang'),
+        ('invoice', 'Pengiriman Invoice')
     )
     status = models.CharField(max_length=30,choices = STATUS_CHOICES) 
+
+    def save(self, *args, **kwargs):
+        # Update the status based on whether specific fields have been filled or not
+        if self.revenue_PO or self.nomor_PO or self.tanggal_PO:
+            self.status = 'order'
+        elif self.tanggal_process:
+            self.status = 'process'
+        elif self.tanggal_input_accurate:
+            self.status = 'accurate'
+        elif self.tanggal_pengiriman_barang:
+            self.status = 'pengiriman'
+        elif self.tanggal_pengiriman_invoice:
+            self.status = 'invoice'
+        else:
+            self.status = 'pending'
+
+        super().save(*args, **kwargs)
 
 class WorkOrder(models.Model):
     customer= models.ForeignKey(Customer, on_delete=models.CASCADE)
