@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,26 +16,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <style type="text/css">
-        .custom-container {
-            margin-left: 0px;
-        }
-
-        .navbar {
-            padding: 15px 10px;
-            background: #fff;
-            border: none;
-            border-radius: 0;
-            margin-bottom: 40px;
-            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .navbar-btn {
-            box-shadow: none;
-            outline: none !important;
-            border: none;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
     <title>{% block title %}Sidebar{% endblock %}</title>
 </head>
 <body>
