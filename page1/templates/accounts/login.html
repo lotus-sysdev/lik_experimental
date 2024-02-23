@@ -1,4 +1,4 @@
-
+{% extends 'account.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,18 +8,32 @@
 </head>
 <body>
     {% block content %}
-    <h1>Login</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        {% for field in form %}
-            {% for error in field.errors %}
-                <p style="color: red;">{{ error }}</p>
-            {% endfor %}
-        {% endfor %}
-        <button type="submit">Login</button>
-    </form>
-    <p>don't have an account?<a href="/register">Register</a></p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.username.label_tag }}
+                    {{ form.username }}
+                    {% for error in form.username.errors %}
+                        <p class="text-danger">{{ error }}</p>
+                    {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.password.label_tag }}
+                {{ form.password }}
+                {% for error in form.password.errors %}
+                    <p class="text-danger">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <div class="text-center pt-1 mb-5 pb-1">
+                <button type="submit" class="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3">Login</button>
+                <a class="link-primary" href="#!">Forgot password?</a>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-center pb-4">
+                <p class="mb-0 me-2">Don't have an account?</p>
+                <a href="/register" class="btn btn-outline-primary ml-2">Create new</a>
+            </div>
+        </form>
     {% endblock %}
 </body>
 </html>

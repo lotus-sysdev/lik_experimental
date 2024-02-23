@@ -464,16 +464,28 @@ class WorkForm(forms.ModelForm):
         }
 
 class Register(UserCreationForm):
+    username = forms.CharField(
+        label='Username',
+        widget=forms.TextInput(attrs={'class':'form-control'}),
+        error_messages= {'required': 'Please enter a username.'}
+    )
+
+    email = forms.EmailField(
+        label='Email Address',
+        widget=forms.EmailInput(attrs={'class':'form-control'}),
+        error_messages= {'required': 'Please provide your email address.'},
+    )
+
     password1 = forms.CharField(
         label='Password',
         strip=False,
-        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'class':'form-control'}),
         error_messages={'required': 'Please enter your password.'}
     )
     password2 = forms.CharField(
         label='Password confirmation',
         strip=False,
-        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'class':'form-control'}),
         error_messages={'required': 'Please confirm your password.'}
     )
     class Meta:
@@ -487,5 +499,3 @@ class Register(UserCreationForm):
 
             if password1 != password2:
                 raise forms.ValidationError('The passwords do not match.')
-
-
