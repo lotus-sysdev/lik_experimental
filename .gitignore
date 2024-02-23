@@ -26,3 +26,6 @@ local_settings.py
 # Media Folder
 media/*
 
+# Migrations
+migrations/*
+
