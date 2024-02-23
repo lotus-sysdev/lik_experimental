@@ -1,0 +1,35 @@
+.custom-container {
+    margin-left: 0px;
+}
+
+.navbar {
+    padding: 15px 10px;
+    background: #fff;
+    border: none;
+    border-radius: 0;
+    margin-bottom: 40px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-btn {
+    box-shadow: none;
+    outline: none !important;
+    border: none;
+}
+/* Custom styles for Select2Widget */
+.select2-container--default .select2-selection--single {
+    height: 38px;
+    padding: 3px 5px;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.select2-container--default .select2-selection--single:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}

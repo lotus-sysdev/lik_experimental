@@ -7,13 +7,17 @@
 </head>
 <body>
     {% block content %} 
-    <h1>Add Supplier PIC</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit</button>
-    </form>
-    <a href="{% url 'supplier_detail' supp_id=entity.supp_id %}">Back</a>
+    <h2>Add Supplier PIC</h2>
+    <div class="form-group w-50">
+        <form method="post" class="mt-3">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <a href="{% url 'supplier_detail' supp_id=entity.supp_id %}" class="btn btn-secondary ml-2">Back</a>
+            </div>
+        </form>
+    </div>
     {% endblock %}
 </body>
 </html>

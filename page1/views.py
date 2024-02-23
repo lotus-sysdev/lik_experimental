@@ -243,7 +243,7 @@ def edit_item(request, SKU):
     else:
         form = ItemForm(instance=entity)
 
-    return render(request, 'item/edit_item.html', {'form': form})
+    return render(request, 'edit_item.html', {'form': form})
 
 @login_required
 def delete_item(request, SKU):
@@ -253,30 +253,47 @@ def delete_item(request, SKU):
 # -------------------- Item Sumber Functions -------------------- #
 @login_required
 def add_sumber(request, SKU):
-    return add_entity(request, SKU, Items, SumberForm, 'add_sumber.html', 'SKU', 'item')
+    return add_entity(request, SKU, Items, SumberForm, 'item/add_sumber.html', 'SKU', 'item')
 
-@login_required
+
+# -------------------- Order Functions -------------------- #
+# Add Purchase Order and Work Order
 def add_PO(request):
-    if request.method == 'POST':
-        form = PurchaseForm(request.POST)
-        if form.is_valid():
-            form.save()
-    else:
-        form = PurchaseForm()
-
-    return render(request, 'add_PO.html', {'form': form})
+    return add_entity_view(request, PurchaseForm, 'order/add_PO.html')
 
 @login_required
 def add_WO(request):
-    if request.method == 'POST':
-        form = WorkForm(request.POST)
-        if form.is_valid():
-            form.save()
-    else:
-        form = WorkForm()
+    return add_entity_view(request, WorkForm, 'order/add_WO.html')
 
-    return render(request, 'add_WO.html', {'form': form})
+# Display Purchase Order and Work Order
+def display_purchase(request):
+    return display_entities(request, PurchaseOrder, 'order/display_purchase.html')
 
+def display_work(request):
+    return display_entities(request, WorkOrder, 'order/display_work.html')
+
+#  Detail of Purchase Order and Work Order
+def purchase_detail(request, id):
+    return entity_detail(request, PurchaseOrder, PurchaseForm, 'id',id, 'order/purchase_detail.html')
+
+def work_detail(request, id):
+    return entity_detail(request, WorkOrder, WorkForm, 'id', id, 'order/work_detail.html')
+
+# Edit Purchase Order and Work Order
+def edit_purchase(request, id):
+    return edit_entity(request, PurchaseOrder, PurchaseForm, 'id', id)
+
+def edit_work(request, id):
+    return edit_entity(request, WorkOrder, WorkForm, 'id', id)
+
+# Delete Purchase Order and Work Order
+def delete_purchase(request, id):
+    return delete_entity(request, PurchaseOrder, 'id', id)
+
+def delete_work(request, id):
+    return delete_entity(request, WorkOrder, 'id', id)
+  
+# Login, Register, and Logout
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, request.POST)
@@ -304,3 +321,4 @@ def register_view(request):
 def logout_view(request):
     logout(request)
     return redirect('/login')
+

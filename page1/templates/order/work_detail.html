@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+<html>
+<head>
+    {% block title %}Purchase Detail{% endblock %}
+</head>
+<body>
+    {% block content %}
+    <div class="container mt-4 custom-container">
+        <h1>Work Order Detail</h1>
+        <a href="/display_work">Back</a>
+        
+        <div class="row">
+            <!-- Left column for the form -->
+            <div class="col-md-6">
+                <form id="editForm" method="post" action="{% url 'edit_work' entity.id %}" data-redirectUrl="{% url 'work_detail' entity.id %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+                <div class="d-flex">
+                    <form id="deleteForm" method="post" action="{% url 'delete_work' entity.id %}" onclick="return confirmDelete('/display_work');">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+</body>
+</html>
