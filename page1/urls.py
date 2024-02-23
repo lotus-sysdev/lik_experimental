@@ -1,6 +1,5 @@
 from django.urls import path, re_path
 from .views import *
-from django_select2.views import AutoResponseView
 
 urlpatterns = [
     path('', placeholder,name='index'),
@@ -38,14 +37,6 @@ urlpatterns = [
     path('supplier_detail/<int:supp_id>/', supplier_detail, name='supplier_detail'),
     path('edit_supplier/<int:supp_id>/', edit_supplier, name='edit_supplier'),
     path('delete_supplier/<int:supp_id>/', delete_supplier, name='delete_supplier'),
-
-    # PIC urls
-    path('add_pic_cust/<int:cust_id>',add_customer_pic,name='add_pic_cust'),
-    path('add_pic_supp/<int:supp_id>',add_supplier_pic,name='add_pic_supp'),
-
-    # Alamat urls
-    path('add_customer_alamat/<int:cust_id>/', add_customer_alamat, name='add_customer_alamat'),
-    path('add_supplier_alamat/<int:supp_id>/', add_supplier_alamat, name='add_supplier_alamat'),
     
     # item detail, edit, and delete
     path('item_detail/<int:SKU>/', item_detail, name='item_detail'),
@@ -54,4 +45,18 @@ urlpatterns = [
     
     # Sumber url
     path('add_sumber/<int:SKU>',add_sumber, name='add_sumber'),
+    
+    # PIC urls
+    path('add_pic_cust/<int:cust_id>',add_customer_pic,name='add_pic_cust'),
+    path('add_pic_supp/<int:supp_id>',add_supplier_pic,name='add_pic_supp'),
+
+    # Alamat urls
+    path('add_customer_alamat/<int:cust_id>/', add_customer_alamat, name='add_customer_alamat'),
+    path('add_supplier_alamat/<int:supp_id>/', add_supplier_alamat, name='add_supplier_alamat'),
+    
+    # Login, Register, and Logou
+    path('login/',login_view, name="login"),
+    path('register/',register_view, name="register"),
+    path('logout/', logout_view, name='logout'),
 ]
+

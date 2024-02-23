@@ -2,8 +2,14 @@ import re
 from django import forms
 from django_select2.forms import Select2Widget
 from .models import *
+
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.models import User
+# from django.core.validators import FileExtensionValidator
+
 from phonenumber_field.formfields import PhoneNumberField, RegionalPhoneNumberWidget
 from django.core.exceptions import ValidationError
+
 
 def validate_npwp(value):
     cleaned_value = re.sub(r'\D', '', value)
@@ -404,6 +410,7 @@ class PurchaseForm(forms.ModelForm):
 
     class Meta:
         model = PurchaseOrder
+        fields = "__all__"
         exclude = ['status']
         widgets = {
             'supplier': Select2Widget(attrs={'class':'form-control'}),
@@ -448,8 +455,36 @@ class WorkForm(forms.ModelForm):
 
     class Meta:
         model = WorkOrder
+        fields = "__all__"
         exclude = ['status']
         widgets = {
             'customer': Select2Widget(attrs={'class':'form-control'}),
             'item': Select2Widget(attrs={'class':'form-control'}),
         }
+
+class Register(UserCreationForm):
+    password1 = forms.CharField(
+        label='Password',
+        strip=False,
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        error_messages={'required': 'Please enter your password.'}
+    )
+    password2 = forms.CharField(
+        label='Password confirmation',
+        strip=False,
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        error_messages={'required': 'Please confirm your password.'}
+    )
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password1', 'password2']
+
+        def clean(self):
+            cleaned_data = super().clean()
+            password1 = cleaned_data.get('password1')
+            password2 = cleaned_data.get('password2')
+
+            if password1 != password2:
+                raise forms.ValidationError('The passwords do not match.')
+
+

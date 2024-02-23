@@ -6,7 +6,7 @@ __pycache__/
 # Local development settings
 .env
 .env.*
-
+/env/
 # Django settings file
 *.pyc
 *.pyo
@@ -25,4 +25,7 @@ local_settings.py
 
 # Media Folder
 media/*
+
+# Migrations
+migrations/*
 
