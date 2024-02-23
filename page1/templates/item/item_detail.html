@@ -3,7 +3,6 @@
 <html>
 <head>
     {% block title %}Item Detail{% endblock %}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     {% block content %} 
@@ -56,33 +55,12 @@
                 processData: false,
                 contentType: false,
                 success: function () {
-                    alert('Item details updated successfully!');
+                    alert('Update successful!');
                 },
                 error: function () {
-                    alert('Error updating Item details.');
+                    alert('Error updating details.');
                 }
             });
-        }
-
-        function confirmDelete() {
-            if (confirm('Are you sure you want to delete this item?')) {
-                // Perform AJAX request for deleting item
-                $.ajax({
-                    type: 'POST',
-                    url: $('#deleteForm').attr('action'),
-                    data: $('#deleteForm').serialize(),
-                    success: function () {
-                        alert('Item deleted successfully!');
-                        // You can optionally update the page or perform additional actions here
-                        // Navigate back to the item list
-                        window.location.href = "/display_item";
-                    },
-                    error: function () {
-                        alert('Error deleting item.');
-                    }
-                });
-            }
-            return false;
         }
     </script>
     {% endblock %}

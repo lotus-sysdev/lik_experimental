@@ -3,7 +3,6 @@
 <html>
 <head>
     {% block title %}Customer Detail{% endblock %}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     {% block content %}
@@ -19,7 +18,7 @@
                     {{ form.as_p }}
                 </form>
                 <div class="d-flex">
-                    <button type="button" onclick="updateCustomer()" class="btn btn-primary mr-2">Update</button>
+                    <button type="button" onclick="update()" class="btn btn-primary mr-2">Update</button>
                     <form id="deleteForm" method="post" action="{% url 'delete_customer' entity.cust_id %}" onclick="return confirmDelete();">
                         {% csrf_token %}
                         <button type="button" class="btn btn-danger">Delete</button>
@@ -70,49 +69,7 @@
                 {% endif %}
                 <a href="{% url 'add_customer_alamat' cust_id=entity.cust_id %}" class="mt-2 btn btn-info">Add Alamat</a>
             </div>
-            
         </div>
-
-
-    <script>
-        function updateCustomer() {
-            // Perform AJAX request for updating customer details
-            $.ajax({
-                type: 'POST',
-                url: $('#editForm').attr('action'),
-                data: $('#editForm').serialize(),
-                success: function () {
-                    alert('Customer details updated successfully!');
-                    // You can optionally update the page or perform additional actions here
-                    // Example: $('#customerName').text($('#id_name').val());
-                },
-                error: function () {
-                    alert('Error updating customer details.');
-                }
-            });
-        }
-
-        function confirmDelete() {
-            if (confirm('Are you sure you want to delete this customer?')) {
-                // Perform AJAX request for deleting customer
-                $.ajax({
-                    type: 'POST',
-                    url: $('#deleteForm').attr('action'),
-                    data: $('#deleteForm').serialize(),
-                    success: function () {
-                        alert('Customer deleted successfully!');
-                        // You can optionally update the page or perform additional actions here
-                        // Navigate back to the customer list
-                        window.location.href = "/display_customer";
-                    },
-                    error: function () {
-                        alert('Error deleting customer.');
-                    }
-                });
-            }
-            return false;
-        }
-    </script>
     {% endblock %}
 </body>
 </html>
