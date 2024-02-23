@@ -11,13 +11,13 @@
         <a href="/display_item">Back</a>
         <div class="row">
             <div class="col-md-6">
-                <form id="editForm" method="post"enctype="multipart/form-data" data-action="{% url 'edit_item' entity.SKU %}">
+                <form id="editForm" method="post"enctype="multipart/form-data" action="{% url 'edit_item' entity.SKU %}" data-redirectUrl="{% url 'item_detail' entity.SKU %}">
                     {% csrf_token %}
                     {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Update</button>
                 </form>
                 <div class="d-flex">
-                    <button type="button" onclick="updateItem()" class="btn btn-primary mr-2">Update</button>
-                    <form id="deleteForm" method="post" action="{% url 'delete_item' entity.SKU %}" onclick="return confirmDelete();">
+                    <form id="deleteForm" method="post" action="{% url 'delete_item' entity.SKU %}" onclick="return confirmDelete('/display_item');">
                         {% csrf_token %}
                         <button type="button" class="btn btn-danger">Delete</button>
                     </form>
@@ -39,30 +39,6 @@
                 {% endif %}
             </div>
     </div>
-
-    <script>
-        function updateItem() {
-            var form = document.getElementById('editForm');
-            var formData = new FormData(form);
-            
-            // Append the file input data manually
-            formData.append('gambar', form.querySelector('input[type="file"]').files[0]);
-
-            $.ajax({
-                type: 'POST',
-                url: form.getAttribute('data-action'),
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function () {
-                    alert('Update successful!');
-                },
-                error: function () {
-                    alert('Error updating details.');
-                }
-            });
-        }
-    </script>
     {% endblock %}
 </body>
 </html>

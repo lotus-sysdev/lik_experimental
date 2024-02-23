@@ -1,10 +1,22 @@
+import re
 from django import forms
 from django_select2.forms import Select2Widget
 from .models import *
 from phonenumber_field.formfields import PhoneNumberField, RegionalPhoneNumberWidget
-# from django.core.validators import FileExtensionValidator
+from django.core.exceptions import ValidationError
 
+def validate_npwp(value):
+    cleaned_value = re.sub(r'\D', '', value)
+
+    # Check if the cleaned value is either 15 or 16 digits
+    if len(cleaned_value) == 15 or len(cleaned_value) == 16:
+        return cleaned_value
+    else:
+        raise ValidationError('Invalid NPWP format')
+
+    
 class CustomerForm(forms.ModelForm):
+    
     nama_pt = forms.CharField(
         max_length=255, 
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'PT. Lotus Lestari Raya'}),
@@ -41,10 +53,20 @@ class CustomerForm(forms.ModelForm):
     )
 
     npwp = forms.CharField(
-        max_length=20,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'xx.xxx.xxx.x-xxx.xxx'}),
-        label='NPWP'
+        max_length=21,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'xx.xxx.xxx.x-xxx.xxx or xxxx xxxx xxxx xxxx'}),
+        label='NPWP',
+        validators=[validate_npwp]
     )
+
+    def clean_npwp(self):
+        npwp = self.cleaned_data.get('npwp')
+        clean_npwp = validate_npwp(npwp)
+        if len(clean_npwp) == 15:
+            formatted_npwp = f'{clean_npwp[:2]}.{clean_npwp[2:5]}.{clean_npwp[5:8]}.{clean_npwp[8]}-{clean_npwp[9:12]}.{clean_npwp[12:]}'
+        else:
+            formatted_npwp = f'{clean_npwp[:4]} {clean_npwp[4:8]} {clean_npwp[8:12]} {clean_npwp[12:]}'
+        return formatted_npwp
     
     faktur = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
@@ -83,10 +105,20 @@ class SupplierForm(forms.ModelForm):
     )
 
     npwp = forms.CharField(
-        max_length=20,
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder':'xx.xxx.xxx.x-xxx.xxx'}),
-        label='NPWP'
+        max_length=21,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'xx.xxx.xxx.x-xxx.xxx or xxxx xxxx xxxx xxxx'}),
+        label='NPWP',
+        validators=[validate_npwp]
     )
+    
+    def clean_npwp(self):
+        npwp = self.cleaned_data.get('npwp')
+        clean_npwp = validate_npwp(npwp)
+        if len(clean_npwp) == 15:
+            formatted_npwp = f'{clean_npwp[:2]}.{clean_npwp[2:5]}.{clean_npwp[5:8]}.{clean_npwp[8]}-{clean_npwp[9:12]}.{clean_npwp[12:]}'
+        else:
+            formatted_npwp = f'{clean_npwp[:4]} {clean_npwp[4:8]} {clean_npwp[8:12]} {clean_npwp[12:]}'
+        return formatted_npwp    
     
     faktur = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'form-control'}),

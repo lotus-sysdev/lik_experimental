@@ -211,7 +211,7 @@ def edit_item(request, SKU):
     else:
         form = ItemForm(instance=entity)
 
-    return render(request, 'item/edit_item.html', {'form': form})
+    return render(request, 'edit_item.html', {'form': form})
 
 
 def delete_item(request, SKU):
