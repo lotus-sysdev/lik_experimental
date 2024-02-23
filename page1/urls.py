@@ -1,6 +1,5 @@
 from django.urls import path, re_path
 from .views import *
-from django_select2.views import AutoResponseView
 
 urlpatterns = [
     path('', placeholder,name='index'),
@@ -43,4 +42,8 @@ urlpatterns = [
 
     path('add_PO/', add_PO, name='add_PO'),
     path('add_WO/', add_WO, name='add_WO'),
+
+    path('login/',login_view, name="login"),
+    path('register/',register_view, name="register"),
+    path('logout/', logout_view, name='logout'),
 ]
