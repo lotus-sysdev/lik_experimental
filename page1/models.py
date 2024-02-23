@@ -2,6 +2,7 @@ import datetime
 from django.db import models
 import uuid
 from phonenumber_field.modelfields import PhoneNumberField
+from djmoney.models.fields import MoneyField
 
 # Create your models here.
 class Customer(models.Model):
@@ -46,7 +47,7 @@ class Items(models.Model):
     nama = models.CharField(max_length=255)
     category = models.CharField(max_length=255)
     quantity = models.IntegerField()
-    price = models.IntegerField()
+    price = MoneyField(max_digits=15, default_currency='IDR', )
     gambar = models.ImageField()
     
     def __str__(self):

@@ -4,3 +4,4 @@ django-phonenumbers
 django-select2
 django-jazzmin
 pillow
+django-money

@@ -9,6 +9,8 @@ from django.contrib.auth.models import User
 
 from phonenumber_field.formfields import PhoneNumberField, RegionalPhoneNumberWidget
 from django.core.exceptions import ValidationError
+from djmoney.forms.fields import MoneyField
+from djmoney.forms.widgets import MoneyWidget
 
 
 def validate_npwp(value):
@@ -318,9 +320,8 @@ class ItemForm(forms.ModelForm):
         label='Kuantitas'
     )
 
-    price = forms.CharField(
-        max_length=255, 
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder':'100000'}),
+    price = MoneyField( 
+        widget=MoneyWidget(attrs={'class': 'form-control', 'placeholder':'100000'}),
         label='Harga'
     )
     
@@ -429,7 +430,7 @@ class WorkForm(forms.ModelForm):
     )
     
     tanggal_PO = forms.DateField(
-        required=False, 
+        required=False,
         widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'}), 
     )
     

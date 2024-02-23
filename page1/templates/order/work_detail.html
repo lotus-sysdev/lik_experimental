@@ -19,7 +19,7 @@
                     <button type="submit" class="btn btn-primary">Update</button>
                 </form>
                 <div class="d-flex">
-                    <form id="deleteForm" method="post" action="{% url 'delete_work' entity.id %}" onclick="return confirmDelete('/display_work');">
+                    <form id="deleteForm" method="post" action="{% url 'delete_work' entity.id %}" onclick="return confirmDelete('/display_work');" class="mt-2">
                         {% csrf_token %}
                         <button type="button" class="btn btn-danger">Delete</button>
                     </form>
