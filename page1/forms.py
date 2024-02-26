@@ -374,9 +374,10 @@ class SumberForm(forms.ModelForm):
         exclude = ['item']
 
 class PurchaseForm(forms.ModelForm):
-    revenue_PO = forms.IntegerField(
+    revenue_PO = MoneyField( 
         required=False,
-        widget=forms.NumberInput(attrs={'class':'form-control'})
+        widget=MoneyWidget(attrs={'class': 'form-control', 'placeholder':'100000'}),
+        label='Harga'
     )
     
     nomor_PO = forms.IntegerField(
@@ -419,9 +420,10 @@ class PurchaseForm(forms.ModelForm):
         }
 
 class WorkForm(forms.ModelForm):
-    revenue_PO = forms.IntegerField(
+    revenue_PO = MoneyField( 
         required=False,
-        widget=forms.NumberInput(attrs={'class':'form-control'})
+        widget=MoneyWidget(attrs={'class': 'form-control', 'placeholder':'100000'}),
+        label='Harga'
     )
     
     nomor_PO = forms.IntegerField(

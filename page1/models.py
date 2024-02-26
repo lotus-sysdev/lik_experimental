@@ -97,7 +97,7 @@ def default_date():
 class PurchaseOrder(models.Model):
     supplier= models.ForeignKey(Supplier, on_delete=models.CASCADE)
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
-    revenue_PO = models.IntegerField(blank=True, null=True, default=0)
+    revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, default=0)
     nomor_PO = models.IntegerField(blank=True, null=True, default=0)
     tanggal_PO = models.DateField(blank=True, null=True, default=default_date)
     tanggal_process = models.DateField(blank=True, null=True, default=default_date)
@@ -134,7 +134,7 @@ class PurchaseOrder(models.Model):
 class WorkOrder(models.Model):
     customer= models.ForeignKey(Customer, on_delete=models.CASCADE)
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
-    revenue_PO = models.IntegerField(blank=True, null=True, default=0)
+    revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, default=0)
     nomor_PO = models.IntegerField(blank=True, null=True, default=0)
     tanggal_PO = models.DateField(blank=True, null=True, default=default_date)
     tanggal_process = models.DateField(blank=True, null=True, default=default_date)
