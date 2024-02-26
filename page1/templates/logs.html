@@ -1,0 +1,9 @@
+<!-- logs.html -->
+
+<h1>User Action Logs</h1>
+
+<ul>
+    {% for log in logs %}
+        <li>{{ log.user.username }} - {{ log.action }} - {{ log.timestamp }} - {{log.payload}}</li>
+    {% endfor %}
+</ul>

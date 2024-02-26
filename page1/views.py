@@ -330,3 +330,8 @@ def logout_view(request):
     logout(request)
     return redirect('/login')
 
+
+def user_action_logs(request):
+    logs = UserActionLog.objects.all().order_by('-timestamp')[:100]  # Get the last 10 logs
+    return render(request, 'logs.html', {'logs': logs})
+

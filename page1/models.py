@@ -1,5 +1,6 @@
 import datetime
 from django.db import models
+from django.contrib.auth.models import User
 import uuid
 from phonenumber_field.modelfields import PhoneNumberField
 from djmoney.models.fields import MoneyField
@@ -153,6 +154,7 @@ class WorkOrder(models.Model):
         ('complete', 'Completed')
     )
     status = models.CharField(max_length=30,choices = STATUS_CHOICES) 
+
     STATUS_CONDITIONS = {
         'complete': lambda self: self.tanggal_pengiriman_invoice and self.tanggal_pengiriman_barang and self.tanggal_input_accurate and self.tanggal_process and self.tanggal_PO and self.revenue_PO and self.nomor_PO,
         'invoice': lambda self: self.tanggal_pengiriman_invoice,
