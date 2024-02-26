@@ -5,6 +5,7 @@ from .models import *
 
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
 # from django.core.validators import FileExtensionValidator
 
 from phonenumber_field.formfields import PhoneNumberField, RegionalPhoneNumberWidget
@@ -488,14 +489,34 @@ class Register(UserCreationForm):
         widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'class':'form-control'}),
         error_messages={'required': 'Please confirm your password.'}
     )
+
+    Role_Choices = (
+        ('Sales','Sales'),
+        ('Finance','Finance'),
+        ('Accounting','Accounting')
+    )
+    role = forms.ChoiceField(
+        choices=Role_Choices,
+        label='Role',
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
-        def clean(self):
-            cleaned_data = super().clean()
-            password1 = cleaned_data.get('password1')
-            password2 = cleaned_data.get('password2')
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get('password1')
+        password2 = cleaned_data.get('password2')
 
-            if password1 != password2:
-                raise forms.ValidationError('The passwords do not match.')
+        if password1 != password2:
+            raise forms.ValidationError('The passwords do not match.')
+        
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        role = self.cleaned_data['role']
+        group = Group.objects.get(name=role)
+        if commit:
+            user.save()
+            user.groups.add(group)
+        return user
