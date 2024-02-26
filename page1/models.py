@@ -229,3 +229,18 @@ class UserActionLog(models.Model):
 
     def __str__(self):
         return f'{self.user.username} - {self.action} - {self.timestamp}'
+    
+class DeliveryPerson(models.Model):
+    name = models.CharField(max_length=100)
+
+class Vehicle(models.Model):
+    name = models.CharField(max_length=100)
+
+class Package(models.Model):
+    dimensions = models.CharField(max_length=100)
+    weight = models.FloatField()
+class DeliveryOrder(models.Model):
+    delivery_person = models.ForeignKey(DeliveryPerson, on_delete=models.CASCADE)
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
+    package = models.ForeignKey(Package, on_delete=models.CASCADE)
+    destination = models.CharField(max_length=100)
