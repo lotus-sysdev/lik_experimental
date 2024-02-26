@@ -12,13 +12,13 @@ urlpatterns = [
     path('add_WO/', add_WO, name='add_WO'),
 
     # display customer, supplier, and item tables
-    path('display_customer/',display_customer, name='Customer Data'),
-    path('display_supplier/',display_supplier, name='Supplier Data'),
-    path('display_item/', display_item, name="Item Data"),
+    path('display_customer/',display_customer, name='display_customer'),
+    path('display_supplier/',display_supplier, name='display_supplier'),
+    path('display_item/', display_item, name="display_item"),
 
     # display purchase and work
-    path('display_purchase/',display_purchase, name='Purchase Order Data'),
-    path('display_work/',display_work, name='Work Order Data'),
+    path('display_purchase/',display_purchase, name='display_purchase'),
+    path('display_work/',display_work, name='display_work'),
 
     # purchase and work detail, edit, and delete
     path('purchase_detail/<int:id>/', purchase_detail, name='purchase_detail'),
