@@ -341,6 +341,7 @@ class ItemForm(forms.ModelForm):
         super(ItemForm, self).__init__(*args, **kwargs)
         if disable_category:
             self.fields['category'].widget.attrs['disabled'] = True
+            self.fields['category'].required = False
 
 class SumberForm(forms.ModelForm):
     TYPE_CHOICES = (

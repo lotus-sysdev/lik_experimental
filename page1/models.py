@@ -56,14 +56,15 @@ class Items(models.Model):
     quantity = models.IntegerField()
     price = MoneyField(max_digits=15, default_currency='IDR', )
     gambar = models.ImageField()
+    is_approved = models.BooleanField(default=False)
     
     def __str__(self):
         return self.nama
 
     def save(self, *args, **kwargs):
-        if not self.SKU or self.category != self._get_category_from_sku():
+        if not self.SKU or 'is_approved' in kwargs:
             # Generate SKU based on category and a unique number
-            if self.category:
+            if self.category and 'is_approved' not in kwargs:
                 category_code = self.category.name[:3].upper()  # Take the first three letters of the category
 
                 # Retrieve the last SKU in the same category
@@ -82,10 +83,6 @@ class Items(models.Model):
                 self.SKU = new_sku
 
         super().save(*args, **kwargs)
-
-    def _get_category_from_sku(self):
-        # Extract category code from the SKU
-        return self.SKU[:3].upper()
 
 
 class ItemSumber(models.Model):

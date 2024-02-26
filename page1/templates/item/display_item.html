@@ -21,7 +21,7 @@
         </thead>
         <tbody>
             {% for i in entities %}
-                <tr>
+                <tr class="{% if i.is_approved %}bg-success bg-opacity-20{% endif %}">
                     <td>{{ i.SKU }}</td>
                     <td>{{ i.nama }}</td>
                     <td>{{ i.category.name }}</td>

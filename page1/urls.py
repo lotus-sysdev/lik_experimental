@@ -41,7 +41,10 @@ urlpatterns = [
     # item detail, edit, and delete
     path('item_detail/<str:SKU>/', item_detail, name='item_detail'),
     path('edit_item/<str:SKU>/', edit_item, name='edit_item'),
-    path('delete_item/<str:SKU>/', delete_item, name='delete_item'),	
+    path('delete_item/<str:SKU>/', delete_item, name='delete_item'),
+
+    # Item approval
+    path('approve_item/<str:SKU>', approve_item, name='approve_item'),
     
     # Sumber url
     path('add_sumber/<str:SKU>',add_sumber, name='add_sumber'),
@@ -54,11 +57,12 @@ urlpatterns = [
     path('add_customer_alamat/<int:cust_id>/', add_customer_alamat, name='add_customer_alamat'),
     path('add_supplier_alamat/<int:supp_id>/', add_supplier_alamat, name='add_supplier_alamat'),
     
-    # Login, Register, and Logou
+    # Login, Register, and Logout
     path('login/',login_view, name="login"),
     path('register/',register_view, name="register"),
     path('logout/', logout_view, name='logout'),
 
+    # User Logs
     path('user-action-logs/', user_action_logs, name='user_action_logs'),
 ]
 
