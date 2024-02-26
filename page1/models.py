@@ -45,7 +45,28 @@ class SupplierPIC(models.Model):
 class Items(models.Model):
     SKU = models.IntegerField(primary_key = True, unique = True)
     nama = models.CharField(max_length=255)
-    category = models.CharField(max_length=255)
+    ITEM_CHOICES = (
+        ('ATK', 'Alat Tulis Kantor'),
+        ('ELK', 'Elektronik Supplies'),
+        ('FAS', 'Fashion'),
+        ('ITS', 'IT Supplies'),
+        ('KES', 'Kesehatan'),
+        ('LPU', 'Lampu'),
+        ('MAK', 'Makanan'),
+        ('MGF', 'Management Fee'),
+        ('MIN', 'Minuman'),
+        ('MRO', 'Maintenance, Repair, and Operations'),
+        ('OTO', 'Otomotif'),
+        ('PER', 'Peralatan'),
+        ('PRK', 'Perawatan dan Kecantikan'),
+        ('PRT', 'Peralatan Rumah Tangga'),
+        ('RTL', 'Rental'),
+        ('SFT', 'Safety'),
+        ('STG', 'Storage'),
+        ('TVL', 'Travel'),
+        ('UMM', 'Umum'),
+    )
+    category = models.CharField(max_length=255, choices=ITEM_CHOICES)
     quantity = models.IntegerField()
     price = MoneyField(max_digits=15, default_currency='IDR', )
     gambar = models.ImageField()

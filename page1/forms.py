@@ -308,9 +308,31 @@ class ItemForm(forms.ModelForm):
         label='Nama Barang'
     )
 
-    category = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Office Supplies'}),
+    ITEM_CHOICES = (
+        ('ATK', 'Alat Tulis Kantor'),
+        ('ELK', 'Elektronik Supplies'),
+        ('FAS', 'Fashion'),
+        ('ITS', 'IT Supplies'),
+        ('KES', 'Kesehatan'),
+        ('LPU', 'Lampu'),
+        ('MAK', 'Makanan'),
+        ('MGF', 'Management Fee'),
+        ('MIN', 'Minuman'),
+        ('MRO', 'Maintenance, Repair, and Operations'),
+        ('OTO', 'Otomotif'),
+        ('PER', 'Peralatan'),
+        ('PRK', 'Perawatan dan Kecantikan'),
+        ('PRT', 'Peralatan Rumah Tangga'),
+        ('RTL', 'Rental'),
+        ('SFT', 'Safety'),
+        ('STG', 'Storage'),
+        ('TVL', 'Travel'),
+        ('UMM', 'Umum'),
+    )
+
+    category = Select2ChoiceField(
+        choices=ITEM_CHOICES,
+        widget=Select2Widget(attrs={'class': 'form-control'}),
         label='Kategori'
     )
 
