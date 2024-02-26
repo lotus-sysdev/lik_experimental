@@ -98,7 +98,7 @@ def default_date():
 class PurchaseOrder(models.Model):
     supplier= models.ForeignKey(Supplier, on_delete=models.CASCADE)
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
-    revenue_PO = models.IntegerField(blank=True, null=True, default=0)
+    revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, default=0)
     nomor_PO = models.IntegerField(blank=True, null=True, default=0)
     tanggal_PO = models.DateField(blank=True, null=True, default=default_date)
     tanggal_process = models.DateField(blank=True, null=True, default=default_date)
@@ -111,31 +111,33 @@ class PurchaseOrder(models.Model):
         ('process', 'Process'),
         ('accurate', 'Accurate'),
         ('pengiriman', 'Pengiriman Barang'),
-        ('invoice', 'Pengiriman Invoice')
+        ('invoice', 'Pengiriman Invoice'),
+        ('complete', 'Completed')
     )
     status = models.CharField(max_length=30,choices = STATUS_CHOICES) 
+    STATUS_CONDITIONS = {
+        'complete': lambda self: self.tanggal_pengiriman_invoice and self.tanggal_pengiriman_barang and self.tanggal_input_accurate and self.tanggal_process and self.tanggal_PO and self.revenue_PO and self.nomor_PO,
+        'invoice': lambda self: self.tanggal_pengiriman_invoice,
+        'pengiriman': lambda self: self.tanggal_pengiriman_barang,
+        'accurate': lambda self: self.tanggal_input_accurate,
+        'process': lambda self: self.tanggal_process,
+        'order': lambda self: self.revenue_PO or self.nomor_PO or self.tanggal_PO,
+        'pending': lambda self: True,
+    }
 
     def save(self, *args, **kwargs):
-        # Update the status based on whether specific fields have been filled or not
-        if self.revenue_PO or self.nomor_PO or self.tanggal_PO:
-            self.status = 'order'
-        elif self.tanggal_process:
-            self.status = 'process'
-        elif self.tanggal_input_accurate:
-            self.status = 'accurate'
-        elif self.tanggal_pengiriman_barang:
-            self.status = 'pengiriman'
-        elif self.tanggal_pengiriman_invoice:
-            self.status = 'invoice'
-        else:
-            self.status = 'pending'
+        # Update the status based on conditions
+        for status, condition in self.STATUS_CONDITIONS.items():
+            if condition(self):
+                self.status = status
+                break
 
-        super().save(*args, **kwargs)
+        super(PurchaseOrder, self).save(*args, **kwargs)
 
 class WorkOrder(models.Model):
     customer= models.ForeignKey(Customer, on_delete=models.CASCADE)
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
-    revenue_PO = models.IntegerField(blank=True, null=True, default=0)
+    revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, default=0)
     nomor_PO = models.IntegerField(blank=True, null=True, default=0)
     tanggal_PO = models.DateField(blank=True, null=True, default=default_date)
     tanggal_process = models.DateField(blank=True, null=True, default=default_date)
@@ -143,17 +145,31 @@ class WorkOrder(models.Model):
     tanggal_pengiriman_barang = models.DateField(blank=True, null=True, default=default_date)
     tanggal_pengiriman_invoice = models.DateField(blank=True, null=True, default=default_date)
     STATUS_CHOICES = (
-        ('Pending', 'Pending'),
-        ('Completed', 'Completed'),
-        ('Cancelled', 'Cancelled')
+        ('order', 'Order Created'),
+        ('pending', 'Pending'),
+        ('process', 'Process'),
+        ('accurate', 'Accurate'),
+        ('pengiriman', 'Pengiriman Barang'),
+        ('invoice', 'Pengiriman Invoice'),
+        ('complete', 'Completed')
     )
     status = models.CharField(max_length=30,choices = STATUS_CHOICES) 
 
-class UserActionLog(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    action = models.CharField(max_length=255)
-    payload = models.TextField(blank=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    STATUS_CONDITIONS = {
+        'complete': lambda self: self.tanggal_pengiriman_invoice and self.tanggal_pengiriman_barang and self.tanggal_input_accurate and self.tanggal_process and self.tanggal_PO and self.revenue_PO and self.nomor_PO,
+        'invoice': lambda self: self.tanggal_pengiriman_invoice,
+        'pengiriman': lambda self: self.tanggal_pengiriman_barang,
+        'accurate': lambda self: self.tanggal_input_accurate,
+        'process': lambda self: self.tanggal_process,
+        'order': lambda self: self.revenue_PO or self.nomor_PO or self.tanggal_PO,
+        'pending': lambda self: True,
+    }
 
-    def __str__(self):
-        return f'{self.user.username} - {self.action} - {self.timestamp}'
+    def save(self, *args, **kwargs):
+        # Update the status based on conditions
+        for status, condition in self.STATUS_CONDITIONS.items():
+            if condition(self):
+                self.status = status
+                break
+
+        super(WorkOrder, self).save(*args, **kwargs)
