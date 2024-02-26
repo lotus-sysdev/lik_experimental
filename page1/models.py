@@ -43,31 +43,16 @@ class SupplierPIC(models.Model):
     telp = PhoneNumberField()
     Role = models.CharField(max_length=50)
 
+class Category(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
+
 class Items(models.Model):
     SKU = models.CharField(max_length=10, primary_key = True, unique = True)
     nama = models.CharField(max_length=255)
-    ITEM_CHOICES = (
-        ('ATK', 'Alat Tulis Kantor'),
-        ('ELK', 'Elektronik Supplies'),
-        ('FAS', 'Fashion'),
-        ('ITS', 'IT Supplies'),
-        ('KES', 'Kesehatan'),
-        ('LPU', 'Lampu'),
-        ('MAK', 'Makanan'),
-        ('MGF', 'Management Fee'),
-        ('MIN', 'Minuman'),
-        ('MRO', 'Maintenance, Repair, and Operations'),
-        ('OTO', 'Otomotif'),
-        ('PER', 'Peralatan'),
-        ('PRK', 'Perawatan dan Kecantikan'),
-        ('PRT', 'Peralatan Rumah Tangga'),
-        ('RTL', 'Rental'),
-        ('SFT', 'Safety'),
-        ('STG', 'Storage'),
-        ('TVL', 'Travel'),
-        ('UMM', 'Umum'),
-    )
-    category = models.CharField(max_length=255, choices=ITEM_CHOICES)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     price = MoneyField(max_digits=15, default_currency='IDR', )
     gambar = models.ImageField()
@@ -78,28 +63,30 @@ class Items(models.Model):
     def save(self, *args, **kwargs):
         if not self.SKU or self.category != self._get_category_from_sku():
             # Generate SKU based on category and a unique number
-            category_code = self.category[:3].upper()  # Take the first three letters of the category
+            if self.category:
+                category_code = self.category.name[:3].upper()  # Take the first three letters of the category
 
-            # Retrieve the last SKU in the same category
-            last_sku = Items.objects.filter(category=self.category).order_by('-SKU').first()
+                # Retrieve the last SKU in the same category
+                last_sku = Items.objects.filter(category=self.category).order_by('-SKU').first()
 
-            if last_sku and last_sku.SKU:
-                last_number_str = str(last_sku.SKU)[3:]  # Extract the number part of the SKU
-                if last_number_str.isdigit():
-                    last_number = int(last_number_str)
+                if last_sku and last_sku.SKU:
+                    last_number_str = str(last_sku.SKU)[3:]  # Extract the number part of the SKU
+                    if last_number_str.isdigit():
+                        last_number = int(last_number_str)
+                    else:
+                        last_number = 0
                 else:
                     last_number = 0
-            else:
-                last_number = 0
 
-            new_sku = f"{category_code}{last_number + 1:04d}"  # Combine category code and a 4-digit number
-            self.SKU = new_sku
+                new_sku = f"{category_code}{last_number + 1:04d}"  # Combine category code and a 4-digit number
+                self.SKU = new_sku
 
         super().save(*args, **kwargs)
 
     def _get_category_from_sku(self):
         # Extract category code from the SKU
         return self.SKU[:3].upper()
+
 
 class ItemSumber(models.Model):
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
