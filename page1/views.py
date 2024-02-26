@@ -24,12 +24,13 @@ def placeholder(request):
 # -------------------- Common Functions --------------------#
 # Adding entity (Customer and Supplier)
 @login_required
-def add_entity_view(request, entity_form, template_name):
+def add_entity_view(request, entity_form, template_name, redirect_template):
     entity_form_instance = entity_form(request.POST or None)
     if request.method == 'POST':
         form = entity_form(request.POST)
         if form.is_valid():
             form.save()
+            return redirect(redirect_template)
     else:
         form = entity_form()
 
@@ -101,11 +102,11 @@ def delete_entity(request, entity_model, entity_id_field, entity_id):
 # -------------------- Add Customer and Supplier Views -------------------- #
 @login_required
 def add_customer(request):
-    return add_entity_view(request, CustomerForm, 'customer/add_cust.html')
+    return add_entity_view(request, CustomerForm, 'customer/add_cust.html', 'display_customer')
 
 @login_required
 def add_supplier(request):
-    return add_entity_view(request, SupplierForm, 'supplier/add_supp.html')
+    return add_entity_view(request, SupplierForm, 'supplier/add_supp.html', 'display_supplier')
 
 
 # -------------------- Add Alamat and PIC -------------------- #
@@ -153,6 +154,7 @@ def add_item(request):
                 item.gambar = resized_image_name
                 print(item.gambar)
                 item.save()
+            return redirect('display_item')
 
     else:
         form = ItemForm()
@@ -259,11 +261,11 @@ def add_sumber(request, SKU):
 # -------------------- Order Functions -------------------- #
 # Add Purchase Order and Work Order
 def add_PO(request):
-    return add_entity_view(request, PurchaseForm, 'order/add_PO.html')
+    return add_entity_view(request, PurchaseForm, 'order/add_PO.html', 'display_purchase')
 
 @login_required
 def add_WO(request):
-    return add_entity_view(request, WorkForm, 'order/add_WO.html')
+    return add_entity_view(request, WorkForm, 'order/add_WO.html', 'display_work')
 
 # Display Purchase Order and Work Order
 def display_purchase(request):

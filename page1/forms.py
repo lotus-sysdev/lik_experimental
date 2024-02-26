@@ -377,27 +377,31 @@ class PurchaseForm(forms.ModelForm):
     revenue_PO = MoneyField( 
         required=False,
         widget=MoneyWidget(attrs={'class': 'form-control', 'placeholder':'100000'}),
-        label='Harga'
+        label='Revenue PO'
     )
     
     nomor_PO = forms.IntegerField(
         required=False,
-        widget=forms.NumberInput(attrs={'class':'form-control'})
+        widget=forms.NumberInput(attrs={'class':'form-control'}),
+        label=('Nomor PO')
     )
     
     tanggal_PO = forms.DateField(
         required=False, 
-        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'}), 
+        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'}),
+        label=('Tanggal PO')
     )
     
     tanggal_process = forms.DateField(
         required=False, 
-        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'})
+        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'}),
+        label=("Tanggal Proses")
     )
     
     tanggal_input_accurate = forms.DateField(
         required=False, 
-        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'})
+        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'}),
+        label=("Tanggal input Accurate")
     )
     
     tanggal_pengiriman_barang = forms.DateField(
@@ -423,27 +427,31 @@ class WorkForm(forms.ModelForm):
     revenue_PO = MoneyField( 
         required=False,
         widget=MoneyWidget(attrs={'class': 'form-control', 'placeholder':'100000'}),
-        label='Harga'
+        label='Revenue PO'
     )
     
     nomor_PO = forms.IntegerField(
         required=False,
-        widget=forms.NumberInput(attrs={'class':'form-control'})
+        widget=forms.NumberInput(attrs={'class':'form-control'}),
+        label=('Nomor PO')
     )
     
     tanggal_PO = forms.DateField(
-        required=False,
-        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'}), 
+        required=False, 
+        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'}),
+        label=('Tanggal PO')
     )
     
     tanggal_process = forms.DateField(
         required=False, 
-        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'})
+        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'}),
+        label=("Tanggal Proses")
     )
     
     tanggal_input_accurate = forms.DateField(
         required=False, 
-        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'})
+        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'}),
+        label=("Tanggal input Accurate")
     )
     
     tanggal_pengiriman_barang = forms.DateField(
