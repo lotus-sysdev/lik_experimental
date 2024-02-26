@@ -9,6 +9,8 @@ from django.contrib.auth.models import User
 
 from phonenumber_field.formfields import PhoneNumberField, RegionalPhoneNumberWidget
 from django.core.exceptions import ValidationError
+from djmoney.forms.fields import MoneyField
+from djmoney.forms.widgets import MoneyWidget
 
 
 def validate_npwp(value):
@@ -318,9 +320,8 @@ class ItemForm(forms.ModelForm):
         label='Kuantitas'
     )
 
-    price = forms.CharField(
-        max_length=255, 
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder':'100000'}),
+    price = MoneyField( 
+        widget=MoneyWidget(attrs={'class': 'form-control', 'placeholder':'100000'}),
         label='Harga'
     )
     
@@ -429,7 +430,7 @@ class WorkForm(forms.ModelForm):
     )
     
     tanggal_PO = forms.DateField(
-        required=False, 
+        required=False,
         widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'}), 
     )
     
@@ -463,16 +464,28 @@ class WorkForm(forms.ModelForm):
         }
 
 class Register(UserCreationForm):
+    username = forms.CharField(
+        label='Username',
+        widget=forms.TextInput(attrs={'class':'form-control'}),
+        error_messages= {'required': 'Please enter a username.'}
+    )
+
+    email = forms.EmailField(
+        label='Email Address',
+        widget=forms.EmailInput(attrs={'class':'form-control'}),
+        error_messages= {'required': 'Please provide your email address.'},
+    )
+
     password1 = forms.CharField(
         label='Password',
         strip=False,
-        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'class':'form-control'}),
         error_messages={'required': 'Please enter your password.'}
     )
     password2 = forms.CharField(
         label='Password confirmation',
         strip=False,
-        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'class':'form-control'}),
         error_messages={'required': 'Please confirm your password.'}
     )
     class Meta:
@@ -486,5 +499,3 @@ class Register(UserCreationForm):
 
             if password1 != password2:
                 raise forms.ValidationError('The passwords do not match.')
-
-

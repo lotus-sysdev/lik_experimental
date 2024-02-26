@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'page1',
     'phonenumber_field',
     'django_select2',
+    'djmoney',
 ]
 
 MIDDLEWARE = [
@@ -133,3 +134,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+DATE_INPUT_FORMATS = ['%d/%m/%Y']
+
+CURRENCIES = ('IDR', 'USD')
+CURRENCY_CHOICES = [('IDR', 'Indonesian Rupiah (Rp.)'), ('USD', 'US Dollar ($)')]

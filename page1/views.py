@@ -293,6 +293,8 @@ def delete_purchase(request, id):
 def delete_work(request, id):
     return delete_entity(request, WorkOrder, 'id', id)
   
+
+# -------------------- Login, Register, Logout Functions -------------------- #
 # Login, Register, and Logout
 def login_view(request):
     if request.method == 'POST':
@@ -306,6 +308,10 @@ def login_view(request):
                 return redirect('/')
     else:
         form = AuthenticationForm()
+
+    form.fields['username'].widget.attrs.update({'class': 'form-control'})
+    form.fields['password'].widget.attrs.update({'class': 'form-control'})
+
     return render(request, 'accounts/login.html', {'form': form})
 
 def register_view(request):
