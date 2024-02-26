@@ -39,12 +39,12 @@ urlpatterns = [
     path('delete_supplier/<int:supp_id>/', delete_supplier, name='delete_supplier'),
     
     # item detail, edit, and delete
-    path('item_detail/<int:SKU>/', item_detail, name='item_detail'),
-    path('edit_item/<int:SKU>/', edit_item, name='edit_item'),
-    path('delete_item/<int:SKU>/', delete_item, name='delete_item'),	
+    path('item_detail/<str:SKU>/', item_detail, name='item_detail'),
+    path('edit_item/<str:SKU>/', edit_item, name='edit_item'),
+    path('delete_item/<str:SKU>/', delete_item, name='delete_item'),	
     
     # Sumber url
-    path('add_sumber/<int:SKU>',add_sumber, name='add_sumber'),
+    path('add_sumber/<str:SKU>',add_sumber, name='add_sumber'),
     
     # PIC urls
     path('add_pic_cust/<int:cust_id>',add_customer_pic,name='add_pic_cust'),

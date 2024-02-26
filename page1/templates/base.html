@@ -52,9 +52,19 @@
 
     {% block scripts %}
     <script>
-        $("#id_item").select2()
-        $("#id_customer").select2()
-        $("#id_supplier").select2()
+        $("#id_item").select2({
+            placeholder: 'Search for an item',
+        }
+        )
+        $("#id_customer").select2({
+            placeholder: 'Search for a customer',
+        })
+        $("#id_supplier").select2({
+            placeholder: 'Search for a supplier',
+        })
+        $('#id_category').select2({
+            placeholder: 'Search for a category',
+        });
     </script>
     {% endblock %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

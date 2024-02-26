@@ -157,7 +157,7 @@ def add_item(request):
             return redirect('display_item')
 
     else:
-        form = ItemForm()
+        form = ItemForm(disable_category=False)
     
     return render(request, 'item/add_item.html', {'item_form': form})
 
@@ -213,9 +213,10 @@ def delete_supplier(request, supp_id):
 # -------------------- Item Functions -------------------- #
 @login_required
 def item_detail(request, SKU):
+    entity = get_object_or_404(Items, SKU=SKU)
     item_sumber = ItemSumber.objects.filter(item=SKU)
-    extra_context = {'item_sumber':item_sumber}
-    return entity_detail(request, Items, ItemForm, 'SKU', SKU, 'item/item_detail.html', extra_context)
+    context = {'entity':entity, 'item_sumber':item_sumber, 'form':ItemForm(instance=entity, disable_category=True)}
+    return render(request, 'item/item_detail.html', context)
 
 @login_required
 def edit_item(request, SKU):

@@ -309,12 +309,6 @@ class ItemForm(forms.ModelForm):
         label='Nama Barang'
     )
 
-    category = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Office Supplies'}),
-        label='Kategori'
-    )
-
     quantity = forms.CharField(
         max_length=255, 
         widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder':'1, 2, 3, ...'}),
@@ -336,6 +330,17 @@ class ItemForm(forms.ModelForm):
         model = Items
         fields = '__all__'
         exclude = ['SKU','gambar_resized']
+        widgets = {
+            'category': Select2Widget(attrs={'class':'form-control'})
+        }
+        labels = {
+            'category': "Kategori"
+        }
+    
+    def __init__(self, *args, disable_category=False, **kwargs):
+        super(ItemForm, self).__init__(*args, **kwargs)
+        if disable_category:
+            self.fields['category'].widget.attrs['disabled'] = True
 
 class SumberForm(forms.ModelForm):
     TYPE_CHOICES = (
