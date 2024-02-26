@@ -468,7 +468,7 @@ class Register(UserCreationForm):
     username = forms.CharField(
         label='Username',
         widget=forms.TextInput(attrs={'class':'form-control'}),
-        error_messages= {'required': 'Please enter a username.'}
+        error_messages= {'required': 'Please enter a username.'},
     )
 
     email = forms.EmailField(
