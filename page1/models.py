@@ -1,11 +1,11 @@
 import datetime
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractBaseUser, BaseUserManager
 import uuid
 from phonenumber_field.modelfields import PhoneNumberField
 from djmoney.models.fields import MoneyField
 
-# Create your models here.
+
 class Customer(models.Model):
     cust_id = models.IntegerField(primary_key=True)
     nama_pt = models.CharField(max_length=255)
