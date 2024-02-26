@@ -308,34 +308,6 @@ class ItemForm(forms.ModelForm):
         label='Nama Barang'
     )
 
-    ITEM_CHOICES = (
-        ('ATK', 'Alat Tulis Kantor'),
-        ('ELK', 'Elektronik Supplies'),
-        ('FAS', 'Fashion'),
-        ('ITS', 'IT Supplies'),
-        ('KES', 'Kesehatan'),
-        ('LPU', 'Lampu'),
-        ('MAK', 'Makanan'),
-        ('MGF', 'Management Fee'),
-        ('MIN', 'Minuman'),
-        ('MRO', 'Maintenance, Repair, and Operations'),
-        ('OTO', 'Otomotif'),
-        ('PER', 'Peralatan'),
-        ('PRK', 'Perawatan dan Kecantikan'),
-        ('PRT', 'Peralatan Rumah Tangga'),
-        ('RTL', 'Rental'),
-        ('SFT', 'Safety'),
-        ('STG', 'Storage'),
-        ('TVL', 'Travel'),
-        ('UMM', 'Umum'),
-    )
-
-    category = Select2ChoiceField(
-        choices=ITEM_CHOICES,
-        widget=Select2Widget(attrs={'class': 'form-control'}),
-        label='Kategori'
-    )
-
     quantity = forms.CharField(
         max_length=255, 
         widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder':'1, 2, 3, ...'}),
@@ -357,6 +329,17 @@ class ItemForm(forms.ModelForm):
         model = Items
         fields = '__all__'
         exclude = ['SKU','gambar_resized']
+        widgets = {
+            'category': Select2Widget(attrs={'class':'form-control'})
+        }
+        labels = {
+            'category': "Kategori"
+        }
+    
+    def __init__(self, *args, disable_category=False, **kwargs):
+        super(ItemForm, self).__init__(*args, **kwargs)
+        if disable_category:
+            self.fields['category'].widget.attrs['disabled'] = True
 
 class SumberForm(forms.ModelForm):
     TYPE_CHOICES = (
