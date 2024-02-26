@@ -173,3 +173,12 @@ class WorkOrder(models.Model):
                 break
 
         super(WorkOrder, self).save(*args, **kwargs)
+
+class UserActionLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    action = models.CharField(max_length=255)
+    payload = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.username} - {self.action} - {self.timestamp}'
