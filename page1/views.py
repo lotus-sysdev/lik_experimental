@@ -319,7 +319,10 @@ def login_view(request):
                 return redirect('/')
     else:
         form = Login()
-        
+    
+    form.fields['email'].widget.attrs.update({'class':'form-control'})
+    # form.fields['username'].widget.attrs.update({'class': 'form-control'})
+    form.fields['password'].widget.attrs.update({'class': 'form-control'})
     return render(request, 'accounts/login.html', {'form': form})
 
 def register_view(request):

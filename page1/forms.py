@@ -536,3 +536,8 @@ class Login(AuthenticationForm):
         label=_("Email"),
         widget=forms.EmailInput(attrs={'autofocus': True}),
     )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields.pop('username', None)
+        self.fields['email'].widget.attrs.update({'class':'form-control'})
+        self.fields['password'].widget.attrs.update({'class': 'form-control'})
