@@ -334,7 +334,9 @@ class ItemForm(forms.ModelForm):
     )
 
     unit = forms.ChoiceField(
-        choices=UNIT_CHOICES, 
+        choices=UNIT_CHOICES,
+        widget=Select2Widget(attrs={'class':'form-control', 'placeholder':'Select unit of measurement'}),
+        label=('Satuan')
     )
 
     price = MoneyField( 
@@ -353,11 +355,10 @@ class ItemForm(forms.ModelForm):
         fields = '__all__'
         exclude = ['SKU','gambar_resized', 'is_approved']
         widgets = {
-            'category': Select2Widget(attrs={'class':'form-control'})
+            'category': Select2Widget(attrs={'class':'form-control'}),
         }
         labels = {
             'category': "Kategori",
-            'unit': "Satuan",
         }
 
 class SumberForm(forms.ModelForm):

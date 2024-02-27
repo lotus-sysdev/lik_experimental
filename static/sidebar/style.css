@@ -52,12 +52,13 @@
     background: #fff;
 }
 
-#sidebar ul li.active > a, a[aria-expanded="false"] {
+#sidebar ul li > a[aria-expanded="false"] {
     color: #fff;
     background: #189CD6;
 }
 
-#sidebar ul li.active > a, a[aria-expanded="true"] {
+#sidebar ul li.active > a, a[aria-expanded="true"],
+#sidebar ul li > a[aria-expanded="true"] {
     color: #fff;
     background: #00699F;
 }
