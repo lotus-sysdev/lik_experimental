@@ -62,7 +62,15 @@ urlpatterns = [
     path('register/',register_view, name="register"),
     path('logout/', logout_view, name='logout'),
 
-    # User Logs
+    # User Action Log
     path('user-action-logs/', user_action_logs, name='user_action_logs'),
+
+    # Delivery Order 
+    path('calendar/', calendar, name='calendar'),
+    path('all_events/', all_events, name='all_events'), 
+    path('add_event/', add_event, name='add_event'), 
+    path('update/', update, name='update'),
+    path('remove/', remove, name='remove'),
+
 ]
 
