@@ -1,6 +1,6 @@
 import datetime
 from django.db import models
-from django.contrib.auth.models import User, AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import User, AbstractUser
 import uuid
 from phonenumber_field.modelfields import PhoneNumberField
 from djmoney.models.fields import MoneyField
@@ -220,3 +220,12 @@ class Events(models.Model):
     name = models.CharField(max_length = 255, null = True, blank = True)
     start = models.DateTimeField(null = True, blank = True)
     end = models.DateTimeField(null = True, blank = True)
+
+class User(AbstractUser):
+    email = models.EmailField(max_length = 100, unique=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+
+    groups = models.ManyToManyField('auth.Group', related_name='custom_user_set', blank=True)
+    user_permissions = models.ManyToManyField('auth.Permission', related_name='custom_user_set', blank=True)

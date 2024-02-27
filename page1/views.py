@@ -309,20 +309,17 @@ def delete_work(request, id):
 # Login, Register, and Logout
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, request.POST)
+        form = Login(request, request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
+            email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            user = authenticate(username=username, password=password)
+            user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
                 return redirect('/')
     else:
-        form = AuthenticationForm()
-
-    form.fields['username'].widget.attrs.update({'class': 'form-control'})
-    form.fields['password'].widget.attrs.update({'class': 'form-control'})
-
+        form = Login()
+        
     return render(request, 'accounts/login.html', {'form': form})
 
 def register_view(request):
