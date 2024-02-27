@@ -52,9 +52,14 @@
     background: #fff;
 }
 
+#sidebar ul li.active > a, a[aria-expanded="false"] {
+    color: #fff;
+    background: #189CD6;
+}
+
 #sidebar ul li.active > a, a[aria-expanded="true"] {
     color: #fff;
-    background: #149AD6;
+    background: #00699F;
 }
 
 a[data-toggle="collapse"] {
@@ -80,7 +85,7 @@ a[aria-expanded="true"]::before {
 ul ul a {
     font-size: 0.9em !important;
     padding-left: 30px !important;
-    background: #149AD6;
+    background: #00699F;
 }
 
 ul.CTAs {

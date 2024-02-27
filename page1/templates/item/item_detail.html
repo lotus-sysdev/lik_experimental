@@ -27,6 +27,10 @@
                         {{ form.quantity }}
                     </div>
                     <div class="form-group">
+                        <label for="{{ form.quantity.id_for_label }}">Satuan</label>
+                        {{ form.unit }}
+                    </div>
+                    <div class="form-group">
                         <label for="{{ form.price.id_for_label }}">Harga</label>
                         {{ form.price }}
                     </div>
