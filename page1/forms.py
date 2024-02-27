@@ -6,7 +6,7 @@ from .models import *
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
-# from django.core.validators import FileExtensionValidator
+from django.utils.translation import gettext_lazy as _
 
 from phonenumber_field.formfields import PhoneNumberField, RegionalPhoneNumberWidget
 from django.core.exceptions import ValidationError
@@ -554,3 +554,14 @@ class Register(UserCreationForm):
             user.groups.add(group)
         return user
 
+class Login(AuthenticationForm):
+    email = forms.EmailField(
+        required=True,
+        label=_("Email"),
+        widget=forms.EmailInput(attrs={'autofocus': True}),
+    )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields.pop('username', None)
+        self.fields['email'].widget.attrs.update({'class':'form-control'})
+        self.fields['password'].widget.attrs.update({'class': 'form-control'})

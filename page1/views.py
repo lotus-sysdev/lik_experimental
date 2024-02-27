@@ -4,7 +4,7 @@ import json
 
 from django.shortcuts import redirect, render, get_object_or_404
 from django.conf import settings
-from django.core.files import File
+from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
@@ -310,20 +310,20 @@ def delete_work(request, id):
 # Login, Register, and Logout
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, request.POST)
+        form = Login(request, request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
+            email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            user = authenticate(username=username, password=password)
+            user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
                 return redirect('/')
     else:
-        form = AuthenticationForm()
-
-    form.fields['username'].widget.attrs.update({'class': 'form-control'})
+        form = Login()
+    
+    form.fields['email'].widget.attrs.update({'class':'form-control'})
+    # form.fields['username'].widget.attrs.update({'class': 'form-control'})
     form.fields['password'].widget.attrs.update({'class': 'form-control'})
-
     return render(request, 'accounts/login.html', {'form': form})
 
 def register_view(request):
@@ -355,6 +355,7 @@ def calendar(request):
 def all_events(request):                                                                                                 
     all_events = Events.objects.all()                                                                                    
     out = []                                                                                                             
+
     for event in all_events: 
         event.start = event.start.astimezone(timezone.get_current_timezone())                                                                                            
         event.end = event.end.astimezone(timezone.get_current_timezone())                                                                                            

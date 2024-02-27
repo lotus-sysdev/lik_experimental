@@ -19,6 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.js"></script>
 </head>
 <body>
+
     <div class="wrapper">
         {% include 'sidebar/index.html' %}
         <div id="content" name="content">
@@ -98,6 +99,29 @@
                             alert('There is a problem!!!');
                         }
                     });
+
+                }
+            },
+            eventResize: function (event) {
+                var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm:ss");
+                var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm:ss");
+                var title = event.title;
+                var id = event.id;
+                $.ajax({
+                    type: "GET",
+                    url: '/update',
+                    data: { 'title': title, 'start': start, 'end': end, 'id': id },
+                    dataType: "json",
+                    success: function (data) {
+                        calendar.fullCalendar('refetchEvents');
+                        alert('Event Update');
+                    },
+                    error: function (data) {
+                        alert('There is a problem!!!');
+                    }
+                });
+            },
+
                 },
     
                 eventDrop: function (event) {
@@ -118,6 +142,7 @@
                             alert('There is a problem!!!');
                         }
                     });
+
                 },
     
                 eventClick: function (event) {
@@ -144,6 +169,5 @@
             });
         });
     </script>
-
 </body>
 </html>
