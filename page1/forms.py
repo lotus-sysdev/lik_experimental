@@ -315,6 +315,28 @@ class ItemForm(forms.ModelForm):
         label='Kuantitas'
     )
 
+    UNIT_CHOICES = (
+        ('Botol', 'Botol'),
+        ('Box', 'Box'),
+        ('Bulan', 'Bulan'),
+        ('Dirigen', 'Dirigen'),
+        ('Item', 'Item'),
+        ('Kaleng', 'Kaleng'),
+        ('Kg', 'Kg'),
+        ('Lusin', 'Lusin'),
+        ('Meter', 'Meter'),
+        ('Orang', 'Orang'),
+        ('Pack', 'Pack'),
+        ('Pail', 'Pail(Cat)'),
+        ('Pair', 'Pair'),
+        ('Pcs', 'Pcs'),
+        ('Unit', 'Unit')
+    )
+
+    unit = forms.ChoiceField(
+        choices=UNIT_CHOICES, 
+    )
+
     price = MoneyField( 
         widget=MoneyWidget(attrs={'class': 'form-control', 'placeholder':'100000'}),
         label='Harga'
@@ -334,7 +356,8 @@ class ItemForm(forms.ModelForm):
             'category': Select2Widget(attrs={'class':'form-control'})
         }
         labels = {
-            'category': "Kategori"
+            'category': "Kategori",
+            'unit': "Satuan",
         }
 
 class SumberForm(forms.ModelForm):
