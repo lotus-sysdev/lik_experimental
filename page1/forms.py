@@ -534,3 +534,4 @@ class Register(UserCreationForm):
             user.save()
             user.groups.add(group)
         return user
+

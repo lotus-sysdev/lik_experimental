@@ -54,11 +54,20 @@ urlpatterns = [
     path('add_customer_alamat/<int:cust_id>/', add_customer_alamat, name='add_customer_alamat'),
     path('add_supplier_alamat/<int:supp_id>/', add_supplier_alamat, name='add_supplier_alamat'),
     
-    # Login, Register, and Logou
+    # Login, Register, and Logout
     path('login/',login_view, name="login"),
     path('register/',register_view, name="register"),
     path('logout/', logout_view, name='logout'),
-
+    
+    # User Action Log
     path('user-action-logs/', user_action_logs, name='user_action_logs'),
+
+    # Delivery Order 
+    path('calendar/', calendar, name='calendar'),
+    path('all_events/', all_events, name='all_events'), 
+    path('add_event/', add_event, name='add_event'), 
+    path('update/', update, name='update'),
+    path('remove/', remove, name='remove'),
+
 ]
 
