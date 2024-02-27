@@ -7,8 +7,8 @@
 <body>
     {% block content %}
     <h1>Item List</h1>
-    <table id="itemTable" class="table table-bordered table-striped w-100">
-        <thead>
+    <table id="itemTable" class="table table-bordered table-striped w-100 table-responsive-lg">
+        <thead class="thead-light">
             <tr>
                 <th>SKU</th>
                 <th>Nama</th>
@@ -21,7 +21,7 @@
         </thead>
         <tbody>
             {% for i in entities %}
-                <tr class="{% if i.is_approved %}bg-success bg-opacity-20{% endif %}">
+                <tr style="{% if i.is_approved %}background-color: #ccffc7;{% endif %}">
                     <td>{{ i.SKU }}</td>
                     <td>{{ i.nama }}</td>
                     <td>{{ i.category.name }}</td>

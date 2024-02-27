@@ -329,19 +329,13 @@ class ItemForm(forms.ModelForm):
     class Meta:
         model = Items
         fields = '__all__'
-        exclude = ['SKU','gambar_resized']
+        exclude = ['SKU','gambar_resized', 'is_approved']
         widgets = {
             'category': Select2Widget(attrs={'class':'form-control'})
         }
         labels = {
             'category': "Kategori"
         }
-    
-    def __init__(self, *args, disable_category=False, **kwargs):
-        super(ItemForm, self).__init__(*args, **kwargs)
-        if disable_category:
-            self.fields['category'].widget.attrs['disabled'] = True
-            self.fields['category'].required = False
 
 class SumberForm(forms.ModelForm):
     TYPE_CHOICES = (
