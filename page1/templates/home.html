@@ -6,7 +6,7 @@
 </head>
 <body>
     {% block content %}
-    <h1>Hello World!</h1>
+    <h1>Hello, {{ request.user.username }}!</h1>
     {% endblock %}
 </body>
 </html>

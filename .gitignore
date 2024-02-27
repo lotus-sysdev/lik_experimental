@@ -27,5 +27,11 @@ local_settings.py
 media/*
 
 # Migrations
-migrations/*
+# Ignore migration .py files
+**/migrations/*.py
 
+# Optionally, ignore migration .pyc files (byte-compiled Python files)
+**/migrations/*.pyc
+
+# If you are using Windows, you might also want to ignore .pyo files
+**/migrations/*.pyo
