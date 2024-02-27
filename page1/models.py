@@ -54,6 +54,7 @@ class Items(models.Model):
     nama = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     quantity = models.IntegerField()
+    unit = models.CharField(max_length=10)
     price = MoneyField(max_digits=15, default_currency='IDR', )
     gambar = models.ImageField()
     is_approved = models.BooleanField(default=False)
