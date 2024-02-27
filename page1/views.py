@@ -158,7 +158,7 @@ def add_item(request):
             return redirect('display_item')
 
     else:
-        form = ItemForm(disable_category=False)
+        form = ItemForm()
     
     return render(request, 'item/add_item.html', {'item_form': form})
 
@@ -216,7 +216,7 @@ def delete_supplier(request, supp_id):
 def item_detail(request, SKU):
     entity = get_object_or_404(Items, SKU=SKU)
     item_sumber = ItemSumber.objects.filter(item=SKU)
-    context = {'entity':entity, 'item_sumber':item_sumber, 'form':ItemForm(instance=entity, disable_category=True)}
+    context = {'entity':entity, 'item_sumber':item_sumber, 'form':ItemForm(instance=entity)}
     return render(request, 'item/item_detail.html', context)
 
 @login_required
@@ -233,7 +233,7 @@ def edit_item(request, SKU):
                 # Process the new image file (similar to the logic in your add_item view)
                 img = Image.open(new_image)
                 img = img.resize((100, 100))
-                resized_image_name = f"{entity.nama}_resized.{new_image.name.split('.')[-1]}"
+                resized_image_name = f"{entity.SKU}_resized.{new_image.name.split('.')[-1]}"
                 resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
                 img.save(resized_image_path)
                 
@@ -253,6 +253,13 @@ def edit_item(request, SKU):
 def delete_item(request, SKU):
     return delete_entity(request, Items, 'SKU', SKU)
 
+@login_required
+def approve_item(request, SKU):
+    item = get_object_or_404(Items, SKU=SKU)
+    item.is_approved = True
+    item.save()
+    # Redirect to the item list or any other appropriate view
+    return redirect('display_item')
 
 # -------------------- Item Sumber Functions -------------------- #
 @login_required
