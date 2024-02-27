@@ -63,7 +63,7 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
 
     # User Action Log
-    path('user-action-logs/', user_action_logs, name='user_action_logs'),
+    path('user_action_logs/', user_action_logs, name='user_action_logs'),
 
     # Delivery Order 
     path('calendar/', calendar, name='calendar'),
