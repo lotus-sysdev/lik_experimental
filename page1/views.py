@@ -396,3 +396,52 @@ def remove(request):
     event.delete()
     data = {}
     return JsonResponse(data)
+
+def delivery_form(request):
+    if request.method == 'POST':
+        form = DeliveryForm(request.POST)
+        if form.is_valid():
+            # Save the event to the database
+            form.save()
+            # Redirect to a success page or do something else
+            return redirect('/calendar')
+    else:
+        # Get the start and end parameters from the URL
+        title_param = request.GET.get('title')
+        start_param = request.GET.get('start')
+        end_param = request.GET.get('end')
+        # Set the initial values for the form fields based on the parameters
+        initial_data = {
+            'title': title_param,
+            'start': start_param,
+            'end': end_param
+        }
+        form = DeliveryForm(initial=initial_data)
+    return render(request, 'delivery/delivery_form.html', {'form': form})
+
+def add_messenger(request):
+    if request.method == 'POST':
+        form = MessengerForm(request.POST)
+        if form.is_valid():
+            form.save()
+    else:
+        form = MessengerForm()
+    return render(request, 'delivery/add_messenger.html', {'form': form})
+
+def add_vehicle(request):
+    if request.method == 'POST':
+        form = VehicleForm(request.POST)
+        if form.is_valid():
+            form.save()
+    else:
+        form = VehicleForm()
+    return render(request, 'delivery/add_vehicle.html', {'form': form})
+
+def add_package(request):
+    if request.method == 'POST':
+        form = PackageForm(request.POST)
+        if form.is_valid():
+            form.save()
+    else:
+        form = PackageForm()
+    return render(request, 'delivery/add_package.html', {'form': form})

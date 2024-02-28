@@ -1,5 +1,6 @@
 import re
 from django import forms
+from django.forms import widgets
 from django_select2.forms import Select2Widget
 from .models import *
 
@@ -565,3 +566,35 @@ class Login(AuthenticationForm):
         self.fields.pop('username', None)
         self.fields['email'].widget.attrs.update({'class':'form-control'})
         self.fields['password'].widget.attrs.update({'class': 'form-control'})
+
+class DeliveryForm(forms.ModelForm):
+    title = forms.CharField(label='Title', max_length=100)
+    start = forms.DateTimeField(label='Start', widget=widgets.DateTimeInput(attrs={'type': 'datetime-local'}))
+    end = forms.DateTimeField(label='End', widget=widgets.DateTimeInput(attrs={'type': 'datetime-local'}))
+    DESTINATION_CHOICES = (
+        ('beezy', 'Beezy Work'),
+        ('dest1', 'Dest 1'),
+    )
+    destination =  forms.ChoiceField(choices = DESTINATION_CHOICES)
+    start_location = forms.ChoiceField(choices = DESTINATION_CHOICES)
+    class Meta:
+        model = Events
+        fields = ['title','start','end','messenger','vehicle','package','start_location','destination']
+
+class MessengerForm(forms.ModelForm):
+    class Meta:
+        model = Messenger
+        fields = '__all__'
+        exclude = ['id']
+
+class VehicleForm(forms.ModelForm):
+    class Meta:
+        model = Vehicle
+        fields = '__all__'
+        exclude = ['id']
+
+class PackageForm(forms.ModelForm):
+    class Meta:
+        model = Package
+        fields = '__all__'
+        exclude = ['id']

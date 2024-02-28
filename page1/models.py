@@ -215,12 +215,48 @@ class UserActionLog(models.Model):
     def __str__(self):
         return f'{self.user.username} - {self.action} - {self.timestamp}'
     
+class Messenger(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.name
+
+class Package(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    dimensions = models.CharField(max_length=100)
+    weight = models.IntegerField()
+
+    def __str__(self):
+        return self.name
+class Vehicle(models.Model):
+    id = models.AutoField(primary_key=True)
+    model = models.CharField(max_length = 100)
+    JENIS_CHOICES = (
+        ("truck", "Truck"),
+        ("mobil", "Mobil"),
+        ("motor", "Motor"),
+        ("ojek_online", "Ojek Online")
+    )
+    jenis = models.CharField(max_length=20)
+    nomor_plat = models.CharField(max_length = 9)
+
+    def __str__(self):
+        return self.nomor_plat
 class Events(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length = 255, null = True, blank = True)
     start = models.DateTimeField(null = True, blank = True)
     end = models.DateTimeField(null = True, blank = True)
+    messenger = models.ForeignKey(Messenger,on_delete=models.SET_NULL, null=True)
+    start_location = models.CharField(max_length=255, null =True)
+    destination = models.CharField(max_length=255, null =True)
+    vehicle = models.ForeignKey(Vehicle,on_delete=models.SET_NULL, null=True)
+    package = models.ForeignKey(Package,on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return self.name
+    
 
 class User(AbstractUser):
     email = models.EmailField(max_length = 100, unique=True)
