@@ -244,9 +244,9 @@ class Events(models.Model):
     start_location = models.CharField(max_length=255, null =True)
     destination = models.CharField(max_length=255, null =True)
     vehicle = models.ForeignKey(Vehicle,on_delete=models.SET_NULL, null=True)
-    package_name = models.CharField(max_length=100)
-    package_dimensions = models.CharField(max_length=100)
-    package_mass = MeasurementField(measurement=Mass)
+    package_name = models.CharField(max_length=100, null=True)
+    package_dimensions = models.CharField(max_length=100, null=True)
+    package_mass = MeasurementField(measurement=Mass,null=True)
 
     def __str__(self):
         return self.name
