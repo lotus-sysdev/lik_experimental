@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'django_select2',
     'djmoney',
+    'django_measurement',
 ]
 
 MIDDLEWARE = [

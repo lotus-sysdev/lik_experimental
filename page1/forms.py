@@ -14,6 +14,9 @@ from django.core.exceptions import ValidationError
 from djmoney.forms.fields import MoneyField
 from djmoney.forms.widgets import MoneyWidget
 
+from django_measurement.forms import MeasurementField
+from measurement.measures import Mass
+
 
 def validate_npwp(value):
     cleaned_value = re.sub(r'\D', '', value)
@@ -575,11 +578,15 @@ class DeliveryForm(forms.ModelForm):
         ('beezy', 'Beezy Work'),
         ('dest1', 'Dest 1'),
     )
-    destination =  forms.ChoiceField(choices = DESTINATION_CHOICES)
     start_location = forms.ChoiceField(choices = DESTINATION_CHOICES)
+    destination =  forms.ChoiceField(choices = DESTINATION_CHOICES)
+    package_mass = MeasurementField(
+        measurement=Mass,
+        unit_choices=(("kg","kg"), ("g","g")),
+    )
     class Meta:
         model = Events
-        fields = ['title','start','end','messenger','vehicle','package','start_location','destination']
+        fields = ['title','start','end','messenger','vehicle','package_mass','start_location','destination']
 
 class MessengerForm(forms.ModelForm):
     class Meta:
@@ -590,11 +597,5 @@ class MessengerForm(forms.ModelForm):
 class VehicleForm(forms.ModelForm):
     class Meta:
         model = Vehicle
-        fields = '__all__'
-        exclude = ['id']
-
-class PackageForm(forms.ModelForm):
-    class Meta:
-        model = Package
         fields = '__all__'
         exclude = ['id']

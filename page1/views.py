@@ -363,8 +363,7 @@ def all_events(request):
     for event in all_events: 
         event.start = event.start.astimezone(timezone.get_current_timezone())                                                                                            
         event.end = event.end.astimezone(timezone.get_current_timezone())                                                                                            
-        out.append({                                                                                                     
-            'title': event.name,                                                                                         
+        out.append({                                                                                         
             'id': event.id,                                                                                              
             'start': event.start.strftime("%m/%d/%Y, %H:%M:%S"),                                                         
             'end': event.end.strftime("%m/%d/%Y, %H:%M:%S"),                                                             
@@ -424,28 +423,8 @@ def delivery_form(request):
     return render(request, 'delivery/delivery_form.html', {'form': form})
 
 def add_messenger(request):
-    if request.method == 'POST':
-        form = MessengerForm(request.POST)
-        if form.is_valid():
-            form.save()
-    else:
-        form = MessengerForm()
-    return render(request, 'delivery/add_messenger.html', {'form': form})
+    return add_entity_view(request, MessengerForm, 'delivery/add_messenger.html', 'calendar')
+
 
 def add_vehicle(request):
-    if request.method == 'POST':
-        form = VehicleForm(request.POST)
-        if form.is_valid():
-            form.save()
-    else:
-        form = VehicleForm()
-    return render(request, 'delivery/add_vehicle.html', {'form': form})
-
-def add_package(request):
-    if request.method == 'POST':
-        form = PackageForm(request.POST)
-        if form.is_valid():
-            form.save()
-    else:
-        form = PackageForm()
-    return render(request, 'delivery/add_package.html', {'form': form})
+    return add_entity_view(request, VehicleForm, 'delivery/add_vehicle.html', 'calendar')
