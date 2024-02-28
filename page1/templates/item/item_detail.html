@@ -1,18 +1,21 @@
 {% extends 'base.html' %}
 
 <html>
+
 <head>
     {% block title %}Item Detail{% endblock %}
 </head>
+
 <body>
-    {% block content %} 
+    {% block content %}
     <div class="container mt-4 custom-container">
         <h1>Item Detail</h1>
         <a href="/display_item">Back</a>
         <div class="row">
             <div class="col-md-6">
-                <form id="editForm" method="post"enctype="multipart/form-data" action="{% url 'edit_item' entity.SKU %}" data-redirectUrl="{% url 'item_detail' entity.SKU %}">
-                    {% csrf_token %}    
+                <form id="editForm" method="post" enctype="multipart/form-data"
+                    action="{% url 'edit_item' entity.SKU %}" data-redirectUrl="{% url 'item_detail' entity.SKU %}">
+                    {% csrf_token %}
                     <div class="form-group">
                         <label for="{{ form.nama.id_for_label }}">Nama Barang</label>
                         {{ form.nama }}
@@ -41,7 +44,8 @@
                     <button type="submit" class="btn btn-primary">Update</button>
                 </form>
                 <div class="d-flex">
-                    <form id="deleteForm" method="post" action="{% url 'delete_item' entity.SKU %}" onclick="return confirmDelete('/display_item');" class="mt-2">
+                    <form id="deleteForm" method="post" action="{% url 'delete_item' entity.SKU %}"
+                        onclick="return confirmDelete('/display_item');" class="mt-2">
                         {% csrf_token %}
                         <button type="button" class="btn btn-danger">Delete</button>
                     </form>
@@ -50,19 +54,20 @@
             <div class="col-md-6">
                 <h2>Sumber:</h2>
                 {% if item_sumber %}
-                    {% for i in item_sumber %}
-                        <p>{{i.jenis_sumber}} - {{i.nama_perusahaan}} {{i.telp}}, {{i.email}} {{i.url}}</p>
-                    {% endfor %}
+                {% for i in item_sumber %}
+                <p>{{i.jenis_sumber}} - {{i.nama_perusahaan}} {{i.telp}}, {{i.email}} {{i.url}}</p>
+                {% endfor %}
                 {% else %}
-                    <p>No Sumber Yet</p>
+                <p>No Sumber Yet</p>
                 {% endif %}
                 {% if item_sumber %}
-                    <a href="{% url 'add_sumber' SKU=entity.SKU %}" class="mt-2 btn btn-success disabled">Add Sumber</a>
+                <a href="{% url 'add_sumber' SKU=entity.SKU %}" class="mt-2 btn btn-success disabled">Add Sumber</a>
                 {% else %}
-                    <a href="{% url 'add_sumber' SKU=entity.SKU %}" class="mt-2 btn btn-success">Add Sumber</a>
+                <a href="{% url 'add_sumber' SKU=entity.SKU %}" class="mt-2 btn btn-success">Add Sumber</a>
                 {% endif %}
             </div>
-    </div>
-    {% endblock %}
+        </div>
+        {% endblock %}
 </body>
+
 </html>

@@ -4,6 +4,6 @@
 
 <ul>
     {% for log in logs %}
-        <li>{{ log.user.username }} - {{ log.action }} - {{ log.timestamp }} - {{log.payload}}</li>
+    <li>{{ log.user.username }} - {{ log.action }} - {{ log.timestamp }} - {{log.payload}}</li>
     {% endfor %}
 </ul>

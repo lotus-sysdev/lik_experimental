@@ -1,9 +1,11 @@
 {% extends 'base.html' %}
 
 <html>
+
 <head>
     {% block title %}Customer Data Table{% endblock %}
 </head>
+
 <body>
     {% block content %}
     <h1>Customer List</h1>
@@ -22,18 +24,18 @@
         </thead>
         <tbody>
             {% for customer in entities %}
-                <tr>
-                    <td>{{ customer.cust_id }}</td>
-                    <td>{{ customer.nama_pt }}</td>
-                    <td>{{ customer.telp }}</td>
-                    <td>{{ customer.terms_of_payment }}</td>
-                    <td>{{ customer.pengiriman }}</td>
-                    <td>{{ customer.npwp }}</td>
-                    <td>{% if customer.faktur %}Yes{% else %}No{% endif %}</td>
-                    <td>
-                        <a href="{% url 'customer_detail' customer.cust_id %}">View</a>
-                    </td>
-                </tr>
+            <tr>
+                <td>{{ customer.cust_id }}</td>
+                <td>{{ customer.nama_pt }}</td>
+                <td>{{ customer.telp }}</td>
+                <td>{{ customer.terms_of_payment }}</td>
+                <td>{{ customer.pengiriman }}</td>
+                <td>{{ customer.npwp }}</td>
+                <td>{% if customer.faktur %}Yes{% else %}No{% endif %}</td>
+                <td>
+                    <a href="{% url 'customer_detail' customer.cust_id %}">View</a>
+                </td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
@@ -43,4 +45,5 @@
     <a href="/add_customer">Add Customer</a>
     {% endblock %}
 </body>
+
 </html>

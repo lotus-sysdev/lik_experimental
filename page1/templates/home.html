@@ -1,12 +1,15 @@
 {% extends 'base.html' %}
 
 <html>
+
 <head>
     {% block title %}Lotus Solusindo{% endblock %}
 </head>
+
 <body>
     {% block content %}
     <h1>Hello, {{ request.user.username }}!</h1>
     {% endblock %}
 </body>
+
 </html>

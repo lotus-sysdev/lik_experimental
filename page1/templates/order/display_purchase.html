@@ -1,9 +1,11 @@
 {% extends 'base.html' %}
 
 <html>
+
 <head>
     {% block title %}Purchase Data Table{% endblock %}
 </head>
+
 <body>
     {% block content %}
     <h1>Purchase Order List</h1>
@@ -25,21 +27,21 @@
         </thead>
         <tbody>
             {% for purchase in entities %}
-                <tr>
-                    <td>{{ purchase.supplier }}</td>
-                    <td>{{ purchase.item }}</td>
-                    <td>{{ purchase.revenue_PO }}</td>
-                    <td>{{ purchase.nomor_PO }}</td>
-                    <td>{{ purchase.tanggal_PO }}</td>
-                    <td>{{ purchase.tanggal_process }}</td>
-                    <td>{{ purchase.tanggal_input_accurate }}</td>
-                    <td>{{ purchase.tanggal_pengiriman_barang }}</td>
-                    <td>{{ purchase.tanggal_pengiriman_invoice }}</td>
-                    <td>{{ purchase.status }}</td>
-                    <td>
-                        <a href="{% url 'purchase_detail' purchase.id %}">View</a>
-                    </td>
-                </tr>
+            <tr>
+                <td>{{ purchase.supplier }}</td>
+                <td>{{ purchase.item }}</td>
+                <td>{{ purchase.revenue_PO }}</td>
+                <td>{{ purchase.nomor_PO }}</td>
+                <td>{{ purchase.tanggal_PO }}</td>
+                <td>{{ purchase.tanggal_process }}</td>
+                <td>{{ purchase.tanggal_input_accurate }}</td>
+                <td>{{ purchase.tanggal_pengiriman_barang }}</td>
+                <td>{{ purchase.tanggal_pengiriman_invoice }}</td>
+                <td>{{ purchase.status }}</td>
+                <td>
+                    <a href="{% url 'purchase_detail' purchase.id %}">View</a>
+                </td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
@@ -49,4 +51,5 @@
     <a href="/add_PO">Add Purchase Order</a>
     {% endblock %}
 </body>
+
 </html>

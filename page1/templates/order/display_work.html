@@ -1,9 +1,11 @@
 {% extends 'base.html' %}
 
 <html>
+
 <head>
     {% block title %}Work Data Table{% endblock %}
 </head>
+
 <body>
     {% block content %}
     <h1>Work Order List</h1>
@@ -25,21 +27,21 @@
         </thead>
         <tbody>
             {% for work in entities %}
-                <tr>
-                    <td>{{ work.customer }}</td>
-                    <td>{{ work.item }}</td>
-                    <td>{{ work.revenue_PO }}</td>
-                    <td>{{ work.nomor_PO }}</td>
-                    <td>{{ work.tanggal_PO }}</td>
-                    <td>{{ work.tanggal_process }}</td>
-                    <td>{{ work.tanggal_input_accurate }}</td>
-                    <td>{{ work.tanggal_pengiriman_barang }}</td>
-                    <td>{{ work.tanggal_pengiriman_invoice }}</td>
-                    <td>{{ work.status }}</td>
-                    <td>
-                        <a href="{% url 'work_detail' work.id %}">View</a>
-                    </td>
-                </tr>
+            <tr>
+                <td>{{ work.customer }}</td>
+                <td>{{ work.item }}</td>
+                <td>{{ work.revenue_PO }}</td>
+                <td>{{ work.nomor_PO }}</td>
+                <td>{{ work.tanggal_PO }}</td>
+                <td>{{ work.tanggal_process }}</td>
+                <td>{{ work.tanggal_input_accurate }}</td>
+                <td>{{ work.tanggal_pengiriman_barang }}</td>
+                <td>{{ work.tanggal_pengiriman_invoice }}</td>
+                <td>{{ work.status }}</td>
+                <td>
+                    <a href="{% url 'work_detail' work.id %}">View</a>
+                </td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
@@ -49,4 +51,5 @@
     <a href="/add_WO">Add Work Order</a>
     {% endblock %}
 </body>
+
 </html>

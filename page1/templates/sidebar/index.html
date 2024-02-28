@@ -2,13 +2,15 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'sidebar/style.css' %}">
-    
+
     <title>Sidebar</title>
 </head>
+
 <body>
     <nav id="sidebar">
         <div class="sidebar-header">
@@ -18,7 +20,8 @@
         <ul class="list-unstyled components">
             <p>Heading</p>
             <li class="active">
-                <a href="#dataSubmenu" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle sidebar-a">Data Tables</a>
+                <a href="#dataSubmenu" data-toggle="collapse" aria-expanded="true"
+                    class="dropdown-toggle sidebar-a">Data Tables</a>
                 <ul class="collapse list-unstyled show" id="dataSubmenu">
                     <li><a class="sidebar-a" href="/display_customer">Customer</a></li>
                     <li><a class="sidebar-a" href="/display_supplier">Supplier</a></li>
@@ -49,4 +52,5 @@
         });
     </script>
 </body>
+
 </html>
