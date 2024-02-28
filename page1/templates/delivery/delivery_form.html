@@ -1,17 +1,60 @@
+{% extends 'base.html' %}
 <!DOCTYPE html>
 <html>
 
 <head>
-    <title>Event Form</title>
+    <title>{% block title %}Event Form{% endblock  %}</title>
 </head>
 
 <body>
-    <h1>Event Form</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit</button>
-    </form>
+    {% block content %}
+    <h2>Delivery Form</h2>
+    <div class="form-group w-50">
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; justify-content: space-between;">
+
+                <div style="width: 48%;" class="mt-4">
+                    <h5>Detail Pengantaran</h5>
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
+                    {{ form.start.label_tag }}
+                    {{ form.start }}
+                    {{ form.end.label_tag }}
+                    {{ form.end }}
+                    {{ form.start_location.label_tag }}
+                    {{ form.start_location }}
+                    {{ form.destination.label_tag }}
+                    {{ form.destination }}
+
+                    <div class="mt-4">
+                        <h5>Kurir</h5>
+                        {{ form.messenger.label_tag }}
+                        {{ form.messenger }}
+                        {{ form.vehicle.label_tag }}
+                        {{ form.vehicle }}
+                    </div>
+                </div>
+
+                <div style="width: 48%;" class="mt-4">
+                    <h5>Paket</h5>
+                    {{ form.package_name.label_tag }}
+                    {{ form.package_name }}
+                    {{ form.package_dimensions.label_tag }}
+                    {{ form.package_dimensions }}
+                    {{ form.package_mass.label_tag }}
+                    {{ form.package_mass }}
+                    <!-- Add other fields for the right side -->
+                </div>
+                
+            </div>
+            <div>
+                <button class="btn btn-info mt-3">Tambah Tujuan</button>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Submit</button>
+        </form>
+    </div>
+    {% endblock %}
 </body>
 
 </html>

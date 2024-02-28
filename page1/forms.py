@@ -14,7 +14,7 @@ from django.core.exceptions import ValidationError
 from djmoney.forms.fields import MoneyField
 from djmoney.forms.widgets import MoneyWidget
 
-from django_measurement.forms import MeasurementField
+from django_measurement.forms import MeasurementField, MeasurementWidget
 from measurement.measures import Mass
 
 
@@ -571,22 +571,62 @@ class Login(AuthenticationForm):
         self.fields['password'].widget.attrs.update({'class': 'form-control'})
 
 class DeliveryForm(forms.ModelForm):
-    title = forms.CharField(label='Title', max_length=100)
-    start = forms.DateTimeField(label='Start', widget=widgets.DateTimeInput(attrs={'type': 'datetime-local'}))
-    end = forms.DateTimeField(label='End', widget=widgets.DateTimeInput(attrs={'type': 'datetime-local'}))
+    title = forms.CharField(
+        max_length=30,
+        label='Judul',
+        widget=forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Judul'}),
+    )
+    start = forms.DateTimeField(
+        label='Jam Keberangkatan', 
+        widget=widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Keberangkatan'})
+        )
+    end = forms.DateTimeField(
+        label='Jam Kedatangan', 
+        widget=widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Kedatangan'})
+        )
     DESTINATION_CHOICES = (
         ('beezy', 'Beezy Work'),
         ('dest1', 'Dest 1'),
     )
-    start_location = forms.ChoiceField(choices = DESTINATION_CHOICES)
-    destination =  forms.ChoiceField(choices = DESTINATION_CHOICES)
+    start_location = forms.ChoiceField(
+        choices = DESTINATION_CHOICES,
+        label= "Lokasi Keberangkatan",
+        widget= forms.Select(attrs={'class':'form-control'})
+        )
+    destination =  forms.ChoiceField(
+        choices = DESTINATION_CHOICES,
+        label= "Destinasi",
+        widget= forms.Select(attrs={'class':'form-control'})
+        )
+
+    package_name = forms.CharField(
+        max_length=30,
+        label= "Nama Paket",
+        widget=forms.TextInput(attrs={'class':'form-control' , 'placeholder': 'Nama Paket'})
+    )
+    package_dimensions = forms.CharField(
+        max_length=30,
+        label= "Dimensi Paket",
+        widget=forms.TextInput(attrs={'class':'form-control', 'placeholder': 'panjang x lebar x tinggi'})
+    )
     package_mass = MeasurementField(
         measurement=Mass,
         unit_choices=(("kg","kg"), ("g","g")),
+        label="Berat Paket",
+        widget = MeasurementWidget(attrs={'class':'form-control', 'placeholder':'10'}, unit_choices=(("kg","kg"), ("g","g")))
     )
     class Meta:
         model = Events
-        fields = ['title','start','end','messenger','vehicle','package_mass','start_location','destination']
+        fields = '__all__'
+        exclude = ['id']
+        widgets = {
+            'messenger': Select2Widget(attrs={'class':'form-control'}),
+            'vehicle': Select2Widget(attrs={'class':'form-control'}),
+        }
+        labels = {
+            'messenger' : 'Pengantar',
+            'vehicle' : 'Kendaraan',
+        }
 
 class MessengerForm(forms.ModelForm):
     class Meta:

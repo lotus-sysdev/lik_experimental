@@ -238,6 +238,7 @@ class Vehicle(models.Model):
         return self.nomor_plat
 class Events(models.Model):
     id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=30, null = True)
     start = models.DateTimeField(null = True, blank = True)
     end = models.DateTimeField(null = True, blank = True)
     messenger = models.ForeignKey(Messenger,on_delete=models.SET_NULL, null=True)
@@ -246,7 +247,7 @@ class Events(models.Model):
     vehicle = models.ForeignKey(Vehicle,on_delete=models.SET_NULL, null=True)
     package_name = models.CharField(max_length=100, null=True)
     package_dimensions = models.CharField(max_length=100, null=True)
-    package_mass = MeasurementField(measurement=Mass,null=True)
+    package_mass = MeasurementField(measurement=Mass, null=True)
 
     def __str__(self):
         return self.name
