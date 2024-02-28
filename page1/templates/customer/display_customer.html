@@ -1,46 +1,49 @@
 {% extends 'base.html' %}
 
 <html>
-<head>
+  <head>
     {% block title %}Customer Data Table{% endblock %}
-</head>
-<body>
+  </head>
+  <body>
     {% block content %}
     <h1>Customer List</h1>
-    <table id="customerTable" class="table table-bordered table-striped w-100 table-responsive-lg">
-        <thead class="thead-light">
-            <tr>
-                <th data-order="asc">Customer ID</th>
-                <th data-order="asc">Nama Perusahaan</th>
-                <th data-order="asc">No. Telpon</th>
-                <th data-order="asc">Terms of Payment</th>
-                <th data-order="asc">Pengiriman</th>
-                <th data-order="asc">NPWP</th>
-                <th data-order="asc">Faktur Pajak</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for customer in entities %}
-                <tr>
-                    <td>{{ customer.cust_id }}</td>
-                    <td>{{ customer.nama_pt }}</td>
-                    <td>{{ customer.telp }}</td>
-                    <td>{{ customer.terms_of_payment }}</td>
-                    <td>{{ customer.pengiriman }}</td>
-                    <td>{{ customer.npwp }}</td>
-                    <td>{% if customer.faktur %}Yes{% else %}No{% endif %}</td>
-                    <td>
-                        <a href="{% url 'customer_detail' customer.cust_id %}">View</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
+    <table
+      id="customerTable"
+      class="table table-bordered table-striped w-100 table-responsive-lg"
+    >
+      <thead class="thead-light">
+        <tr>
+          <th data-order="asc">Customer ID</th>
+          <th data-order="asc">Nama Perusahaan</th>
+          <th data-order="asc">No. Telpon</th>
+          <th data-order="asc">Terms of Payment</th>
+          <th data-order="asc">Pengiriman</th>
+          <th data-order="asc">NPWP</th>
+          <th data-order="asc">Faktur Pajak</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for customer in entities %}
+        <tr>
+          <td>{{ customer.cust_id }}</td>
+          <td>{{ customer.nama_pt }}</td>
+          <td>{{ customer.telp }}</td>
+          <td>{{ customer.terms_of_payment }}</td>
+          <td>{{ customer.pengiriman }}</td>
+          <td>{{ customer.npwp }}</td>
+          <td>{% if customer.faktur %}Yes{% else %}No{% endif %}</td>
+          <td>
+            <a href="{% url 'customer_detail' customer.cust_id %}">View</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
     <script>
-        new DataTable('#customerTable');
+      new DataTable("#customerTable");
     </script>
     <a href="/add_customer">Add Customer</a>
     {% endblock %}
-</body>
+  </body>
 </html>

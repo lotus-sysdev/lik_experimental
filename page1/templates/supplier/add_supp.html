@@ -2,20 +2,18 @@
 
 <!DOCTYPE html>
 <html>
-<head>
-   {% block title %}Add Supplier{% endblock %}
-</head>
-<body>
+  <head>
+    {% block title %}Add Supplier{% endblock %}
+  </head>
+  <body>
     {% block content %}
     <h2>Add Supplier</h2>
     <div class="form-group w-50">
-        <form method="post">
-            {% csrf_token %}
-            {{ entity_form.as_p }}
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+      <form method="post">
+        {% csrf_token %} {{ entity_form.as_p }}
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
     </div>
     {% endblock %}
-</body>
+  </body>
 </html>
-
