@@ -48,39 +48,11 @@
         </tr>
         {% endfor %}
       </tbody>
-    <table id="itemTable" class="table table-bordered table-striped w-100 table-responsive-lg">
-        <thead class="thead-light">
-            <tr>
-                <th>SKU</th>
-                <th>Nama</th>
-                <th>Category</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Gambar</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for i in entities %}
-            <tr style="{% if i.is_approved %}background-color: #ccffc7;{% endif %}">
-                <td>{{ i.SKU }}</td>
-                <td>{{ i.nama }}</td>
-                <td>{{ i.category.name }}</td>
-                <td>{{ i.quantity }}</td>
-                <td>{{ i.price }}</td>
-                <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}"></td>
-                <td>
-                    <a href="{% url 'item_detail' i.SKU %}">View</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
     </table>
     <script>
       new DataTable("#itemTable");
     </script>
-    <a href="/add_item">Add Item</a><br /><br />
-    <a href="/add_item">Add Item</a><br /><br />
+    <a href="/add_item">Add Item</a><br/>
     {% endblock %}
 </body>
 
