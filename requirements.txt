@@ -5,3 +5,4 @@ django-select2
 django-jazzmin
 pillow
 django-money
+django-measurements

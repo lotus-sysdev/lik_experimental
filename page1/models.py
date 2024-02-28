@@ -4,7 +4,8 @@ from django.contrib.auth.models import User, AbstractUser
 import uuid
 from phonenumber_field.modelfields import PhoneNumberField
 from djmoney.models.fields import MoneyField
-
+from django_measurement.models import MeasurementField
+from measurement.measures import Mass
 
 class Customer(models.Model):
     cust_id = models.IntegerField(primary_key=True)
@@ -84,7 +85,6 @@ class Items(models.Model):
                 self.SKU = new_sku
 
         super().save(*args, **kwargs)
-
 
 class ItemSumber(models.Model):
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
@@ -222,14 +222,6 @@ class Messenger(models.Model):
     def __str__(self):
         return self.name
 
-class Package(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
-    dimensions = models.CharField(max_length=100)
-    weight = models.IntegerField()
-
-    def __str__(self):
-        return self.name
 class Vehicle(models.Model):
     id = models.AutoField(primary_key=True)
     model = models.CharField(max_length = 100)
@@ -252,7 +244,9 @@ class Events(models.Model):
     start_location = models.CharField(max_length=255, null =True)
     destination = models.CharField(max_length=255, null =True)
     vehicle = models.ForeignKey(Vehicle,on_delete=models.SET_NULL, null=True)
-    package = models.ForeignKey(Package,on_delete=models.SET_NULL, null=True)
+    package_name = models.CharField(max_length=100)
+    package_dimensions = models.CharField(max_length=100)
+    package_mass = MeasurementField(measurement=Mass)
 
     def __str__(self):
         return self.name
