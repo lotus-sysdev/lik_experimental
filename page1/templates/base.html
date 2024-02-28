@@ -2,117 +2,97 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.datatables.net/2.0.0/css/dataTables.bootstrap4.css"
-    />
-    <link rel="stylesheet" href="{% static 'style.css' %}" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.1/css/all.css"
-      rel="stylesheet"
-    />
 
-    <script src="{% static 'script.js' %}"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://cdn.datatables.net/2.0.0/js/dataTables.js"></script>
-    <script src="https://cdn.datatables.net/2.0.0/js/dataTables.bootstrap4.js"></script>
-    <script
-      src="https://code.jquery.com/jquery-3.7.1.min.js"
-      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-      crossorigin="anonymous"
-    ></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <title>{% block title %}Sidebar{% endblock %}</title>
-    <style>
-      /* Custom styles for Select2Widget */
-      .select2-container--default .select2-selection--single {
-        height: 38px;
-        padding: 3px 5px;
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.0.0/css/dataTables.bootstrap4.css" />
+  <link rel="stylesheet" href="{% static 'style.css' %}" />
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.1/css/all.css" rel="stylesheet" />
 
-      .select2-container--default
-        .select2-selection--single
-        .select2-selection__arrow {
-        top: 50%;
-        transform: translateY(-50%);
-      }
+  <script src="{% static 'script.js' %}"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdn.datatables.net/2.0.0/js/dataTables.js"></script>
+  <script src="https://cdn.datatables.net/2.0.0/js/dataTables.bootstrap4.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <title>{% block title %}Sidebar{% endblock %}</title>
+  <style>
+    /* Custom styles for Select2Widget */
+    .select2-container--default .select2-selection--single {
+      height: 38px;
+      padding: 3px 5px;
+      border: 1px solid #ced4da;
+      border-radius: 0.25rem;
+    }
 
-      .select2-container--default .select2-selection--single:focus {
-        border-color: #80bdff;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrapper">
-      {% include 'sidebar/index.html' %}
-      <div id="content" name="content">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
-          <div class="container-fluid">
-            <button type="button" id="sidebarCollapse" class="navbar-btn">
-              <span></span>
-              <span></span>
-              <span></span>
-            </button>
-            <button
-              class="btn btn-dark d-inline-block d-lg-none ml-auto"
-              type="button"
-              data-toggle="collapse"
-              data-target="#navbarSupportedContent"
-              aria-controls="navbarSupportedContent"
-              aria-label="Toggle navigation"
-            >
-              <i class="fas fa-align-justify"></i>
-            </button>
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+      top: 50%;
+      transform: translateY(-50%);
+    }
 
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <ul class="nav navbar-nav ml-auto">
-                <li class="nav-item">
-                  <a class="nav-link" href="/logout">Logout</a>
-                </li>
-              </ul>
-            </div>
+    .select2-container--default .select2-selection--single:focus {
+      border-color: #80bdff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    {% include 'sidebar/index.html' %}
+    <div id="content" name="content">
+      <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
+        <div class="container-fluid">
+          <button type="button" id="sidebarCollapse" class="navbar-btn">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-label="Toggle navigation">
+            <i class="fas fa-align-justify"></i>
+          </button>
+
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="nav navbar-nav ml-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="/logout">Logout</a>
+              </li>
+            </ul>
           </div>
-        </nav>
-        {% block content %} {% endblock %}
-      </div>
+        </div>
+      </nav>
+      {% block content %} {% endblock %}
     </div>
+  </div>
 
-    {% block scripts %}
-    <script>
-      $("#id_item").select2({
-        placeholder: "Search for an item",
-      });
-      $("#id_customer").select2({
-        placeholder: "Search for a customer",
-      });
-      $("#id_supplier").select2({
-        placeholder: "Search for a supplier",
-      });
-      $("#id_category").select2({
-        placeholder: "Search for a category",
-      });
-      $("#id_unit").select2({
-        placeholder: "Select unit of measurement",
-      });
-    </script>
-    {% endblock %}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
-  </body>
+  {% block scripts %}
+  <script>
+    $("#id_item").select2({
+      placeholder: "Search for an item",
+    });
+    $("#id_customer").select2({
+      placeholder: "Search for a customer",
+    });
+    $("#id_supplier").select2({
+      placeholder: "Search for a supplier",
+    });
+    $("#id_category").select2({
+      placeholder: "Search for a category",
+    });
+    $("#id_unit").select2({
+      placeholder: "Select unit of measurement",
+    });
+  </script>
+  {% endblock %}
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+</body>
+
 </html>

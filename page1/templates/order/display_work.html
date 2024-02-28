@@ -1,55 +1,55 @@
 {% extends 'base.html' %}
 
 <html>
-  <head>
+
+<head>
     {% block title %}Work Data Table{% endblock %}
-  </head>
-  <body>
+</head>
+
+<body>
     {% block content %}
     <h1>Work Order List</h1>
-    <table
-      id="workTable"
-      class="table table-bordered table-striped w-100 table-responsive-lg"
-    >
-      <thead class="thead-light">
-        <tr>
-          <th data-order="asc">Customer</th>
-          <th data-order="asc">Item</th>
-          <th data-order="asc">Revenue PO</th>
-          <th data-order="asc">Nomor PO</th>
-          <th data-order="asc">Tanggal PO</th>
-          <th data-order="asc">Tanggal Proses</th>
-          <th data-order="asc">Tanggal Input Accurate</th>
-          <th data-order="asc">Tanggal Pengiriman Barang</th>
-          <th data-order="asc">Tanggal Pengiriman Invoice</th>
-          <th data-order="asc">Status</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for work in entities %}
-        <tr>
-          <td>{{ work.customer }}</td>
-          <td>{{ work.item }}</td>
-          <td>{{ work.revenue_PO }}</td>
-          <td>{{ work.nomor_PO }}</td>
-          <td>{{ work.tanggal_PO }}</td>
-          <td>{{ work.tanggal_process }}</td>
-          <td>{{ work.tanggal_input_accurate }}</td>
-          <td>{{ work.tanggal_pengiriman_barang }}</td>
-          <td>{{ work.tanggal_pengiriman_invoice }}</td>
-          <td>{{ work.status }}</td>
-          <td>
-            <a href="{% url 'work_detail' work.id %}">View</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
+    <table id="workTable" class="table table-bordered table-striped w-100 table-responsive-lg">
+        <thead class="thead-light">
+            <tr>
+                <th data-order="asc">Customer</th>
+                <th data-order="asc">Item</th>
+                <th data-order="asc">Revenue PO</th>
+                <th data-order="asc">Nomor PO</th>
+                <th data-order="asc">Tanggal PO</th>
+                <th data-order="asc">Tanggal Proses</th>
+                <th data-order="asc">Tanggal Input Accurate</th>
+                <th data-order="asc">Tanggal Pengiriman Barang</th>
+                <th data-order="asc">Tanggal Pengiriman Invoice</th>
+                <th data-order="asc">Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for work in entities %}
+            <tr>
+                <td>{{ work.customer }}</td>
+                <td>{{ work.item }}</td>
+                <td>{{ work.revenue_PO }}</td>
+                <td>{{ work.nomor_PO }}</td>
+                <td>{{ work.tanggal_PO }}</td>
+                <td>{{ work.tanggal_process }}</td>
+                <td>{{ work.tanggal_input_accurate }}</td>
+                <td>{{ work.tanggal_pengiriman_barang }}</td>
+                <td>{{ work.tanggal_pengiriman_invoice }}</td>
+                <td>{{ work.status }}</td>
+                <td>
+                    <a href="{% url 'work_detail' work.id %}">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
     <script>
       new DataTable("#workTable");
     </script>
     <a href="/add_WO">Add Work Order</a>
     {% endblock %}
-  </body>
+</body>
+
 </html>

@@ -1,47 +1,48 @@
 {% extends 'base.html' %}
 
 <html>
-  <head>
+
+<head>
     {% block title %}Supplier Data Table{% endblock %}
-  </head>
-  <body>
+</head>
+
+<body>
     {% block content %}
     <h1>Supplier List</h1>
-    <table
-      id="supplierTable"
-      class="table table-bordered table-striped w-100 table-responsive-lg"
-    >
-      <thead class="thead-light">
-        <tr>
-          <th data-order="asc">Supplier ID</th>
-          <th data-order="asc">Nama Perusahaan</th>
-          <th data-order="asc">No. Telpon</th>
-          <th data-order="asc">Terms of Payment</th>
-          <th data-order="asc">NPWP</th>
-          <th data-order="asc">Faktur Pajak</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for s in entities %}
-        <tr>
-          <td>{{ s.supp_id }}</td>
-          <td>{{ s.nama_pt }}</td>
-          <td>{{ s.telp }}</td>
-          <td>{{ s.terms_of_payment }}</td>
-          <td>{{ s.npwp }}</td>
-          <td>{% if s.faktur %}Yes{% else %}No{% endif %}</td>
-          <td>
-            <a href="{% url 'supplier_detail' s.supp_id %}">View</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
+    <table id="supplierTable" class="table table-bordered table-striped w-100 table-responsive-lg">
+        <thead class="thead-light">
+            <tr>
+                <th data-order="asc">Supplier ID</th>
+                <th data-order="asc">Nama Perusahaan</th>
+                <th data-order="asc">No. Telpon</th>
+                <th data-order="asc">Terms of Payment</th>
+                <th data-order="asc">NPWP</th>
+                <th data-order="asc">Faktur Pajak</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in entities %}
+            <tr>
+                <td>{{ s.supp_id }}</td>
+                <td>{{ s.nama_pt }}</td>
+                <td>{{ s.telp }}</td>
+                <td>{{ s.terms_of_payment }}</td>
+                <td>{{ s.npwp }}</td>
+                <td>{% if s.faktur %}Yes{% else %}No{% endif %}</td>
+                <td>
+                    <a href="{% url 'supplier_detail' s.supp_id %}">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
     <script>
       new DataTable("#supplierTable");
     </script>
     <a href="/add_supplier">Add Supplier</a><br /><br />
+    <a href="/add_supplier">Add Supplier</a><br /><br />
     {% endblock %}
-  </body>
+</body>
+
 </html>
