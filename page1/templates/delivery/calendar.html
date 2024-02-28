@@ -1,9 +1,14 @@
 {% extends "delivery_base.html" %}
 
-{% block title %}Python Django Ajax FullCalender CRUD (Create, Read, Update and Delete){% endblock title %}
-
-{% block content %}
-<div class="container col-md-12 mt-5">
-    <div id='calendar'></div>
-</div>
-{% endblock content %}
+<head>
+  <title>
+    {% block title %}Delivery Order Calendary{% endblock title %}
+  </title>
+</head>
+<body>
+  {% block content %}
+  <div class="container col-md-12 mt-5">
+    <div id="calendar"></div>
+  </div>
+  {% endblock content %}
+</body>

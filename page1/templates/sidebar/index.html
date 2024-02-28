@@ -13,9 +13,9 @@
 
 <body>
     <nav id="sidebar">
-        <div class="sidebar-header">
-            <h3><a href="/" class="sidebar-a">Lotus Solusindo</a></h3>
-        </div>
+      <div class="sidebar-header">
+        <h3><a href="/" class="sidebar-a">Lotus Solusindo</a></h3>
+      </div>
 
         <ul class="list-unstyled components">
             <p>Heading</p>
@@ -34,22 +34,20 @@
             <li><a class="sidebar-a" href="">Page</a></li>
         </ul>
 
-        <ul class="list-unstyled CTAs">
-            <li>
-                <a class="sidebar-a" class="settings" href="">
-                    Settings
-                </a>
-            </li>
-        </ul>
+      <ul class="list-unstyled CTAs">
+        <li>
+          <a class="sidebar-a" class="settings" href=""> Settings </a>
+        </li>
+      </ul>
     </nav>
 
     <script type="text/javascript">
-        $(document).ready(function () {
-            $('#sidebarCollapse').on('click', function () {
-                $('#sidebar').toggleClass('active');
-                $(this).toggleClass('active');
-            });
+      $(document).ready(function () {
+        $("#sidebarCollapse").on("click", function () {
+          $("#sidebar").toggleClass("active");
+          $(this).toggleClass("active");
         });
+      });
     </script>
 </body>
 

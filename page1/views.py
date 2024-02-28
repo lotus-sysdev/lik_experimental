@@ -341,10 +341,14 @@ def logout_view(request):
     return redirect('/login')
 
 
+# -------------------- User Action Logs -------------------- #
 def user_action_logs(request):
     logs = UserActionLog.objects.all().order_by('-timestamp')[:100]  # Get the last 10 logs
     return render(request, 'logs.html', {'logs': logs})
 
+
+# -------------------- Delivery Order -------------------- #
+# Display calendar, and event addition/deletion functionality
 def calendar(request):  
     all_events = Events.objects.all()
     context = {

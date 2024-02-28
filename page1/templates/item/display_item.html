@@ -1,14 +1,53 @@
 {% extends 'base.html' %}
 
 <html>
+  <head>
 
 <head>
     {% block title %}Item Data Table{% endblock %}
+  </head>
+  <body>
 </head>
 
 <body>
     {% block content %}
     <h1>Item List</h1>
+    <table
+      id="itemTable"
+      class="table table-bordered table-striped w-100 table-responsive-lg"
+    >
+      <thead class="thead-light">
+        <tr>
+          <th>SKU</th>
+          <th>Nama</th>
+          <th>Category</th>
+          <th>Quantity</th>
+          <th>Satuan</th>
+          <th>Price</th>
+          <th>Gambar</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in entities %}
+        <tr
+          {% if i.is_approved%}
+          style="background-color: #ccffc7;"
+          {% endif %}
+        >
+          <td>{{ i.SKU }}</td>
+          <td>{{ i.nama }}</td>
+          <td>{{ i.category.name }}</td>
+          <td>{{ i.quantity }}</td>
+          <td>{{ i.unit }}</td>
+          <td>{{ i.price }}</td>
+          <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}" /></td>
+          <td>
+            <a href="{% url 'item_detail' i.SKU %}">View</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
     <table id="itemTable" class="table table-bordered table-striped w-100 table-responsive-lg">
         <thead class="thead-light">
             <tr>
@@ -38,8 +77,9 @@
         </tbody>
     </table>
     <script>
-        new DataTable('#itemTable');
+      new DataTable("#itemTable");
     </script>
+    <a href="/add_item">Add Item</a><br /><br />
     <a href="/add_item">Add Item</a><br /><br />
     {% endblock %}
 </body>
