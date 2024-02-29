@@ -270,6 +270,7 @@ def add_sumber(request, SKU):
 
 # -------------------- Order Functions -------------------- #
 # Add Purchase Order and Work Order
+@login_required
 def add_PO(request):
     return add_entity_view(request, PurchaseForm, 'order/add_PO.html', 'display_purchase')
 
@@ -278,30 +279,38 @@ def add_WO(request):
     return add_entity_view(request, WorkForm, 'order/add_WO.html', 'display_work')
 
 # Display Purchase Order and Work Order
+@login_required
 def display_purchase(request):
     return display_entities(request, PurchaseOrder, 'order/display_purchase.html')
 
+@login_required
 def display_work(request):
     return display_entities(request, WorkOrder, 'order/display_work.html')
 
 #  Detail of Purchase Order and Work Order
+@login_required
 def purchase_detail(request, id):
     return entity_detail(request, PurchaseOrder, PurchaseForm, 'id',id, 'order/purchase_detail.html')
 
+@login_required
 def work_detail(request, id):
     return entity_detail(request, WorkOrder, WorkForm, 'id', id, 'order/work_detail.html')
 
 # Edit Purchase Order and Work Order
+@login_required
 def edit_purchase(request, id):
     return edit_entity(request, PurchaseOrder, PurchaseForm, 'id', id)
 
+@login_required
 def edit_work(request, id):
     return edit_entity(request, WorkOrder, WorkForm, 'id', id)
 
 # Delete Purchase Order and Work Order
+@login_required
 def delete_purchase(request, id):
     return delete_entity(request, PurchaseOrder, 'id', id)
 
+@login_required
 def delete_work(request, id):
     return delete_entity(request, WorkOrder, 'id', id)
   
@@ -349,13 +358,15 @@ def user_action_logs(request):
 
 # -------------------- Delivery Order -------------------- #
 # Display calendar, and event addition/deletion functionality
+@login_required
 def calendar(request):  
     all_events = Events.objects.all()
     context = {
         "events":all_events,
     }
     return render(request,'delivery/calendar.html',context)
- 
+
+@login_required
 def all_events(request):                                                                                                 
     all_events = Events.objects.all()                                                                                    
     out = []                                                                                                             
@@ -363,10 +374,13 @@ def all_events(request):
     for event in all_events: 
         event.start = event.start.astimezone(timezone.get_current_timezone())                                                                                            
         event.end = event.end.astimezone(timezone.get_current_timezone())                                                                                            
-        out.append({                                                                                         
+        out.append({     
+            'title': event.title,                                                                                    
             'id': event.id,                                                                                              
             'start': event.start.strftime("%m/%d/%Y, %H:%M:%S"),                                                         
-            'end': event.end.strftime("%m/%d/%Y, %H:%M:%S"),                                                             
+            'end': event.end.strftime("%m/%d/%Y, %H:%M:%S"),
+            'messenger_id':event.messenger.id,      
+            'messenger_color':event.messenger.color                                                       
         })                                                                                                               
                                                                                                                       
     return JsonResponse(out, safe=False) 
