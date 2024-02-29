@@ -363,10 +363,13 @@ def all_events(request):
     for event in all_events: 
         event.start = event.start.astimezone(timezone.get_current_timezone())                                                                                            
         event.end = event.end.astimezone(timezone.get_current_timezone())                                                                                            
-        out.append({                                                                                         
+        out.append({     
+            'title': event.title,                                                                                    
             'id': event.id,                                                                                              
             'start': event.start.strftime("%m/%d/%Y, %H:%M:%S"),                                                         
-            'end': event.end.strftime("%m/%d/%Y, %H:%M:%S"),                                                             
+            'end': event.end.strftime("%m/%d/%Y, %H:%M:%S"),
+            'messenger_id':event.messenger.id,      
+            'messenger_color':event.messenger.color                                                       
         })                                                                                                               
                                                                                                                       
     return JsonResponse(out, safe=False) 
