@@ -144,8 +144,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DATE_INPUT_FORMATS = ['%d/%m/%Y']
 
-CURRENCIES = ('IDR', 'USD')
-CURRENCY_CHOICES = [('IDR', 'Indonesian Rupiah (Rp.)'), ('USD', 'US Dollar ($)')]
+CURRENCIES = ('IDR', 'USD', 'SGD', 'CNY', 'TWD')
+CURRENCY_CHOICES = [('IDR', 'Indonesian Rupiah (IDR)'), ('USD', 'US Dollar (USD)'), ('SGD', 'Singapore Dollar (SGD)'), ('CNY', 'Chinese Yuan (CNY)'), ('TWD', 'New Taiwan Dollar (TWD)')]
 
 # settings.py
 

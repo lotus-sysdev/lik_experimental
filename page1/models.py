@@ -253,7 +253,6 @@ class Events(models.Model):
     def __str__(self):
         return self.title
     
-
 class User(AbstractUser):
     email = models.EmailField(max_length = 100, unique=True)
 
