@@ -1,60 +1,143 @@
 {% extends 'base.html' %}
 <!DOCTYPE html>
 <html>
-
-<head>
-    <title>{% block title %}Event Form{% endblock  %}</title>
-</head>
-
-<body>
+  <head>
+    <title>{% block title %}Event Form{% endblock %}</title>
+  </head>
+  <body>
     {% block content %}
     <h2>Delivery Form</h2>
-    <div class="form-group w-50">
-        <form method="post">
-            {% csrf_token %}
-            <div style="display: flex; justify-content: space-between;">
-
-                <div style="width: 48%;" class="mt-4">
-                    <h5>Detail Pengantaran</h5>
-                    {{ form.title.label_tag }}
-                    {{ form.title }}
-                    {{ form.start.label_tag }}
-                    {{ form.start }}
-                    {{ form.end.label_tag }}
-                    {{ form.end }}
-                    {{ form.start_location.label_tag }}
-                    {{ form.start_location }}
-                    {{ form.destination.label_tag }}
-                    {{ form.destination }}
-
-                    <div class="mt-4">
-                        <h5>Kurir</h5>
-                        {{ form.messenger.label_tag }}
-                        {{ form.messenger }}
-                        {{ form.vehicle.label_tag }}
-                        {{ form.vehicle }}
-                    </div>
-                </div>
-
-                <div style="width: 48%;" class="mt-4">
-                    <h5>Paket</h5>
-                    {{ form.package_name.label_tag }}
-                    {{ form.package_name }}
-                    {{ form.package_dimensions.label_tag }}
-                    {{ form.package_dimensions }}
-                    {{ form.package_mass.label_tag }}
-                    {{ form.package_mass }}
-                    <!-- Add other fields for the right side -->
-                </div>
-                
+    <div class="form-group" style="width: 90%">
+      <form method="post">
+        {% csrf_token %}
+        <div id="forms-container"">
+          <div
+            id="form-section-1"
+          >
+          <div style="display: flex;"">
+            <div class="mt-4 w-50 mr-3">
+              <h5>Detail Pengantaran</h5>
+              {{ form.title.label_tag }} {{ form.title }} 
+              {{ form.start.label_tag }} {{ form.start }} 
+              {{ form.end.label_tag }}{{ form.end }} 
+              {{ form.start_location.label_tag }}{{form.start_location }} 
+              {{ form.destination.label_tag }} {{  form.destination }}
             </div>
-            <div>
-                <button class="btn btn-info mt-3">Tambah Tujuan</button>
+
+            <div class="mt-4 w-50 ml-3">
+              <h5>Paket</h5>
+              {{ form.package_name.label_tag }} {{ form.package_name }} 
+              {{ form.package_dimensions.label_tag }} {{ form.package_dimensions }}
+              {{ form.package_mass.label_tag }} {{ form.package_mass }}
+              <!-- Add other fields for the right side -->
             </div>
-            <button type="submit" class="btn btn-primary mt-2">Submit</button>
-        </form>
+          </div>
+          <div class="w-100">
+              <br>
+              <hr>
+          </div>
+          </div>
+        </div>
+        <div class="mt-4 w-50 mr-3">
+          <h5>Kurir</h5>
+          {{ form.messenger.label_tag }} {{ form.messenger }} 
+          {{ form.vehicle.label_tag }} {{ form.vehicle }}
+        </div>
+        <div>
+          <button
+            class="btn btn-info mt-3"
+            id="tambah-tujuan-btn"
+            type="button"
+          >
+            Tambah Tujuan
+          </button>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Submit</button>
+      </form>
     </div>
-    {% endblock %}
-</body>
+    <script>
+      $(document).ready(function () {
+        // Counter to track the number of forms added
+        var formCounter = 1;
+        var maxForms = 3;
 
+        // Function to create a new form section
+        function createForm() {
+          if (formCounter >= maxForms) {
+            return ''; // Return null if the maximum number of forms is reached
+          }
+
+          formCounter++;
+          var newForm = $("#form-section-1").clone();
+          newForm.attr("id", "form-section-" + formCounter);
+
+          newForm.find(":input").val("");
+          newForm.find("label[for]").each(function () {
+            var labelFor = $(this).attr("for");
+            $(this).attr("for", labelFor.replace("-1", "-" + formCounter));
+          });
+
+            // Copy values from the previous form
+            var prevForm = $("#form-section-" + (formCounter - 1));
+            newForm.find('[name="start"]').val(prevForm.find('[name="end"]').val());
+            newForm.find('[name="start_location"]').val(prevForm.find('[name="destination"]').val());
+
+            // Append hidden inputs for cloned form fields with unique names
+      newForm.find(":input").each(function () {
+        var inputName = $(this).attr("name");
+        if (inputName) {
+          var uniqueInputName = inputName.replace("-1", "-" + formCounter);
+          $(this).attr('name', uniqueInputName);
+        }
+      });
+
+          return newForm;
+        }
+
+        // Event handler for "Tambah Tujuan" button
+        $("#tambah-tujuan-btn").click(function (e) {
+          e.preventDefault(); // Prevent the default form submission
+          var newForm = createForm();
+          if (newForm !== null) {
+            newForm.appendTo("#forms-container"); // Append the new form to a container
+          } else {
+            alert("Maximum number of forms reached (3)");
+            $("#tambah-tujuan-btn").prop("disabled", true);
+          }
+        });
+
+         // Event handler for main form submission
+        $("form").submit(function () {
+        // Gather data from all forms
+        var formData = "";
+        $(".dynamic-form").each(function () {
+            formData += $(this).serialize() + "&";
+        });
+
+        // Include CSRF token in the data
+      formData += "csrfmiddlewaretoken=" + csrfToken;
+
+        // Remove the trailing "&"
+        formData = formData.slice(0, -1);
+
+        // Submit all form data in a single request
+        $.ajax({
+            type: "POST",
+            url: $(this).attr("action"),
+            data: formData,
+            success: function (response) {
+            // Handle success, if needed
+            alert("Forms submitted successfully!");
+            },
+            error: function (error) {
+            // Handle error, if needed
+            alert("Form submission failed!");
+            },
+        });
+        return false
+    });
+});
+    </script>
+    {% endblock %}
+  </body>
 </html>

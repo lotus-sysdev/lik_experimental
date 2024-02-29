@@ -388,7 +388,7 @@ def update(request):
     event = Events.objects.get(id=id)
     event.start = start
     event.end = end
-    event.name = title
+    event.title = title
     event.save()
     data = {}
     return JsonResponse(data)
