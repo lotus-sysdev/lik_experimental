@@ -1,14 +1,12 @@
 import os
 from PIL import Image
-import json
 
 from django.shortcuts import redirect, render, get_object_or_404
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseNotFound
+from django.http import JsonResponse
 from django.utils import timezone
 
 from .decorators import *
