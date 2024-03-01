@@ -29,7 +29,6 @@
               {{ form.package_name.label_tag }} {{ form.package_name }} 
               {{ form.package_dimensions.label_tag }} {{ form.package_dimensions }}
               {{ form.package_mass.label_tag }} {{ form.package_mass }}
-              <!-- Add other fields for the right side -->
             </div>
           </div>
           <div class="w-100">
@@ -48,6 +47,7 @@
             class="btn btn-info mt-3"
             id="tambah-tujuan-btn"
             type="button"
+            disabled
           >
             Tambah Tujuan
           </button>
@@ -105,38 +105,7 @@
             $("#tambah-tujuan-btn").prop("disabled", true);
           }
         });
-
-         // Event handler for main form submission
-        $("form").submit(function () {
-        // Gather data from all forms
-        var formData = "";
-        $(".dynamic-form").each(function () {
-            formData += $(this).serialize() + "&";
-        });
-
-        // Include CSRF token in the data
-      formData += "csrfmiddlewaretoken=" + csrfToken;
-
-        // Remove the trailing "&"
-        formData = formData.slice(0, -1);
-
-        // Submit all form data in a single request
-        $.ajax({
-            type: "POST",
-            url: $(this).attr("action"),
-            data: formData,
-            success: function (response) {
-            // Handle success, if needed
-            alert("Forms submitted successfully!");
-            },
-            error: function (error) {
-            // Handle error, if needed
-            alert("Form submission failed!");
-            },
-        });
-        return false
     });
-});
     </script>
     {% endblock %}
   </body>

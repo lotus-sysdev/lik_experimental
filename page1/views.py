@@ -398,31 +398,28 @@ def remove(request):
     data = {}
     return JsonResponse(data)
 
+# Forms for adding delivery order, messenger, and vehicle
 def delivery_form(request):
     if request.method == 'POST':
         form = DeliveryForm(request.POST)
         if form.is_valid():
             # Save the event to the database
             form.save()
-            # Redirect to a success page or do something else
-            return redirect('/calendar')
     else:
         # Get the start and end parameters from the URL
-        title_param = request.GET.get('title')
         start_param = request.GET.get('start')
         end_param = request.GET.get('end')
         # Set the initial values for the form fields based on the parameters
         initial_data = {
-            'title': title_param,
             'start': start_param,
             'end': end_param
         }
         form = DeliveryForm(initial=initial_data)
+
     return render(request, 'delivery/delivery_form.html', {'form': form})
 
 def add_messenger(request):
     return add_entity_view(request, MessengerForm, 'delivery/add_messenger.html', 'calendar')
-
 
 def add_vehicle(request):
     return add_entity_view(request, VehicleForm, 'delivery/add_vehicle.html', 'calendar')
