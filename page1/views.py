@@ -385,6 +385,7 @@ def all_events(request):
                                                                                                                       
     return JsonResponse(out, safe=False) 
  
+@login_required
 def add_event(request):
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
@@ -394,6 +395,7 @@ def add_event(request):
     data = {}
     return JsonResponse(data)
  
+@login_required
 def update(request):
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
@@ -407,6 +409,7 @@ def update(request):
     data = {}
     return JsonResponse(data)
  
+@login_required
 def remove(request):
     id = request.GET.get("id", None)
     event = Events.objects.get(id=id)
@@ -414,6 +417,7 @@ def remove(request):
     data = {}
     return JsonResponse(data)
 
+@login_required
 def delivery_form(request):
     if request.method == 'POST':
         form = DeliveryForm(request.POST)
@@ -436,9 +440,10 @@ def delivery_form(request):
         form = DeliveryForm(initial=initial_data)
     return render(request, 'delivery/delivery_form.html', {'form': form})
 
+@login_required
 def add_messenger(request):
     return add_entity_view(request, MessengerForm, 'delivery/add_messenger.html', 'calendar')
 
-
+@login_required
 def add_vehicle(request):
     return add_entity_view(request, VehicleForm, 'delivery/add_vehicle.html', 'calendar')
