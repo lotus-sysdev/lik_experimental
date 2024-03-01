@@ -250,7 +250,7 @@ class Events(models.Model):
     package_mass = MeasurementField(measurement=Mass, null=True)
 
     def __str__(self):
-        return self.name
+        return self.title
     
 
 class User(AbstractUser):

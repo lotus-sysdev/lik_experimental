@@ -1,8 +1,14 @@
 {% extends 'base.html' %}
+
 <!DOCTYPE html>
 <html>
   <head>
     <title>{% block title %}Event Form{% endblock %}</title>
+    <style>
+      #form-container .extra-form {
+        display: none;
+      }
+    </style>
   </head>
   <body>
     {% block content %}
@@ -10,7 +16,9 @@
     <div class="form-group" style="width: 90%">
       <form method="post">
         {% csrf_token %}
-        <div id="forms-container"">
+        {{ forms.management_form }}
+        {% for form in forms %}
+        <div id="forms-container">
           <div
             id="form-section-1"
           >
@@ -42,12 +50,12 @@
           {{ form.messenger.label_tag }} {{ form.messenger }} 
           {{ form.vehicle.label_tag }} {{ form.vehicle }}
         </div>
+        {% endfor %}
         <div>
           <button
             class="btn btn-info mt-3"
             id="tambah-tujuan-btn"
             type="button"
-            disabled
           >
             Tambah Tujuan
           </button>
@@ -56,57 +64,19 @@
       </form>
     </div>
     <script>
-      $(document).ready(function () {
-        // Counter to track the number of forms added
-        var formCounter = 1;
-        var maxForms = 3;
-
-        // Function to create a new form section
-        function createForm() {
-          if (formCounter >= maxForms) {
-            return ''; // Return null if the maximum number of forms is reached
-          }
-
-          formCounter++;
-          var newForm = $("#form-section-1").clone();
-          newForm.attr("id", "form-section-" + formCounter);
-
-          newForm.find(":input").val("");
-          newForm.find("label[for]").each(function () {
-            var labelFor = $(this).attr("for");
-            $(this).attr("for", labelFor.replace("-1", "-" + formCounter));
+      document.addEventListener('DOMContentLoaded', function () {
+          var formContainer = document.getElementById('form-container');
+          var showHideButton = document.getElementById('tambah-tujuan-btn');
+          
+          showHideButton.addEventListener('click', function () {
+              // Toggle the display property of the extra forms
+              var extraForms = formContainer.querySelectorAll('.extra-form');
+              extraForms.forEach(function (form) {
+                  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+              });
           });
-
-            // Copy values from the previous form
-            var prevForm = $("#form-section-" + (formCounter - 1));
-            newForm.find('[name="start"]').val(prevForm.find('[name="end"]').val());
-            newForm.find('[name="start_location"]').val(prevForm.find('[name="destination"]').val());
-
-            // Append hidden inputs for cloned form fields with unique names
-      newForm.find(":input").each(function () {
-        var inputName = $(this).attr("name");
-        if (inputName) {
-          var uniqueInputName = inputName.replace("-1", "-" + formCounter);
-          $(this).attr('name', uniqueInputName);
-        }
       });
-
-          return newForm;
-        }
-
-        // Event handler for "Tambah Tujuan" button
-        $("#tambah-tujuan-btn").click(function (e) {
-          e.preventDefault(); // Prevent the default form submission
-          var newForm = createForm();
-          if (newForm !== null) {
-            newForm.appendTo("#forms-container"); // Append the new form to a container
-          } else {
-            alert("Maximum number of forms reached (3)");
-            $("#tambah-tujuan-btn").prop("disabled", true);
-          }
-        });
-    });
-    </script>
+  </script>
     {% endblock %}
   </body>
 </html>

@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils import timezone
+from django.forms import formset_factory
 
 from .decorators import *
 from .forms import *
@@ -400,23 +401,41 @@ def remove(request):
 
 # Forms for adding delivery order, messenger, and vehicle
 def delivery_form(request):
+    DeliveryFormSet = formset_factory(DeliveryForm, extra=2, can_delete=False)
+
     if request.method == 'POST':
-        form = DeliveryForm(request.POST)
-        if form.is_valid():
-            # Save the event to the database
-            form.save()
+        # extra_value = int(request.POST.get('extra', default_extra))
+        # DeliveryFormSet = formset_factory(DeliveryForm, extra=extra_value, can_delete=False)
+        formset = DeliveryFormSet(request.POST, prefix='form')
+
+        if formset.is_valid():
+            for form in formset:
+                # print(form.cleaned_data)
+                if form.has_changed():
+                    instance = form.save(commit=False)
+                    # print(instance)
+                    instance.save()
+
+            return redirect('/calendar')
+        else:
+            print("Formset not valid")
+            print(formset.errors)
+            print(formset.non_form_errors())
     else:
-        # Get the start and end parameters from the URL
         start_param = request.GET.get('start')
         end_param = request.GET.get('end')
-        # Set the initial values for the form fields based on the parameters
-        initial_data = {
+        initial_data = [{
             'start': start_param,
             'end': end_param
-        }
-        form = DeliveryForm(initial=initial_data)
+        }]
+        formset = DeliveryFormSet(initial=initial_data, prefix='form')
 
-    return render(request, 'delivery/delivery_form.html', {'form': form})
+    return render(request, 'delivery/delivery_form.html', {'forms': formset})
+
+def render_dynamic_form(request):
+    form_counter = request.GET.get('form_counter', 1)
+    form = DeliveryForm(prefix=f'form-{form_counter}')
+    return render(request, 'delivery/dynamic_form.html', {'form':form, 'form_counter':form_counter})
 
 def add_messenger(request):
     return add_entity_view(request, MessengerForm, 'delivery/add_messenger.html', 'calendar')
