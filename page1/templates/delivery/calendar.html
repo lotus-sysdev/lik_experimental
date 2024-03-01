@@ -5,9 +5,20 @@
     {% block title %}Delivery Order Calendary{% endblock title %}
   </title>
 </head>
+
 <body>
   {% block content %}
   <div class="container col-md-12 mt-5">
+    <button id="myCustomButton" class="fc-btn btn-sm btn-primary dropdown-toggle float-right ml-3 " type="button"
+      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Events By Messenger
+    </button>
+    <div class="dropdown-menu" aria-labelledby="myCustomButton">
+      <a id="null" class="dropdown-item" href="#">All Deliveries</a>
+      <a id="1" class="dropdown-item" href="#">Messenger 1</a>
+      <a id="1" class="dropdown-item" href="#">Messenger 2</a>
+      <a id="1" class="dropdown-item" href="#">Messenger 3</a>
+    </div>
     <div id="calendar"></div>
   </div>
   {% endblock content %}
