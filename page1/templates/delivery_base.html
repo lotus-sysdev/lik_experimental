@@ -51,40 +51,40 @@
 
   <script>
     $(document).ready(function () {
-      var calendar = $("#calendar").fullCalendar({
+      let currentMessengerId = null; // Update 'var' to 'let' or 'const'
+      let calendar = $("#calendar").fullCalendar({
         header: {
           left: "prev,next today",
           center: "title",
           right: "month,agendaWeek,agendaDay", // Add the custom button to the header
         },
-        customButtons: {
-          myCustomButton: {
-            text: 'Events By Messenger',
-            click: function () {
-              // Open the dropdown menu
-              $(".dropdown-menu").toggle();
-            }
-          }
-        },
         events: function (start, end, timezone, callback) {
+          console.log(currentMessengerId);
           $.ajax({
             url: '/all_events',
             type: 'GET',
             dataType: 'json',
             success: function (response) {
-              var events = [];
+              let events = []; // Update 'var' to 'let'
               // Process the response data to set eventColor based on messengerid
               response.forEach(function (event) {
-                var color = event.messenger_color; // Adjust colors as needed
-                events.push({
-                  id: event.id,
-                  title: event.title,
-                  start: event.start,
-                  end: event.end,
-                  allDay: event.allDay,
-                  color: color
-                });
+                console.log(currentMessengerId);
+                let color = event.messenger_color; // Adjust colors as needed
+                let messengerId = event.messenger_id;
+                // Check if the event's messengerId matches the filter criteria
+                if (!currentMessengerId || messengerId.toString() === currentMessengerId) {
+                  events.push({
+                    id: event.id,
+                    title: event.title,
+                    start: event.start,
+                    end: event.end,
+                    allDay: event.allDay,
+                    color: color,
+                    messengerId: messengerId // use messengerId instead of messenger_id
+                  });
+                }
               });
+              console.log('Filtered Events:', events);
               callback(events);
             }
           });
@@ -165,7 +165,25 @@
         themeSystem: "bootstrap4",
         timeZone: "Asia/Jakarta",
       });
+      $('.dropdown-item').on('click', function () {
+        // Get the messenger ID from the clicked item
+        let messengerId = $(this).attr('id'); // Update 'var' to 'let' or 'const'
+        // Update the current messenger ID
+        currentMessengerId = messengerId;
+
+        console.log('Current Messenger ID:', currentMessengerId);
+
+        // Update the button text to show the selected messenger
+        $('#myCustomButton').text($(this).text());
+
+        // Refetch events with the new messenger ID
+        calendar.fullCalendar('refetchEvents');
+        
+      });
     });
+    calendar.fullCalendar('refetchEvents', function (events) {
+  console.log('Refetched Events:', events);
+});
   </script>
 </body>
 
