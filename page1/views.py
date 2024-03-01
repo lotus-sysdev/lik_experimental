@@ -425,6 +425,8 @@ def remove(request):
     data = {}
     return JsonResponse(data)
 
+
+# Delivery form functionality
 @login_required
 def delivery_form(request):
     if request.method == 'POST':
@@ -457,5 +459,9 @@ def add_vehicle(request):
     return add_entity_view(request, VehicleForm, 'delivery/add_vehicle.html', 'calendar')
 
 
+# -------------------- Error Pages -------------------- #
 def forbidden(request):
     return render(request, 'forbidden.html')
+
+def page_not_found(request, exception):
+    return render(request, '404.html', status=404)
