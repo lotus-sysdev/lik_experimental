@@ -59,7 +59,7 @@
           right: "month,agendaWeek,agendaDay", // Add the custom button to the header
         },
         events: function (start, end, timezone, callback) {
-          console.log(currentMessengerId);
+          // console.log(currentMessengerId);
           $.ajax({
             url: '/all_events',
             type: 'GET',
@@ -68,7 +68,7 @@
               let events = []; // Update 'var' to 'let'
               // Process the response data to set eventColor based on messengerid
               response.forEach(function (event) {
-                console.log(currentMessengerId);
+                // console.log(currentMessengerId);
                 let color = event.messenger_color; // Adjust colors as needed
                 let messengerId = event.messenger_id;
                 // Check if the event's messengerId matches the filter criteria
@@ -84,7 +84,7 @@
                   });
                 }
               });
-              console.log('Filtered Events:', events);
+              // console.log('Filtered Events:', events);
               callback(events);
             }
           });
@@ -171,7 +171,7 @@
         // Update the current messenger ID
         currentMessengerId = messengerId;
 
-        console.log('Current Messenger ID:', currentMessengerId);
+        // console.log('Current Messenger ID:', currentMessengerId);
 
         // Update the button text to show the selected messenger
         $('#myCustomButton').text($(this).text());
@@ -181,9 +181,6 @@
         
       });
     });
-    calendar.fullCalendar('refetchEvents', function (events) {
-  console.log('Refetched Events:', events);
-});
   </script>
 </body>
 
