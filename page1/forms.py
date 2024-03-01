@@ -530,7 +530,8 @@ class Register(UserCreationForm):
 
     Role_Choices = (
         ('GA','General Affairs'),
-        ('Accounting','Accounting')
+        ('Accounting','Accounting'),
+        ('Messenger', 'Messenger')
     )
     role = forms.ChoiceField(
         choices=Role_Choices,

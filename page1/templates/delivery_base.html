@@ -172,13 +172,19 @@
         currentMessengerId = messengerId;
 
         // console.log('Current Messenger ID:', currentMessengerId);
+        if (currentMessengerId.toString() === 'all') {
+          // Reset the currentMessengerId to null or any other appropriate value
+          currentMessengerId = null;
+          $('#myCustomButton').text($(this).text());
+          calendar.fullCalendar('refetchEvents');
+        } else {
+          // Update the button text to show the selected messenger
+          $('#myCustomButton').text($(this).text());
+          
+          // Refetch events with the new messenger ID
+          calendar.fullCalendar('refetchEvents');
+        }
 
-        // Update the button text to show the selected messenger
-        $('#myCustomButton').text($(this).text());
-
-        // Refetch events with the new messenger ID
-        calendar.fullCalendar('refetchEvents');
-        
       });
     });
   </script>
