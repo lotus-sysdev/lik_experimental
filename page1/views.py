@@ -271,8 +271,16 @@ def add_sumber(request, SKU):
 # -------------------- Order Functions -------------------- #
 # Add Purchase Order and Work Order
 @login_required
+@allowed_roles_required
 def add_PO(request):
-    return add_entity_view(request, PurchaseForm, 'order/add_PO.html', 'display_purchase')
+    if request.method == 'POST':
+        form = PurchaseForm(request.POST)
+        if form.is_valid():
+            form.save()
+    else:
+        form = PurchaseForm()
+
+    return render(request, 'order/add_PO.html', {'form': form})
 
 @login_required
 def add_WO(request):
@@ -447,3 +455,7 @@ def add_messenger(request):
 @login_required
 def add_vehicle(request):
     return add_entity_view(request, VehicleForm, 'delivery/add_vehicle.html', 'calendar')
+
+
+def forbidden(request):
+    return render(request, 'forbidden.html')
