@@ -103,34 +103,41 @@ def delete_entity(request, entity_model, entity_id_field, entity_id):
 
 # -------------------- Add Customer and Supplier Views -------------------- #
 @login_required
+@allowed_roles_required
 def add_customer(request):
     return add_entity_view(request, CustomerForm, 'customer/add_cust.html', 'display_customer')
 
 @login_required
+@allowed_roles_required
 def add_supplier(request):
     return add_entity_view(request, SupplierForm, 'supplier/add_supp.html', 'display_supplier')
 
 
 # -------------------- Add Alamat and PIC -------------------- #
 @login_required
+@allowed_roles_required
 def add_customer_pic(request, cust_id):
     return add_entity(request, cust_id, Customer, CustPICForms, 'pic/add_cust_pic.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
 
 @login_required
+@allowed_roles_required
 def add_supplier_pic(request, supp_id):
     return add_entity(request, supp_id, Supplier, SuppPICForms, 'pic/add_supp_pic.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
 
 @login_required
+@allowed_roles_required
 def add_customer_alamat(request, cust_id):
     return add_entity(request, cust_id, Customer, CustAlamatForms, 'alamat/add_customer_alamat.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
 
 @login_required
+@allowed_roles_required
 def add_supplier_alamat(request, supp_id):
     return add_entity(request, supp_id, Supplier, SuppAlamattForms, 'alamat/add_supplier_alamat.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
 
 
 # -------------------- Add Item -------------------- #
 @login_required
+@allowed_roles_required
 def add_item(request):
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES)
@@ -166,20 +173,24 @@ def add_item(request):
 
 # -------------------- Display Tables -------------------- #
 @login_required
+@allowed_roles_required
 def display_customer(request):
     return display_entities(request, Customer, 'customer/display_customer.html')
 
 @login_required
+@allowed_roles_required
 def display_supplier(request):
     return display_entities(request, Supplier, 'supplier/display_supplier.html')
 
 @login_required
+@allowed_roles_required
 def display_item(request):
     return display_entities(request, Items, 'item/display_item.html')
 
 
 # -------------------- Customer Functions -------------------- #
 @login_required
+@allowed_roles_required
 def customer_detail(request, cust_id):
     customer_pics = CustomerPIC.objects.filter(customer_id=cust_id)
     customer_alamat = CustomerAlamat.objects.filter(customer_id=cust_id)
@@ -187,16 +198,19 @@ def customer_detail(request, cust_id):
     return entity_detail(request, Customer, CustomerForm, 'cust_id', cust_id, 'customer/customer_detail.html', extra_context)
 
 @login_required
+@allowed_roles_required
 def edit_customer(request, cust_id):
     return edit_entity(request, Customer, CustomerForm, 'cust_id', cust_id)
 
 @login_required
+@allowed_roles_required
 def delete_customer(request, cust_id):
     return delete_entity(request, Customer, 'cust_id', cust_id)
 
 
 # -------------------- Customer Functions -------------------- #
 @login_required
+@allowed_roles_required
 def supplier_detail(request, supp_id):
     supplier_pics = SupplierPIC.objects.filter(supplier_id=supp_id)
     supplier_alamat = SupplierAlamat.objects.filter(supplier_id=supp_id)
@@ -204,16 +218,19 @@ def supplier_detail(request, supp_id):
     return entity_detail(request, Supplier, SupplierForm, 'supp_id', supp_id, 'supplier/supplier_detail.html', extra_context)
 
 @login_required
+@allowed_roles_required
 def edit_supplier(request, supp_id):
     return edit_entity(request, Supplier, SupplierForm, 'supp_id', supp_id)
 
 @login_required
+@allowed_roles_required
 def delete_supplier(request, supp_id):
     return delete_entity(request, Supplier, 'supp_id', supp_id)
 
 
 # -------------------- Item Functions -------------------- #
 @login_required
+@allowed_roles_required
 def item_detail(request, SKU):
     entity = get_object_or_404(Items, SKU=SKU)
     item_sumber = ItemSumber.objects.filter(item=SKU)
@@ -221,6 +238,7 @@ def item_detail(request, SKU):
     return render(request, 'item/item_detail.html', context)
 
 @login_required
+@allowed_roles_required
 def edit_item(request, SKU):
     entity = get_object_or_404(Items,SKU=SKU)
 
@@ -251,10 +269,12 @@ def edit_item(request, SKU):
     return render(request, 'edit_item.html', {'form': form})
 
 @login_required
+@allowed_roles_required
 def delete_item(request, SKU):
     return delete_entity(request, Items, 'SKU', SKU)
 
 @login_required
+@allowed_roles_required
 def approve_item(request, SKU):
     item = get_object_or_404(Items, SKU=SKU)
     item.is_approved = True
@@ -264,6 +284,7 @@ def approve_item(request, SKU):
 
 # -------------------- Item Sumber Functions -------------------- #
 @login_required
+@allowed_roles_required
 def add_sumber(request, SKU):
     return add_entity(request, SKU, Items, SumberForm, 'item/add_sumber.html', 'SKU', 'item')
 
@@ -283,42 +304,58 @@ def add_PO(request):
     return render(request, 'order/add_PO.html', {'form': form})
 
 @login_required
+@allowed_roles_required
 def add_WO(request):
-    return add_entity_view(request, WorkForm, 'order/add_WO.html', 'display_work')
+    if request.method == 'POST':
+        form = WorkForm(request.POST)
+        if form.is_valid():
+            form.save()
+    else:
+        form = WorkForm()
+
+    return render(request, 'order/add_WO.html', {'form': form})
 
 # Display Purchase Order and Work Order
 @login_required
+@allowed_roles_required
 def display_purchase(request):
     return display_entities(request, PurchaseOrder, 'order/display_purchase.html')
 
 @login_required
+@allowed_roles_required
 def display_work(request):
     return display_entities(request, WorkOrder, 'order/display_work.html')
 
 #  Detail of Purchase Order and Work Order
 @login_required
+@allowed_roles_required
 def purchase_detail(request, id):
     return entity_detail(request, PurchaseOrder, PurchaseForm, 'id',id, 'order/purchase_detail.html')
 
 @login_required
+@allowed_roles_required
 def work_detail(request, id):
     return entity_detail(request, WorkOrder, WorkForm, 'id', id, 'order/work_detail.html')
 
 # Edit Purchase Order and Work Order
 @login_required
+@allowed_roles_required
 def edit_purchase(request, id):
     return edit_entity(request, PurchaseOrder, PurchaseForm, 'id', id)
 
 @login_required
+@allowed_roles_required
 def edit_work(request, id):
     return edit_entity(request, WorkOrder, WorkForm, 'id', id)
 
 # Delete Purchase Order and Work Order
 @login_required
+@allowed_roles_required
 def delete_purchase(request, id):
     return delete_entity(request, PurchaseOrder, 'id', id)
 
 @login_required
+@allowed_roles_required
 def delete_work(request, id):
     return delete_entity(request, WorkOrder, 'id', id)
   
