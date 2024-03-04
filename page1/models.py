@@ -1,7 +1,9 @@
 import datetime
 from django.db import models
-from django.contrib.auth.models import User, AbstractUser
+from django.contrib.auth.models import User, AbstractUser, Group
 import uuid
+from django.forms import ValidationError
+from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 from djmoney.models.fields import MoneyField
 from django_measurement.models import MeasurementField
@@ -52,6 +54,7 @@ class Category(models.Model):
 
 class Items(models.Model):
     SKU = models.CharField(max_length=10, primary_key = True, unique = True)
+    Tanggal = models.DateField(default=timezone.now)
     nama = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     quantity = models.IntegerField()
@@ -130,13 +133,13 @@ def default_date():
 class PurchaseOrder(models.Model):
     supplier= models.ForeignKey(Supplier, on_delete=models.CASCADE)
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
-    revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, default=0)
-    nomor_PO = models.IntegerField(blank=True, null=True, default=0)
-    tanggal_PO = models.DateField(blank=True, null=True, default=default_date)
-    tanggal_process = models.DateField(blank=True, null=True, default=default_date)
-    tanggal_input_accurate = models.DateField(blank=True, null=True, default=default_date)
-    tanggal_pengiriman_barang = models.DateField(blank=True, null=True, default=default_date)
-    tanggal_pengiriman_invoice = models.DateField(blank=True, null=True, default=default_date)
+    revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, )
+    nomor_PO = models.IntegerField(blank=True, null=True,)
+    tanggal_PO = models.DateField(blank=True, null=True, )
+    tanggal_process = models.DateField(blank=True, null=True, )
+    tanggal_input_accurate = models.DateField(blank=True, null=True,)
+    tanggal_pengiriman_barang = models.DateField(blank=True, null=True, )
+    tanggal_pengiriman_invoice = models.DateField(blank=True, null=True, )
     STATUS_CHOICES = (
         ('order', 'Order Created'),
         ('pending', 'Pending'),
@@ -169,13 +172,13 @@ class PurchaseOrder(models.Model):
 class WorkOrder(models.Model):
     customer= models.ForeignKey(Customer, on_delete=models.CASCADE)
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
-    revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, default=0)
-    nomor_PO = models.IntegerField(blank=True, null=True, default=0)
-    tanggal_PO = models.DateField(blank=True, null=True, default=default_date)
-    tanggal_process = models.DateField(blank=True, null=True, default=default_date)
-    tanggal_input_accurate = models.DateField(blank=True, null=True, default=default_date)
-    tanggal_pengiriman_barang = models.DateField(blank=True, null=True, default=default_date)
-    tanggal_pengiriman_invoice = models.DateField(blank=True, null=True, default=default_date)
+    revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True)
+    nomor_PO = models.IntegerField(blank=True, null=True)
+    tanggal_PO = models.DateField(blank=True, null=True)
+    tanggal_process = models.DateField(blank=True, null=True)
+    tanggal_input_accurate = models.DateField(blank=True, null=True)
+    tanggal_pengiriman_barang = models.DateField(blank=True, null=True)
+    tanggal_pengiriman_invoice = models.DateField(blank=True, null=True)
     STATUS_CHOICES = (
         ('order', 'Order Created'),
         ('pending', 'Pending'),
