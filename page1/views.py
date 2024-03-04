@@ -1,15 +1,15 @@
 import os
 from PIL import Image
-import json
+import requests
 
 from django.shortcuts import redirect, render, get_object_or_404
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseNotFound
+from django.http import JsonResponse
 from django.utils import timezone
+from django.urls import resolve
 
 from .decorators import *
 from .forms import *
@@ -436,6 +436,8 @@ def user_action_logs(request):
 @login_required
 def calendar(request):  
     all_events = Events.objects.all()
+    request.session['num_forms'] = 1
+    request.session.modified = True
     context = {
         "events":all_events,
     }
@@ -492,35 +494,57 @@ def remove(request):
     data = {}
     return JsonResponse(data)
 
-
+# Forms for adding delivery order, messenger, and vehicle
 # Delivery form functionality
 @login_required
 def delivery_form(request):
+    max_forms = 3  # Maximum number of forms allowed
+
     if request.method == 'POST':
-        form = DeliveryForm(request.POST)
-        if form.is_valid():
-            # Save the event to the database
-            form.save()
-            # Redirect to a success page or do something else
-            return redirect('/calendar')
+        num_forms = int(request.POST.get('num_forms', 1))  # Get the submitted number of forms
+
+        forms = [DeliveryForm(request.POST, prefix=str(i)) for i in range(1, num_forms + 1)]
+        
+        if all(form.is_valid() for form in forms):
+            # All forms are valid, process the data as needed
+            for form in forms:
+                # Save or process each form's data
+                instance = form.save(commit=False)
+                # Do additional processing if needed
+                instance.save()
+
+            request.session['num_forms'] = 1
+            request.session.modified = True
+            return redirect('calendar')  # Redirect to a success page
     else:
-        # Get the start and end parameters from the URL
-        title_param = request.GET.get('title')
         start_param = request.GET.get('start')
         end_param = request.GET.get('end')
-        # Set the initial values for the form fields based on the parameters
-        initial_data = {
-            'title': title_param,
-            'start': start_param,
-            'end': end_param
-        }
-        form = DeliveryForm(initial=initial_data)
-    return render(request, 'delivery/delivery_form.html', {'form': form})
+        # Set initial data for the forms based on start and end parameters
+        initial_data = {'start': start_param, 'end': end_param}
+
+        num_forms = int(request.session.get('num_forms', 1))
+        # print(num_forms)
+
+        forms = [DeliveryForm(initial=initial_data, prefix=str(i)) for i in range(1, num_forms + 1)]
+
+    context = {'forms': forms, 'max_forms': max_forms}
+    return render(request, 'delivery/delivery_form.html', context)
+
+def update_num_forms(request):
+    if request.method == 'POST':
+        num_forms = int(request.POST.get('num_forms', 1))
+        request.session['num_forms'] = num_forms
+        request.session.modified = True
+        
+        return JsonResponse({'status': 'success', 'num_forms':num_forms})
+
+    return JsonResponse({'status': 'error'})
 
 @login_required
 def add_messenger(request):
     return add_entity_view(request, MessengerForm, 'delivery/add_messenger.html', 'calendar')
 
+ 
 @login_required
 def add_vehicle(request):
     return add_entity_view(request, VehicleForm, 'delivery/add_vehicle.html', 'calendar')

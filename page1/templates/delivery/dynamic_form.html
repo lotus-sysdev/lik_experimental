@@ -1,0 +1,25 @@
+<!-- dynamic_form.html -->
+
+<div id="form-section-{{ form_counter }}">
+    <div style="display: flex;">
+        <div class="mt-4 w-50 mr-3">
+            <h5>Detail Pengantaran</h5>
+            Title:{{ form.title.label_tag }} {{ form.title }} 
+            {{ form.start.label_tag }} {{ form.start }} 
+            {{ form.end.label_tag }}{{ form.end }} 
+            {{ form.start_location.label_tag }}{{ form.start_location }} 
+            {{ form.destination.label_tag }} {{ form.destination }}
+        </div>
+
+        <div class="mt-4 w-50 ml-3">
+            <h5>Paket</h5>
+            {{ form.package_name.label_tag }} {{ form.package_name }} 
+            {{ form.package_dimensions.label_tag }} {{ form.package_dimensions }}
+            {{ form.package_mass.label_tag }} {{ form.package_mass }}
+        </div>
+    </div>
+    <div class="w-100">
+        <br>
+        <hr>
+    </div>
+</div>

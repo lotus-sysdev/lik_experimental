@@ -72,6 +72,7 @@ urlpatterns = [
     path('update/', update, name='update'),
     path('remove/', remove, name='remove'),
     path('delivery_form/', delivery_form, name='delivery_form'),
+    path('update_num_forms/', update_num_forms, name='update_num_forms'),
     path('add_messenger/', add_messenger, name='add_messenger'),
     path('add_vehicle/', add_vehicle, name='add_vehicle'),
 

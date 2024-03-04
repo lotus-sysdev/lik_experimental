@@ -18,6 +18,32 @@ from djmoney.forms.widgets import MoneyWidget
 from django_measurement.forms import MeasurementField, MeasurementWidget
 from measurement.measures import Mass
 
+class DimensionsInput(forms.MultiWidget):
+    def __init__(self, attrs=None):
+        widgets = [
+            forms.NumberInput(attrs={'class':'form-control', 'style':'width:33%', 'placeholder': 'Panjang (cm)'}),
+            forms.NumberInput(attrs={'class':'form-control', 'style':'width:33%', 'placeholder': 'Lebar (cm)'}),
+            forms.NumberInput(attrs={'class':'form-control', 'style':'width:33%', 'placeholder': 'Tinggi (cm)'}),
+        ]
+        super().__init__(widgets, attrs)
+
+    def decompress(self, value):
+        if value:
+            return [int(dim) for dim in value.split('x')]
+        return [None, None, None]
+
+class DimensionsField(forms.MultiValueField):
+    def __init__(self, *args, **kwargs):
+        fields = (
+            forms.IntegerField(),
+            forms.IntegerField(),
+            forms.IntegerField(),
+        )
+        super().__init__(fields, *args, **kwargs)
+        self.widget = DimensionsInput() 
+
+    def compress(self, data_list):
+        return f"{data_list[0]}x{data_list[1]}x{data_list[2]}"
 
 def validate_npwp(value):
     cleaned_value = re.sub(r'\D', '', value)
@@ -615,10 +641,9 @@ class DeliveryForm(forms.ModelForm):
         label= "Nama Paket",
         widget=forms.TextInput(attrs={'class':'form-control' , 'placeholder': 'Nama Paket'})
     )
-    package_dimensions = forms.CharField(
-        max_length=30,
+    package_dimensions = DimensionsField(
         label= "Dimensi Paket",
-        widget=forms.TextInput(attrs={'class':'form-control', 'placeholder': 'panjang x lebar x tinggi'})
+        widget=DimensionsInput(attrs={'class':'form-control'})
     )
     package_mass = MeasurementField(
         measurement=Mass,
