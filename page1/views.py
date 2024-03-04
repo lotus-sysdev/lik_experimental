@@ -1,5 +1,6 @@
 import os
 from PIL import Image
+import requests
 
 from django.shortcuts import redirect, render, get_object_or_404
 from django.conf import settings
@@ -8,7 +9,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils import timezone
-from django.forms import formset_factory
+from django.urls import resolve
 
 from .decorators import *
 from .forms import *
@@ -350,6 +351,8 @@ def user_action_logs(request):
 # Display calendar, and event addition/deletion functionality
 def calendar(request):  
     all_events = Events.objects.all()
+    request.session['num_forms'] = 1
+    request.session.modified = True
     context = {
         "events":all_events,
     }
@@ -401,41 +404,47 @@ def remove(request):
 
 # Forms for adding delivery order, messenger, and vehicle
 def delivery_form(request):
-    DeliveryFormSet = formset_factory(DeliveryForm, extra=2, can_delete=False)
+    max_forms = 3  # Maximum number of forms allowed
 
     if request.method == 'POST':
-        # extra_value = int(request.POST.get('extra', default_extra))
-        # DeliveryFormSet = formset_factory(DeliveryForm, extra=extra_value, can_delete=False)
-        formset = DeliveryFormSet(request.POST, prefix='form')
+        num_forms = int(request.POST.get('num_forms', 1))  # Get the submitted number of forms
 
-        if formset.is_valid():
-            for form in formset:
-                # print(form.cleaned_data)
-                if form.has_changed():
-                    instance = form.save(commit=False)
-                    # print(instance)
-                    instance.save()
+        forms = [DeliveryForm(request.POST, prefix=str(i)) for i in range(1, num_forms + 1)]
+        
+        if all(form.is_valid() for form in forms):
+            # All forms are valid, process the data as needed
+            for form in forms:
+                # Save or process each form's data
+                instance = form.save(commit=False)
+                # Do additional processing if needed
+                instance.save()
 
-            return redirect('/calendar')
-        else:
-            print("Formset not valid")
-            print(formset.errors)
-            print(formset.non_form_errors())
+            request.session['num_forms'] = 1
+            request.session.modified = True
+            return redirect('calendar')  # Redirect to a success page
     else:
         start_param = request.GET.get('start')
         end_param = request.GET.get('end')
-        initial_data = [{
-            'start': start_param,
-            'end': end_param
-        }]
-        formset = DeliveryFormSet(initial=initial_data, prefix='form')
+        # Set initial data for the forms based on start and end parameters
+        initial_data = {'start': start_param, 'end': end_param}
 
-    return render(request, 'delivery/delivery_form.html', {'forms': formset})
+        num_forms = int(request.session.get('num_forms', 1))
+        # print(num_forms)
 
-def render_dynamic_form(request):
-    form_counter = request.GET.get('form_counter', 1)
-    form = DeliveryForm(prefix=f'form-{form_counter}')
-    return render(request, 'delivery/dynamic_form.html', {'form':form, 'form_counter':form_counter})
+        forms = [DeliveryForm(initial=initial_data, prefix=str(i)) for i in range(1, num_forms + 1)]
+
+    context = {'forms': forms, 'max_forms': max_forms}
+    return render(request, 'delivery/delivery_form.html', context)
+
+def update_num_forms(request):
+    if request.method == 'POST':
+        num_forms = int(request.POST.get('num_forms', 1))
+        request.session['num_forms'] = num_forms
+        request.session.modified = True
+        
+        return JsonResponse({'status': 'success', 'num_forms':num_forms})
+
+    return JsonResponse({'status': 'error'})
 
 def add_messenger(request):
     return add_entity_view(request, MessengerForm, 'delivery/add_messenger.html', 'calendar')

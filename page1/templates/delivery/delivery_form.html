@@ -1,82 +1,129 @@
-{% extends 'base.html' %}
+<!-- delivery_form_template.html -->
 
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>{% block title %}Event Form{% endblock %}</title>
-    <style>
-      #form-container .extra-form {
-        display: none;
-      }
-    </style>
-  </head>
-  <body>
-    {% block content %}
-    <h2>Delivery Form</h2>
-    <div class="form-group" style="width: 90%">
-      <form method="post">
-        {% csrf_token %}
-        {{ forms.management_form }}
-        {% for form in forms %}
-        <div id="forms-container">
-          <div
-            id="form-section-1"
-          >
-          <div style="display: flex;"">
-            <div class="mt-4 w-50 mr-3">
-              <h5>Detail Pengantaran</h5>
-              {{ form.title.label_tag }} {{ form.title }} 
-              {{ form.start.label_tag }} {{ form.start }} 
-              {{ form.end.label_tag }}{{ form.end }} 
-              {{ form.start_location.label_tag }}{{form.start_location }} 
-              {{ form.destination.label_tag }} {{  form.destination }}
-            </div>
+{% extends 'base.html' %} {% block content %}
+<h2>{% block title %}Create Delivery Order{% endblock %}</h2>
 
-            <div class="mt-4 w-50 ml-3">
-              <h5>Paket</h5>
-              {{ form.package_name.label_tag }} {{ form.package_name }} 
-              {{ form.package_dimensions.label_tag }} {{ form.package_dimensions }}
-              {{ form.package_mass.label_tag }} {{ form.package_mass }}
-            </div>
-          </div>
-          <div class="w-100">
-              <br>
-              <hr>
-          </div>
-          </div>
-        </div>
+<form id="delivery-form" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <label for="id_num_forms" style="display: none;">Number of Forms (1-3):</label>
+  <input
+    type="number"
+    name="num_forms"
+    id="id_num_forms"
+    min="1"
+    max="3"
+    value="{{ forms|length }}"
+    required
+    style="display: none;"
+  />
+
+  <div id="forms-container">
+    {% for form in forms %}
+    <fieldset class="delivery-form">
+      <div
+        id="form-section-1"
+      >
+      <div style="display: flex;"">
         <div class="mt-4 w-50 mr-3">
-          <h5>Kurir</h5>
-          {{ form.messenger.label_tag }} {{ form.messenger }} 
-          {{ form.vehicle.label_tag }} {{ form.vehicle }}
+          <h5>Detail Pengantaran</h5>
+          {{ form.title.label_tag }} {{ form.title }} 
+          {{ form.start.label_tag }} {{ form.start }} 
+          {{ form.end.label_tag }}{{ form.end }} 
+          {{ form.start_location.label_tag }}{{form.start_location }} 
+          {{ form.destination.label_tag }} {{  form.destination }}
         </div>
-        {% endfor %}
-        <div>
-          <button
-            class="btn btn-info mt-3"
-            id="tambah-tujuan-btn"
-            type="button"
-          >
-            Tambah Tujuan
-          </button>
+
+        <div class="mt-4 w-50 ml-3">
+          <h5>Paket</h5>
+          {{ form.package_name.label_tag }} {{ form.package_name }} 
+          {{ form.package_dimensions.label_tag }} {{ form.package_dimensions }}
+          {{ form.package_mass.label_tag }} {{ form.package_mass }}
         </div>
-        <button type="submit" class="btn btn-primary mt-2">Submit</button>
-      </form>
-    </div>
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-          var formContainer = document.getElementById('form-container');
-          var showHideButton = document.getElementById('tambah-tujuan-btn');
-          
-          showHideButton.addEventListener('click', function () {
-              // Toggle the display property of the extra forms
-              var extraForms = formContainer.querySelectorAll('.extra-form');
-              extraForms.forEach(function (form) {
-                  form.style.display = form.style.display === 'none' ? 'block' : 'none';
-              });
-          });
+      </div>
+      <div class="w-100">
+          <br>
+          <hr>
+      </div>
+      </div>
+      <div class="mt-4 w-50 mr-3">
+        <h5>Kurir</h5>
+        {{ form.messenger.label_tag }} {{ form.messenger }} 
+        {{ form.vehicle.label_tag }} {{ form.vehicle }}
+      </div>
+      <br>
+      <hr>
+    </fieldset>
+    {% endfor %}
+  </div>
+  <div class="d-flex">
+    <button type="submit" class="btn btn-primary mr-2">Submit</button>
+    <button type="button" id="add-form" class="btn btn-info mr-2">Tambah Tujuan</button>
+    <button type="button" id="remove-form" class="btn btn-danger">Kurangi Tujuan</button>
+  </div>
+</form>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const addFormButton = document.getElementById("add-form");
+    const removeFormButton = document.getElementById("remove-form");
+    const numFormsInput = document.getElementById("id_num_forms");
+    const formsContainer = document.getElementById("forms-container");
+
+    addFormButton.addEventListener("click", function () {
+      const currentNumForms = parseInt(numFormsInput.value, 10);
+      if (currentNumForms < 3) {
+        numFormsInput.value = currentNumForms + 1;
+        addForm();
+        updateNumForms();
+        document.getElementById("delivery-form").submit();
+      }
+    });
+
+    removeFormButton.addEventListener("click", function () {
+      const currentNumForms = parseInt(numFormsInput.value, 10);
+      if (currentNumForms > 1) {
+        numFormsInput.value = currentNumForms - 1;
+        removeForm();
+        updateNumForms();
+      }
+    });
+
+    function addForm() {
+      const newForm = document.createElement("fieldset");
+      newForm.className = "delivery-form";
+      
+      formsContainer.appendChild(newForm);
+
+      // const firstForm = document.querySelector(".delivery-form");
+      // if (firstForm) {
+      //   const clonedForm = firstForm.cloneNode(true);
+      //   formsContainer.appendChild(clonedForm);
+      // }
+    }
+
+    function removeForm() {
+      const lastForm = formsContainer.lastElementChild;
+      if (lastForm) {
+        formsContainer.removeChild(lastForm);
+      }
+    }
+
+    function updateNumForms() {
+      const numForms = numFormsInput.value;
+      const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0]
+        .value;
+      $.ajax({
+        type: "POST",
+        url: '{% url "update_num_forms" %}', // Update with the correct URL name
+        data: { num_forms: numForms, csrfmiddlewaretoken: csrfToken },
+        success: function (data) {
+          // location.reload()
+        },
+        error: function (error) {
+          // Handle error if needed
+        },
       });
-  </script>
-    {% endblock %}
-  </body>
-</html>
+    }
+  });
+</script>
+{% endblock %}
