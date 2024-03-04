@@ -316,23 +316,67 @@ def display_work(request):
 @login_required
 @Messenger_Forbidden
 def purchase_detail(request, id):
-    return entity_detail(request, PurchaseOrder, PurchaseForm, 'id',id, 'order/purchase_detail.html')
+    entity = get_object_or_404(PurchaseOrder, id = id)
+
+    if request.user.groups.filter(name='GA').exists() or request.user.groups.filter(name='Admin').exists():
+            form = PurchaseForm(instance=entity)
+    elif request.user.groups.filter(name='Accounting').exists():
+        form = PurchaseFormNGA(instance=entity)
+    context = {'entity': entity, 'form': form, 'entity_id': id}
+
+    return render(request, 'order/purchase_detail.html', context)
 
 @login_required
 @Messenger_Forbidden
 def work_detail(request, id):
-    return entity_detail(request, WorkOrder, WorkForm, 'id', id, 'order/work_detail.html')
+    entity = get_object_or_404(WorkOrder, id = id)
+
+    if request.user.groups.filter(name='GA').exists() or request.user.groups.filter(name='Admin').exists():
+            form =WorkForm(instance=entity)
+    elif request.user.groups.filter(name='Accounting').exists():
+        form = WorkFormNGA(instance=entity)
+    context = {'entity': entity, 'form': form, 'entity_id': id}
+
+    return render(request, 'order/work_detail.html', context)
 
 # Edit Purchase Order and Work Order
 @login_required
 @Messenger_Forbidden
 def edit_purchase(request, id):
-    return edit_entity(request, PurchaseOrder, PurchaseForm, 'id', id)
+    entity = get_object_or_404(PurchaseOrder, id = id)
+
+    if request.method == 'POST':
+        if request.user.groups.filter(name='GA').exists() or request.user.groups.filter(name='Admin').exists():
+            form = PurchaseForm(request.POST, instance=entity)
+        elif request.user.groups.filter(name='Accounting').exists():
+            form = PurchaseFormNGA(request.POST, instance=entity)
+        
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+
+    return render(request, 'order/purchase_detail.html', {'form': form})
 
 @login_required
 @Messenger_Forbidden
 def edit_work(request, id):
-    return edit_entity(request, WorkOrder, WorkForm, 'id', id)
+    entity = get_object_or_404(WorkOrder, id = id)
+
+    if request.method == 'POST':
+        if request.user.groups.filter(name='GA').exists() or request.user.groups.filter(name='Admin').exists():
+            form = WorkForm(request.POST, instance=entity)
+        elif request.user.groups.filter(name='Accounting').exists():
+            form = WorkFormNGA(request.POST, instance=entity)
+        
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+
+    return render(request, 'order/work_detail.html', {'form': form})
 
 # Delete Purchase Order and Work Order
 @login_required

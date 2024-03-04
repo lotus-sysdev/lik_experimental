@@ -361,6 +361,7 @@ class ItemForm(forms.ModelForm):
         exclude = ['SKU','gambar_resized', 'is_approved']
         widgets = {
             'category': Select2Widget(attrs={'class':'form-control'}),
+            'Tanggal' : forms.DateInput(attrs={'type': 'date','class': 'form-control'}),
         }
         labels = {
             'category': "Kategori",
@@ -429,6 +430,22 @@ class PurchaseForm(forms.ModelForm):
             'tanggal_pengiriman_invoice': 'Tanggal Pengiriman Invoice',
         }
 
+class PurchaseFormNGA(forms.ModelForm):
+    class Meta:
+        model = PurchaseOrder
+        fields = ['tanggal_process', 'tanggal_input_accurate', 'tanggal_pengiriman_barang', 'tanggal_pengiriman_invoice']
+        widgets = {
+            'tanggal_process': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'tanggal_input_accurate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'tanggal_pengiriman_barang': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'tanggal_pengiriman_invoice': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
+        labels = {
+            'tanggal_process': 'Tanggal Proses',
+            'tanggal_input_accurate': 'Tanggal Input Accurate',
+            'tanggal_pengiriman_barang': 'Tanggal Pengiriman Barang',
+            'tanggal_pengiriman_invoice': 'Tanggal Pengiriman Invoice',
+        }
 class WorkForm(forms.ModelForm):
     revenue_PO = MoneyField( 
         required=False,
@@ -479,6 +496,22 @@ class WorkForm(forms.ModelForm):
             'item': Select2Widget(attrs={'class':'form-control'}),
         }
 
+class WorkFormNGA(forms.ModelForm):
+    class Meta:
+        model = WorkOrder
+        fields = ['tanggal_process', 'tanggal_input_accurate', 'tanggal_pengiriman_barang', 'tanggal_pengiriman_invoice']
+        widgets = {
+            'tanggal_process': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'tanggal_input_accurate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'tanggal_pengiriman_barang': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'tanggal_pengiriman_invoice': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
+        labels = {
+            'tanggal_process': 'Tanggal Proses',
+            'tanggal_input_accurate': 'Tanggal Input Accurate',
+            'tanggal_pengiriman_barang': 'Tanggal Pengiriman Barang',
+            'tanggal_pengiriman_invoice': 'Tanggal Pengiriman Invoice',
+        }
 class Register(UserCreationForm):
     username = forms.CharField(
         label='Username',
