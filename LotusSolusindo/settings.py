@@ -25,9 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-rj@lh5#&q==hsgz0-_+p!v0dykoosn!^4%nxyj)-j^&uhy1r*w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 LOGIN_URL = 'login/'
 
@@ -144,8 +144,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DATE_INPUT_FORMATS = ['%d/%m/%Y']
 
-CURRENCIES = ('IDR', 'USD')
-CURRENCY_CHOICES = [('IDR', 'Indonesian Rupiah (Rp.)'), ('USD', 'US Dollar ($)')]
+CURRENCIES = ('IDR', 'USD', 'SGD', 'CNY', 'TWD')
+CURRENCY_CHOICES = [('IDR', 'Indonesian Rupiah (IDR)'), ('USD', 'US Dollar (USD)'), ('SGD', 'Singapore Dollar (SGD)'), ('CNY', 'Chinese Yuan (CNY)'), ('TWD', 'New Taiwan Dollar (TWD)')]
 
 # settings.py
 

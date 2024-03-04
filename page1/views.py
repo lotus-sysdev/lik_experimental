@@ -103,34 +103,41 @@ def delete_entity(request, entity_model, entity_id_field, entity_id):
 
 # -------------------- Add Customer and Supplier Views -------------------- #
 @login_required
+@GA_required
 def add_customer(request):
     return add_entity_view(request, CustomerForm, 'customer/add_cust.html', 'display_customer')
 
 @login_required
+@GA_required
 def add_supplier(request):
     return add_entity_view(request, SupplierForm, 'supplier/add_supp.html', 'display_supplier')
 
 
 # -------------------- Add Alamat and PIC -------------------- #
 @login_required
+@GA_required
 def add_customer_pic(request, cust_id):
     return add_entity(request, cust_id, Customer, CustPICForms, 'pic/add_cust_pic.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
 
 @login_required
+@GA_required
 def add_supplier_pic(request, supp_id):
     return add_entity(request, supp_id, Supplier, SuppPICForms, 'pic/add_supp_pic.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
 
 @login_required
+@GA_required
 def add_customer_alamat(request, cust_id):
     return add_entity(request, cust_id, Customer, CustAlamatForms, 'alamat/add_customer_alamat.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
 
 @login_required
+@GA_required
 def add_supplier_alamat(request, supp_id):
     return add_entity(request, supp_id, Supplier, SuppAlamattForms, 'alamat/add_supplier_alamat.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
 
 
 # -------------------- Add Item -------------------- #
 @login_required
+@GA_required
 def add_item(request):
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES)
@@ -166,20 +173,24 @@ def add_item(request):
 
 # -------------------- Display Tables -------------------- #
 @login_required
+@GA_required
 def display_customer(request):
     return display_entities(request, Customer, 'customer/display_customer.html')
 
 @login_required
+@GA_required
 def display_supplier(request):
     return display_entities(request, Supplier, 'supplier/display_supplier.html')
 
 @login_required
+@GA_required
 def display_item(request):
     return display_entities(request, Items, 'item/display_item.html')
 
 
 # -------------------- Customer Functions -------------------- #
 @login_required
+@GA_required
 def customer_detail(request, cust_id):
     customer_pics = CustomerPIC.objects.filter(customer_id=cust_id)
     customer_alamat = CustomerAlamat.objects.filter(customer_id=cust_id)
@@ -187,16 +198,19 @@ def customer_detail(request, cust_id):
     return entity_detail(request, Customer, CustomerForm, 'cust_id', cust_id, 'customer/customer_detail.html', extra_context)
 
 @login_required
+@GA_required
 def edit_customer(request, cust_id):
     return edit_entity(request, Customer, CustomerForm, 'cust_id', cust_id)
 
 @login_required
+@GA_required
 def delete_customer(request, cust_id):
     return delete_entity(request, Customer, 'cust_id', cust_id)
 
 
 # -------------------- Customer Functions -------------------- #
 @login_required
+@GA_required
 def supplier_detail(request, supp_id):
     supplier_pics = SupplierPIC.objects.filter(supplier_id=supp_id)
     supplier_alamat = SupplierAlamat.objects.filter(supplier_id=supp_id)
@@ -204,16 +218,19 @@ def supplier_detail(request, supp_id):
     return entity_detail(request, Supplier, SupplierForm, 'supp_id', supp_id, 'supplier/supplier_detail.html', extra_context)
 
 @login_required
+@GA_required
 def edit_supplier(request, supp_id):
     return edit_entity(request, Supplier, SupplierForm, 'supp_id', supp_id)
 
 @login_required
+@GA_required
 def delete_supplier(request, supp_id):
     return delete_entity(request, Supplier, 'supp_id', supp_id)
 
 
 # -------------------- Item Functions -------------------- #
 @login_required
+@GA_required
 def item_detail(request, SKU):
     entity = get_object_or_404(Items, SKU=SKU)
     item_sumber = ItemSumber.objects.filter(item=SKU)
@@ -221,6 +238,7 @@ def item_detail(request, SKU):
     return render(request, 'item/item_detail.html', context)
 
 @login_required
+@GA_required
 def edit_item(request, SKU):
     entity = get_object_or_404(Items,SKU=SKU)
 
@@ -251,10 +269,12 @@ def edit_item(request, SKU):
     return render(request, 'edit_item.html', {'form': form})
 
 @login_required
+@GA_required
 def delete_item(request, SKU):
     return delete_entity(request, Items, 'SKU', SKU)
 
 @login_required
+@GA_required
 def approve_item(request, SKU):
     item = get_object_or_404(Items, SKU=SKU)
     item.is_approved = True
@@ -264,44 +284,108 @@ def approve_item(request, SKU):
 
 # -------------------- Item Sumber Functions -------------------- #
 @login_required
+@GA_required
 def add_sumber(request, SKU):
     return add_entity(request, SKU, Items, SumberForm, 'item/add_sumber.html', 'SKU', 'item')
 
 
 # -------------------- Order Functions -------------------- #
 # Add Purchase Order and Work Order
+@login_required
+@GA_required
 def add_PO(request):
     return add_entity_view(request, PurchaseForm, 'order/add_PO.html', 'display_purchase')
 
 @login_required
+@GA_required
 def add_WO(request):
-    return add_entity_view(request, WorkForm, 'order/add_WO.html', 'display_work')
+     return add_entity_view(request, WorkForm, 'order/add_WO.html', 'display_work')
 
 # Display Purchase Order and Work Order
+@login_required
+@Messenger_Forbidden
 def display_purchase(request):
     return display_entities(request, PurchaseOrder, 'order/display_purchase.html')
 
+@login_required
+@Messenger_Forbidden
 def display_work(request):
     return display_entities(request, WorkOrder, 'order/display_work.html')
 
 #  Detail of Purchase Order and Work Order
+@login_required
+@Messenger_Forbidden
 def purchase_detail(request, id):
-    return entity_detail(request, PurchaseOrder, PurchaseForm, 'id',id, 'order/purchase_detail.html')
+    entity = get_object_or_404(PurchaseOrder, id = id)
 
+    if request.user.groups.filter(name='GA').exists() or request.user.groups.filter(name='Admin').exists():
+            form = PurchaseForm(instance=entity)
+    elif request.user.groups.filter(name='Accounting').exists():
+        form = PurchaseFormNGA(instance=entity)
+    context = {'entity': entity, 'form': form, 'entity_id': id}
+
+    return render(request, 'order/purchase_detail.html', context)
+
+@login_required
+@Messenger_Forbidden
 def work_detail(request, id):
-    return entity_detail(request, WorkOrder, WorkForm, 'id', id, 'order/work_detail.html')
+    entity = get_object_or_404(WorkOrder, id = id)
+
+    if request.user.groups.filter(name='GA').exists() or request.user.groups.filter(name='Admin').exists():
+            form =WorkForm(instance=entity)
+    elif request.user.groups.filter(name='Accounting').exists():
+        form = WorkFormNGA(instance=entity)
+    context = {'entity': entity, 'form': form, 'entity_id': id}
+
+    return render(request, 'order/work_detail.html', context)
 
 # Edit Purchase Order and Work Order
+@login_required
+@Messenger_Forbidden
 def edit_purchase(request, id):
-    return edit_entity(request, PurchaseOrder, PurchaseForm, 'id', id)
+    entity = get_object_or_404(PurchaseOrder, id = id)
 
+    if request.method == 'POST':
+        if request.user.groups.filter(name='GA').exists() or request.user.groups.filter(name='Admin').exists():
+            form = PurchaseForm(request.POST, instance=entity)
+        elif request.user.groups.filter(name='Accounting').exists():
+            form = PurchaseFormNGA(request.POST, instance=entity)
+        
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+
+    return render(request, 'order/purchase_detail.html', {'form': form})
+
+@login_required
+@Messenger_Forbidden
 def edit_work(request, id):
-    return edit_entity(request, WorkOrder, WorkForm, 'id', id)
+    entity = get_object_or_404(WorkOrder, id = id)
+
+    if request.method == 'POST':
+        if request.user.groups.filter(name='GA').exists() or request.user.groups.filter(name='Admin').exists():
+            form = WorkForm(request.POST, instance=entity)
+        elif request.user.groups.filter(name='Accounting').exists():
+            form = WorkFormNGA(request.POST, instance=entity)
+        
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+
+    return render(request, 'order/work_detail.html', {'form': form})
 
 # Delete Purchase Order and Work Order
+@login_required
+@Messenger_Forbidden
 def delete_purchase(request, id):
     return delete_entity(request, PurchaseOrder, 'id', id)
 
+@login_required
+@Messenger_Forbidden
 def delete_work(request, id):
     return delete_entity(request, WorkOrder, 'id', id)
   
@@ -349,6 +433,7 @@ def user_action_logs(request):
 
 # -------------------- Delivery Order -------------------- #
 # Display calendar, and event addition/deletion functionality
+@login_required
 def calendar(request):  
     all_events = Events.objects.all()
     request.session['num_forms'] = 1
@@ -357,7 +442,8 @@ def calendar(request):
         "events":all_events,
     }
     return render(request,'delivery/calendar.html',context)
- 
+
+@login_required
 def all_events(request):                                                                                                 
     all_events = Events.objects.all()                                                                                    
     out = []                                                                                                             
@@ -365,14 +451,18 @@ def all_events(request):
     for event in all_events: 
         event.start = event.start.astimezone(timezone.get_current_timezone())                                                                                            
         event.end = event.end.astimezone(timezone.get_current_timezone())                                                                                            
-        out.append({                                                                                         
+        out.append({     
+            'title': event.title,                                                                                    
             'id': event.id,                                                                                              
             'start': event.start.strftime("%m/%d/%Y, %H:%M:%S"),                                                         
-            'end': event.end.strftime("%m/%d/%Y, %H:%M:%S"),                                                             
+            'end': event.end.strftime("%m/%d/%Y, %H:%M:%S"),
+            'messenger_id':event.messenger.id,      
+            'messenger_color':event.messenger.color                                                       
         })                                                                                                               
                                                                                                                       
     return JsonResponse(out, safe=False) 
  
+@login_required
 def add_event(request):
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
@@ -382,6 +472,7 @@ def add_event(request):
     data = {}
     return JsonResponse(data)
  
+@login_required
 def update(request):
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
@@ -395,6 +486,7 @@ def update(request):
     data = {}
     return JsonResponse(data)
  
+@login_required
 def remove(request):
     id = request.GET.get("id", None)
     event = Events.objects.get(id=id)
@@ -403,6 +495,8 @@ def remove(request):
     return JsonResponse(data)
 
 # Forms for adding delivery order, messenger, and vehicle
+# Delivery form functionality
+@login_required
 def delivery_form(request):
     max_forms = 3  # Maximum number of forms allowed
 
@@ -446,8 +540,19 @@ def update_num_forms(request):
 
     return JsonResponse({'status': 'error'})
 
+@login_required
 def add_messenger(request):
     return add_entity_view(request, MessengerForm, 'delivery/add_messenger.html', 'calendar')
 
+ 
+@login_required
 def add_vehicle(request):
     return add_entity_view(request, VehicleForm, 'delivery/add_vehicle.html', 'calendar')
+
+
+# -------------------- Error Pages -------------------- #
+def forbidden(request):
+    return render(request, 'forbidden.html')
+
+def page_not_found(request, exception):
+    return render(request, '404.html', status=404)
