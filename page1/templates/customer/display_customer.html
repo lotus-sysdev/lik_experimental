@@ -4,13 +4,12 @@
   <head>
     {% block title %}Customer Data Table{% endblock %}
   </head>
-
   <body>
     {% block content %}
     <h1>Customer List</h1>
     <table
       id="customerTable"
-      class="table table-bordered table-striped w-100 table-responsive-lg"
+      class="table table-hover table-bordered table-striped table-responsive-lg w-100"
     >
       <thead class="thead-light">
         <tr>
@@ -24,7 +23,18 @@
           <th></th>
         </tr>
       </thead>
-      <tbody>
+      <tfoot style="display: table-head-group">
+        <tr>
+            <th>Customer ID</th>
+            <th>Nama Perusahaan</th>
+            <th>No. Telpon</th>
+            <th>Terms of Payment</th>
+            <th>Pengiriman</th>
+            <th>NPWP</th>
+            <th>Faktur Pajak</th>
+        </tr>
+    </tfoot>
+      <tbody class="tbody">
         {% for customer in entities %}
         <tr>
           <td>{{ customer.cust_id }}</td>
@@ -40,17 +50,6 @@
         </tr>
         {% endfor %}
       </tbody>
-      <tfoot>
-        <tr>
-            <th>ID</th>
-            <th>Nama Perusahaan</th>
-            <th>No. Telpon</th>
-            <th>Terms of Payment</th>
-            <th>Pengiriman</th>
-            <th>NPWP</th>
-            <th>Faktur Pajak</th>
-        </tr>
-    </tfoot>
     </table>
     <script>
       new DataTable("#customerTable", {
