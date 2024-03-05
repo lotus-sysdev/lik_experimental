@@ -26,7 +26,7 @@
           <th>Price</th>
           <th>Tanggal Input</th>
           <th>Gambar</th>
-          <th></th>
+          <th>Edit/Delete</th>
         </tr>
       </thead>
       <tbody>
@@ -52,7 +52,49 @@
       </tbody>
     </table>
     <script>
-      new DataTable("#itemTable");
+      new DataTable("#itemTable", {
+        initComplete: function () {
+          this.api()
+            .columns()
+            .every(function () {
+              let column = this;
+              let title = column.footer().textContent;
+
+              // Create input element
+              let input = document.createElement("input");
+              input.placeholder = title;
+              column.footer().replaceChildren(input);
+
+              // Event listener for user input
+              input.addEventListener("keyup", () => {
+                if (column.search() !== this.value) {
+                  column.search(input.value).draw();
+                }
+              });
+            });
+        },
+        lengthMenu: 
+        [[10, 25, 50, 100, -1],
+        [10, 25, 50, 100, "All"]
+        ],
+        layout: {
+          top2Start: {
+            buttons: {
+              buttons: [
+                { extend: "pdf", className: "btn-primary" },
+                { extend: "csv", className: "btn-secondary" },
+                { extend: "colvis", className: "btn-info" },
+              ],
+              dom: {
+                button: {
+                  className: "btn",
+                },
+              },
+            },
+          },
+          // top2Start:'pageLength'
+        },
+      });
     </script>
     <a href="/add_item">Add Item</a><br/>
     {% endblock %}

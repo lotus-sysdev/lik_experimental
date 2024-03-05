@@ -1,55 +1,98 @@
 {% extends 'base.html' %}
 
 <html>
-
-<head>
+  <head>
     {% block title %}Purchase Data Table{% endblock %}
-</head>
+  </head>
 
-<body>
+  <body>
     {% block content %}
     <h1>Purchase Order List</h1>
-    <table id="purchaseTable" class="table table-bordered table-striped w-100 table-responsive-lg">
-        <thead class="thead-light">
-            <tr>
-                <th data-order="asc">Supplier</th>
-                <th data-order="asc">Item</th>
-                <th data-order="asc">Revenue PO</th>
-                <th data-order="asc">Nomor PO</th>
-                <th data-order="asc">Tanggal PO</th>
-                <th data-order="asc">Tanggal Proses</th>
-                <th data-order="asc">Tanggal Input Accurate</th>
-                <th data-order="asc">Tanggal Pengiriman Barang</th>
-                <th data-order="asc">Tanggal Pengiriman Invoice</th>
-                <th data-order="asc">Status</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for purchase in entities %}
-            <tr>
-                <td>{{ purchase.supplier }}</td>
-                <td>{{ purchase.item }}</td>
-                <td>{{ purchase.revenue_PO }}</td>
-                <td>{{ purchase.nomor_PO }}</td>
-                <td>{{ purchase.tanggal_PO }}</td>
-                <td>{{ purchase.tanggal_process }}</td>
-                <td>{{ purchase.tanggal_input_accurate }}</td>
-                <td>{{ purchase.tanggal_pengiriman_barang }}</td>
-                <td>{{ purchase.tanggal_pengiriman_invoice }}</td>
-                <td>{{ purchase.status }}</td>
-                <td>
-                    <a href="{% url 'purchase_detail' purchase.id %}">View</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
+    <table
+      id="purchaseTable"
+      class="table table-bordered table-striped w-100 table-responsive-lg"
+    >
+      <thead class="thead-light">
+        <tr>
+          <th>Supplier</th>
+          <th>Item</th>
+          <th>Revenue PO</th>
+          <th>Nomor PO</th>
+          <th>Tanggal PO</th>
+          <th>Tanggal Proses</th>
+          <th>Tanggal Input Accurate</th>
+          <th>Tanggal Pengiriman Barang</th>
+          <th>Tanggal Pengiriman Invoice</th>
+          <th>Status</th>
+          <th>Edit/Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for purchase in entities %}
+        <tr>
+          <td>{{ purchase.supplier }}</td>
+          <td>{{ purchase.item }}</td>
+          <td>{{ purchase.revenue_PO }}</td>
+          <td>{{ purchase.nomor_PO }}</td>
+          <td>{{ purchase.tanggal_PO }}</td>
+          <td>{{ purchase.tanggal_process }}</td>
+          <td>{{ purchase.tanggal_input_accurate }}</td>
+          <td>{{ purchase.tanggal_pengiriman_barang }}</td>
+          <td>{{ purchase.tanggal_pengiriman_invoice }}</td>
+          <td>{{ purchase.status }}</td>
+          <td>
+            <a href="{% url 'purchase_detail' purchase.id %}">View</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
     <script>
-      new DataTable("#purchaseTable");
+      new DataTable("#purchaseTable", {
+        initComplete: function () {
+          this.api()
+            .columns()
+            .every(function () {
+              let column = this;
+              let title = column.footer().textContent;
+
+              // Create input element
+              let input = document.createElement("input");
+              input.placeholder = title;
+              column.footer().replaceChildren(input);
+
+              // Event listener for user input
+              input.addEventListener("keyup", () => {
+                if (column.search() !== this.value) {
+                  column.search(input.value).draw();
+                }
+              });
+            });
+        },
+        lengthMenu: [
+          [10, 25, 50, 100, -1],
+          [10, 25, 50, 100, "All"],
+        ],
+        layout: {
+          top2Start: {
+            buttons: {
+              buttons: [
+                { extend: "pdf", className: "btn-primary" },
+                { extend: "csv", className: "btn-secondary" },
+                { extend: "colvis", className: "btn-info" },
+              ],
+              dom: {
+                button: {
+                  className: "btn",
+                },
+              },
+            },
+          },
+          // top2Start:'pageLength'
+        },
+      });
     </script>
     <a href="/add_PO">Add Purchase Order</a>
     {% endblock %}
-</body>
-
+  </body>
 </html>
