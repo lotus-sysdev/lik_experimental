@@ -1,6 +1,5 @@
 import os
 from PIL import Image
-import requests
 
 from django.shortcuts import redirect, render, get_object_or_404
 from django.conf import settings
