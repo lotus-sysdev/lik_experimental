@@ -361,7 +361,8 @@ class ItemForm(forms.ModelForm):
         ('Pail', 'Pail(Cat)'),
         ('Pair', 'Pair'),
         ('Pcs', 'Pcs'),
-        ('Unit', 'Unit')
+        ('Unit', 'Unit'),
+        ('Lainnya', 'Lainnya')
     )
 
     unit = forms.ChoiceField(
@@ -391,6 +392,7 @@ class ItemForm(forms.ModelForm):
         }
         labels = {
             'category': "Kategori",
+            'Tanggal': 'Tanggal Input'
         }
 
 class SumberForm(forms.ModelForm):

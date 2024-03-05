@@ -1,6 +1,5 @@
 import os
 from PIL import Image
-import requests
 
 from django.shortcuts import redirect, render, get_object_or_404
 from django.conf import settings
@@ -9,7 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils import timezone
-from django.urls import resolve
+from django.urls import reverse
 
 from .decorators import *
 from .forms import *
@@ -41,7 +40,7 @@ def add_entity_view(request, entity_form, template_name, redirect_template):
 
 # Common add_entity function for adding alamat and pic
 @login_required
-def add_entity(request, entity_id, entity_model, form_class, template_name, entity_field, entity_form_field, initial_data=None):
+def add_entity(request, entity_id, entity_model, form_class, template_name, entity_field, entity_form_field, initial_data=None, redirect_url = None):
     entity = get_object_or_404(entity_model, **{entity_field: entity_id})
 
     if request.method == 'POST':
@@ -49,6 +48,8 @@ def add_entity(request, entity_id, entity_model, form_class, template_name, enti
         if form.is_valid():
             setattr(form.instance, entity_form_field, entity)
             form.save()
+            if redirect_url:
+                return redirect(redirect_url)
     else:
         form = form_class(initial=initial_data)
 
@@ -117,22 +118,26 @@ def add_supplier(request):
 @login_required
 @GA_required
 def add_customer_pic(request, cust_id):
-    return add_entity(request, cust_id, Customer, CustPICForms, 'pic/add_cust_pic.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
+    redirect_url  = reverse('customer_detail', args=(cust_id,))
+    return add_entity(request, cust_id, Customer, CustPICForms, 'pic/add_cust_pic.html', 'cust_id', 'customer_id', {'customer_id': cust_id}, redirect_url=redirect_url)
 
 @login_required
 @GA_required
 def add_supplier_pic(request, supp_id):
-    return add_entity(request, supp_id, Supplier, SuppPICForms, 'pic/add_supp_pic.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
+    redirect_url  = reverse('supplier_detail', args=(supp_id,))
+    return add_entity(request, supp_id, Supplier, SuppPICForms, 'pic/add_supp_pic.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id}, redirect_url=redirect_url)
 
 @login_required
 @GA_required
 def add_customer_alamat(request, cust_id):
-    return add_entity(request, cust_id, Customer, CustAlamatForms, 'alamat/add_customer_alamat.html', 'cust_id', 'customer_id', {'customer_id': cust_id})
+    redirect_url  = reverse('customer_detail', args=(cust_id,))
+    return add_entity(request, cust_id, Customer, CustAlamatForms, 'alamat/add_customer_alamat.html', 'cust_id', 'customer_id', {'customer_id': cust_id}, redirect_url=redirect_url)
 
 @login_required
 @GA_required
 def add_supplier_alamat(request, supp_id):
-    return add_entity(request, supp_id, Supplier, SuppAlamattForms, 'alamat/add_supplier_alamat.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id})
+    redirect_url  = reverse('supplier_detail', args=(supp_id,))
+    return add_entity(request, supp_id, Supplier, SuppAlamattForms, 'alamat/add_supplier_alamat.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id}, redirect_url=redirect_url)
 
 
 # -------------------- Add Item -------------------- #
@@ -286,7 +291,8 @@ def approve_item(request, SKU):
 @login_required
 @GA_required
 def add_sumber(request, SKU):
-    return add_entity(request, SKU, Items, SumberForm, 'item/add_sumber.html', 'SKU', 'item')
+    redirect_url  = reverse('item_detail', args=(SKU,))
+    return add_entity(request, SKU, Items, SumberForm, 'item/add_sumber.html', 'SKU', 'item', redirect_url=redirect_url)
 
 
 # -------------------- Order Functions -------------------- #
