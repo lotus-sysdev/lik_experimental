@@ -23,7 +23,7 @@
           <th></th>
         </tr>
       </thead>
-      <tfoot style="display: table-head-group">
+      <!-- <tfoot style="display: table-row-group">
         <tr>
             <th>Customer ID</th>
             <th>Nama Perusahaan</th>
@@ -33,7 +33,7 @@
             <th>NPWP</th>
             <th>Faktur Pajak</th>
         </tr>
-    </tfoot>
+    </tfoot> -->
       <tbody class="tbody">
         {% for customer in entities %}
         <tr>
@@ -72,6 +72,11 @@
                 }
               });
             });
+        },
+        layout: {
+          topStart: {
+            buttons: ['pdf'],
+          },
         },
       });
     </script>
