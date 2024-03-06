@@ -18,13 +18,13 @@
     >
       <thead class="thead-light">
         <tr>
+          <th>Tanggal Input</th>
           <th>SKU</th>
           <th>Nama</th>
           <th>Category</th>
           <th>Quantity</th>
           <th>Satuan</th>
           <th>Price</th>
-          <th>Tanggal Input</th>
           <th>Gambar</th>
           <th>Edit/Delete</th>
         </tr>
@@ -36,13 +36,13 @@
           style="background-color: #ccffc7;"
           {% endif %}
         >
+        <td>{{ i.Tanggal }}</td>
         <td>{{ i.SKU }}</td>
         <td>{{ i.nama }}</td>
         <td>{{ i.category.name }}</td>
         <td>{{ i.quantity }}</td>
         <td>{{ i.unit }}</td>
         <td>{{ i.price }}</td>
-        <td>{{ i.Tanggal }}</td>
         <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}" /></td>
           <td>
             <a href="{% url 'item_detail' i.SKU %}">View</a>
@@ -54,7 +54,7 @@
     <script>
       new DataTable("#itemTable",{
         columnDefs: [ {
-                  targets: 5, // Target the first column (adjust the index as needed)
+                  targets: 6, // Target the first column (adjust the index as needed)
                   render: function ( data, type, row ) {
                       if (type === 'display') {
                           if (data.startsWith('IDR')) {
