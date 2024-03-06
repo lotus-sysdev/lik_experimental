@@ -190,9 +190,11 @@ class CustPICForms(forms.ModelForm):
     )
 
     Role_Options = (
-        (1, 'Option 1'),
-        (2, 'Option 2'),
-        (3, 'Option 3'),
+        ('Finance', 'Finance'),
+        ('General Affairs', 'General Affairs (GA)'),
+        ('Sales', 'Sales'),
+        ('Procurement', 'Procurement'),
+        ('Board of Directors', 'Board of Directors (BOD)'),
     )
     Role = forms.ChoiceField(
         choices=Role_Options,
