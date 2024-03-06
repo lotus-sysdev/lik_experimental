@@ -51,11 +51,21 @@ urlpatterns = [
     
     # PIC urls
     path('add_pic_cust/<int:cust_id>',add_customer_pic,name='add_pic_cust'),
+    path('edit_customer_pic/<int:pic_id>/', edit_customer_pic, name='edit_customer_pic'),
+    path('delete_customer_pic/<int:pic_id>/', delete_customer_pic, name='delete_customer_pic'),
+
     path('add_pic_supp/<int:supp_id>',add_supplier_pic,name='add_pic_supp'),
+    path('edit_supplier_pic/<int:pic_id>/', edit_supplier_pic, name='edit_supplier_pic'),
+    path('delete_supplier_pic/<int:pic_id>/', delete_supplier_pic, name='delete_supplier_pic'),
 
     # Alamat urls
     path('add_customer_alamat/<int:cust_id>/', add_customer_alamat, name='add_customer_alamat'),
+    path('edit_customer_alamat/<int:alamat_id>/', edit_customer_alamat, name='edit_customer_alamat'),
+    path('delete_customer_alamat/<int:alamat_id>/', delete_customer_alamat, name='delete_customer_alamat'),
+
     path('add_supplier_alamat/<int:supp_id>/', add_supplier_alamat, name='add_supplier_alamat'),
+    path('edit_supplier_alamat/<int:alamat_id>/', edit_supplier_alamat, name='edit_supplier_alamat'),
+    path('delete_supplier_alamat/<int:alamat_id>/', delete_supplier_alamat, name='delete_supplier_alamat'),
     
     # Login, Register, and Logout
     path('login/',login_view, name="login"),

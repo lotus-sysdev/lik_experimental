@@ -20,6 +20,7 @@
     color: #fff;
     transition: all 0.1s cubic-bezier(0.945, 0.020, 0.270, 0.665);
     transform-origin: bottom left;
+    z-index: 12;
 }
 
 #sidebar.active {
@@ -55,12 +56,14 @@
 #sidebar ul li > a[aria-expanded="false"] {
     color: #fff;
     background: #189CD6;
+    transition: none;
 }
 
 .active > a, a[aria-expanded="true"],
 #sidebar ul li > a[aria-expanded="true"] {
     color: #fff;
     background: #00699F;
+    transition: none;
 }
 
 a[data-toggle="collapse"] {

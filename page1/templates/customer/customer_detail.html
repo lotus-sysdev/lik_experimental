@@ -45,8 +45,9 @@
                                     <p>Email: {{ pic.email }}</p>
                                 </div>
                                 <div>
-                                    <a href="{}" class="btn btn-sm btn-primary"><i class="fa fa-pen"></i></a>
-                                    <a href="{}" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
+                                    <a href="{% url 'edit_customer_pic' pic.id %}" class="btn btn-sm btn-primary"><i class="fa fa-pen"></i></a>
+                                    <!-- <a href="{% url 'delete_customer_pic' pic.id %}" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a> -->
+                                    <button class="btn btn-sm btn-danger delete-pic-btn" data-pic-id="{{ pic.id }}" data-pic-name="{{ pic.nama }}"><i class="fa fa-times"></i></button>
                                 </div>
                             </div>
                             {% else %}
@@ -75,8 +76,8 @@
                                             {% if alamat.detail and alamat.kelurahan and alamat.kecamatan and alamat.kota and alamat.provinsi %}
                                                 {{ alamat.detail }}, {{ alamat.kelurahan }}, {{ alamat.kecamatan }}, {{ alamat.kota }}, {{ alamat.provinsi }}
                                                 <div class="mt-2">
-                                                    <a href="{}" class="btn btn-sm btn-primary"><i class="fa fa-pen"></i></a>
-                                                    <a href="{}" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
+                                                    <a href="{% url 'edit_customer_alamat' alamat.id %}" class="btn btn-sm btn-primary"><i class="fa fa-pen"></i></a>
+                                                    <button class="btn btn-sm btn-danger delete-alamat-btn" data-alamat-id="{{ alamat.id }}" data-alamat-detail="{{ alamat.detail }}"><i class="fa fa-times"></i></button>
                                                 </div>
                                             {% else %}
                                                 No address details yet.
@@ -102,8 +103,8 @@
                                             {% if alamat.detail and alamat.kelurahan and alamat.kecamatan and alamat.kota and alamat.provinsi %}
                                                 {{ alamat.detail }}, {{ alamat.kelurahan }}, {{ alamat.kecamatan }}, {{ alamat.kota }}, {{ alamat.provinsi }}
                                                 <div class="mt-2">
-                                                    <a href="{}" class="btn btn-sm btn-primary"><i class="fa fa-pen"></i></a>
-                                                    <a href="{}" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
+                                                    <a href="{% url 'edit_customer_alamat' alamat.id %}" class="btn btn-sm btn-primary"><i class="fa fa-pen"></i></a>
+                                                    <button class="btn btn-sm btn-danger delete-alamat-btn" data-alamat-id="{{ alamat.id }}" data-alamat-detail="{{ alamat.detail }}"><i class="fa fa-times"></i></button>
                                                 </div>
                                             {% else %}
                                                 No address details yet.
@@ -124,6 +125,69 @@
                 <a href="{% url 'add_customer_alamat' cust_id=entity.cust_id %}" class="mt-2 btn btn-info">Add Alamat</a>
             </div>
         </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                // Add a click event listener to all delete buttons
+                document.querySelectorAll('.delete-pic-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        // Display a confirmation dialog
+                        const isConfirmed = confirm("Are you sure you want to delete " + btn.getAttribute('data-pic-name') + "?");
+
+                        if (isConfirmed) {
+                            // If confirmed, make an Ajax request to delete the pic
+                            const picId = btn.getAttribute('data-pic-id');
+                            fetch("{% url 'delete_customer_pic' 0 %}".replace('0', picId), {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': "{{ csrf_token }}",
+                                },
+                            }).then(response => response.json()).then(data => {
+                                if (data.success) {
+                                    // Reload the page or update the DOM as needed
+                                    location.reload();
+                                } else {
+                                    alert("Failed to delete the pic.");
+                                }
+                            }).catch(error => {
+                                console.error('Error:', error);
+                                alert("An error occurred while deleting the pic.");
+                            });
+                        }
+                    });
+                });
+            });
+
+            document.addEventListener("DOMContentLoaded", function () {
+                // Add a click event listener to all delete buttons
+                document.querySelectorAll('.delete-alamat-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        // Display a confirmation dialog
+                        const isConfirmed = confirm("Are you sure you want to delete " + btn.getAttribute('data-alamat-detail') + "?");
+
+                        if (isConfirmed) {
+                            // If confirmed, make an Ajax request to delete the pic
+                            const alamatId = btn.getAttribute('data-alamat-id');
+                            fetch("{% url 'delete_customer_alamat' 0 %}".replace('0', alamatId), {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': "{{ csrf_token }}",
+                                },
+                            }).then(response => response.json()).then(data => {
+                                if (data.success) {
+                                    // Reload the page or update the DOM as needed
+                                    location.reload();
+                                } else {
+                                    alert("Failed to delete the alamat.");
+                                }
+                            }).catch(error => {
+                                console.error('Error:', error);
+                                alert("An error occurred while deleting alamat.");
+                            });
+                        }
+                    });
+                });
+            });
+        </script>
         {% endblock %}
 </body>
 

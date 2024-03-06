@@ -140,6 +140,77 @@ def add_supplier_alamat(request, supp_id):
     return add_entity(request, supp_id, Supplier, SuppAlamattForms, 'alamat/add_supplier_alamat.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id}, redirect_url=redirect_url)
 
 
+# -------------------- Edit and Delete Alamat and PIC -------------------- #
+@login_required
+@GA_required
+def edit_customer_pic(request, pic_id):
+    pic = get_object_or_404(CustomerPIC, id=pic_id)
+    form = CustPICForms(request.POST or None, instance=pic)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('customer_detail', cust_id=pic.customer_id.pk)
+    return render(request, 'pic/edit_customer_pic.html', {'form': form, 'pic': pic})
+
+@login_required
+@GA_required
+def delete_customer_pic(request, pic_id):
+    return delete_entity(request, CustomerPIC, 'id', pic_id)
+
+@login_required
+@GA_required
+def edit_customer_alamat(request, alamat_id):
+    alamat = get_object_or_404(CustomerAlamat, id=alamat_id)
+    form = CustAlamatForms(request.POST or None, instance=alamat)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('customer_detail', cust_id=alamat.customer_id.pk)
+    return render(request, 'alamat/edit_customer_alamat.html', {'form': form, 'alamat': alamat})
+
+@login_required
+@GA_required
+def delete_customer_alamat(request, alamat_id):
+    return delete_entity(request, CustomerAlamat, 'id', alamat_id)
+
+# Supplier
+@login_required
+@GA_required
+def edit_supplier_pic(request, pic_id):
+    pic = get_object_or_404(SupplierPIC, id=pic_id)
+    form = SuppPICForms(request.POST or None, instance=pic)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('supplier_detail', supp_id=pic.supplier_id.pk)
+    return render(request, 'pic/edit_supplier_pic.html', {'form': form, 'pic': pic})
+
+@login_required
+@GA_required
+def delete_supplier_pic(request, pic_id):
+    return delete_entity(request, SupplierPIC, 'id', pic_id)
+
+@login_required
+@GA_required
+def edit_supplier_alamat(request, alamat_id):
+    alamat = get_object_or_404(SupplierAlamat, id=alamat_id)
+    form = SuppAlamattForms(request.POST or None, instance=alamat)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('customer_detail', cust_id=alamat.supplier_id.pk)
+    return render(request, 'alamat/edit_supplier_alamat.html', {'form': form, 'alamat': alamat})
+
+@login_required
+@GA_required
+def delete_supplier_alamat(request, alamat_id):
+    return delete_entity(request, SupplierAlamat, 'id', alamat_id)
+
+
 # -------------------- Add Item -------------------- #
 @login_required
 @GA_required
