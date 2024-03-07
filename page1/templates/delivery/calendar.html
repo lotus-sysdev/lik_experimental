@@ -8,16 +8,19 @@
 
 <body>
   {% block content %}
+  <style>
+    @media screen and (max-width:767px) { #myCustomButton {font-size: 40%}}
+  </style>
   <div class="container col-md-12 mt-5">
     <button id="myCustomButton" class="fc-btn btn-sm btn-primary dropdown-toggle float-right ml-3 " type="button"
       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       Filter Deliveries
     </button>
     <div class="dropdown-menu" aria-labelledby="myCustomButton">
-      <a id="all" class="dropdown-item" href="#">All Deliveries</a>
-      <a id="1" class="dropdown-item" href="#">Messenger 1</a>
-      <a id="2" class="dropdown-item" href="#">Messenger 2</a>
-      <a id="3" class="dropdown-item" href="#">Messenger 3</a>
+      <a id="all" class="dropdown-item" href="#">All Messengers</a>
+      {% for messenger in messengers %}
+        <a id="{{ messenger.id }}" class="dropdown-item" href="#">{{ messenger.name }}</a>
+      {% endfor %}
     </div>
     <div id="calendar"></div>
   </div>

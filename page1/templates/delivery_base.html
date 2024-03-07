@@ -18,6 +18,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.js"></script>
+
+  <style>
+    @media screen and (max-width:767px) { .fc-toolbar.fc-header-toolbar {font-size: 60%}}
+  </style>
 </head>
 
 <body>
@@ -58,7 +62,7 @@
           center: "title",
           right: "month,agendaWeek,agendaDay", // Add the custom button to the header
         },
-        eventLongPressDelay: 1000,
+        eventLongPressDelay: 700,
         events: function (start, end, timezone, callback) {
           // console.log(currentMessengerId);
           $.ajax({
@@ -66,7 +70,7 @@
             type: 'GET',
             dataType: 'json',
             success: function (response) {
-              let events = []; // Update 'var' to 'let'
+              let events = [];
               // Process the response data to set eventColor based on messengerid
               response.forEach(function (event) {
                 // console.log(currentMessengerId);
@@ -145,24 +149,25 @@
         },
 
         eventClick: function (event) {
-          if (confirm("Are you sure you want to remove it?")) {
-            var id = event.id;
-            $.ajax({
-              type: "GET",
-              url: "/remove",
-              data: { id: id },
-              dataType: "json",
-              success: function (data) {
-                calendar.fullCalendar("refetchEvents");
-                alert("Event Removed");
-              },
-              error: function (data) {
-                alert("There is a problem!!!");
-              },
-            });
-          }
+          // if (confirm("Are you sure you want to remove it?")) {
+          //   var id = event.id;
+          //   $.ajax({
+          //     type: "GET",
+          //     url: "/remove",
+          //     data: { id: id },
+          //     dataType: "json",
+          //     success: function (data) {
+          //       calendar.fullCalendar("refetchEvents");
+          //       alert("Event Removed");
+          //     },
+          //     error: function (data) {
+          //       alert("There is a problem!!!");
+          //     },
+          //   });
+          // }
+          window.location.href = "/delivery_detail/" + event.id;
         },
-
+        
         themeSystem: "bootstrap4",
         timeZone: "Asia/Jakarta",
       });
