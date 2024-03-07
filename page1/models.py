@@ -59,7 +59,7 @@ class Items(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     unit = models.CharField(max_length=10)
-    price = MoneyField(max_digits=15, default_currency='IDR' )
+    price = MoneyField(max_digits=15, decimal_places=2, default_currency='IDR', blank= False, null= False)
     gambar = models.ImageField()
     is_approved = models.BooleanField(default=False)
     
@@ -70,13 +70,14 @@ class Items(models.Model):
         if not self.SKU or 'is_approved' in kwargs:
             # Generate SKU based on category and a unique number
             if self.category and 'is_approved' not in kwargs:
+                category_id_str = str(self.category.pk).zfill(2)  # Use the category ID, padded with a leading zero if needed
                 category_code = self.category.name[:3].upper()  # Take the first three letters of the category
 
                 # Retrieve the last SKU in the same category
                 last_sku = Items.objects.filter(category=self.category).order_by('-SKU').first()
 
                 if last_sku and last_sku.SKU:
-                    last_number_str = str(last_sku.SKU)[3:]  # Extract the number part of the SKU
+                    last_number_str = str(last_sku.SKU)[5:9]  # Extract the number part of the SKU
                     if last_number_str.isdigit():
                         last_number = int(last_number_str)
                     else:
@@ -84,16 +85,21 @@ class Items(models.Model):
                 else:
                     last_number = 0
 
-                new_sku = f"{category_code}{last_number + 1:04d}"  # Combine category code and a 4-digit number
+                # Format the current date as ddmmyy
+                current_date = self.Tanggal.strftime('%d%m%y')
+
+                new_sku = f"{category_id_str}{category_code}{last_number + 1:04d}{current_date}"  # Combine category ID, category code, a 4-digit number, and the formatted date
                 self.SKU = new_sku
 
         super().save(*args, **kwargs)
-
+        
 class ItemSumber(models.Model):
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
     TYPE_CHOICES = (
-        ('online', 'Online Store'),
-        ('pabrik', 'Pabrik'),
+        ('Online Store', 'Online Store'),
+        ('Rabrik', 'Pabrik'),
+        ('Reseller', 'Reseller'),
+        ('Grosir', 'Grosir'),
     )
     jenis_sumber = models.CharField(max_length=30, choices=TYPE_CHOICES)
     nama_perusahaan = models.CharField(max_length=255)
@@ -236,7 +242,7 @@ class Vehicle(models.Model):
         ("ojek_online", "Ojek Online")
     )
     jenis = models.CharField(max_length=20)
-    nomor_plat = models.CharField(max_length = 9)
+    nomor_plat = models.CharField(max_length = 11)
 
     def __str__(self):
         return self.nomor_plat
