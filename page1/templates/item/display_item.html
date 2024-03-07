@@ -3,34 +3,38 @@
 {% block title %}Item Data Table{% endblock %}
 
 {% block content %}
-<h1>Item List</h1>
-<table id="itemTable" class="table table-bordered table-striped w-100 table-responsive-lg">
-  {% csrf_token %}
-    <thead class="thead-light">
+    <h1>Item List</h1>
+    <table
+      id="itemTable"
+      class="table table-bordered table-striped w-100 table-responsive-lg"
+    >
+      <thead class="thead-light">
+        {% csrf_token %}
         <tr>
-            <th>Tanggal Input</th>
-            <th>SKU</th>
-            <th>Nama</th>
-            <th>Category</th>
-            <th>Quantity</th>
-            <th>Satuan</th>
-            <th>Price</th>
-            <th>Gambar</th>
-            <th>Edit/Delete</th>
+          <th>Tanggal Input</th>
+          <th>SKU</th>
+          <th>Nama</th>
+          <th>Category</th>
+          <th>Quantity</th>
+          <th>Satuan</th>
+          <th>Price</th>
+          <th>Gambar</th>
+          <th>Edit/Delete</th>
         </tr>
-        <tfoot style="display: table-row-group">
-          <tr>
-            <th>Tanggal Input</th>
-            <th>SKU</th>  
-            <th>Nama</th>
-            <th>Category</th>
-            <th>Quantity</th>
-            <th>Satuan</th>
-            <th>Price</th>
-            <th>Gambar</th>
-          </tr>
-        </tfoot>
-    </thead>
+      </thead>
+      <!-- <tfoot style="display: table-row-group">
+        <tr>
+          <th>Tanggal Input</th>
+          <th>SKU</th>  
+          <th>Nama</th>
+          <th>Category</th>
+          <th>Quantity</th>
+          <th>Satuan</th>
+          <th>Price</th>
+          <th>Gambar</th>
+
+        </tr>
+        </tfoot> -->
     <tbody>
         {% for i in entities %}
         <tr {% if i.is_approved %} style="background-color: #ccffc7;" {% endif %}>
@@ -47,6 +51,7 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
 <script>
   var table;
   function initializeDataTable() {
@@ -71,7 +76,7 @@
                           // Add a space after the first three characters
                           return data.substr(0, 3) + ' ' + data.substr(3);
                       }
-                      }
+
                   }
                   return data;
               }
@@ -121,6 +126,7 @@
               className: "btn",
             },
           },
+
         },
       },
       // top2Start:'pageLength'
