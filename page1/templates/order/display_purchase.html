@@ -8,47 +8,89 @@
   <body>
     {% block content %}
     <h1>Purchase Order List</h1>
-    <table
-      id="purchaseTable"
-      class="table table-bordered table-striped w-100 table-responsive-lg"
-    >
-      <thead class="thead-light">
-        <tr>
-          <th>Supplier</th>
-          <th>Item</th>
-          <th>Revenue PO</th>
-          <th>Nomor PO</th>
-          <th>Tanggal PO</th>
-          <th>Tanggal Proses</th>
-          <th>Tanggal Input Accurate</th>
-          <th>Tanggal Pengiriman Barang</th>
-          <th>Tanggal Pengiriman Invoice</th>
-          <th>Status</th>
-          <th>Edit/Delete</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for purchase in entities %}
-        <tr>
-          <td>{{ purchase.supplier }}</td>
-          <td>{{ purchase.item }}</td>
-          <td>{{ purchase.revenue_PO }}</td>
-          <td>{{ purchase.nomor_PO }}</td>
-          <td>{{ purchase.tanggal_PO }}</td>
-          <td>{{ purchase.tanggal_process }}</td>
-          <td>{{ purchase.tanggal_input_accurate }}</td>
-          <td>{{ purchase.tanggal_pengiriman_barang }}</td>
-          <td>{{ purchase.tanggal_pengiriman_invoice }}</td>
-          <td>{{ purchase.status }}</td>
-          <td>
-            <a href="{% url 'purchase_detail' purchase.id %}">View</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div>
+      <table
+        id="purchaseTable"
+        class="table table-bordered table-striped w-100 table-responsive"
+      >
+        <thead class="thead-light">
+          <tr>
+            <th>Supplier</th>
+            <th>Item</th>
+            <th>Revenue PO</th>
+            <th>Nomor PO</th>
+            <th>Tanggal PO</th>
+            <th>Tanggal Proses</th>
+            <th>Tanggal Input Accurate</th>
+            <th>Tanggal Pengiriman Barang</th>
+            <th>Tanggal Pengiriman Invoice</th>
+            <th>Status</th>
+            <th>Edit/Delete</th>
+          </tr>
+        </thead>
+        <tfoot style="display: table-row-group">
+          <tr>
+              <th>Supplier</th>
+              <th>Item</th>
+              <th>Revenue PO</th>
+              <th>Nomor PO</th>
+              <th>Tanggal PO</th>
+              <th>Tanggal Proses</th>
+              <th>Tanggal Input Accurate</th>
+              <th>Tanggal Pengiriman Barang</th>
+              <th>Tanggal Pengiriman Invoice</th>
+              <th>Status</th>
+          </tr>
+      </tfoot>
+        <tbody>
+          {% for purchase in entities %}
+          <tr>
+            <td>{{ purchase.supplier }}</td>
+            <td>{{ purchase.item }}</td>
+            <td>{{ purchase.revenue_PO }}</td>
+            <td>{{ purchase.nomor_PO }}</td>
+            <td>{{ purchase.tanggal_PO }}</td>
+            <td>{{ purchase.tanggal_process }}</td>
+            <td>{{ purchase.tanggal_input_accurate }}</td>
+            <td>{{ purchase.tanggal_pengiriman_barang }}</td>
+            <td>{{ purchase.tanggal_pengiriman_invoice }}</td>
+            <td>{{ purchase.status }}</td>
+            <td>
+              <a href="{% url 'purchase_detail' purchase.id %}">View</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
     <script>
       new DataTable("#purchaseTable", {
+        columnDefs: [
+          {
+            targets: 2, // Target the first column (adjust the index as needed)
+            render: function (data, type, row) {
+              if (type === "display") {
+                if (data.startsWith("IDR")) {
+                  // Replace commas with periods and periods with commas
+                  data = data
+                    .replace(/,/g, "#")
+                    .replace(/\./g, ",")
+                    .replace(/#/g, ".");
+                  data = data.substr(0, 3) + " " + data.substr(3);
+                  return data;
+                } else if (data.startsWith("$")) {
+                  data = data.replace("$", "USD");
+                  data = data.substr(0, 3) + " " + data.substr(3);
+                  return data;
+                } else {
+                  // Add a space after the first three characters
+                  return data.substr(0, 3) + " " + data.substr(3);
+                }
+              }
+              return data;
+            },
+          },
+        ],
         initComplete: function () {
           this.api()
             .columns()

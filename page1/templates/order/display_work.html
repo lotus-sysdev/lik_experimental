@@ -10,7 +10,7 @@
     <h1>Work Order List</h1>
     <table
       id="workTable"
-      class="table table-bordered table-striped w-100 table-responsive-lg"
+      class="table table-bordered table-striped w-100 table-responsive"
     >
       <thead class="thead-light">
         <tr>
@@ -27,6 +27,20 @@
           <th>Edit/Delete</th>
         </tr>
       </thead>
+      <tfoot style="display: table-row-group">
+        <tr>
+            <th>Supplier</th>
+            <th>Item</th>
+            <th>Revenue PO</th>
+            <th>Nomor PO</th>
+            <th>Tanggal PO</th>
+            <th>Tanggal Proses</th>
+            <th>Tanggal Input Accurate</th>
+            <th>Tanggal Pengiriman Barang</th>
+            <th>Tanggal Pengiriman Invoice</th>
+            <th>Status</th>
+        </tr>
+    </tfoot>
       <tbody>
         {% for work in entities %}
         <tr>
@@ -49,6 +63,32 @@
     </table>
     <script>
       new DataTable("#workTable", {
+        columnDefs: [
+          {
+            targets: 2, // Target the first column (adjust the index as needed)
+            render: function (data, type, row) {
+              if (type === "display") {
+                if (data.startsWith("IDR")) {
+                  // Replace commas with periods and periods with commas
+                  data = data
+                    .replace(/,/g, "#")
+                    .replace(/\./g, ",")
+                    .replace(/#/g, ".");
+                  data = data.substr(0, 3) + " " + data.substr(3);
+                  return data;
+                } else if (data.startsWith("$")) {
+                  data = data.replace("$", "USD");
+                  data = data.substr(0, 3) + " " + data.substr(3);
+                  return data;
+                } else {
+                  // Add a space after the first three characters
+                  return data.substr(0, 3) + " " + data.substr(3);
+                }
+              }
+              return data;
+            },
+          },
+        ],
         initComplete: function () {
           this.api()
             .columns()
