@@ -733,13 +733,14 @@ def upload_csv(request):
 
 
 def delete_selected_rows(request):
-    if request.method == 'POST' and request.is_ajax():
-        selected_skus = request.POST.getlist('selectedSKUs[]')
+    if request.method == 'POST':
+        selected_skus = request.POST.getlist('selected_skus[]')  # Assuming you're sending an array of selected SKUs
         try:
-            # Delete objects based on the received SKUs
+            # Delete the selected rows from the database
             Items.objects.filter(SKU__in=selected_skus).delete()
-            return JsonResponse({'success': True, 'message': 'Selected rows deleted successfully'})
+            return JsonResponse({'success': True})
         except Exception as e:
-            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+            return JsonResponse({'success': False, 'error': str(e)})
+            
     else:
-        return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
