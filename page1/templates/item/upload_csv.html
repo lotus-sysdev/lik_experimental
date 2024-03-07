@@ -5,10 +5,12 @@
 
 {% block content %}
 <h1>Upload CSV</h1>
-<form id="uploadForm" method="post" enctype="multipart/form-data">
+<form id="uploadForm" method="post" enctype="multipart/form-data" >
     {% csrf_token %}
-    <input type="file" name="csv_file">
-    <button type="submit">Upload</button>
+    <div class="form-group">
+        <input type="file" name="csv_file">
+    </div>
+    <button type="submit" class="btn btn-primary">Upload</button>
 </form>
 
 <!-- Display error messages if any

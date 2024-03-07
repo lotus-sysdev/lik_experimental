@@ -1,140 +1,172 @@
 {% extends 'base.html' %}
 
-<html>
-  <head>
+{% block title %}Item Data Table{% endblock %}
 
-<head>
-    {% block title %}Item Data Table{% endblock %}
-  </head>
-  <body>
-</head>
-
-<body>
-    {% block content %}
-    <h1>Item List</h1>
-    <table
-      id="itemTable"
-      class="table table-bordered table-striped w-100 table-responsive-lg"
-    >
-    <a href="{% url 'upload_csv' %}">Upload CSV</a>
-      <thead class="thead-light">
+{% block content %}
+<h1>Item List</h1>
+<table id="itemTable" class="table table-bordered table-striped w-100 table-responsive-lg">
+  {% csrf_token %}
+    <thead class="thead-light">
         <tr>
-          <th>Tanggal Input</th>
-          <th>SKU</th>
-          <th>Nama</th>
-          <th>Category</th>
-          <th>Quantity</th>
-          <th>Satuan</th>
-          <th>Price</th>
-          <th>Gambar</th>
-          <th>Edit/Delete</th>
+            <th>Tanggal Input</th>
+            <th>SKU</th>
+            <th>Nama</th>
+            <th>Category</th>
+            <th>Quantity</th>
+            <th>Satuan</th>
+            <th>Price</th>
+            <th>Gambar</th>
+            <th>Edit/Delete</th>
         </tr>
-      </thead>
-      <tfoot style="display: table-row-group">
-        <tr>
-          <th>Tanggal Input</th>
-          <th>SKU</th>  
-          <th>Nama</th>
-          <th>Category</th>
-          <th>Quantity</th>
-          <th>Satuan</th>
-          <th>Price</th>
-          <th>Gambar</th>
-        </tr>
-      </tfoot>
-      <tbody>
+        <tfoot style="display: table-row-group">
+          <tr>
+            <th>Tanggal Input</th>
+            <th>SKU</th>  
+            <th>Nama</th>
+            <th>Category</th>
+            <th>Quantity</th>
+            <th>Satuan</th>
+            <th>Price</th>
+            <th>Gambar</th>
+          </tr>
+        </tfoot>
+    </thead>
+    <tbody>
         {% for i in entities %}
-        <tr
-          {% if i.is_approved%}
-          style="background-color: #ccffc7;"
-          {% endif %}
-        >
-        <td>{{ i.Tanggal }}</td>
-        <td>{{ i.SKU }}</td>
-        <td>{{ i.nama }}</td>
-        <td>{{ i.category.name }}</td>
-        <td>{{ i.quantity }}</td>
-        <td>{{ i.unit }}</td>
-        <td>{{ i.price }}</td>
-        <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}" /></td>
-          <td>
-            <a href="{% url 'item_detail' i.SKU %}">View</a>
-          </td>
+        <tr {% if i.is_approved %} style="background-color: #ccffc7;" {% endif %}>
+            <td>{{ i.Tanggal }}</td>
+            <td>{{ i.SKU }}</td>
+            <td>{{ i.nama }}</td>
+            <td>{{ i.category.name }}</td>
+            <td>{{ i.quantity }}</td>
+            <td>{{ i.unit }}</td>
+            <td>{{ i.price }}</td>
+            <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}" /></td>
+            <td><a href="{% url 'item_detail' i.SKU %}">View</a></td>
         </tr>
         {% endfor %}
-      </tbody>
-    </table>
-    <script>
-      new DataTable("#itemTable",{
-        select: {
-          style: 'multi'
-        },
-        columnDefs: [ {
-                  targets: 6, // Target the first column (adjust the index as needed)
-                  render: function ( data, type, row ) {
-                      if (type === 'display') {
-                          if (data.startsWith('IDR')) {
-                              // Replace commas with periods and periods with commas
-                              data = data.replace(/,/g, '#').replace(/\./g, ',').replace(/#/g, '.');
-                              data = data.substr(0, 3) + ' ' + data.substr(3);
-                              return data
-                          }else if(data.startsWith('$')){
-                            data = data.replace('$', 'USD');
-                            data = data.substr(0, 3) + ' ' + data.substr(3);
-                            return data
-                          } else {
-                              // Add a space after the first three characters
-                              return data.substr(0, 3) + ' ' + data.substr(3);
-                          }
+    </tbody>
+</table>
+<script>
+  var table;
+  function initializeDataTable() {
+  table = new DataTable("#itemTable",{
+    select: {
+      style: "multi",
+    },
+    columnDefs: [ {
+              targets: 6, // Target the first column (adjust the index as needed)
+              render: function ( data, type, row ) {
+                  if (type === 'display') {
+                      if (data.startsWith('IDR')) {
+                          // Replace commas with periods and periods with commas
+                          data = data.replace(/,/g, '#').replace(/\./g, ',').replace(/#/g, '.');
+                          data = data.substr(0, 3) + ' ' + data.substr(3);
+                          return data
+                      }else if(data.startsWith('$')){
+                        data = data.replace('$', 'USD');
+                        data = data.substr(0, 3) + ' ' + data.substr(3);
+                        return data
+                      } else {
+                          // Add a space after the first three characters
+                          return data.substr(0, 3) + ' ' + data.substr(3);
                       }
-                      return data;
+                      }
                   }
-              } ],
-          initComplete: function () {
-          this.api()
-            .columns()
-            .every(function () {
-              let column = this;
-              let title = column.footer().textContent;
+                  return data;
+              }
+          } ],
+    //   initComplete: function () {
+    //   this.api()
+    //     .columns()
+    //     .every(function () {
+    //       let column = this;
+    //       let title = column.footer().textContent;
 
-              // Create input element
-              let input = document.createElement("input");
-              input.placeholder = title;
-              column.footer().replaceChildren(input);
+    //       // Create input element
+    //       let input = document.createElement("input");
+    //       input.placeholder = title;
+    //       column.footer().replaceChildren(input);
 
-              // Event listener for user input
-              input.addEventListener("keyup", () => {
-                if (column.search() !== this.value) {
-                  column.search(input.value).draw();
-                }
-              });
-            });
-        },
-        lengthMenu: 
-        [[10, 25, 50, 100, -1],
-        [10, 25, 50, 100, "All"]
-        ],
-        layout: {
-          top2Start: {
-            buttons: {
-              buttons: [
-                { extend: "pdf", className: "btn-primary" },
-                { extend: "csv", className: "btn-secondary" },
-                { extend: "colvis", className: "btn-info" },
-              ],
-              dom: {
-                button: {
-                  className: "btn",
-                },
-              },
+    //       // Event listener for user input
+    //       input.addEventListener("keyup", () => {
+    //         if (column.search() !== this.value) {
+    //           column.search(input.value).draw();
+    //         }
+    //       });
+    //     });
+    // },
+    lengthMenu: 
+    [[10, 25, 50, 100, -1],
+    [10, 25, 50, 100, "All"]
+    ],
+    layout: {
+      top2Start: {
+        buttons: {
+          buttons: [
+            { extend: "pdf", className: "btn-primary" },
+            { extend: "csv", className: "btn-secondary" },
+            { text: "Upload CSV", className: "btn-primary", action:function(){
+                window.location.href = "/upload_csv";
+            }},
+            {
+              text: "Delete Rows",
+              className: "btn-danger",
+              action: deleteSelectedRows,
+            },
+            { extend: "colvis", className: "btn-info" },
+          ],
+          dom: {
+            button: {
+              className: "btn",
             },
           },
-          // top2Start:'pageLength'
         },
-      });
-    </script>
-    <a href="/add_item">Add Item</a><br/>
-    {% endblock %}
-</body>
+      },
+      // top2Start:'pageLength'
+    },
+  });
+  }
+  function deleteSelectedRows(){
+    if (!table) {
+        console.error("Table is not initialized.");
+        return;
+    }
+        var selectedSKUs = table.rows('.selected').data().toArray().map(row => row[1]); // Get SKUs of selected rows using DataTables API
+        selectedSKUs.forEach(function(value) {
+        console.log('selected_skus[]:', value);
+        });
+        if (selectedSKUs.length === 0) {
+            alert('Please select at least one row to delete.');
+            return;
+        }
 
-</html>
+        if (confirm('Are you sure you want to delete the selected rows?')) {
+            const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+            $.ajax({
+                url: '{% url "delete_selected_rows" %}',
+                type: 'POST',
+                data: {selected_skus: selectedSKUs, csrfmiddlewaretoken: csrfToken },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Reload or update the table after successful deletion
+                        location.reload(); // Assuming you're using AJAX to populate the table
+                        // Optionally, provide feedback to the user
+                        alert('Selected rows deleted successfully.');
+                    } else {
+                        alert('Error deleting selected rows: ' + response.error);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('Error deleting selected rows: ' + error);
+                },
+            });
+        }
+    }
+  $(document).ready(function() {
+    initializeDataTable();
+});
+</script>
+<a href="/add_item">Add Item</a><br/>
+{% endblock %}

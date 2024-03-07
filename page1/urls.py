@@ -43,12 +43,15 @@ urlpatterns = [
     path('edit_item/<str:SKU>/', edit_item, name='edit_item'),
     path('delete_item/<str:SKU>/', delete_item, name='delete_item'),
     path('upload_csv/', upload_csv, name='upload_csv'),
+    path('delete_selected_rows/', delete_selected_rows, name='delete_selected_rows'),
 
     # Item approval
     path('approve_item/<str:SKU>', approve_item, name='approve_item'),
     
     # Sumber url
     path('add_sumber/<str:SKU>',add_sumber, name='add_sumber'),
+    path('edit_sumber/<int:sumber_id>/', edit_sumber, name='edit_sumber'),
+    path('delete_sumber/<int:sumber_id>/', delete_sumber, name='delete_sumber'),
     
     # PIC urls
     path('add_pic_cust/<int:cust_id>',add_customer_pic,name='add_pic_cust'),

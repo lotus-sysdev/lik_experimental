@@ -371,6 +371,32 @@ def add_sumber(request, SKU):
     redirect_url  = reverse('item_detail', args=(SKU,))
     return add_entity(request, SKU, Items, SumberForm, 'item/add_sumber.html', 'SKU', 'item', redirect_url=redirect_url)
 
+@login_required
+@GA_required
+def edit_sumber(request, sumber_id):
+    sumber = get_object_or_404(ItemSumber, id=sumber_id)
+    form = SumberForm(request.POST or None, instance=sumber)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('item_detail', SKU=sumber.item.pk)
+    return render(request, 'item/edit_sumber.html', {'form': form, 'sumber': sumber})
+
+# def edit_customer_pic(request, pic_id):
+#     pic = get_object_or_404(CustomerPIC, id=pic_id)
+#     form = CustPICForms(request.POST or None, instance=pic)
+
+#     if request.method == 'POST':
+#         if form.is_valid():
+#             form.save()
+#             return redirect('customer_detail', cust_id=pic.customer_id.pk)
+#     return render(request, 'pic/edit_customer_pic.html', {'form': form, 'pic': pic})
+@login_required
+@GA_required
+def delete_sumber(request, sumber_id):
+    return delete_entity(request, ItemSumber, 'id', sumber_id)
+
 
 # -------------------- Order Functions -------------------- #
 # Add Purchase Order and Work Order
@@ -706,4 +732,15 @@ def upload_csv(request):
     return render(request, 'item/upload_csv.html')
 
 
-# def bulk_delete_items(request):
+def delete_selected_rows(request):
+    if request.method == 'POST':
+        selected_skus = request.POST.getlist('selected_skus[]')  # Assuming you're sending an array of selected SKUs
+        try:
+            # Delete the selected rows from the database
+            Items.objects.filter(SKU__in=selected_skus).delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+            
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
