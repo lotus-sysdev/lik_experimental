@@ -1,9 +1,15 @@
+import json
 import os
+import csv
 from PIL import Image
+import requests
 
+from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import redirect, render, get_object_or_404
 from django.conf import settings
 from django.utils import timezone
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -633,3 +639,59 @@ def forbidden(request):
 
 def page_not_found(request, exception):
     return render(request, '404.html', status=404)
+
+
+def upload_csv(request):
+    if request.method == 'POST' and request.FILES['csv_file']:
+        csv_file = request.FILES['csv_file']
+        decoded_file = csv_file.read().decode('utf-8').splitlines()
+        csv_reader = csv.DictReader(decoded_file)
+
+        success_count = 0
+        error_messages = []
+
+        for row_number, row in enumerate(csv_reader, start=1):
+            try:
+                # Get or create the Category instance based on the provided category name
+                category_name = row['category']
+                category_instance, _ = Category.objects.get_or_create(name=category_name)
+
+                # Check if image URL is provided in the CSV row
+                if 'gambar' in row and row['gambar']:
+                    image_url = row['gambar']
+                    # Download the image from the URL
+                    response = requests.get(image_url)
+                    if response.status_code == 200:
+                        # Create a file-like object from the image content
+                        image_content = response.content
+                        # Use the image URL's filename as the uploaded file name
+                        image_filename = image_url.split('/')[-1]
+                        # Create a SimpleUploadedFile object with the image content
+                        uploaded_image = SimpleUploadedFile(image_filename, image_content)
+
+                # Create the Items object with the retrieved Category instance
+                item_data = {
+                    'nama': row['nama'],
+                    'category': category_instance,
+                    'quantity': row['quantity'],
+                    'unit': row['unit'],
+                    'price': row['price'],
+                    'price_currency' : row['price_currency']
+                }
+                if 'gambar' in row and row['gambar']:
+                    item_data['gambar'] = uploaded_image
+
+                item = Items.objects.create(**item_data)
+                success_count += 1
+            except Exception as e:
+                error_messages.append(f"Error in row {row_number}: {str(e)}")
+
+        if error_messages:
+            return JsonResponse({'success': False, 'errors': error_messages,'message':f"{success_count} items imported successfully."})
+        else:
+            return JsonResponse({'success': True, 'message': f"{success_count} items imported successfully."})
+
+    return render(request, 'item/upload_csv.html')
+
+
+# def bulk_delete_items(request):

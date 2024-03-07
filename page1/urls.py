@@ -42,6 +42,7 @@ urlpatterns = [
     path('item_detail/<str:SKU>/', item_detail, name='item_detail'),
     path('edit_item/<str:SKU>/', edit_item, name='edit_item'),
     path('delete_item/<str:SKU>/', delete_item, name='delete_item'),
+    path('upload_csv/', upload_csv, name='upload_csv'),
 
     # Item approval
     path('approve_item/<str:SKU>', approve_item, name='approve_item'),

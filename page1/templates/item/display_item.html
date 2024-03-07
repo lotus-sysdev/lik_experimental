@@ -12,61 +12,49 @@
 <body>
     {% block content %}
     <h1>Item List</h1>
-    <div>
-      <table
-        id="itemTable"
-        class="table table-bordered table-striped w-100 table-responsive"
-      >
-        <thead class="thead-light">
-          <tr>
-            <th>Tanggal Input</th>
-            <th>SKU</th>
-            <th>Nama</th>
-            <th>Category</th>
-            <th>Quantity</th>
-            <th>Satuan</th>
-            <th>Price</th>
-            <th>Gambar</th>
-            <th>Edit/Delete</th>
-          </tr>
-        </thead>
-        <tfoot style="display: table-row-group">
-          <tr>
-              <th>Tanggal Input</th>
-              <th>SKU</th>
-              <th>Nama</th>
-              <th>Category</th>
-              <th>Quantity</th>
-              <th>Satuan</th>
-              <th>Price</th>
-              <th>Gambar</th>
-          </tr>
-      </tfoot>
-        <tbody>
-          {% for i in entities %}
-          <tr
-            {% if i.is_approved%}
-            style="background-color: #ccffc7;"
-            {% endif %}
-          >
-          <td>{{ i.Tanggal }}</td>
-          <td>{{ i.SKU }}</td>
-          <td>{{ i.nama }}</td>
-          <td>{{ i.category.name }}</td>
-          <td>{{ i.quantity }}</td>
-          <td>{{ i.unit }}</td>
-          <td>{{ i.price }}</td>
-          <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}" /></td>
-            <td>
-              <a href="{% url 'item_detail' i.SKU %}">View</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <table
+      id="itemTable"
+      class="table table-bordered table-striped w-100 table-responsive-lg"
+    >
+    <a href="{% url 'upload_csv' %}">Upload CSV</a>
+      <thead class="thead-light">
+        <tr>
+          <th>SKU</th>
+          <th>Nama</th>
+          <th>Category</th>
+          <th>Quantity</th>
+          <th>Satuan</th>
+          <th>Price</th>
+          <th>Tanggal Input</th>
+          <th>Gambar</th>
+          <th>Edit/Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in entities %}
+        <tr
+          {% if i.is_approved%}
+          style="background-color: #ccffc7;"
+          {% endif %}
+        >
+        <td>{{ i.SKU }}</td>
+        <td>{{ i.nama }}</td>
+        <td>{{ i.category.name }}</td>
+        <td>{{ i.quantity }}</td>
+        <td>{{ i.unit }}</td>
+        <td>{{ i.price }}</td>
+        <td>{{ i.Tanggal }}</td>
+        <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}" /></td>
+          <td>
+            <a href="{% url 'item_detail' i.SKU %}">View</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
     <script>
       new DataTable("#itemTable",{
+        select: true,
         columnDefs: [ {
                   targets: 6, // Target the first column (adjust the index as needed)
                   render: function ( data, type, row ) {

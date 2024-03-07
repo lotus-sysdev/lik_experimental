@@ -6,3 +6,4 @@ django-jazzmin
 pillow
 django-money
 django-measurement
+requests

@@ -1,0 +1,49 @@
+<!-- upload_csv.html -->
+{% extends 'base.html' %}
+
+{% block title %}Upload CSV{% endblock %}
+
+{% block content %}
+<h1>Upload CSV</h1>
+<form id="uploadForm" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="csv_file">
+    <button type="submit">Upload</button>
+</form>
+
+<!-- Display error messages if any
+{% if messages %}
+<div class="alert alert-danger mt-10" role="alert">
+    <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %} -->
+<script>
+    document.getElementById('uploadForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var formData = new FormData(this);
+    
+        fetch('/upload_csv/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('No Errors Found');
+                alert(data.message); // Show success message
+            } else {
+                var errorMessage = 'Error importing items:\n' + data.errors.join('\n');
+                alert(errorMessage); 
+                alert(data.message);// Show error message
+            }
+        })
+        .catch(error => {
+            alert('An error occurred while processing the CSV: ' + error.message); // Show generic error message
+        });
+    });
+    </script>
+{% endblock %}
