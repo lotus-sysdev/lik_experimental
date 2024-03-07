@@ -6,6 +6,7 @@ from django.forms import ValidationError
 from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 from djmoney.models.fields import MoneyField
+from djmoney.models.validators import MinMoneyValidator
 from django_measurement.models import MeasurementField
 from measurement.measures import Mass
 
@@ -59,7 +60,7 @@ class Items(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     unit = models.CharField(max_length=10)
-    price = MoneyField(max_digits=15, decimal_places=2, default_currency='IDR', blank= False, null= False)
+    price = MoneyField(max_digits=15, decimal_places=2, default_currency='IDR', blank= False, null= False, validators=[MinMoneyValidator(0)])
     gambar = models.ImageField()
     is_approved = models.BooleanField(default=False)
     
@@ -139,7 +140,7 @@ def default_date():
 class PurchaseOrder(models.Model):
     supplier= models.ForeignKey(Supplier, on_delete=models.CASCADE)
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
-    revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, )
+    revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, validators=[MinMoneyValidator(0)])
     nomor_PO = models.IntegerField(blank=True, null=True,)
     tanggal_PO = models.DateField(blank=True, null=True, )
     tanggal_process = models.DateField(blank=True, null=True, )
@@ -178,7 +179,7 @@ class PurchaseOrder(models.Model):
 class WorkOrder(models.Model):
     customer= models.ForeignKey(Customer, on_delete=models.CASCADE)
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
-    revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True)
+    revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, validators=[MinMoneyValidator(0)])
     nomor_PO = models.IntegerField(blank=True, null=True)
     tanggal_PO = models.DateField(blank=True, null=True)
     tanggal_process = models.DateField(blank=True, null=True)

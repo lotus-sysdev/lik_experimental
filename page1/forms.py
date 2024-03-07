@@ -54,50 +54,7 @@ def validate_npwp(value):
     else:
         raise ValidationError('Invalid NPWP format')
 
-    
 class CustomerForm(forms.ModelForm):
-    
-    nama_pt = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'PT. Lotus Lestari Raya'}),
-        label='Nama Perusahaan'
-    )
-    
-    telp = PhoneNumberField(
-        region="ID",
-        widget=RegionalPhoneNumberWidget(region='ID', attrs={'class':'form-control', 'placeholder':'081-234-567-890'}),
-        label='No. Telpon'
-    )
-    
-    # Define choices for terms_of_payment field
-    TERMS_OF_PAYMENT_CHOICES = (
-        (1, 'Option 1'),
-        (2, 'Option 2'),
-        (3, 'Option 3'),
-    )
-    terms_of_payment = forms.ChoiceField(
-        choices=TERMS_OF_PAYMENT_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='Terms of Payment'
-    )
-
-    # Define choices for pengiriman field
-    PENGIRIMAN_CHOICES = (
-        (True, 'Yes'),
-        (False, 'No'),
-    )
-    pengiriman = forms.ChoiceField(
-        choices=PENGIRIMAN_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='Pengiriman'
-    )
-
-    npwp = forms.CharField(
-        max_length=21,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'xx.xxx.xxx.x-xxx.xxx or xxxx xxxx xxxx xxxx'}),
-        label='NPWP',
-        validators=[validate_npwp]
-    )
 
     def clean_npwp(self):
         npwp = self.cleaned_data.get('npwp')
@@ -107,50 +64,34 @@ class CustomerForm(forms.ModelForm):
         else:
             formatted_npwp = f'{clean_npwp[:4]} {clean_npwp[4:8]} {clean_npwp[8:12]} {clean_npwp[12:]}'
         return formatted_npwp
-    
-    faktur = forms.BooleanField(
-        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
-        label='Faktur Pajak',
-        required=False
-    )
 
     class Meta:
         model = Customer
         fields = '__all__'
         exclude = ['cust_id']
+        widgets = {
+            'nama_pt': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'PT. Lotus Lestari Raya'}),
+            'telp': RegionalPhoneNumberWidget(region='ID', attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
+            'npwp': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'xx.xxx.xxx.x-xxx.xxx or xxxx xxxx xxxx xxxx'}),
+            'faktur': forms.CheckboxInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'nama_pt': 'Nama Perusahaan',
+            'telp': 'No. Telpon',
+            'terms_of_payment': 'Terms of Payment',
+            'pengiriman': 'Pengiriman',
+            'npwp': 'NPWP',
+            'faktur': 'Faktur Pajak',
+        }
+        choices = {
+            'terms_of_payment': ((1, 'Option 1'), (2, 'Option 2'), (3, 'Option 3')),
+            'pengiriman': ((True, 'Yes'), (False, 'No')),
+        }
+
+    terms_of_payment = forms.ChoiceField(choices=Meta.choices['terms_of_payment'], widget=forms.Select(attrs={'class': 'form-control'}), label='Terms of Payment')
+    pengiriman = forms.ChoiceField(choices=Meta.choices['pengiriman'], widget=forms.Select(attrs={'class': 'form-control'}), label='Pengiriman')
 
 class SupplierForm(forms.ModelForm):
-    nama_pt = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'PT. Lotus Lestari Raya'}),
-        label='Nama Perusahaan'
-    )
-    
-    telp = PhoneNumberField(
-        region="ID",
-        widget=RegionalPhoneNumberWidget(region='ID', attrs={'class':'form-control', 'placeholder':'081-234-567-890'}),
-        label='No. Telpon'
-    )
-    
-    # Define choices for terms_of_payment field
-    TERMS_OF_PAYMENT_CHOICES = (
-        (1, 'Option 1'),
-        (2, 'Option 2'),
-        (3, 'Option 3'),
-    )
-    terms_of_payment = forms.ChoiceField(
-        choices=TERMS_OF_PAYMENT_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='Terms of Payment'
-    )
-
-    npwp = forms.CharField(
-        max_length=21,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'xx.xxx.xxx.x-xxx.xxx or xxxx xxxx xxxx xxxx'}),
-        label='NPWP',
-        validators=[validate_npwp]
-    )
-    
     def clean_npwp(self):
         npwp = self.cleaned_data.get('npwp')
         clean_npwp = validate_npwp(npwp)
@@ -158,281 +99,194 @@ class SupplierForm(forms.ModelForm):
             formatted_npwp = f'{clean_npwp[:2]}.{clean_npwp[2:5]}.{clean_npwp[5:8]}.{clean_npwp[8]}-{clean_npwp[9:12]}.{clean_npwp[12:]}'
         else:
             formatted_npwp = f'{clean_npwp[:4]} {clean_npwp[4:8]} {clean_npwp[8:12]} {clean_npwp[12:]}'
-        return formatted_npwp    
-    
-    faktur = forms.BooleanField(
-        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
-        label='Faktur Pajak',
-        required=False
-    )
+        return formatted_npwp
 
     class Meta:
         model = Supplier
         fields = '__all__'
-        exclude=['supp_id']
+        exclude = ['supp_id']
+        widgets = {
+            'nama_pt': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'PT. Lotus Lestari Raya'}),
+            'telp': RegionalPhoneNumberWidget(region='ID', attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
+            'npwp': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'xx.xxx.xxx.x-xxx.xxx or xxxx xxxx xxxx xxxx'}),
+            'faktur': forms.CheckboxInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'nama_pt': 'Nama Perusahaan',
+            'telp': 'No. Telpon',
+            'terms_of_payment': 'Terms of Payment',
+            'npwp': 'NPWP',
+            'faktur': 'Faktur Pajak',
+        }
+        choices = {
+            'terms_of_payment': ((1, 'Option 1'), (2, 'Option 2'), (3, 'Option 3')),
+        }
+
+    terms_of_payment = forms.ChoiceField(choices=Meta.choices['terms_of_payment'], widget=forms.Select(attrs={'class': 'form-control'}), label='Terms of Payment')
 
 class CustPICForms(forms.ModelForm):
-    nama = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Nama'}),
-        label='Nama'
-    )
-    
-    email = forms.EmailField(
-        max_length=255,
-        widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder':'username@lotuslestari.co.id'})
-    )
-
-    telp = PhoneNumberField(
-        region="ID",
-        widget=RegionalPhoneNumberWidget(region='ID', attrs={'class':'form-control', 'placeholder':'081-234-567-890'}),
-        label='No. Telpon'
-    )
-
-    Role_Options = (
-        ('Finance', 'Finance'),
-        ('General Affairs', 'General Affairs (GA)'),
-        ('Sales', 'Sales'),
-        ('Procurement', 'Procurement'),
-        ('Board of Directors', 'Board of Directors (BOD)'),
-    )
-    Role = forms.ChoiceField(
-        choices=Role_Options,
-        widget=forms.Select(attrs={'class':'form-control'}),
-        label='Jabatan'
-    )
-
     class Meta:
         model = CustomerPIC
         fields = '__all__'
         exclude = ['customer_id']
+        widgets = {
+            'nama': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nama'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'username@lotuslestari.co.id'}),
+            'telp': RegionalPhoneNumberWidget(region='ID', attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
+        }
+        labels = {
+            'nama': 'Nama',
+            'email': 'Email',
+            'telp': 'No. Telpon',
+        }
+        choices = {
+            'Role': (('Finance', 'Finance'), ('General Affairs', 'General Affairs (GA)'), ('Sales', 'Sales'), ('Procurement', 'Procurement'),('Board of Directors', 'Board of Directors (BOD)'),)
+        }
+    Role = forms.ChoiceField(choices=Meta.choices['Role'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jabatan')
 
 class SuppPICForms(forms.ModelForm):
-    nama = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Nama'}),
-        label='Nama'
-    )
-    
-    email = forms.EmailField(
-        max_length=255,
-        widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder':'username@lotuslestari.co.id'})
-    )
-
-    telp = PhoneNumberField(
-        region="ID",
-        widget=RegionalPhoneNumberWidget(region='ID', attrs={'class':'form-control', 'placeholder':'081-234-567-890'}),
-        label='No. Telpon'
-    )
-
-    Role_Options = (
-        (1, 'Option 1'),
-        (2, 'Option 2'),
-        (3, 'Option 3'),
-    )
-    Role = forms.ChoiceField(
-        choices=Role_Options,
-        widget=forms.Select(attrs={'class':'form-control'}),
-        label='Jabatan'
-    )
-
     class Meta:
         model = SupplierPIC
         fields = '__all__'
         exclude = ['supplier_id']
+        widgets = {
+            'nama': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nama'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'username@lotuslestari.co.id'}),
+            'telp': RegionalPhoneNumberWidget(region='ID', attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
+        }
+        labels = {
+            'nama': 'Nama',
+            'email': 'Email',
+            'telp': 'No. Telpon',
+        }
+        choices = {
+            'Role': (('Finance', 'Finance'), ('General Affairs', 'General Affairs (GA)'), ('Sales', 'Sales'), ('Procurement', 'Procurement'),('Board of Directors', 'Board of Directors (BOD)'),)
+        }
+    Role = forms.ChoiceField(choices=Meta.choices['Role'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jabatan')
 
 class CustAlamatForms(forms.ModelForm):
-    TYPE_CHOICES = (
-        ('penagihan', 'Alamat Penagihan'),
-        ('pengiriman', 'Alamat Pengiriman'),
-    )
-
-    type = forms.ChoiceField(
-        choices=TYPE_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='Jenis Alamat'
-    )
-
-    provinsi = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'DKI Jakarta'}),
-        label='Provinsi'
-    )
-
-    kota = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Jakarta Barat'}),
-        label='Kota'
-    )
-
-    kecamatan = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Kembangan'}),
-        label='Nama Perusahaan'
-    )
-
-    kelurahan = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Srengseng'}),
-        label='Nama Perusahaan'
-    )
-
-    detail = forms.CharField(
-        max_length=255, 
-        widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder':'Ruko, Jl. Permata Regency Jl. H. Kelik No.31 Blok C, RT.1/RW.6,'}),
-        label='Alamat Detail'
-    )
-
     class Meta:
         model = CustomerAlamat
         fields = '__all__'
         exclude = ['customer_id']
+        widgets = {
+            'provinsi': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'DKI Jakarta'}),
+            'kota': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Jakarta Barat'}),
+            'kecamatan': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Kembangan'}),
+            'kelurahan': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Srengseng'}),
+            'detail': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ruko, Jl. Permata Regency Jl. H. Kelik No.31 Blok C, RT.1/RW.6,'}),
+        }
+        labels = {
+            'provinsi': 'Provinsi',
+            'kota': 'Kota',
+            'kecamatan': 'Kecamatan',
+            'kelurahan': 'Kelurahan',
+            'detail': 'Alamat Detail',
+        }
+        choices = {
+            'type': (('penagihan', 'Alamat Penagihan'), ('pengiriman', 'Alamat Pengiriman'),)
+        }
+    type = forms.ChoiceField(choices=Meta.choices['type'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jenis Alamat')
 
 class SuppAlamattForms(forms.ModelForm):
-    TYPE_CHOICES = (
-        ('penagihan', 'Alamat Penagihan'),
-        ('pengiriman', 'Alamat Pengiriman'),
-    )
-
-    type = forms.ChoiceField(
-        choices=TYPE_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='Jenis Alamat'
-    )
-
-    provinsi = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'DKI Jakarta'}),
-        label='Provinsi'
-    )
-
-    kota = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Jakarta Barat'}),
-        label='Kota'
-    )
-
-    kecamatan = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Kembangan'}),
-        label='Nama Perusahaan'
-    )
-
-    kelurahan = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Srengseng'}),
-        label='Nama Perusahaan'
-    )
-
-    detail = forms.CharField(
-        max_length=255, 
-        widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder':'Ruko, Jl. Permata Regency Jl. H. Kelik No.31 Blok C, RT.1/RW.6,'}),
-        label='Alamat Detail'
-    )
-
     class Meta:
         model = SupplierAlamat
         fields = '__all__'
         exclude = ['supplier_id']
-
-class ItemForm(forms.ModelForm):
-    nama = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Baterai AA'}),
-        label='Nama Barang'
-    )
-
-    quantity = forms.CharField(
-        max_length=255, 
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder':'1, 2, 3, ...'}),
-        label='Kuantitas'
-    )
-
-    UNIT_CHOICES = (
-        ('Botol', 'Botol'),
-        ('Box', 'Box'),
-        ('Bulan', 'Bulan'),
-        ('Dirigen', 'Dirigen'),
-        ('Item', 'Item'),
-        ('Kaleng', 'Kaleng'),
-        ('Kg', 'Kg'),
-        ('Lusin', 'Lusin'),
-        ('Meter', 'Meter'),
-        ('Orang', 'Orang'),
-        ('Pack', 'Pack'),
-        ('Pail', 'Pail(Cat)'),
-        ('Pair', 'Pair'),
-        ('Pcs', 'Pcs'),
-        ('Unit', 'Unit'),
-        ('Lainnya', 'Lainnya')
-    )
-
-    unit = forms.ChoiceField(
-        choices=UNIT_CHOICES,
-        widget=Select2Widget(attrs={'class':'form-control', 'placeholder':'Select unit of measurement'}),
-        label=('Satuan')
-    )
-
-    price = MoneyField( 
-        widget=MoneyWidget(attrs={'class': 'form-control', 'placeholder':'100000'}),
-        label='Harga'
-    )
-    
-    gambar = forms.FileField( 
-        widget=forms.ClearableFileInput(attrs={'class': 'form-control-file', 'accept':'image/*'}),
-        label='Gambar',
-        # validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])]
-    )
-
-    class Meta:
-        model = Items
-        fields = '__all__'
-        exclude = ['SKU','gambar_resized', 'is_approved']
         widgets = {
-            'category': Select2Widget(attrs={'class':'form-control'}),
-            'Tanggal' : forms.DateInput(attrs={'type': 'date','class': 'form-control'}),
+            'provinsi': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'DKI Jakarta'}),
+            'kota': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Jakarta Barat'}),
+            'kecamatan': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Kembangan'}),
+            'kelurahan': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Srengseng'}),
+            'detail': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ruko, Jl. Permata Regency Jl. H. Kelik No.31 Blok C, RT.1/RW.6,'}),
         }
         labels = {
-            'category': "Kategori",
+            'provinsi': 'Provinsi',
+            'kota': 'Kota',
+            'kecamatan': 'Kecamatan',
+            'kelurahan': 'Kelurahan',
+            'detail': 'Alamat Detail',
+        }
+        choices = {
+            'type': (('penagihan', 'Alamat Penagihan'), ('pengiriman', 'Alamat Pengiriman'),)
+        }
+    type = forms.ChoiceField(choices=Meta.choices['type'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jenis Alamat')
+
+class ItemForm(forms.ModelForm):
+    class Meta:
+        UNIT_CHOICES = (
+            ('Botol', 'Botol'),
+            ('Box', 'Box'),
+            ('Bulan', 'Bulan'),
+            ('Dirigen', 'Dirigen'),
+            ('Item', 'Item'),
+            ('Kaleng', 'Kaleng'),
+            ('Kg', 'Kg'),
+            ('Lusin', 'Lusin'),
+            ('Meter', 'Meter'),
+            ('Orang', 'Orang'),
+            ('Pack', 'Pack'),
+            ('Pail', 'Pail(Cat)'),
+            ('Pair', 'Pair'),
+            ('Pcs', 'Pcs'),
+            ('Unit', 'Unit'),
+            ('Lainnya', 'Lainnya')
+        )
+
+        model = Items
+        fields = '__all__'
+        exclude = ['SKU', 'gambar_resized', 'is_approved']
+        widgets = {
+            'nama': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Baterai AA'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '1, 2, 3, ...'}),
+            'price': MoneyWidget(attrs={'class': 'form-control', 'placeholder': '100000'}),
+            'gambar': forms.ClearableFileInput(attrs={'class': 'form-control-file', 'accept': 'image/*'}),
+            'category': Select2Widget(attrs={'class': 'form-control'}),
+            'Tanggal': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
+        labels = {
+            'nama': 'Nama Barang',
+            'quantity': 'Kuantitas',
+            'unit': 'Satuan',
+            'price': 'Harga',
+            'gambar': 'Gambar',
+            'category': 'Kategori',
             'Tanggal': 'Tanggal Input'
         }
+        choices = {
+            'unit': UNIT_CHOICES,
+        }
+    unit = forms.ChoiceField(choices=Meta.choices['unit'], widget=forms.Select(attrs={'class': 'form-control'}))
+
+    def clean_quantity(self):
+        quantity = self.cleaned_data.get('quantity')
+        if quantity < 0:
+            raise ValidationError('Kuantitas harus positif.')
+        return quantity
 
 class SumberForm(forms.ModelForm):
-    TYPE_CHOICES = (
-        ('online', 'Online Store'),
-        ('pabrik', 'Pabrik'),
-    )
-    jenis_sumber = forms.ChoiceField(
-        choices=TYPE_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='Jenis Sumber'
-    )
-
-    nama_perusahaan = forms.CharField(
-        max_length=255, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'PT. Lotus Lestari Raya'}),
-        label='Nama Perusahaan'
-    )
-
-    telp = PhoneNumberField(
-        region="ID",
-        widget=RegionalPhoneNumberWidget(region='ID', attrs={'class':'form-control', 'placeholder':'081-234-567-890'}),
-        label='No. Telpon'
-    )
-
-    email = forms.EmailField(
-        max_length=255,
-        widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder':'username@lotuslestari.co.id'})
-    )
-
-    url = forms.URLField(
-        widget=forms.URLInput(attrs={'class':'form-control', 'placeholder':'https://beezywork.id'}),
-    )
-
     class Meta:
         model = ItemSumber
         fields = '__all__'
         exclude = ['item']
+        widgets = {
+            'nama_perusahaan' : forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'PT. Lotus Lestari Raya'}),
+            'telp' : RegionalPhoneNumberWidget(attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
+            'email' : forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'username@lotuslestari.co.id'}),
+            'url' : forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://beezywork.id'}),
+        }
+        labels = {
+            'jenis_sumber' : 'Jenis Sumber*',
+            'nama_perusahaan' : 'Nama Perusahaan*',
+            'telp' : 'No. Telpon',
+            'email' : 'Email',
+            'url' : 'Link',
+        }
+        choices = {
+            'jenis_sumber': (('Online Store', 'Online Store'), ('Rabrik', 'Pabrik'), ('Reseller', 'Reseller'), ('Grosir', 'Grosir'),)
+        }
+        
+    jenis_sumber = forms.ChoiceField(choices=Meta.choices['jenis_sumber'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jenis Sumber*')
 
 class PurchaseForm(forms.ModelForm):
     class Meta:
@@ -443,7 +297,7 @@ class PurchaseForm(forms.ModelForm):
             'supplier': Select2Widget(attrs={'class': 'form-control'}),
             'item': Select2Widget(attrs={'class': 'form-control'}),
             'revenue_PO': MoneyWidget(attrs={'class': 'form-control', 'placeholder': '100000'}),
-            'nomor_PO': forms.NumberInput(attrs={'class': 'form-control'}),
+            'nomor_PO': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '012345'}),
             'tanggal_PO': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'tanggal_process': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'tanggal_input_accurate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
@@ -476,54 +330,31 @@ class PurchaseFormNGA(forms.ModelForm):
             'tanggal_pengiriman_barang': 'Tanggal Pengiriman Barang',
             'tanggal_pengiriman_invoice': 'Tanggal Pengiriman Invoice',
         }
-class WorkForm(forms.ModelForm):
-    revenue_PO = MoneyField( 
-        required=False,
-        widget=MoneyWidget(attrs={'class': 'form-control', 'placeholder':'100000'}),
-        label='Revenue PO'
-    )
-    
-    nomor_PO = forms.IntegerField(
-        required=False,
-        widget=forms.NumberInput(attrs={'class':'form-control'}),
-        label=('Nomor PO')
-    )
-    
-    tanggal_PO = forms.DateField(
-        required=False, 
-        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'}),
-        label=('Tanggal PO')
-    )
-    
-    tanggal_process = forms.DateField(
-        required=False, 
-        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'}),
-        label=("Tanggal Proses")
-    )
-    
-    tanggal_input_accurate = forms.DateField(
-        required=False, 
-        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'}),
-        label=("Tanggal input Accurate")
-    )
-    
-    tanggal_pengiriman_barang = forms.DateField(
-        required=False, 
-        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'})
-    )
-    
-    tanggal_pengiriman_invoice = forms.DateField(
-        required=False, 
-        widget=forms.DateInput(attrs={'type': 'date', 'class':'form-control'})
-    )
 
+class WorkForm(forms.ModelForm):
     class Meta:
         model = WorkOrder
         fields = "__all__"
         exclude = ['status']
         widgets = {
-            'customer': Select2Widget(attrs={'class':'form-control'}),
-            'item': Select2Widget(attrs={'class':'form-control'}),
+            'supplier': Select2Widget(attrs={'class': 'form-control'}),
+            'item': Select2Widget(attrs={'class': 'form-control'}),
+            'revenue_PO': MoneyWidget(attrs={'class': 'form-control', 'placeholder': '100000'}),
+            'nomor_PO': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '012345'}),
+            'tanggal_PO': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'tanggal_process': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'tanggal_input_accurate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'tanggal_pengiriman_barang': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'tanggal_pengiriman_invoice': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
+        labels = {
+            'revenue_PO': 'Revenue PO',
+            'nomor_PO': 'Nomor PO',
+            'tanggal_PO': 'Tanggal PO',
+            'tanggal_process': 'Tanggal Proses',
+            'tanggal_input_accurate': 'Tanggal Input Accurate',
+            'tanggal_pengiriman_barang': 'Tanggal Pengiriman Barang',
+            'tanggal_pengiriman_invoice': 'Tanggal Pengiriman Invoice',
         }
 
 class WorkFormNGA(forms.ModelForm):
@@ -542,6 +373,8 @@ class WorkFormNGA(forms.ModelForm):
             'tanggal_pengiriman_barang': 'Tanggal Pengiriman Barang',
             'tanggal_pengiriman_invoice': 'Tanggal Pengiriman Invoice',
         }
+
+# TODO Validation for everything below this
 class Register(UserCreationForm):
     username = forms.CharField(
         label='Username',
