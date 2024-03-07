@@ -30,6 +30,18 @@
           <th>Edit/Delete</th>
         </tr>
       </thead>
+      <tfoot style="display: table-row-group">
+        <tr>
+          <th>SKU</th>  
+          <th>Nama</th>
+          <th>Category</th>
+          <th>Quantity</th>
+          <th>Satuan</th>
+          <th>Price</th>
+          <th>Tanggal Input</th>
+          <th>Gambar</th>
+        </tr>
+      </tfoot>
       <tbody>
         {% for i in entities %}
         <tr
@@ -54,7 +66,9 @@
     </table>
     <script>
       new DataTable("#itemTable",{
-        select: true,
+        select: {
+          style: 'multi'
+        },
         columnDefs: [ {
                   targets: 6, // Target the first column (adjust the index as needed)
                   render: function ( data, type, row ) {
