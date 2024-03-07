@@ -732,4 +732,14 @@ def upload_csv(request):
     return render(request, 'item/upload_csv.html')
 
 
-# def bulk_delete_items(request):
+def delete_selected_rows(request):
+    if request.method == 'POST' and request.is_ajax():
+        selected_skus = request.POST.getlist('selectedSKUs[]')
+        try:
+            # Delete objects based on the received SKUs
+            Items.objects.filter(SKU__in=selected_skus).delete()
+            return JsonResponse({'success': True, 'message': 'Selected rows deleted successfully'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    else:
+        return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
