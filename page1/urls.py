@@ -83,6 +83,11 @@ urlpatterns = [
     path('remove/', remove, name='remove'),
     path('delivery_form/', delivery_form, name='delivery_form'),
     path('update_num_forms/', update_num_forms, name='update_num_forms'),
+
+    path('delivery_detail/<int:id>', delivery_detail, name='delivery_detail'),
+    path('edit_delivery/<int:id>/', edit_delivery, name='edit_delivery'),
+    path('delete_delivery/<int:id>/', delete_delivery, name='delete_delivery'),
+
     path('add_messenger/', add_messenger, name='add_messenger'),
     path('add_vehicle/', add_vehicle, name='add_vehicle'),
 

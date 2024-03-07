@@ -6,7 +6,7 @@
 <form id="delivery-form" method="post" enctype="multipart/form-data">
   {% csrf_token %}
 
-  <label for="id_num_forms" style="display: none;">Number of Forms (1-3):</label>
+  <label for="id_num_forms" style="display: none">Number of Forms (1-3):</label>
   <input
     type="number"
     name="num_forms"
@@ -15,51 +15,71 @@
     max="3"
     value="{{ forms|length }}"
     required
-    style="display: none;"
+    style="display: none"
   />
 
   <div id="forms-container">
     {% for form in forms %}
     <fieldset class="delivery-form">
-      <div
-        id="form-section-1"
-      >
-      <div style="display: flex;"">
-        <div class="mt-4 w-50 mr-3">
+      <div class="form-row">
+        <div class="col-md-5">
           <h5>Detail Pengantaran</h5>
-          {{ form.title.label_tag }} {{ form.title }} 
-          {{ form.start.label_tag }} {{ form.start }} 
-          {{ form.end.label_tag }}{{ form.end }} 
-          {{ form.start_location.label_tag }}{{form.start_location }} 
-          {{ form.destination.label_tag }} {{  form.destination }}
+          <div class="form-group">
+            {{ form.title.label_tag }} {{ form.title }}
+          </div>
+          <div class="form-group">
+            {{ form.start.label_tag }} {{ form.start }}
+          </div>
+          <div class="form-group">{{ form.end.label_tag }}{{ form.end }}</div>
+          <div class="form-group">
+            {{ form.start_location.label_tag }}{{form.start_location }}
+          </div>
+          <div class="form-group">
+            {{ form.destination.label_tag }} {{ form.destination }}
+          </div>
         </div>
 
-        <div class="mt-4 w-50 ml-3">
+        <div class="col-md-5 ml-5">
           <h5>Paket</h5>
-          {{ form.package_name.label_tag }} {{ form.package_name }} 
-          {{ form.package_dimensions.label_tag }} {{ form.package_dimensions }}
-          {{ form.package_mass.label_tag }} {{ form.package_mass }}
+          <div class="form-group">
+            {{ form.package_name.label_tag }} {{ form.package_name }}
+          </div>
+          <div class="form-group">
+            {{ form.package_dimensions.label_tag }} {{ form.package_dimensions }}
+          </div>
+          <div class="form-group">
+            {{ form.package_mass.label_tag }} {{ form.package_mass }}
+          </div>
         </div>
       </div>
       <div class="w-100">
-          <br>
-          <hr>
+        <br />
+        <hr />
       </div>
+      <div class="form-row">
+        <div class="col-md-5">
+          <h5>Kurir</h5>
+          <div class="form-group">
+            {{ form.messenger.label_tag }} {{ form.messenger }}
+          </div>
+          <div class="form-group">
+            {{ form.vehicle.label_tag }} {{ form.vehicle }}
+          </div>
+        </div>
       </div>
-      <div class="mt-4 w-50 mr-3">
-        <h5>Kurir</h5>
-        {{ form.messenger.label_tag }} {{ form.messenger }} 
-        {{ form.vehicle.label_tag }} {{ form.vehicle }}
-      </div>
-      <br>
-      <hr>
+      <br />
+      <hr />
     </fieldset>
     {% endfor %}
   </div>
   <div class="d-flex">
     <button type="submit" class="btn btn-primary mr-2">Submit</button>
-    <button type="button" id="add-form" class="btn btn-info mr-2">Tambah Tujuan</button>
-    <button type="button" id="remove-form" class="btn btn-danger">Kurangi Tujuan</button>
+    <button type="button" id="add-form" class="btn btn-info mr-2">
+      Tambah Tujuan
+    </button>
+    <button type="button" id="remove-form" class="btn btn-danger">
+      Kurangi Tujuan
+    </button>
   </div>
 </form>
 <script>
@@ -91,7 +111,7 @@
     function addForm() {
       const newForm = document.createElement("fieldset");
       newForm.className = "delivery-form";
-      
+
       formsContainer.appendChild(newForm);
 
       // const firstForm = document.querySelector(".delivery-form");

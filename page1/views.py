@@ -513,10 +513,12 @@ def user_action_logs(request):
 @login_required
 def calendar(request):  
     all_events = Events.objects.all()
+    messengers = Messenger.objects.all()
     request.session['num_forms'] = 1
     request.session.modified = True
     context = {
         "events":all_events,
+        "messengers": messengers,
     }
     return render(request,'delivery/calendar.html',context)
 
@@ -617,11 +619,21 @@ def update_num_forms(request):
 
     return JsonResponse({'status': 'error'})
 
+# Display, edit, and delete delivery
+def delivery_detail(request, id):
+    return entity_detail(request, Events, DeliveryForm, "id", id, 'delivery/delivery_detail.html')
+
+def edit_delivery(request, id):
+    return edit_entity(request, Events, DeliveryForm, 'id', id)
+
+def delete_delivery(request, id):
+    return delete_entity(request, Events, 'id', id)
+
+# Adding messenger and vehicle
 @login_required
 def add_messenger(request):
     return add_entity_view(request, MessengerForm, 'delivery/add_messenger.html', 'calendar')
 
- 
 @login_required
 def add_vehicle(request):
     return add_entity_view(request, VehicleForm, 'delivery/add_vehicle.html', 'calendar')
