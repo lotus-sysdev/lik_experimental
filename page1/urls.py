@@ -49,6 +49,8 @@ urlpatterns = [
     
     # Sumber url
     path('add_sumber/<str:SKU>',add_sumber, name='add_sumber'),
+    path('edit_sumber/<int:sumber_id>/', edit_sumber, name='edit_sumber'),
+    path('delete_sumber/<int:sumber_id>/', delete_sumber, name='delete_sumber'),
     
     # PIC urls
     path('add_pic_cust/<int:cust_id>',add_customer_pic,name='add_pic_cust'),
