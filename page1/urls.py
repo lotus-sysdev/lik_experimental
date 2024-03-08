@@ -43,13 +43,13 @@ urlpatterns = [
     path('edit_item/<str:SKU>/', edit_item, name='edit_item'),
     path('delete_item/<str:SKU>/', delete_item, name='delete_item'),
     path('upload_csv/', upload_csv, name='upload_csv'),
-    path('delete_selected_rows/', delete_selected_rows, name='delete_selected_rows'),
+
+    # Deletion of multiple rows
+    path('delete_selected_rows_item/', delete_selected_rows_item, name='delete_selected_rows_item'),
     path('delete_selected_rows_cust/', delete_selected_rows_cust, name='delete_selected_rows_cust'),
     path('delete_selected_rows_supp/', delete_selected_rows_supp, name='delete_selected_rows_supp'),
     path('delete_selected_rows_PO/', delete_selected_rows_PO, name='delete_selected_rows_PO'),
     path('delete_selected_rows_WO/', delete_selected_rows_WO, name='delete_selected_rows_WO'),
-
-
 
     # Item approval
     path('approve_item/<str:SKU>', approve_item, name='approve_item'),

@@ -13,8 +13,8 @@
         id="customerTable"
         class="table table-bordered table-striped w-100 table-lg table-responsive-lg"
       >
-      <div>
-        <select id="columnFilter">
+      <div class="form-inline mb-2">
+        <select id="columnFilter" class="form-control btn-info">
           <option value="0">Customer ID</option>
           <option value="1">Nama Perusahaan</option>
           <option value="2">No. Telpon</option>
@@ -24,7 +24,7 @@
           <option value="6">Faktur Pajak</option>
           <!-- Add more options for additional columns -->
         </select>
-        <input type="text" id="columnSearch" placeholder="Search in selected column">
+        <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
       </div>
         <thead class="thead-light">
           <tr>
@@ -96,11 +96,11 @@
         console.error("Table is not initialized.");
         return;
     }
-        var selectedSKUs = table.rows('.selected').data().toArray().map(row => row[0]); // Get SKUs of selected rows using DataTables API
-        selectedSKUs.forEach(function(value) {
-        console.log('selected_skus[]:', value);
+        var selectedIDs = table.rows('.selected').data().toArray().map(row => row[0]); // Get SKUs of selected rows using DataTables API
+        selectedIDs.forEach(function(value) {
+        console.log('selected_ids[]:', value);
         });
-        if (selectedSKUs.length === 0) {
+        if (selectedIDs.length === 0) {
             alert('Please select at least one row to delete.');
             return;
         }
@@ -110,7 +110,7 @@
             $.ajax({
                 url: '{% url "delete_selected_rows_cust" %}',
                 type: 'POST',
-                data: {selected_skus: selectedSKUs, csrfmiddlewaretoken: csrfToken },
+                data: {selected_ids: selectedIDs, csrfmiddlewaretoken: csrfToken },
                 dataType: 'json',
                 success: function(response) {
                     if (response.success) {

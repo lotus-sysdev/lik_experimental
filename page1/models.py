@@ -54,7 +54,7 @@ class Category(models.Model):
         return self.name
 
 class Items(models.Model):
-    SKU = models.CharField(max_length=10, primary_key = True, unique = True)
+    SKU = models.CharField(max_length=20, primary_key = True, unique = True)
     Tanggal = models.DateField(default=timezone.now)
     nama = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -87,7 +87,7 @@ class Items(models.Model):
                     last_number = 0
 
                 # Format the current date as ddmmyy
-                current_date = self.Tanggal.strftime('%d%m%y')
+                current_date = self.Tanggal.strftime('%y%m%d')
 
                 new_sku = f"{category_id_str}{category_code}{last_number + 1:04d}{current_date}"  # Combine category ID, category code, a 4-digit number, and the formatted date
                 self.SKU = new_sku

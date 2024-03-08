@@ -4,21 +4,12 @@
 
 {% block content %}
     <h1>Item List</h1>
-    <style>
-      #itemTable_info{
-        display: flex;
-        flex-direction: column;
-      }
-      .select-info{
-        padding: 1px 0px;
-      }
-    </style>
     <table
       id="itemTable"
       class="table table-bordered table-striped w-100 table-responsive-lg"
     >
-    <div>
-      <select id="columnFilter">
+    <div class="form-inline mb-2">
+      <select id="columnFilter"  class="form-control btn-info">
         <option value="0">Tanggal</option>
         <option value="1">SKU</option>
         <option value="2">Nama</option>
@@ -28,7 +19,7 @@
         <option value="6">Harga</option>
         <!-- Add more options for additional columns -->
       </select>
-      <input type="text" id="columnSearch" placeholder="Search in selected column">
+      <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
     </div>
       <thead class="thead-light">
         {% csrf_token %}
@@ -99,9 +90,9 @@
       top2Start: {
         buttons: {
           buttons: [
-            { extend: "pdf", className: "btn-primary" },
-            { extend: "csv", className: "btn-secondary" },
-            { text: "Upload CSV", className: "btn-primary", action:function(){
+            { text: "PDF", extend: "pdf", className: "btn-primary" },
+            { text: "CSV", extend: "csv", className: "btn-secondary" },
+            { text: "Upload CSV", className: "btn-warning", action:function(){
                 window.location.href = "/upload_csv";
             }},
             {
@@ -128,11 +119,11 @@
         console.error("Table is not initialized.");
         return;
     }
-        var selectedSKUs = table.rows('.selected').data().toArray().map(row => row[1]); // Get SKUs of selected rows using DataTables API
-        selectedSKUs.forEach(function(value) {
-        console.log('selected_skus[]:', value);
+        var selectedIDs = table.rows('.selected').data().toArray().map(row => row[1]); // Get SKUs of selected rows using DataTables API
+        selectedIDs.forEach(function(value) {
+        console.log('selected_ids[]:', value);
         });
-        if (selectedSKUs.length === 0) {
+        if (selectedIDs.length === 0) {
             alert('Please select at least one row to delete.');
             return;
         }
@@ -140,9 +131,9 @@
         if (confirm('Are you sure you want to delete the selected rows?')) {
             const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
             $.ajax({
-                url: '{% url "delete_selected_rows" %}',
+                url: '{% url "delete_selected_rows_item" %}',
                 type: 'POST',
-                data: {selected_skus: selectedSKUs, csrfmiddlewaretoken: csrfToken },
+                data: {selected_ids: selectedIDs, csrfmiddlewaretoken: csrfToken },
                 dataType: 'json',
                 success: function(response) {
                     if (response.success) {

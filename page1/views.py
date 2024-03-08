@@ -740,75 +740,40 @@ def upload_csv(request):
     return render(request, 'item/upload_csv.html')
 
 
-def delete_selected_rows(request):
+# Delete Selected Rows
+def delete_selected_rows(request, model, key):
     if request.method == 'POST':
-        selected_skus = request.POST.getlist('selected_skus[]')  # Assuming you're sending an array of selected SKUs
+        selected_ids = request.POST.getlist('selected_ids[]')  # Assuming you're sending an array of selected IDs
         try:
-            selected_items = Items.objects.filter(SKU__in=selected_skus)
-            for item in selected_items:
-                # Delete the corresponding image file from the server directory
-                image_path = os.path.join(settings.MEDIA_ROOT, str(item.gambar))
-                if os.path.exists(image_path):
-                    os.remove(image_path)
-                else:
-                    print(f"Image file not found: {image_path}")
+            selected_items = model.objects.filter(**{f'{key}__in': selected_ids})
+
+            # Additional logic for image deletion if applicable
+            if hasattr(model, 'gambar'):
+                for item in selected_items:
+                    image_path = os.path.join(settings.MEDIA_ROOT, str(item.gambar))
+                    if os.path.exists(image_path):
+                        os.remove(image_path)
+                    else:
+                        print(f"Image file not found: {image_path}")
 
             selected_items.delete()  # Delete the selected rows from the database
             return JsonResponse({'success': True})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
-            
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request method'})
-    
+# Wrapper functions
+def delete_selected_rows_item(request):
+    return delete_selected_rows(request, Items, 'SKU')
+
 def delete_selected_rows_cust(request):
-    if request.method == 'POST':
-        selected_skus = request.POST.getlist('selected_skus[]')  # Assuming you're sending an array of selected SKUs
-        try: 
-            selected_items = Customer.objects.filter(cust_id__in=selected_skus)
-            selected_items.delete()  # Delete the selected rows from the database
-            return JsonResponse({'success': True})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
-            
-    else:
-        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    return delete_selected_rows(request, Customer, 'cust_id')
 
 def delete_selected_rows_supp(request):
-    if request.method == 'POST':
-        selected_skus = request.POST.getlist('selected_skus[]')  # Assuming you're sending an array of selected SKUs
-        try:
-            selected_items = Supplier.objects.filter(supp_id__in=selected_skus)
-            selected_items.delete()  # Delete the selected rows from the database
-            return JsonResponse({'success': True})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
-            
-    else:
-        return JsonResponse({'success': False, 'error': 'Invalid request method'})
-    
+    return delete_selected_rows(request, Supplier, 'supp_id')
+
 def delete_selected_rows_PO(request):
-    if request.method == 'POST':
-        selected_skus = request.POST.getlist('selected_skus[]')  # Assuming you're sending an array of selected SKUs
-        try:
-            selected_items = PurchaseOrder.objects.filter(id__in=selected_skus)
-            selected_items.delete()  # Delete the selected rows from the database
-            return JsonResponse({'success': True})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
-            
-    else:
-        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    return delete_selected_rows(request, PurchaseOrder, 'id')
 
 def delete_selected_rows_WO(request):
-    if request.method == 'POST':
-        selected_skus = request.POST.getlist('selected_skus[]')  # Assuming you're sending an array of selected SKUs
-        try:
-            selected_items = WorkOrder.objects.filter(id__in=selected_skus)
-            selected_items.delete()  # Delete the selected rows from the database
-            return JsonResponse({'success': True})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
-            
-    else:
-        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    return delete_selected_rows(request, WorkOrder, 'id')
