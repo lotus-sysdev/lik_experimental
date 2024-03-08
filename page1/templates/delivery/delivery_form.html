@@ -22,7 +22,7 @@
     {% for form in forms %}
     <fieldset class="delivery-form">
       <div class="form-row">
-        <div class="col-md-5">
+        <div class="col-md-5 mr-5">
           <h5>Detail Pengantaran</h5>
           <div class="form-group">
             {{ form.title.label_tag }} {{ form.title }}
@@ -39,13 +39,18 @@
           </div>
         </div>
 
-        <div class="col-md-5 ml-5">
+        <div class="col-md-5">
           <h5>Paket</h5>
           <div class="form-group">
             {{ form.package_name.label_tag }} {{ form.package_name }}
           </div>
           <div class="form-group">
             {{ form.package_dimensions.label_tag }} {{ form.package_dimensions }}
+            {% for error in form.package_dimensions.errors %}
+              {% if error != 'This field is required.' %}
+                  <p class="text-danger">{{ error }}</p>
+              {% endif %}
+            {% endfor %}
           </div>
           <div class="form-group">
             {{ form.package_mass.label_tag }} {{ form.package_mass }}

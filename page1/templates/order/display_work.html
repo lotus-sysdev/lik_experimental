@@ -99,6 +99,15 @@
               return data;
             },
           },
+          {
+            targets: 3, // Target the third column
+            render: function (data, type, row) {
+              if (type === "display" && !isNaN(data)) { // Check if data is a number
+                return "PO " + data;
+              }
+              return data;
+            },
+          }
         ],
         lengthMenu: [
           [10, 25, 50, 100, -1],
