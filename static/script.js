@@ -75,3 +75,4 @@ function confirmDelete(redirect) {
     }
     return false;
 }
+

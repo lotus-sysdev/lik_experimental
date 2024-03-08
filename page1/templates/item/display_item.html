@@ -17,6 +17,19 @@
       id="itemTable"
       class="table table-bordered table-striped w-100 table-responsive-lg"
     >
+    <div>
+      <select id="columnFilter">
+        <option value="0">Tanggal</option>
+        <option value="1">SKU</option>
+        <option value="2">Nama</option>
+        <option value="3">Kategori</option>
+        <option value="4">Jumlah</option>
+        <option value="5">Satuan</option>
+        <option value="6">Harga</option>
+        <!-- Add more options for additional columns -->
+      </select>
+      <input type="text" id="columnSearch" placeholder="Search in selected column">
+    </div>
       <thead class="thead-light">
         {% csrf_token %}
         <tr>
@@ -31,19 +44,6 @@
           <th>Edit/Delete</th>
         </tr>
       </thead>
-      <!-- <tfoot style="display: table-row-group">
-        <tr>
-          <th>Tanggal Input</th>
-          <th>SKU</th>  
-          <th>Nama</th>
-          <th>Category</th>
-          <th>Quantity</th>
-          <th>Satuan</th>
-          <th>Price</th>
-          <th>Gambar</th>
-
-        </tr>
-        </tfoot> -->
     <tbody>
         {% for i in entities %}
         <tr {% if i.is_approved %} style="background-color: #ccffc7;" {% endif %}>
@@ -87,31 +87,10 @@
                           // Add a space after the first three characters
                           return data.substr(0, 3) + ' ' + data.substr(3);
                       }
-
                   }
                   return data;
               }
           } ],
-    //   initComplete: function () {
-    //   this.api()
-    //     .columns()
-    //     .every(function () {
-    //       let column = this;
-    //       let title = column.footer().textContent;
-
-    //       // Create input element
-    //       let input = document.createElement("input");
-    //       input.placeholder = title;
-    //       column.footer().replaceChildren(input);
-
-    //       // Event listener for user input
-    //       input.addEventListener("keyup", () => {
-    //         if (column.search() !== this.value) {
-    //           column.search(input.value).draw();
-    //         }
-    //       });
-    //     });
-    // },
     lengthMenu: 
     [[10, 25, 50, 100, -1],
     [10, 25, 50, 100, "All"]
@@ -183,6 +162,17 @@
     }
   $(document).ready(function() {
     initializeDataTable();
+    $('#columnSearch').on('keyup', function() {
+    columnSearch(); // Call the columnSearch function when the user types in the input field
+  });
+
+  // Function to perform column-specific search
+  function columnSearch() {
+    var columnIndex = $('#columnFilter').val(); // Get the index of the selected column
+    var searchValue = $('#columnSearch').val().trim(); // Get the value of the search input and remove leading/trailing whitespace
+    table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
+  }
 });
+  
 </script>
 {% endblock %}

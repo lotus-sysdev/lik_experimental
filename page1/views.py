@@ -760,3 +760,55 @@ def delete_selected_rows(request):
             
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    
+def delete_selected_rows_cust(request):
+    if request.method == 'POST':
+        selected_skus = request.POST.getlist('selected_skus[]')  # Assuming you're sending an array of selected SKUs
+        try: 
+            selected_items = Customer.objects.filter(cust_id__in=selected_skus)
+            selected_items.delete()  # Delete the selected rows from the database
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+            
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+def delete_selected_rows_supp(request):
+    if request.method == 'POST':
+        selected_skus = request.POST.getlist('selected_skus[]')  # Assuming you're sending an array of selected SKUs
+        try:
+            selected_items = Supplier.objects.filter(supp_id__in=selected_skus)
+            selected_items.delete()  # Delete the selected rows from the database
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+            
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    
+def delete_selected_rows_PO(request):
+    if request.method == 'POST':
+        selected_skus = request.POST.getlist('selected_skus[]')  # Assuming you're sending an array of selected SKUs
+        try:
+            selected_items = PurchaseOrder.objects.filter(id__in=selected_skus)
+            selected_items.delete()  # Delete the selected rows from the database
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+            
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+def delete_selected_rows_WO(request):
+    if request.method == 'POST':
+        selected_skus = request.POST.getlist('selected_skus[]')  # Assuming you're sending an array of selected SKUs
+        try:
+            selected_items = WorkOrder.objects.filter(id__in=selected_skus)
+            selected_items.delete()  # Delete the selected rows from the database
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+            
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
