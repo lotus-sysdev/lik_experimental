@@ -9,14 +9,18 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import user_passes_test
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import authenticate
 
-from phonenumber_field.formfields import PhoneNumberField, RegionalPhoneNumberWidget
+from phonenumber_field.formfields import RegionalPhoneNumberWidget
 from django.core.exceptions import ValidationError
-from djmoney.forms.fields import MoneyField
 from djmoney.forms.widgets import MoneyWidget
 
 from django_measurement.forms import MeasurementField, MeasurementWidget
 from measurement.measures import Mass
+
+# def validate_positive_mass(value):
+#     if value is not None and value.magnitude < 0:
+#         raise ValidationError(_('Ensure this value is greater than or equal to 0.'), code='negative')
 
 class DimensionsInput(forms.MultiWidget):
     def __init__(self, attrs=None):
@@ -29,7 +33,7 @@ class DimensionsInput(forms.MultiWidget):
 
     def decompress(self, value):
         if value:
-            return [int(dim) for dim in value.split('x')]
+            return [int(dim) if dim != 'x' else None for dim in value.split('x')]
         return [None, None, None]
 
 class DimensionsField(forms.MultiValueField):
@@ -43,7 +47,10 @@ class DimensionsField(forms.MultiValueField):
         self.widget = DimensionsInput() 
 
     def compress(self, data_list):
-        return f"{data_list[0]}x{data_list[1]}x{data_list[2]}"
+        for dim in data_list:
+            if dim is not None and dim < 0:
+                raise ValidationError("Dimensions must be positive integers.")
+        return f"{data_list[0] if data_list[0] is not None else 'x'}x{data_list[1] if data_list[1] is not None else 'x'}x{data_list[2] if data_list[2] is not None else 'x'}"
 
 def validate_npwp(value):
     cleaned_value = re.sub(r'\D', '', value)
@@ -337,7 +344,7 @@ class WorkForm(forms.ModelForm):
         fields = "__all__"
         exclude = ['status']
         widgets = {
-            'supplier': Select2Widget(attrs={'class': 'form-control'}),
+            'customer': Select2Widget(attrs={'class': 'form-control'}),
             'item': Select2Widget(attrs={'class': 'form-control'}),
             'revenue_PO': MoneyWidget(attrs={'class': 'form-control', 'placeholder': '100000'}),
             'nomor_PO': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '012345'}),
@@ -374,7 +381,6 @@ class WorkFormNGA(forms.ModelForm):
             'tanggal_pengiriman_invoice': 'Tanggal Pengiriman Invoice',
         }
 
-# TODO Validation for everything below this
 class Register(UserCreationForm):
     username = forms.CharField(
         label='Username',
@@ -401,16 +407,6 @@ class Register(UserCreationForm):
         error_messages={'required': 'Please confirm your password.'}
     )
 
-    Role_Choices = (
-        ('GA','General Affairs'),
-        ('Accounting','Accounting'),
-        ('Messenger', 'Messenger')
-    )
-    role = forms.ChoiceField(
-        choices=Role_Choices,
-        label='Role',
-        widget=forms.Select(attrs={'class': 'form-control'}),
-    )
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
@@ -443,13 +439,48 @@ class Login(AuthenticationForm):
         self.fields.pop('username', None)
         self.fields['email'].widget.attrs.update({'class':'form-control'})
         self.fields['password'].widget.attrs.update({'class': 'form-control'})
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get('email')
+        password = cleaned_data.get('password')
+
+        if email and password:
+            # Add your custom authentication logic here
+            user = authenticate(email=email, password=password)
+
+            if user is None:
+                raise forms.ValidationError(
+                    _("Invalid email or password. Please try again.")
+                )
+
+        return cleaned_data
 
 class DeliveryForm(forms.ModelForm):
-    title = forms.CharField(
-        max_length=30,
-        label='Judul',
-        widget=forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Judul'}),
-    )
+    class Meta:
+        DESTINATION_CHOICES = (
+        ('beezy', 'Beezy Work'),
+        ('dest1', 'Dest 1'),
+        )
+        model = Events
+        fields = '__all__'
+        exclude = ['id']
+        widgets = {
+            'title': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Judul'}),
+            'package_name': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Nama Paket'}),
+            'messenger': Select2Widget(attrs={'class':'form-control'}),
+            'vehicle': Select2Widget(attrs={'class':'form-control'}),
+        }
+        labels = {
+            'title' : 'Judul',
+            'package_name' : 'Nama Paket',
+            'messenger' : 'Pengantar',
+            'vehicle' : 'Kendaraan',
+        }
+        choices = {
+            'start_location' : DESTINATION_CHOICES,
+            'destination' : DESTINATION_CHOICES,
+        }
     start = forms.DateTimeField(
         label='Jam Keberangkatan', 
         widget=widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Keberangkatan'})
@@ -458,48 +489,17 @@ class DeliveryForm(forms.ModelForm):
         label='Jam Kedatangan', 
         widget=widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Kedatangan'})
         )
-    DESTINATION_CHOICES = (
-        ('beezy', 'Beezy Work'),
-        ('dest1', 'Dest 1'),
-    )
-    start_location = forms.ChoiceField(
-        choices = DESTINATION_CHOICES,
-        label= "Lokasi Keberangkatan",
-        widget= forms.Select(attrs={'class':'form-control'})
-        )
-    destination =  forms.ChoiceField(
-        choices = DESTINATION_CHOICES,
-        label= "Destinasi",
-        widget= forms.Select(attrs={'class':'form-control'})
-        )
-
-    package_name = forms.CharField(
-        max_length=30,
-        label= "Nama Paket",
-        widget=forms.TextInput(attrs={'class':'form-control' , 'placeholder': 'Nama Paket'})
-    )
-    package_dimensions = DimensionsField(
-        label= "Dimensi Paket",
-        widget=DimensionsInput(attrs={'class':'form-control'})
-    )
     package_mass = MeasurementField(
         measurement=Mass,
         unit_choices=(("kg","kg"), ("g","g")),
         label="Berat Paket",
-        widget = MeasurementWidget(attrs={'class':'form-control', 'placeholder':'10'}, unit_choices=(("kg","kg"), ("g","g")))
+        widget = MeasurementWidget(attrs={'class':'form-control', 'placeholder':'10'}, unit_choices=(("kg","kg"), ("g","g"))),
+        # validators=[validate_positive_mass]
     )
-    class Meta:
-        model = Events
-        fields = '__all__'
-        exclude = ['id']
-        widgets = {
-            'messenger': Select2Widget(attrs={'class':'form-control'}),
-            'vehicle': Select2Widget(attrs={'class':'form-control'}),
-        }
-        labels = {
-            'messenger' : 'Pengantar',
-            'vehicle' : 'Kendaraan',
-        }
+    package_dimensions = DimensionsField(label='Dimensi Paket (p x l x t)', widget=DimensionsInput(attrs={'class':'form-control'}))
+    start_location = forms.ChoiceField(choices=Meta.choices['start_location'], label="Lokasi Keberangkatan", widget=forms.Select(attrs={'class': 'form-control'}))
+    destination = forms.ChoiceField(choices=Meta.choices['destination'], label="Destinasi", widget=forms.Select(attrs={'class': 'form-control'}))
+
 
 class MessengerForm(forms.ModelForm):
     class Meta:
