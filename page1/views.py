@@ -353,7 +353,15 @@ def edit_item(request, SKU):
 @login_required
 @GA_required
 def delete_item(request, SKU):
-    return delete_entity(request, Items, 'SKU', SKU)
+    entity = get_object_or_404(Items, SKU=SKU)
+    image = entity.gambar
+    image_str = str(image)
+    image_path = os.path.join(settings.MEDIA_ROOT, image_str)
+    print(image_path)
+    os.remove(image_path)
+    entity.delete()
+    messages.success(request, 'Item deleted successfully')
+    return redirect('/display_item')
 
 @login_required
 @GA_required
@@ -736,8 +744,16 @@ def delete_selected_rows(request):
     if request.method == 'POST':
         selected_skus = request.POST.getlist('selected_skus[]')  # Assuming you're sending an array of selected SKUs
         try:
-            # Delete the selected rows from the database
-            Items.objects.filter(SKU__in=selected_skus).delete()
+            selected_items = Items.objects.filter(SKU__in=selected_skus)
+            for item in selected_items:
+                # Delete the corresponding image file from the server directory
+                image_path = os.path.join(settings.MEDIA_ROOT, str(item.gambar))
+                if os.path.exists(image_path):
+                    os.remove(image_path)
+                else:
+                    print(f"Image file not found: {image_path}")
+
+            selected_items.delete()  # Delete the selected rows from the database
             return JsonResponse({'success': True})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})

@@ -4,6 +4,15 @@
 
 {% block content %}
     <h1>Item List</h1>
+    <style>
+      #itemTable_info{
+        display: flex;
+        flex-direction: column;
+      }
+      .select-info{
+        padding: 1px 0px;
+      }
+    </style>
     <table
       id="itemTable"
       class="table table-bordered table-striped w-100 table-responsive-lg"
@@ -51,7 +60,9 @@
         {% endfor %}
     </tbody>
 </table>
+<a href="/add_item">Add Item</a><br/>
 </div>
+
 <script>
   var table;
   function initializeDataTable() {
@@ -174,5 +185,4 @@
     initializeDataTable();
 });
 </script>
-<a href="/add_item">Add Item</a><br/>
 {% endblock %}
