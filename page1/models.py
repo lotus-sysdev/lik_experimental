@@ -55,13 +55,15 @@ class Category(models.Model):
 
 class Items(models.Model):
     SKU = models.CharField(max_length=20, primary_key = True, unique = True)
+    upload_type = models.CharField(max_length=10, default = "manual")
     Tanggal = models.DateField(default=timezone.now)
     nama = models.CharField(max_length=255)
+    catatan = models.CharField(max_length = 500, null = True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     unit = models.CharField(max_length=10)
     price = MoneyField(max_digits=15, decimal_places=2, default_currency='IDR', blank= False, null= False, validators=[MinMoneyValidator(0)])
-    gambar = models.ImageField()
+    gambar = models.ImageField(max_length=500)
     is_approved = models.BooleanField(default=False)
     
     def __str__(self):

@@ -242,7 +242,7 @@ class ItemForm(forms.ModelForm):
 
         model = Items
         fields = '__all__'
-        exclude = ['SKU', 'gambar_resized', 'is_approved']
+        exclude = ['SKU', 'gambar_resized', 'is_approved','upload_type']
         widgets = {
             'nama': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Baterai AA'}),
             'quantity': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '1, 2, 3, ...'}),
@@ -250,6 +250,7 @@ class ItemForm(forms.ModelForm):
             'gambar': forms.ClearableFileInput(attrs={'class': 'form-control-file', 'accept': 'image/*'}),
             'category': Select2Widget(attrs={'class': 'form-control'}),
             'Tanggal': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'catatan': forms.Textarea(attrs={'class': 'form-control', 'placeholder':"Masukkan Spesifikasi Barang"}),
         }
         labels = {
             'nama': 'Nama Barang',

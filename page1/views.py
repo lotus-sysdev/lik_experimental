@@ -239,6 +239,7 @@ def add_item(request):
                 resized_image_name = f"media_{item.nama}_{item.Tanggal}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
                 resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
                 img.save(resized_image_path)
+                
 
                 # os.remove(image_path)
 
@@ -722,12 +723,14 @@ def upload_csv(request):
                     'quantity': row['quantity'],
                     'unit': row['unit'],
                     'price': row['price'],
-                    'price_currency' : row['price_currency']
+                    'price_currency' : row['price_currency'],
+                    'upload_type': 'bulk'
                 }
                 if 'gambar' in row and row['gambar']:
                     item_data['gambar'] = uploaded_image
 
                 item = Items.objects.create(**item_data)
+                # item.upload_type = "bulk"
                 success_count += 1
             except Exception as e:
                 error_messages.append(f"Error in row {row_number}: {str(e)}")
@@ -738,7 +741,6 @@ def upload_csv(request):
             return JsonResponse({'success': True, 'message': f"{success_count} items imported successfully."})
 
     return render(request, 'item/upload_csv.html')
-
 
 # Delete Selected Rows
 def delete_selected_rows(request, model, key):
@@ -763,6 +765,7 @@ def delete_selected_rows(request, model, key):
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request method'})
 # Wrapper functions
+    
 def delete_selected_rows_item(request):
     return delete_selected_rows(request, Items, 'SKU')
 
