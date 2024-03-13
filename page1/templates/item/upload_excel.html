@@ -4,7 +4,13 @@
 {% block title %}Upload CSV{% endblock %}
 
 {% block content %}
-<h1>Upload CSV</h1>
+<h2>Upload Excel File</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit" class="btn btn-primary">Upload</button>
+</form>
+<!-- <h1>Upload CSV</h1>
 <form id="uploadForm" method="post" enctype="multipart/form-data" >
     <div>
         <p>Please note that the CSV format should be:</p>
@@ -54,7 +60,7 @@
         <input type="file" name="csv_file">
     </div>
     <button type="submit" class="btn btn-primary">Upload</button>
-</form>
+</form> -->
 
 <!-- Display error messages if any
 {% if messages %}
@@ -66,7 +72,7 @@
     </ul>
 </div>
 {% endif %} -->
-<script>
+<!-- <script>
     document.getElementById('uploadForm').addEventListener('submit', function(event) {
         event.preventDefault();
         var formData = new FormData(this);
@@ -90,5 +96,12 @@
             alert('An error occurred while processing the CSV: ' + error.message); // Show generic error message
         });
     });
-    </script>
+    </script> -->
 {% endblock %}
+<!-- 
+<h2>Upload Excel File</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit" class="btn btn-primary">Upload</button>
+</form>-->

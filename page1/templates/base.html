@@ -48,6 +48,8 @@
   
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   
+
+  
   <title>{% block title %}Sidebar{% endblock %}</title>
   <style>
     /* Custom styles for Select2Widget */
@@ -67,7 +69,6 @@
       border-color: #80bdff;
       box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     }
-
     .errorlist {
       color: red;
       list-style-type: none;
@@ -131,11 +132,17 @@
     $("#id_unit").select2({
       placeholder: "Select unit of measurement",
     });
-    $("#id_messenger").select2({
+    $("#id_1-messenger").select2({
       placeholder: "Select a messenger",
     });
-    $("#id_vehicle").select2({
+    $("#id_1-vehicle").select2({
       placeholder: "Select a vehicle",
+    });
+    $("#id_1-start_location").select2({
+      placeholder: "Choose a starting location",
+    });
+    $("#id_1-destination").select2({
+      placeholder: "Enter delivery destination",
     });
   </script>
   {% endblock %}

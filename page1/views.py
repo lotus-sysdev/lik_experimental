@@ -2,9 +2,12 @@ import json
 import os
 import csv
 from PIL import Image
+from openpyxl import load_workbook
+import pandas as pd
 import requests
 
-from django.core.files import File
+from django.core.files.base import ContentFile
+# from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import redirect, render, get_object_or_404
 from django.conf import settings
@@ -239,6 +242,7 @@ def add_item(request):
                 resized_image_name = f"media_{item.nama}_{item.Tanggal}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
                 resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
                 img.save(resized_image_path)
+                
 
                 # os.remove(image_path)
 
@@ -551,6 +555,7 @@ def user_action_logs(request):
 # -------------------- Delivery Order -------------------- #
 # Display calendar, and event addition/deletion functionality
 @login_required
+@Messenger_Only
 def calendar(request):  
     all_events = Events.objects.all()
     messengers = Messenger.objects.all()
@@ -563,6 +568,7 @@ def calendar(request):
     return render(request,'delivery/calendar.html',context)
 
 @login_required
+@Messenger_Only
 def all_events(request):                                                                                                 
     all_events = Events.objects.all()                                                                                    
     out = []                                                                                                             
@@ -582,6 +588,7 @@ def all_events(request):
     return JsonResponse(out, safe=False) 
  
 @login_required
+@Messenger_Only
 def add_event(request):
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
@@ -592,6 +599,7 @@ def add_event(request):
     return JsonResponse(data)
  
 @login_required
+@Messenger_Only
 def update(request):
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
@@ -606,6 +614,7 @@ def update(request):
     return JsonResponse(data)
  
 @login_required
+@Messenger_Only
 def remove(request):
     id = request.GET.get("id", None)
     event = Events.objects.get(id=id)
@@ -616,6 +625,7 @@ def remove(request):
 # Forms for adding delivery order, messenger, and vehicle
 # Delivery form functionality
 @login_required
+@Messenger_Only
 def delivery_form(request):
     max_forms = 3  # Maximum number of forms allowed
 
@@ -649,6 +659,8 @@ def delivery_form(request):
     context = {'forms': forms, 'max_forms': max_forms}
     return render(request, 'delivery/delivery_form.html', context)
 
+@login_required
+@Messenger_Only
 def update_num_forms(request):
     if request.method == 'POST':
         num_forms = int(request.POST.get('num_forms', 1))
@@ -660,12 +672,18 @@ def update_num_forms(request):
     return JsonResponse({'status': 'error'})
 
 # Display, edit, and delete delivery
+@login_required
+@Messenger_Only
 def delivery_detail(request, id):
     return entity_detail(request, Events, DeliveryForm, "id", id, 'delivery/delivery_detail.html')
 
+@login_required
+@Messenger_Only
 def edit_delivery(request, id):
     return edit_entity(request, Events, DeliveryForm, 'id', id)
 
+@login_required
+@Messenger_Only
 def delete_delivery(request, id):
     return delete_entity(request, Events, 'id', id)
 
@@ -722,12 +740,14 @@ def upload_csv(request):
                     'quantity': row['quantity'],
                     'unit': row['unit'],
                     'price': row['price'],
-                    'price_currency' : row['price_currency']
+                    'price_currency' : row['price_currency'],
+                    'upload_type': 'bulk'
                 }
                 if 'gambar' in row and row['gambar']:
                     item_data['gambar'] = uploaded_image
 
                 item = Items.objects.create(**item_data)
+                # item.upload_type = "bulk"
                 success_count += 1
             except Exception as e:
                 error_messages.append(f"Error in row {row_number}: {str(e)}")
@@ -738,6 +758,37 @@ def upload_csv(request):
             return JsonResponse({'success': True, 'message': f"{success_count} items imported successfully."})
 
     return render(request, 'item/upload_csv.html')
+
+from django.contrib import messages
+
+# def upload_excel(request):
+#     if request.method == 'POST':
+#         form = ExcelUploadForm(request.POST, request.FILES)
+#         if form.is_valid():
+#                 excel_data = request.FILES['excel_file']
+#                 df = pd.read_excel(excel_data)
+                
+#                 for index, row in df.iterrows():
+#                     category_name = row['category']
+#                     category_instance, _ = Category.objects.get_or_create(name=category_name)
+#                     # Assuming your ItemForm has fields similar to the columns in your Excel file
+#                     item_data = {
+#                         'nama': row['nama'],
+#                         'catatan': row['catatan'],
+#                         'category': category_instance,  # Is this supposed to be category?
+#                         'quantity': row['quantity'],
+#                         'unit': row['unit'],
+#                         'price': row['price'],
+#                         'price_currency': row['price_currency'],
+#                         'gambar': row['gambar'],
+#                         # Add other fields as needed
+#                     }
+#                     Items.objects.create(item_data)
+#                 # return redirect('/display_item')  # You might want to redirect here if the process is successful
+#     else:
+#         form = ExcelUploadForm()
+#     return render(request, 'item/upload_excel.html', {'form': form})
+
 
 
 # Delete Selected Rows
@@ -763,6 +814,7 @@ def delete_selected_rows(request, model, key):
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request method'})
 # Wrapper functions
+    
 def delete_selected_rows_item(request):
     return delete_selected_rows(request, Items, 'SKU')
 
@@ -777,3 +829,13 @@ def delete_selected_rows_PO(request):
 
 def delete_selected_rows_WO(request):
     return delete_selected_rows(request, WorkOrder, 'id')
+def add_additional_address(request):
+    if request.method == 'POST':
+        form = AdditionalAddressForm(request.POST)
+        if form.is_valid():
+            form.save()  # This saves the form data to the database
+            return redirect('/calendar')
+    else:
+        form = AdditionalAddressForm()
+    
+    return render(request, 'delivery/add_delivery_address.html', {'form': form})

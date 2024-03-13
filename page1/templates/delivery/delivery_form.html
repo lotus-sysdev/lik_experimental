@@ -1,8 +1,10 @@
 <!-- delivery_form_template.html -->
 
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %} 
 <h2>{% block title %}Create Delivery Order{% endblock %}</h2>
 
+<body>
+{% block content %}
 <form id="delivery-form" method="post" enctype="multipart/form-data">
   {% csrf_token %}
 
@@ -31,11 +33,14 @@
             {{ form.start.label_tag }} {{ form.start }}
           </div>
           <div class="form-group">{{ form.end.label_tag }}{{ form.end }}</div>
-          <div class="form-group">
-            {{ form.start_location.label_tag }}{{form.start_location }}
-          </div>
-          <div class="form-group">
-            {{ form.destination.label_tag }} {{ form.destination }}
+          <div id="location_container">
+            <div class="form-group">
+              {{ form.start_location.label_tag }}{{form.start_location }}
+            </div>
+            <div class="form-group">
+              {{ form.destination.label_tag }} {{ form.destination }}
+            </div>
+            <a href="{% url 'add_additional_address'%}">Tambahkan Alamat Baru</a>
           </div>
         </div>
 
@@ -152,3 +157,5 @@
   });
 </script>
 {% endblock %}
+</body>
+

@@ -235,17 +235,18 @@ class ItemForm(forms.ModelForm):
             ('Unit', 'Unit'),
             ('Lainnya', 'Lainnya')
         )
-
+    
         model = Items
         fields = '__all__'
-        exclude = ['SKU', 'gambar_resized', 'is_approved']
+        exclude = ['SKU', 'gambar_resized', 'is_approved','upload_type']
         widgets = {
             'nama': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Baterai AA'}),
             'quantity': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '1, 2, 3, ...'}),
             'price': MoneyWidget(attrs={'class': 'form-control', 'placeholder': '100000'}),
             'gambar': forms.ClearableFileInput(attrs={'class': 'form-control-file', 'accept': 'image/*'}),
             'category': Select2Widget(attrs={'class': 'form-control'}),
-            'Tanggal': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'Tanggal': forms.DateInput(attrs={'type': 'date', 'class': 'form-control','required': False}),
+            'catatan': forms.Textarea(attrs={'class': 'form-control', 'placeholder':"Masukkan Spesifikasi Barang"}),
         }
         labels = {
             'nama': 'Nama Barang',
@@ -260,6 +261,7 @@ class ItemForm(forms.ModelForm):
             'unit': UNIT_CHOICES,
         }
     unit = forms.ChoiceField(choices=Meta.choices['unit'], widget=forms.Select(attrs={'class': 'form-control'}))
+
 
     def clean_quantity(self):
         quantity = self.cleaned_data.get('quantity')
@@ -417,11 +419,11 @@ class Register(UserCreationForm):
         
     def save(self, commit=True):
         user = super().save(commit=False)
-        role = self.cleaned_data['role']
-        group = Group.objects.get(name=role)
+        # role = self.cleaned_data['role']
+        # group = Group.objects.get(name=role)
         if commit:
             user.save()
-            user.groups.add(group)
+            # user.groups.add(group)
         return user
 
 class Login(AuthenticationForm):
@@ -443,7 +445,7 @@ class Login(AuthenticationForm):
 
         if email and password:
             # Add your custom authentication logic here
-            user = authenticate(email=email, password=password)
+            user = authenticate(username =email, password=password)
 
             if user is None:
                 raise forms.ValidationError(
@@ -454,10 +456,6 @@ class Login(AuthenticationForm):
 
 class DeliveryForm(forms.ModelForm):
     class Meta:
-        DESTINATION_CHOICES = (
-        ('beezy', 'Beezy Work'),
-        ('dest1', 'Dest 1'),
-        )
         model = Events
         fields = '__all__'
         exclude = ['id']
@@ -466,34 +464,28 @@ class DeliveryForm(forms.ModelForm):
             'package_name': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Nama Paket'}),
             'messenger': Select2Widget(attrs={'class':'form-control'}),
             'vehicle': Select2Widget(attrs={'class':'form-control'}),
+            'start_location': Select2Widget(attrs={'class': 'form-control'}),
+            'destination': Select2Widget(attrs={'class': 'form-control'}),
+            'start' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Keberangkatan'}),
+            'end' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Kedatangan'}),
+            'package_dimensions' : DimensionsInput(attrs={'class':'form-control'}),
         }
         labels = {
             'title' : 'Judul',
             'package_name' : 'Nama Paket',
             'messenger' : 'Pengantar',
             'vehicle' : 'Kendaraan',
+            'start' : 'Jam Keberangkatan',
+            'end' : 'Jam Kedatangan',
+            'package_mass' : 'Berat Paket',
+            'package_dimensions' : 'Dimensi Paket (p x l x t)',
         }
-        choices = {
-            'start_location' : DESTINATION_CHOICES,
-            'destination' : DESTINATION_CHOICES,
-        }
-    start = forms.DateTimeField(
-        label='Jam Keberangkatan', 
-        widget=widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Keberangkatan'})
-        )
-    end = forms.DateTimeField(
-        label='Jam Kedatangan', 
-        widget=widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Kedatangan'})
-        )
     package_mass = MeasurementField(
         measurement=Mass,
         unit_choices=(("kg","kg"), ("g","g")),
-        label="Berat Paket",
         widget = MeasurementWidget(attrs={'class':'form-control', 'placeholder':'10'}, unit_choices=(("kg","kg"), ("g","g"))),
     )
-    package_dimensions = DimensionsField(label='Dimensi Paket (p x l x t)', widget=DimensionsInput(attrs={'class':'form-control'}))
-    start_location = forms.ChoiceField(choices=Meta.choices['start_location'], label="Lokasi Keberangkatan", widget=forms.Select(attrs={'class': 'form-control'}))
-    destination = forms.ChoiceField(choices=Meta.choices['destination'], label="Destinasi", widget=forms.Select(attrs={'class': 'form-control'}))
+    package_dimensions = DimensionsField()
 
 
 class MessengerForm(forms.ModelForm):
@@ -507,3 +499,11 @@ class VehicleForm(forms.ModelForm):
         model = Vehicle
         fields = '__all__'
         exclude = ['id']
+
+class ExcelUploadForm(forms.Form):
+    excel_file = forms.FileField()
+
+class AdditionalAddressForm(forms.ModelForm):
+    class Meta:
+        model=DeliveryAddresses
+        fields = '__all__'

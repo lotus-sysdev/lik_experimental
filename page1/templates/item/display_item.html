@@ -10,13 +10,16 @@
     >
     <div class="form-inline mb-2">
       <select id="columnFilter"  class="form-control btn-info">
-        <option value="0">Tanggal</option>
-        <option value="1">SKU</option>
-        <option value="2">Nama</option>
-        <option value="3">Kategori</option>
-        <option value="4">Jumlah</option>
-        <option value="5">Satuan</option>
-        <option value="6">Harga</option>
+        <option value="0">Upload Type</option>
+        <option value="1">Tanggal</option>
+        <option value="2">SKU</option>
+        <option value="3">Nama</option>
+        <option value="4">Kategori</option>
+        <option value="5">Jumlah</option>
+        <option value="6">Satuan</option>
+        <option value="7">Harga</option>
+        <option value="8">Approved</option>
+
         <!-- Add more options for additional columns -->
       </select>
       <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
@@ -24,6 +27,7 @@
       <thead class="thead-light">
         {% csrf_token %}
         <tr>
+          <th>Upload Type</th>
           <th>Tanggal Input</th>
           <th>SKU</th>
           <th>Nama</th>
@@ -32,12 +36,14 @@
           <th>Satuan</th>
           <th>Price</th>
           <th>Gambar</th>
+          <th>Approved</th>
           <th>Edit/Delete</th>
         </tr>
       </thead>
     <tbody>
         {% for i in entities %}
         <tr {% if i.is_approved %} style="background-color: #ccffc7;" {% endif %}>
+            <td>{{i.upload_type}}</td>
             <td>{{ i.Tanggal }}</td>
             <td>{{ i.SKU }}</td>
             <td>{{ i.nama }}</td>
@@ -46,6 +52,7 @@
             <td>{{ i.unit }}</td>
             <td>{{ i.price }}</td>
             <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}" /></td>
+            <td>{% if i.is_approved %}Yes{% else %}No{% endif %}</td>
             <td><a href="{% url 'item_detail' i.SKU %}">View</a></td>
         </tr>
         {% endfor %}
@@ -62,7 +69,7 @@
       style: "multi",
     },
     columnDefs: [ {
-              targets: 6, // Target the first column (adjust the index as needed)
+              targets: 7, // Target the first column (adjust the index as needed)
               render: function ( data, type, row ) {
                   if (type === 'display') {
                       if (data.startsWith('IDR')) {
@@ -102,11 +109,12 @@
             },
             { extend: "colvis", className: "btn-info" },
           ],
-          dom: {
+          dom:{
             button: {
               className: "btn",
             },
           },
+
 
         },
       },
@@ -119,7 +127,7 @@
         console.error("Table is not initialized.");
         return;
     }
-        var selectedIDs = table.rows('.selected').data().toArray().map(row => row[1]); // Get SKUs of selected rows using DataTables API
+        var selectedIDs = table.rows('.selected').data().toArray().map(row => row[2]); // Get SKUs of selected rows using DataTables API
         selectedIDs.forEach(function(value) {
         console.log('selected_ids[]:', value);
         });
