@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'django_select2',
     'djmoney',
     'django_measurement',
-    'openpyxl'
 ]
 
 MIDDLEWARE = [

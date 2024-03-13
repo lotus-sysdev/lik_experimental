@@ -2,7 +2,6 @@ import json
 import os
 import csv
 from PIL import Image
-from openpyxl import load_workbook
 import pandas as pd
 import requests
 
