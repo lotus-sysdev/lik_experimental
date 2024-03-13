@@ -459,10 +459,6 @@ class Login(AuthenticationForm):
 
 class DeliveryForm(forms.ModelForm):
     class Meta:
-        DESTINATION_CHOICES = (
-        ('beezy', 'Beezy Work'),
-        ('dest1', 'Dest 1'),
-        )
         model = Events
         fields = '__all__'
         exclude = ['id']
@@ -471,35 +467,29 @@ class DeliveryForm(forms.ModelForm):
             'package_name': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Nama Paket'}),
             'messenger': Select2Widget(attrs={'class':'form-control'}),
             'vehicle': Select2Widget(attrs={'class':'form-control'}),
+            'start_location': Select2Widget(attrs={'class': 'form-control'}),
+            'destination': Select2Widget(attrs={'class': 'form-control'}),
+            'start' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Keberangkatan'}),
+            'end' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Kedatangan'}),
+            'package_dimensions' : DimensionsInput(attrs={'class':'form-control'}),
         }
         labels = {
             'title' : 'Judul',
             'package_name' : 'Nama Paket',
             'messenger' : 'Pengantar',
             'vehicle' : 'Kendaraan',
+            'start' : 'Jam Keberangkatan',
+            'end' : 'Jam Kedatangan',
+            'package_mass' : 'Berat Paket',
+            'package_dimensions' : 'Dimensi Paket (p x l x t)',
         }
-        choices = {
-            'start_location' : DESTINATION_CHOICES,
-            'destination' : DESTINATION_CHOICES,
-        }
-    start = forms.DateTimeField(
-        label='Jam Keberangkatan', 
-        widget=widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Keberangkatan'})
-        )
-    end = forms.DateTimeField(
-        label='Jam Kedatangan', 
-        widget=widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Kedatangan'})
-        )
     package_mass = MeasurementField(
         measurement=Mass,
         unit_choices=(("kg","kg"), ("g","g")),
-        label="Berat Paket",
         widget = MeasurementWidget(attrs={'class':'form-control', 'placeholder':'10'}, unit_choices=(("kg","kg"), ("g","g"))),
         # validators=[validate_positive_mass]
     )
-    package_dimensions = DimensionsField(label='Dimensi Paket (p x l x t)', widget=DimensionsInput(attrs={'class':'form-control'}))
-    start_location = forms.ChoiceField(choices=Meta.choices['start_location'], label="Lokasi Keberangkatan", widget=forms.Select(attrs={'class': 'form-control'}))
-    destination = forms.ChoiceField(choices=Meta.choices['destination'], label="Destinasi", widget=forms.Select(attrs={'class': 'form-control'}))
+    package_dimensions = DimensionsField()
 
 
 class MessengerForm(forms.ModelForm):
@@ -513,3 +503,11 @@ class VehicleForm(forms.ModelForm):
         model = Vehicle
         fields = '__all__'
         exclude = ['id']
+
+class ExcelUploadForm(forms.Form):
+    excel_file = forms.FileField()
+
+class AdditionalAddressForm(forms.ModelForm):
+    class Meta:
+        model=DeliveryAddresses
+        fields = '__all__'

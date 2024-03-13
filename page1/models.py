@@ -249,14 +249,24 @@ class Vehicle(models.Model):
 
     def __str__(self):
         return self.nomor_plat
+
+class DeliveryAddresses(models.Model):
+    provinsi = models.CharField(max_length=255)
+    kota = models.CharField(max_length=50)
+    kecamatan = models.CharField(max_length=50)
+    kelurahan = models.CharField(max_length=50)
+    detail = models.CharField(max_length=50)
+    
+    def __str__(self):
+        return self.detail
 class Events(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=30, null = True)
     start = models.DateTimeField(null = True, blank = True)
     end = models.DateTimeField(null = True, blank = True)
     messenger = models.ForeignKey(Messenger,on_delete=models.SET_NULL, null=True)
-    start_location = models.CharField(max_length=255, null =True)
-    destination = models.CharField(max_length=255, null =True)
+    start_location = models.ForeignKey(DeliveryAddresses, related_name= "delivery_start_location", on_delete=models.CASCADE, null =True)
+    destination = models.ForeignKey(DeliveryAddresses, related_name="delivery_destination",on_delete=models.CASCADE, null =True)
     vehicle = models.ForeignKey(Vehicle,on_delete=models.SET_NULL, null=True)
     package_name = models.CharField(max_length=100, null=True)
     package_dimensions = models.CharField(max_length=100, null=True)
@@ -273,3 +283,4 @@ class User(AbstractUser):
 
     groups = models.ManyToManyField('auth.Group', related_name='custom_user_set', blank=True)
     user_permissions = models.ManyToManyField('auth.Permission', related_name='custom_user_set', blank=True)
+

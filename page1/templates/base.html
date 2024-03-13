@@ -47,6 +47,7 @@
   <script src="https://cdn.datatables.net/buttons/3.0.0/js/buttons.colVis.min.js"></script>
   
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
   
   <title>{% block title %}Sidebar{% endblock %}</title>
   <style>
@@ -136,6 +137,12 @@
     });
     $("#id_vehicle").select2({
       placeholder: "Select a vehicle",
+    });
+    $("#id_start_location").select2({
+      placeholder: "Choose a starting location",
+    });
+    $("#id_destination").select2({
+      placeholder: "Enter delivery destination",
     });
   </script>
   {% endblock %}
