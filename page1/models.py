@@ -14,10 +14,9 @@ class Customer(models.Model):
     cust_id = models.IntegerField(primary_key=True)
     nama_pt = models.CharField(max_length=255)
     telp = PhoneNumberField()
-    terms_of_payment = models.CharField(max_length=10)
+    terms_of_payment = models.CharField(max_length=15)
     pengiriman = models.CharField(max_length=50)
     npwp = models.CharField(max_length=255)
-    faktur = models.BooleanField()
 
     def __str__(self):
         return self.nama_pt

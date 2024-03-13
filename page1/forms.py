@@ -80,23 +80,19 @@ class CustomerForm(forms.ModelForm):
             'nama_pt': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'PT. Lotus Lestari Raya'}),
             'telp': RegionalPhoneNumberWidget(region='ID', attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
             'npwp': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'xx.xxx.xxx.x-xxx.xxx or xxxx xxxx xxxx xxxx'}),
-            'faktur': forms.CheckboxInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'nama_pt': 'Nama Perusahaan',
             'telp': 'No. Telpon',
-            'terms_of_payment': 'Terms of Payment',
-            'pengiriman': 'Pengiriman',
             'npwp': 'NPWP',
-            'faktur': 'Faktur Pajak',
         }
         choices = {
-            'terms_of_payment': ((1, 'Option 1'), (2, 'Option 2'), (3, 'Option 3')),
-            'pengiriman': ((True, 'Yes'), (False, 'No')),
+            'terms_of_payment': (('Cash', 'Cash'), ('Cash in Advance', 'Cash in Advance'), ('14 Hari', 'net 14 hari'), ('30 hari', 'net 30 hari'), ('45 hari', 'net 45 hari'),),
+            'pengiriman': (('Soft Copy', 'Soft Copy'), ('Hard Copy', 'Hard Copy'), ('Keduanya', 'Keduanya')),
         }
 
     terms_of_payment = forms.ChoiceField(choices=Meta.choices['terms_of_payment'], widget=forms.Select(attrs={'class': 'form-control'}), label='Terms of Payment')
-    pengiriman = forms.ChoiceField(choices=Meta.choices['pengiriman'], widget=forms.Select(attrs={'class': 'form-control'}), label='Pengiriman')
+    pengiriman = forms.ChoiceField(choices=Meta.choices['pengiriman'], widget=forms.Select(attrs={'class': 'form-control'}), label='Pengiriman Faktur dan Invoice')
 
 class SupplierForm(forms.ModelForm):
     def clean_npwp(self):
@@ -494,7 +490,6 @@ class DeliveryForm(forms.ModelForm):
         unit_choices=(("kg","kg"), ("g","g")),
         label="Berat Paket",
         widget = MeasurementWidget(attrs={'class':'form-control', 'placeholder':'10'}, unit_choices=(("kg","kg"), ("g","g"))),
-        # validators=[validate_positive_mass]
     )
     package_dimensions = DimensionsField(label='Dimensi Paket (p x l x t)', widget=DimensionsInput(attrs={'class':'form-control'}))
     start_location = forms.ChoiceField(choices=Meta.choices['start_location'], label="Lokasi Keberangkatan", widget=forms.Select(attrs={'class': 'form-control'}))
