@@ -705,107 +705,90 @@ def page_not_found(request, exception):
     return render(request, '404.html', status=404)
 
 
-# def upload_csv(request):
-#     if request.method == 'POST' and request.FILES['csv_file']:
-#         csv_file = request.FILES['csv_file']
-#         decoded_file = csv_file.read().decode('utf-8').splitlines()
-#         csv_reader = csv.DictReader(decoded_file)
+def upload_csv(request):
+    if request.method == 'POST' and request.FILES['csv_file']:
+        csv_file = request.FILES['csv_file']
+        decoded_file = csv_file.read().decode('utf-8').splitlines()
+        csv_reader = csv.DictReader(decoded_file)
 
-#         success_count = 0
-#         error_messages = []
+        success_count = 0
+        error_messages = []
 
-#         for row_number, row in enumerate(csv_reader, start=1):
-#             try:
-#                 # Get or create the Category instance based on the provided category name
-#                 category_name = row['category']
-#                 category_instance, _ = Category.objects.get_or_create(name=category_name)
+        for row_number, row in enumerate(csv_reader, start=1):
+            try:
+                # Get or create the Category instance based on the provided category name
+                category_name = row['category']
+                category_instance, _ = Category.objects.get_or_create(name=category_name)
 
-#                 # Check if image URL is provided in the CSV row
-#                 if 'gambar' in row and row['gambar']:
-#                     image_url = row['gambar']
-#                     # Download the image from the URL
-#                     response = requests.get(image_url)
-#                     if response.status_code == 200:
-#                         # Create a file-like object from the image content
-#                         image_content = response.content
-#                         # Use the image URL's filename as the uploaded file name
-#                         image_filename = image_url.split('/')[-1]
-#                         # Create a SimpleUploadedFile object with the image content
-#                         uploaded_image = SimpleUploadedFile(image_filename, image_content)
+                # Check if image URL is provided in the CSV row
+                if 'gambar' in row and row['gambar']:
+                    image_url = row['gambar']
+                    # Download the image from the URL
+                    response = requests.get(image_url)
+                    if response.status_code == 200:
+                        # Create a file-like object from the image content
+                        image_content = response.content
+                        # Use the image URL's filename as the uploaded file name
+                        image_filename = image_url.split('/')[-1]
+                        # Create a SimpleUploadedFile object with the image content
+                        uploaded_image = SimpleUploadedFile(image_filename, image_content)
 
-#                 # Create the Items object with the retrieved Category instance
-#                 item_data = {
-#                     'nama': row['nama'],
-#                     'category': category_instance,
-#                     'quantity': row['quantity'],
-#                     'unit': row['unit'],
-#                     'price': row['price'],
-#                     'price_currency' : row['price_currency'],
-#                     'upload_type': 'bulk'
-#                 }
-#                 if 'gambar' in row and row['gambar']:
-#                     item_data['gambar'] = uploaded_image
+                # Create the Items object with the retrieved Category instance
+                item_data = {
+                    'nama': row['nama'],
+                    'category': category_instance,
+                    'quantity': row['quantity'],
+                    'unit': row['unit'],
+                    'price': row['price'],
+                    'price_currency' : row['price_currency'],
+                    'upload_type': 'bulk'
+                }
+                if 'gambar' in row and row['gambar']:
+                    item_data['gambar'] = uploaded_image
 
-#                 item = Items.objects.create(**item_data)
-#                 # item.upload_type = "bulk"
-#                 success_count += 1
-#             except Exception as e:
-#                 error_messages.append(f"Error in row {row_number}: {str(e)}")
+                item = Items.objects.create(**item_data)
+                # item.upload_type = "bulk"
+                success_count += 1
+            except Exception as e:
+                error_messages.append(f"Error in row {row_number}: {str(e)}")
 
-#         if error_messages:
-#             return JsonResponse({'success': False, 'errors': error_messages,'message':f"{success_count} items imported successfully."})
-#         else:
-#             return JsonResponse({'success': True, 'message': f"{success_count} items imported successfully."})
+        if error_messages:
+            return JsonResponse({'success': False, 'errors': error_messages,'message':f"{success_count} items imported successfully."})
+        else:
+            return JsonResponse({'success': True, 'message': f"{success_count} items imported successfully."})
 
-#     return render(request, 'item/upload_csv.html')
+    return render(request, 'item/upload_csv.html')
 
-def upload_excel(request):
-    if request.method == 'POST':
-        form = ExcelUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            excel_file = request.FILES['excel_file']
+from django.contrib import messages
 
-            # Load the Excel file
-            wb = load_workbook(excel_file, data_only=True)
-            ws = wb.active
-
-            # Iterate over rows in the worksheet
-            for row in ws.iter_rows(min_row=2, values_only=True):  # Assuming first row is header
-                nama, catatan, category, quantity, unit, price, price_currency, gambar = row[:8]  # Assuming columns are in order
+# def upload_excel(request):
+#     if request.method == 'POST':
+#         form = ExcelUploadForm(request.POST, request.FILES)
+#         if form.is_valid():
+#                 excel_data = request.FILES['excel_file']
+#                 df = pd.read_excel(excel_data)
                 
-                # Access the image data if cell contains an image
-                if gambar is not None and hasattr(gambar, 'image'):
-                    image_data = gambar.image.blob
+#                 for index, row in df.iterrows():
+#                     category_name = row['category']
+#                     category_instance, _ = Category.objects.get_or_create(name=category_name)
+#                     # Assuming your ItemForm has fields similar to the columns in your Excel file
+#                     item_data = {
+#                         'nama': row['nama'],
+#                         'catatan': row['catatan'],
+#                         'category': category_instance,  # Is this supposed to be category?
+#                         'quantity': row['quantity'],
+#                         'unit': row['unit'],
+#                         'price': row['price'],
+#                         'price_currency': row['price_currency'],
+#                         'gambar': row['gambar'],
+#                         # Add other fields as needed
+#                     }
+#                     Items.objects.create(item_data)
+#                 # return redirect('/display_item')  # You might want to redirect here if the process is successful
+#     else:
+#         form = ExcelUploadForm()
+#     return render(request, 'item/upload_excel.html', {'form': form})
 
-                    # Save the image data to a file in the media root directory
-                    image_path = settings.MEDIA_ROOT / 'images' / f'{nama}.jpg'
-                    with open(image_path, 'wb') as f:
-                        f.write(image_data)
-
-                    # Create an instance of your model and assign the data
-                    my_instance = Items(
-                        nama=nama,
-                        catatan=catatan,
-                        category=category,
-                        quantity=quantity,
-                        unit=unit,
-                        price=price,
-                        price_currency=price_currency,
-                        upload_type = "bulk"
-                    )
-                    
-                    # Assign the image file path to the ImageField
-                    my_instance.image_field.save(f'{nama}.jpg', ContentFile(image_data))
-                    my_instance.save()
-                else:
-                    print(gambar)
-                    print("something went wrong")
-            
-            # return render(request, 'success.html')
-    else:
-        form = ExcelUploadForm()
-    
-    return render(request, 'item/upload_excel.html', {'form': form})
 
 
 # Delete Selected Rows

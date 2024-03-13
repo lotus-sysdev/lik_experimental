@@ -239,7 +239,7 @@ class ItemForm(forms.ModelForm):
             ('Unit', 'Unit'),
             ('Lainnya', 'Lainnya')
         )
-
+    
         model = Items
         fields = '__all__'
         exclude = ['SKU', 'gambar_resized', 'is_approved','upload_type']
@@ -249,7 +249,7 @@ class ItemForm(forms.ModelForm):
             'price': MoneyWidget(attrs={'class': 'form-control', 'placeholder': '100000'}),
             'gambar': forms.ClearableFileInput(attrs={'class': 'form-control-file', 'accept': 'image/*'}),
             'category': Select2Widget(attrs={'class': 'form-control'}),
-            'Tanggal': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'Tanggal': forms.DateInput(attrs={'type': 'date', 'class': 'form-control','required': False}),
             'catatan': forms.Textarea(attrs={'class': 'form-control', 'placeholder':"Masukkan Spesifikasi Barang"}),
         }
         labels = {
@@ -265,6 +265,7 @@ class ItemForm(forms.ModelForm):
             'unit': UNIT_CHOICES,
         }
     unit = forms.ChoiceField(choices=Meta.choices['unit'], widget=forms.Select(attrs={'class': 'form-control'}))
+
 
     def clean_quantity(self):
         quantity = self.cleaned_data.get('quantity')

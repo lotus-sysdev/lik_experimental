@@ -43,7 +43,7 @@ urlpatterns = [
     path('edit_item/<str:SKU>/', edit_item, name='edit_item'),
     path('delete_item/<str:SKU>/', delete_item, name='delete_item'),
     # path('upload_csv/', upload_csv, name='upload_csv'),
-    path('upload_excel/', upload_excel, name='upload_excel'),
+    path('upload_csv/', upload_csv, name='upload_csv'),
 
     
     # Deletion of multiple rows
