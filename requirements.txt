@@ -3,7 +3,9 @@ django-phonenumber-field
 django-phonenumbers
 django-select2
 django-jazzmin
-pillow
 django-money
 django-measurement
+pillow
+pandas
 requests
+openpyxl

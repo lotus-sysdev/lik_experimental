@@ -25,6 +25,10 @@
                         {{ form.nama }}
                     </div>
                     <div class="form-group">
+                        <label for="{{ form.catatan.id_for_label }}">Catatan</label>
+                        {{ form.catatan }}
+                    </div>
+                    <div class="form-group">
                         <label>Kategori</label>
                         <input type="text" class="form-control" disabled value="{{entity.category.name}}"></input>
                         <input type="hidden" name="category" value="{{ entity.category.pk }}">

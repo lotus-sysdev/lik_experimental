@@ -42,7 +42,9 @@ urlpatterns = [
     path('item_detail/<str:SKU>/', item_detail, name='item_detail'),
     path('edit_item/<str:SKU>/', edit_item, name='edit_item'),
     path('delete_item/<str:SKU>/', delete_item, name='delete_item'),
+    # path('upload_csv/', upload_csv, name='upload_csv'),
     path('upload_csv/', upload_csv, name='upload_csv'),
+
     
     # Deletion of multiple rows
     path('delete_selected_rows_item/', delete_selected_rows_item, name='delete_selected_rows_item'),
@@ -102,5 +104,7 @@ urlpatterns = [
     path('add_vehicle/', add_vehicle, name='add_vehicle'),
 
     path('forbidden/', forbidden, name='forbidden'),
+
+    path('add_additional_address/', add_additional_address, name='add_additional_address'),
 ]
 
