@@ -10,12 +10,14 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import user_passes_test
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import authenticate
+# from django_measurement.forms import MeasurementField, MeasurementWidget
+from .custom_widget import MeasurementField, MeasurementWidget
 
 from phonenumber_field.formfields import RegionalPhoneNumberWidget
 from django.core.exceptions import ValidationError
 from djmoney.forms.widgets import MoneyWidget
 
-from django_measurement.forms import MeasurementField, MeasurementWidget
+# from django_measurement.forms import MeasurementField, MeasurementWidget
 from measurement.measures import Mass
 
 class DimensionsInput(forms.MultiWidget):
@@ -449,16 +451,6 @@ class Login(AuthenticationForm):
         return cleaned_data
 
 class DeliveryForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(DeliveryForm, self).__init__(*args, **kwargs)
-        messenger = None
-        if 'instance' in kwargs:
-            messenger = kwargs['instance'].messenger
-        queryset = Vehicle.objects.all()  # Default queryset
-        if messenger:
-            queryset = Vehicle.objects.filter(messenger=messenger)
-        self.fields['vehicle'].queryset = queryset
-
     class Meta:
         DESTINATION_CHOICES = (
         ('beezy', 'Beezy Work'),
