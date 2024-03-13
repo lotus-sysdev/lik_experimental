@@ -69,26 +69,26 @@
       style: "multi",
     },
     columnDefs: [ {
-              targets: 7, // Target the first column (adjust the index as needed)
-              render: function ( data, type, row ) {
-                  if (type === 'display') {
-                      if (data.startsWith('IDR')) {
-                          // Replace commas with periods and periods with commas
-                          data = data.replace(/,/g, '#').replace(/\./g, ',').replace(/#/g, '.');
-                          data = data.substr(0, 3) + ' ' + data.substr(3);
-                          return data
-                      }else if(data.startsWith('$')){
-                        data = data.replace('$', 'USD');
-                        data = data.substr(0, 3) + ' ' + data.substr(3);
-                        return data
-                      } else {
-                          // Add a space after the first three characters
-                          return data.substr(0, 3) + ' ' + data.substr(3);
-                      }
-                  }
-                  return data;
-              }
-          } ],
+        targets: 7, // Target the first column (adjust the index as needed)
+        render: function ( data, type, row ) {
+            if (type === 'display') {
+                if (data.startsWith('IDR')) {
+                    // Replace commas with periods and periods with commas
+                    data = data.replace(/,/g, '#').replace(/\./g, ',').replace(/#/g, '.');
+                    data = data.substr(0, 3) + ' ' + data.substr(3);
+                    return data
+                }else if(data.startsWith('$')){
+                  data = data.replace('$', 'USD');
+                  data = data.substr(0, 3) + ' ' + data.substr(3);
+                  return data
+                } else {
+                    // Add a space after the first three characters
+                    return data.substr(0, 3) + ' ' + data.substr(3);
+                }
+            }
+            return data;
+        }
+    } ],
     lengthMenu: 
     [[10, 25, 50, 100, -1],
     [10, 25, 50, 100, "All"]
@@ -97,9 +97,8 @@
       top2Start: {
         buttons: {
           buttons: [
-            { text: "PDF", extend: "pdf", className: "btn-primary" },
-            { text: "CSV", extend: "csv", className: "btn-secondary" },
-            { text: "Upload CSV", className: "btn-warning", action:function(){
+            { text: "PDF", extend: "print", className: "btn-primary", exportOptions: {stripHtml: false} },
+            { text: "Upload CSV", className: "btn-secondary", action:function(){
                 window.location.href = "/upload_csv";
             }},
             {
@@ -118,7 +117,6 @@
 
         },
       },
-      // top2Start:'pageLength'
     },
   });
   }

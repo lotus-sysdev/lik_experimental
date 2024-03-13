@@ -10,17 +10,15 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import user_passes_test
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import authenticate
+# from django_measurement.forms import MeasurementField, MeasurementWidget
+from .custom_widget import MeasurementField, MeasurementWidget
 
 from phonenumber_field.formfields import RegionalPhoneNumberWidget
 from django.core.exceptions import ValidationError
 from djmoney.forms.widgets import MoneyWidget
 
-from django_measurement.forms import MeasurementField, MeasurementWidget
+# from django_measurement.forms import MeasurementField, MeasurementWidget
 from measurement.measures import Mass
-
-# def validate_positive_mass(value):
-#     if value is not None and value.magnitude < 0:
-#         raise ValidationError(_('Ensure this value is greater than or equal to 0.'), code='negative')
 
 class DimensionsInput(forms.MultiWidget):
     def __init__(self, attrs=None):
@@ -122,7 +120,7 @@ class SupplierForm(forms.ModelForm):
             'faktur': 'Faktur Pajak',
         }
         choices = {
-            'terms_of_payment': ((1, 'Option 1'), (2, 'Option 2'), (3, 'Option 3')),
+            'terms_of_payment': (('Cash', 'Cash'), ('Cash in Advance', 'Cash in Advance'), ('14 Hari', 'net 14 hari'), ('30 hari', 'net 30 hari'), ('45 hari', 'net 45 hari'),),
         }
 
     terms_of_payment = forms.ChoiceField(choices=Meta.choices['terms_of_payment'], widget=forms.Select(attrs={'class': 'form-control'}), label='Terms of Payment')
@@ -486,7 +484,6 @@ class DeliveryForm(forms.ModelForm):
         widget = MeasurementWidget(attrs={'class':'form-control', 'placeholder':'10'}, unit_choices=(("kg","kg"), ("g","g"))),
     )
     package_dimensions = DimensionsField()
-
 
 class MessengerForm(forms.ModelForm):
     class Meta:
