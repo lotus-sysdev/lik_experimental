@@ -422,11 +422,11 @@ class Register(UserCreationForm):
         
     def save(self, commit=True):
         user = super().save(commit=False)
-        role = self.cleaned_data['role']
-        group = Group.objects.get(name=role)
+        # role = self.cleaned_data['role']
+        # group = Group.objects.get(name=role)
         if commit:
             user.save()
-            user.groups.add(group)
+            # user.groups.add(group)
         return user
 
 class Login(AuthenticationForm):
@@ -448,7 +448,7 @@ class Login(AuthenticationForm):
 
         if email and password:
             # Add your custom authentication logic here
-            user = authenticate(email=email, password=password)
+            user = authenticate(username =email, password=password)
 
             if user is None:
                 raise forms.ValidationError(

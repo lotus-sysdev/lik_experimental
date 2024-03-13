@@ -555,6 +555,7 @@ def user_action_logs(request):
 # -------------------- Delivery Order -------------------- #
 # Display calendar, and event addition/deletion functionality
 @login_required
+@Messenger_Only
 def calendar(request):  
     all_events = Events.objects.all()
     messengers = Messenger.objects.all()
@@ -567,6 +568,7 @@ def calendar(request):
     return render(request,'delivery/calendar.html',context)
 
 @login_required
+@Messenger_Only
 def all_events(request):                                                                                                 
     all_events = Events.objects.all()                                                                                    
     out = []                                                                                                             
@@ -586,6 +588,7 @@ def all_events(request):
     return JsonResponse(out, safe=False) 
  
 @login_required
+@Messenger_Only
 def add_event(request):
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
@@ -596,6 +599,7 @@ def add_event(request):
     return JsonResponse(data)
  
 @login_required
+@Messenger_Only
 def update(request):
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
@@ -610,6 +614,7 @@ def update(request):
     return JsonResponse(data)
  
 @login_required
+@Messenger_Only
 def remove(request):
     id = request.GET.get("id", None)
     event = Events.objects.get(id=id)
@@ -620,6 +625,7 @@ def remove(request):
 # Forms for adding delivery order, messenger, and vehicle
 # Delivery form functionality
 @login_required
+@Messenger_Only
 def delivery_form(request):
     max_forms = 3  # Maximum number of forms allowed
 
@@ -653,6 +659,8 @@ def delivery_form(request):
     context = {'forms': forms, 'max_forms': max_forms}
     return render(request, 'delivery/delivery_form.html', context)
 
+@login_required
+@Messenger_Only
 def update_num_forms(request):
     if request.method == 'POST':
         num_forms = int(request.POST.get('num_forms', 1))
@@ -664,12 +672,18 @@ def update_num_forms(request):
     return JsonResponse({'status': 'error'})
 
 # Display, edit, and delete delivery
+@login_required
+@Messenger_Only
 def delivery_detail(request, id):
     return entity_detail(request, Events, DeliveryForm, "id", id, 'delivery/delivery_detail.html')
 
+@login_required
+@Messenger_Only
 def edit_delivery(request, id):
     return edit_entity(request, Events, DeliveryForm, 'id', id)
 
+@login_required
+@Messenger_Only
 def delete_delivery(request, id):
     return delete_entity(request, Events, 'id', id)
 
@@ -837,7 +851,7 @@ def add_additional_address(request):
         form = AdditionalAddressForm(request.POST)
         if form.is_valid():
             form.save()  # This saves the form data to the database
-            # return redirect('success_url')
+            return redirect('/calendar')
     else:
         form = AdditionalAddressForm()
     
