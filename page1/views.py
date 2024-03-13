@@ -687,6 +687,7 @@ def page_not_found(request, exception):
     return render(request, '404.html', status=404)
 
 
+# -------------------- Upload CSV -------------------- #
 def upload_csv(request):
     if request.method == 'POST' and request.FILES['csv_file']:
         csv_file = request.FILES['csv_file']
@@ -740,7 +741,7 @@ def upload_csv(request):
     return render(request, 'item/upload_csv.html')
 
 
-# Delete Selected Rows
+# -------------------- Delete multiple items -------------------- #
 def delete_selected_rows(request, model, key):
     if request.method == 'POST':
         selected_ids = request.POST.getlist('selected_ids[]')  # Assuming you're sending an array of selected IDs

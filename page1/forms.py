@@ -18,10 +18,6 @@ from djmoney.forms.widgets import MoneyWidget
 from django_measurement.forms import MeasurementField, MeasurementWidget
 from measurement.measures import Mass
 
-# def validate_positive_mass(value):
-#     if value is not None and value.magnitude < 0:
-#         raise ValidationError(_('Ensure this value is greater than or equal to 0.'), code='negative')
-
 class DimensionsInput(forms.MultiWidget):
     def __init__(self, attrs=None):
         widgets = [
@@ -122,7 +118,7 @@ class SupplierForm(forms.ModelForm):
             'faktur': 'Faktur Pajak',
         }
         choices = {
-            'terms_of_payment': ((1, 'Option 1'), (2, 'Option 2'), (3, 'Option 3')),
+            'terms_of_payment': (('Cash', 'Cash'), ('Cash in Advance', 'Cash in Advance'), ('14 Hari', 'net 14 hari'), ('30 hari', 'net 30 hari'), ('45 hari', 'net 45 hari'),),
         }
 
     terms_of_payment = forms.ChoiceField(choices=Meta.choices['terms_of_payment'], widget=forms.Select(attrs={'class': 'form-control'}), label='Terms of Payment')
@@ -453,6 +449,16 @@ class Login(AuthenticationForm):
         return cleaned_data
 
 class DeliveryForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(DeliveryForm, self).__init__(*args, **kwargs)
+        messenger = None
+        if 'instance' in kwargs:
+            messenger = kwargs['instance'].messenger
+        queryset = Vehicle.objects.all()  # Default queryset
+        if messenger:
+            queryset = Vehicle.objects.filter(messenger=messenger)
+        self.fields['vehicle'].queryset = queryset
+
     class Meta:
         DESTINATION_CHOICES = (
         ('beezy', 'Beezy Work'),
@@ -494,7 +500,6 @@ class DeliveryForm(forms.ModelForm):
     package_dimensions = DimensionsField(label='Dimensi Paket (p x l x t)', widget=DimensionsInput(attrs={'class':'form-control'}))
     start_location = forms.ChoiceField(choices=Meta.choices['start_location'], label="Lokasi Keberangkatan", widget=forms.Select(attrs={'class': 'form-control'}))
     destination = forms.ChoiceField(choices=Meta.choices['destination'], label="Destinasi", widget=forms.Select(attrs={'class': 'form-control'}))
-
 
 class MessengerForm(forms.ModelForm):
     class Meta:

@@ -241,11 +241,13 @@ class Vehicle(models.Model):
         ("motor", "Motor"),
         ("ojek_online", "Ojek Online")
     )
-    jenis = models.CharField(max_length=20)
+    jenis = models.CharField(choices = JENIS_CHOICES, max_length=20)
     nomor_plat = models.CharField(max_length = 11)
+    messenger = models.ForeignKey(Messenger, on_delete=models.SET_NULL, null=True, related_name='vehicles')
 
     def __str__(self):
         return self.nomor_plat
+
 class Events(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=30, null = True)
