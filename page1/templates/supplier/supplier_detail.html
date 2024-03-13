@@ -73,7 +73,7 @@
                     <h5 class="mt-1">Alamat Pengiriman:</h5>
                     <div class="card">
                         <div class="card-body">
-                            {% with penagihan_count=0 %}
+                            {% with pengiriman_count=0 %}
                                 {% for alamat in supplier_alamat %}
                                     {% if alamat.type == 'pengiriman' %}
                                         {% with pengiriman_count=pengiriman_count|add:1 %}
@@ -91,9 +91,6 @@
                                         {% endwith %}
                                     {% endif %}
                                 {% endfor %}
-                                {% if pengiriman_count == 0 %}
-                                    <p class="h5 text-muted">Belum ada alamat pengiriman</p>
-                                {% endif %}
                             {% endwith %}
                         </div>
                     </div>
@@ -118,14 +115,11 @@
                                         {% endwith %}
                                     {% endif %}
                                 {% endfor %}
-                            {% if penagihan_count == 0 %}
-                                <p class="h5 text-muted">Belum ada alamat penagihan</p>
-                            {% endif %}
                             {% endwith %}
                         </div>
                     </div>
                 {% else %}
-                    <p>No addresses yet.</p>
+                    <p>Belum ada alamat.</p>
                 {% endif %}
                 <a href="{% url 'add_supplier_alamat' supp_id=entity.supp_id %}" class="mt-2 btn btn-info">Add Alamat</a>
             </div>
@@ -141,7 +135,7 @@
                     if (isConfirmed) {
                         // If confirmed, make an Ajax request to delete the pic
                         const picId = btn.getAttribute('data-pic-id');
-                        fetch("{% url 'delete_customer_pic' 0 %}".replace('0', picId), {
+                        fetch("{% url 'delete_supplier_pic' 0 %}".replace('0', picId), {
                             method: 'POST',
                             headers: {
                                 'X-CSRFToken': "{{ csrf_token }}",
@@ -172,7 +166,7 @@
                     if (isConfirmed) {
                         // If confirmed, make an Ajax request to delete the pic
                         const alamatId = btn.getAttribute('data-alamat-id');
-                        fetch("{% url 'delete_customer_alamat' 0 %}".replace('0', alamatId), {
+                        fetch("{% url 'delete_supplier_alamat' 0 %}".replace('0', alamatId), {
                             method: 'POST',
                             headers: {
                                 'X-CSRFToken': "{{ csrf_token }}",
