@@ -20,7 +20,6 @@
           <option value="2">No. Telpon</option>
           <option value="3">Terms Of Payment</option>
           <option value="4">Pengiriman</option>
-          <option value="5">NPWP</option>
           <option value="6">Faktur Pajak</option>
           <!-- Add more options for additional columns -->
         </select>
@@ -32,9 +31,8 @@
             <th>Nama Perusahaan</th>
             <th>No. Telpon</th>
             <th>Terms of Payment</th>
-            <th>Pengiriman</th>
+            <th>Pengiriman Faktur Pajak & Invoice</th>
             <th>NPWP</th>
-            <th>Faktur Pajak</th>
             <th>Edit/Delete</th>
           </tr>
         </thead>
@@ -47,7 +45,6 @@
             <td>{{ customer.terms_of_payment }}</td>
             <td>{{ customer.pengiriman }}</td>
             <td>{{ customer.npwp }}</td>
-            <td>{% if customer.faktur %}Yes{% else %}No{% endif %}</td>
             <td>
               <a href="{% url 'customer_detail' customer.cust_id %}">View</a>
             </td>

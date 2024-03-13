@@ -12,6 +12,49 @@
 </form>
 <!-- <h1>Upload CSV</h1>
 <form id="uploadForm" method="post" enctype="multipart/form-data" >
+    <div>
+        <p>Please note that the CSV format should be:</p>
+        <table class="table table-striped table-bordered table-responsive-lg">
+            <thead>
+                <tr>
+                    <th>nama</th>
+                    <th>catatan</th>
+                    <th>category</th>
+                    <th>quantity</th>
+                    <th>satuan</th>
+                    <th>price</th>
+                    <th>price Currency</th>
+                    <th>gambar</th>
+                  </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Item Name</td>
+                    <td>Catatan....</td>
+                    <td>Kategori (Electronics,...) preferably the one available in existing category</td>
+                    <td>1, 2, 3, ...</td>
+                    <td>Unit, Box, Pcs, ...</td>
+                    <td>100000000 (don't use separator)</td>
+                    <td>IDR, USD, CNY, ... (3 digits currency code)</td>
+                    <td>Link of Image https://...</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>or</p>
+        <table class="table table-bordered table-responsive-lg table-striped">
+            <thead>
+                <tr>
+                    <th>nama, catatan, category, quantity, stauan, price, pricecurrency, gambar</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>nama barang, Dimensi barang:... , Electronics, 2, Unit, 100000, IDR, https://....</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>Note: separate each section with "<span class="h4">,</span>"</p>
+    </div>
     {% csrf_token %}
     <div class="form-group">
         <input type="file" name="csv_file">
