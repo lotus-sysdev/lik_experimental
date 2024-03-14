@@ -839,3 +839,85 @@ def add_additional_address(request):
         form = AdditionalAddressForm()
     
     return render(request, 'delivery/add_delivery_address.html', {'form': form})
+
+def add_log(request):
+    return add_entity_view(request, LogBookForm, 'log_book/add_log.html', 'calendar')
+
+@login_required
+@Messenger_Only
+def log_book(request):  
+    all_events = LogBook.objects.all()
+    request.session['num_forms'] = 1
+    request.session.modified = True
+    context = {
+        "events":all_events,
+    }
+    return render(request,'log_book/log-book.html',context)
+
+@login_required
+@Messenger_Only
+def lb_all_events(request):                                                                                                 
+    all_events = LogBook.objects.all()                                                                                    
+    out = []                                                                                                             
+
+    for event in all_events: 
+        event.start = event.start.astimezone(timezone.get_current_timezone())                                                                                            
+        event.end = event.end.astimezone(timezone.get_current_timezone())                                                                                            
+        out.append({     
+            'nama': event.nama,                                                                                    
+            'id': event.id,                                                                                              
+            'start': event.start.strftime("%m/%d/%Y, %H:%M:%S"),                                                         
+            'end': event.end.strftime("%m/%d/%Y, %H:%M:%S"),                                                       
+        })                                                                                                               
+                                                                                                                      
+    return JsonResponse(out, safe=False) 
+ 
+@login_required
+@Messenger_Only
+def lb_add_event(request):
+    start = request.GET.get("start", None)
+    end = request.GET.get("end", None)
+    nama = request.GET.get("nama", None)
+    event = LogBook(name=str(nama), start=start, end=end)
+    event.save()
+    data = {}
+    return JsonResponse(data)
+ 
+@login_required
+@Messenger_Only
+def lb_update(request):
+    start = request.GET.get("start", None)
+    end = request.GET.get("end", None)
+    nama = request.GET.get("nama", None)
+    id = request.GET.get("id", None)
+    event = LogBook.objects.get(id=id)
+    event.start = start
+    event.end = end
+    event.nama = nama
+    event.save()
+    data = {}
+    return JsonResponse(data)
+ 
+@login_required
+@Messenger_Only
+def lb_remove(request):
+    id = request.GET.get("id", None)
+    event = LogBook.objects.get(id=id)
+    event.delete()
+    data = {}
+    return JsonResponse(data)
+
+@login_required
+@Messenger_Only
+def log_detail(request, id):
+    return entity_detail(request, LogBook, LogBookForm, "id", id, 'log_book/log_detail.html')
+
+@login_required
+@Messenger_Only
+def edit_log(request, id):
+    return edit_entity(request, LogBook, LogBookForm, 'id', id)
+
+@login_required
+@Messenger_Only
+def delete_log(request, id):
+    return delete_entity(request, LogBook, 'id', id)

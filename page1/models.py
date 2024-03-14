@@ -275,7 +275,32 @@ class Events(models.Model):
 
     def __str__(self):
         return self.title
-    
+
+class LogBook(models.Model):
+    id = models.AutoField(primary_key=True)
+    instansi_asal = models.CharField(max_length = 255, null = True)
+    nama = models.CharField(max_length=50, null = True)
+    email = models.EmailField(max_length = 100)
+    TUJUAN_CHOICES = (
+        ("meeting", "Meeting"),
+        ("survey", "Survey"),
+        ("interview","Interview"),
+        ("lainnya","Lainnya"),
+    )
+    tujuan = models.CharField(max_length = 20, null = True,choices = TUJUAN_CHOICES)
+    tujuan_lainnya = models.CharField(max_length = 200, null = True, blank = True)
+    nama_dikunjungi = models.CharField(max_length = 50, null=True)
+    JENIS_CHOICES = (
+        ("unscheduled", "Unscheduled"),
+        ("scheduled", "Scheduled"),
+    )
+    tipe = models.CharField(max_length = 15, choices = JENIS_CHOICES)
+    start = models.DateTimeField(null = True, blank = True)
+    end = models.DateTimeField(null = True, blank = True)
+    telp = PhoneNumberField()
+
+    def __str__(self):
+        return f"{self.title} ({self.start.strftime('%Y-%m-%d') if self.start else 'No start date'})"
 class User(AbstractUser):
     email = models.EmailField(max_length = 100, unique=True)
 
