@@ -69,7 +69,11 @@
           top2Start: {
             buttons: {
               buttons: [
-                { extend: "pdf", className: "btn-primary" },
+                { extend: "pdf", 
+                  className: "btn-primary",
+                  exportOptions: {
+                    columns: ':visible'
+                  } },
                 {
                     text: "Delete Rows",
                     className: "btn-danger",

@@ -97,7 +97,14 @@
       top2Start: {
         buttons: {
           buttons: [
-            { text: "PDF", extend: "print", className: "btn-primary", exportOptions: {stripHtml: false} },
+            { text: "PDF", 
+              extend: "print", 
+              className: "btn-primary",
+              exportOptions: {
+                columns:":visible",
+                stripHtml: false
+              } 
+            },
             { text: "Upload Excel", className: "btn-secondary", action:function(){
                 window.location.href = "/upload_excel";
             }},
