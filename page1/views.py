@@ -762,6 +762,7 @@ def upload_csv(request):
     return render(request, 'item/upload_csv.html')
 
 def upload_excel(request):
+    categories = Category.objects.all()
     if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
         if form.is_valid():
@@ -838,7 +839,7 @@ def upload_excel(request):
         form = ExcelUploadForm()
     
     # Render the upload form template
-    return render(request, 'item/upload_excel.html', {'form': form})
+    return render(request, 'item/upload_excel.html', {'form': form, 'categories': categories})
 
 
 # -------------------- Delete multiple items -------------------- #
