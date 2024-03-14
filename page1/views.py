@@ -35,7 +35,7 @@ def placeholder(request):
 # -------------------- Common Functions --------------------#
 # Adding entity (Customer and Supplier)
 @login_required
-def add_entity_view(request, entity_form, template_name, redirect_template):
+def add_entity_view(request, entity_form, template_name, redirect_template, initial = None):
     entity_form_instance = entity_form(request.POST or None)
     if request.method == 'POST':
         form = entity_form(request.POST)
@@ -43,7 +43,12 @@ def add_entity_view(request, entity_form, template_name, redirect_template):
             form.save()
             return redirect(redirect_template)
     else:
-        form = entity_form()
+        print(initial)
+        if (initial):
+            form = (entity_form(initial=initial))
+            entity_form_instance = form
+        else: 
+            form = entity_form()
 
     return render(request, template_name, {'entity_form': entity_form_instance})
 
@@ -890,15 +895,18 @@ def add_additional_address(request):
     
     return render(request, 'delivery/add_delivery_address.html', {'form': form})
 
+
+# -------------------- Log Book Basics -------------------- #
 def add_log(request):
-    return add_entity_view(request, LogBookForm, 'log_book/add_log.html', 'calendar')
+    start_param = request.GET.get('start')
+    end_param = request.GET.get('end')
+    initial_data = {'start': start_param, 'end': end_param}
+    return add_entity_view(request, LogBookForm, 'log_book/add_log.html', 'calendar', initial=initial_data)
 
 @login_required
 @Messenger_Only
 def log_book(request):  
     all_events = LogBook.objects.all()
-    request.session['num_forms'] = 1
-    request.session.modified = True
     context = {
         "events":all_events,
     }

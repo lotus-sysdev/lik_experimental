@@ -17,61 +17,20 @@
       >
         {% csrf_token %}
         <div class="form-row">
-            <div class="col-md-5 mr-5">
-              <h5>Detail Pengantaran</h5>
-              <div class="form-group">
-                {{ form.nama.label_tag }} {{ form.nama }}
-              </div>
-              <div class="form-group">
-                {{ form.start.label_tag }} {{ form.start }}
-              </div>
-              <div class="form-group">
-                {{ form.end.label_tag }}{{ form.end }}
-              </div>
-              <div class="form-group">
-                {{ form.instansi_asal.label_tag }}{{form.instansi_asal }}
-              </div>
-              <div class="form-group">
-                {{ form.email.label_tag }} {{ form.email }}
-              </div>
-              <div class="form-group">
-                  {{ form.telp.label_tag }} {{ form.telp }}
-              </div>
-              <div class="form-group">
-                  {{ form.nama_tujuan.label_tag }} {{ form.nama_tujuan }}
-              </div>
-              <div class="form-group">
-                  {{ form.tujuan_lainnya.label_tag }} {{ form.tujuan_lainnya }}
-              </div>
-          </div>
-
           <div class="col-md-5 mr-5">
-            <h5>Paket</h5>
-            <div class="form-group">
-              {{ form.package_name.label_tag }} {{ form.package_name }}
-            </div>
-            <div class="form-group">
-              {{ form.package_dimensions.label_tag }} {{ form.package_dimensions }}
-              <p>{{ form.package_dimensions.errors }}</p>
-            </div>
-            <div class="form-group">
-              {{ form.package_mass.label_tag }} {{ form.package_mass }}
-            </div>
+            {{ form.nama.label_tag }} {{ form.nama }} 
+            {{ form.instansi_asal.label_tag }} {{ form.instansi_asal }} 
+            {{ form.email.label_tag }} {{ form.email }} 
+            {{ form.telp.label_tag }} {{ form.telp }} 
+            {{ form.tujuan.label_tag }} {{ form.tujuan }} 
+            {{ form.tujuan_lainnya.label_tag }} 
+            {{ form.tujuan_lainnya }} 
+            {{ form.nama_dikunjungi.label_tag }} 
+            {{ form.nama_dikunjungi }}
           </div>
-        </div>
-        <div class="w-100">
-          <br />
-          <hr />
-        </div>
-        <div class="form-row">
           <div class="col-md-5 mr-5">
-            <h5>Kurir</h5>
-            <div class="form-group">
-              {{ form.messenger.label_tag }} {{ form.messenger }}
-            </div>
-            <div class="form-group">
-              {{ form.vehicle.label_tag }} {{ form.vehicle }}
-            </div>
+            {{ form.start.label_tag }} {{ form.start }} 
+            {{form.end.label_tag }} {{ form.end }}
           </div>
         </div>
         <button type="submit" class="btn btn-primary mt-2">Update</button>
@@ -79,8 +38,8 @@
       <form
         id="deleteForm"
         method="post"
-        action="{% url 'delete_delivery' entity.id %}"
-        onclick="return confirmDelete('/calendar');"
+        action="{% url 'delete_log' entity.id %}"
+        onclick="return confirmDelete('/log_book');"
         class="mt-2"
       >
         {% csrf_token %}

@@ -8,14 +8,8 @@
 
 <body>
   {% block content %}
-  <style>
-    @media screen and (max-width:767px) { #myCustomButton {font-size: 40%}}
-  </style>
+  <h1 class="items-center h1 container">Log Book</h1>
   <div class="container col-md-12 mt-5">
-    <button id="myCustomButton" class="fc-btn btn-sm btn-primary dropdown-toggle float-right ml-3 " type="button"
-      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      Filter Deliveries
-    </button>
     <div id="calendar"></div>
   </div>
   {% endblock content %}
@@ -26,7 +20,7 @@
       let calendar = $("#calendar").fullCalendar({
         header: {
           left: "prev,next today",
-          center: "nama",
+          center: "title",
           right: "month,agendaWeek,agendaDay", // Add the custom button to the header
         },
         eventLongPressDelay: 700,

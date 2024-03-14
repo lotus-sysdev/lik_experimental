@@ -504,7 +504,7 @@ class LogBookForm(forms.ModelForm):
         widgets = {
             'nama': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Nama Pengunjung'}),
             'instansi_asal': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Institusi/Perusahaan'}),
-            'email': forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Contoh@abc.com'}),
+            'email': forms.TextInput(attrs={'class':'form-control', 'placeholder': 'contoh@abc.com'}),
             'telp': RegionalPhoneNumberWidget(region='ID', attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
             'tujuan':forms.Select(attrs={'class': 'form-control'}),
             'start' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Mulai Kunjungan'}),
@@ -523,6 +523,7 @@ class LogBookForm(forms.ModelForm):
             'nama_dikunjungi' : 'Nama Yang Dikunjungi',
             'tujuan_lainnya': 'Lainnya',
         }
+
 class ExcelUploadForm(forms.Form):
     excel_file = forms.FileField()
 
