@@ -106,5 +106,15 @@ urlpatterns = [
     path('forbidden/', forbidden, name='forbidden'),
 
     path('add_additional_address/', add_additional_address, name='add_additional_address'),
+
+    path('log_book/', log_book, name="log_book"),
+    path('lb_all_events/', lb_all_events, name='lb_all_events'), 
+    path('lb_add_event/', lb_add_event, name='lb_add_event'), 
+    path('lb_update/', lb_update, name='lb_update'),
+    path('lb_remove/', lb_remove, name='lb_remove'),
+    path('add_log/', add_log, name="add_log"),
+    path('log_detail/<int:id>', log_detail, name='log_detail'),
+    path('edit_log/<int:id>/', edit_log, name='edit_log'),
+    path('delete_log/<int:id>/', delete_log, name='delete_log'),
 ]
 

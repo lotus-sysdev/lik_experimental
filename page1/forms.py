@@ -497,6 +497,32 @@ class VehicleForm(forms.ModelForm):
         fields = '__all__'
         exclude = ['id']
 
+class LogBookForm(forms.ModelForm):
+    class Meta:
+        model = LogBook
+        fields = ['nama', 'instansi_asal', 'email','telp', 'tujuan', 'tujuan_lainnya', 'start','end','nama_dikunjungi']
+        widgets = {
+            'nama': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Nama Pengunjung'}),
+            'instansi_asal': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Institusi/Perusahaan'}),
+            'email': forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Contoh@abc.com'}),
+            'telp': RegionalPhoneNumberWidget(region='ID', attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
+            'tujuan':forms.Select(attrs={'class': 'form-control'}),
+            'start' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Mulai Kunjungan'}),
+            'end' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Selesai Kunjungan'}),
+            'nama_dikunjungi' : forms.TextInput(attrs={'class':'form-control', 'placeholder':'Nama Yang Dikunjungi'}),
+            'tujuan_lainnya': forms.TextInput(attrs={'class': 'form-control', 'disabled': "True"}),
+        }
+        labels = {
+            'nama': 'Nama Pengunjung',
+            'instansi_asal': 'Institusi/Pengunjung Asal',
+            'email': 'Email',
+            'telp': 'No. Telpon',
+            'tujuan': 'Tujuan Kunjungan',
+            'start' : 'Jam Mulai',
+            'end' : 'Jam Selesai',
+            'nama_dikunjungi' : 'Nama Yang Dikunjungi',
+            'tujuan_lainnya': 'Lainnya',
+        }
 class ExcelUploadForm(forms.Form):
     excel_file = forms.FileField()
 
