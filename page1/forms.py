@@ -530,3 +530,17 @@ class AdditionalAddressForm(forms.ModelForm):
     class Meta:
         model=DeliveryAddresses
         fields = '__all__'
+        widgets = {
+            'provinsi': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'DKI Jakarta'}),
+            'kota': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Jakarta Barat'}),
+            'kecamatan': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Kembangan'}),
+            'kelurahan': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Srengseng'}),
+            'detail': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ruko, Jl. Permata Regency Jl. H. Kelik No.31 Blok C, RT.1/RW.6,'}),
+        }
+        labels = {
+            'provinsi': 'Provinsi',
+            'kota': 'Kota',
+            'kecamatan': 'Kecamatan',
+            'kelurahan': 'Kelurahan',
+            'detail': 'Alamat Detail',
+        }
