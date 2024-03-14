@@ -8,3 +8,4 @@ django-measurement
 pillow
 pandas
 requests
+openpyxl-image-loader
