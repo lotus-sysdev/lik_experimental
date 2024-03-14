@@ -4,6 +4,7 @@ import csv
 from PIL import Image
 import pandas as pd
 import requests
+import datetime
 
 from django.core.files.base import ContentFile
 # from django.core.files import File
@@ -21,7 +22,8 @@ from django.urls import reverse
 from .decorators import *
 from .forms import *
 from .models import *
-
+import openpyxl
+from openpyxl_image_loader import SheetImageLoader
 
 
 # -------------------- Placeholder for homepage --------------------#
@@ -704,7 +706,7 @@ def page_not_found(request, exception):
     return render(request, '404.html', status=404)
 
 
-# -------------------- Upload CSV -------------------- #
+# -------------------- Upload CSV/Excel -------------------- #
 def upload_csv(request):
     if request.method == 'POST' and request.FILES['csv_file']:
         csv_file = request.FILES['csv_file']
@@ -759,36 +761,84 @@ def upload_csv(request):
 
     return render(request, 'item/upload_csv.html')
 
-from django.contrib import messages
+def upload_excel(request):
+    if request.method == 'POST':
+        form = ExcelUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            excel_file = request.FILES['excel_file']
+            wb = openpyxl.load_workbook(excel_file)
+            worksheet = wb.active
 
-# def upload_excel(request):
-#     if request.method == 'POST':
-#         form = ExcelUploadForm(request.POST, request.FILES)
-#         if form.is_valid():
-#                 excel_data = request.FILES['excel_file']
-#                 df = pd.read_excel(excel_data)
-                
-#                 for index, row in df.iterrows():
-#                     category_name = row['category']
-#                     category_instance, _ = Category.objects.get_or_create(name=category_name)
-#                     # Assuming your ItemForm has fields similar to the columns in your Excel file
-#                     item_data = {
-#                         'nama': row['nama'],
-#                         'catatan': row['catatan'],
-#                         'category': category_instance,  # Is this supposed to be category?
-#                         'quantity': row['quantity'],
-#                         'unit': row['unit'],
-#                         'price': row['price'],
-#                         'price_currency': row['price_currency'],
-#                         'gambar': row['gambar'],
-#                         # Add other fields as needed
-#                     }
-#                     Items.objects.create(item_data)
-#                 # return redirect('/display_item')  # You might want to redirect here if the process is successful
-#     else:
-#         form = ExcelUploadForm()
-#     return render(request, 'item/upload_excel.html', {'form': form})
+            # Get column titles from the first row
+            header_row = next(worksheet.iter_rows(values_only=True))
+            column_titles = [str(cell).strip().lower() for cell in header_row]
 
+            # Get column indices based on titles
+            nama_index = column_titles.index('nama') if 'nama' in column_titles else None
+            catatan_index = column_titles.index('catatan') if 'catatan' in column_titles else None
+            category_index = column_titles.index('category') if 'category' in column_titles else None
+            quantity_index = column_titles.index('quantity') if 'quantity' in column_titles else None
+            unit_index = column_titles.index('unit') if 'unit' in column_titles else None
+            price_index = column_titles.index('price') if 'price' in column_titles else None
+            price_currency_index = column_titles.index('price_currency') if 'price_currency' in column_titles else None
+
+            # Find the row containing the 'Gambar' column title
+            gambar_row_index = None
+            for row_index, row in enumerate(worksheet.iter_rows(values_only=True)):
+                if 'gambar' in [str(cell).strip().lower() for cell in row]:
+                    gambar_row_index = row_index
+                    break
+
+            if gambar_row_index is not None:
+                # Load image from the 'Gambar' column for each row
+                image_loader = SheetImageLoader(worksheet)
+                for row_index, row in enumerate(worksheet.iter_rows(min_row=gambar_row_index + 2, values_only=True)):
+                    # Extract category information
+                    category_name = row[category_index] if category_index is not None else ''
+                    category_instance, _ = Category.objects.get_or_create(name=category_name)
+
+                    # Load image from specified cell
+                    image_cell = chr(65 + column_titles.index('gambar')) + str(row_index + 2)
+                    image = image_loader.get(image_cell)
+
+                    image = image.resize((100, 100), Image.ANTIALIAS)
+
+                    # Generate filename including item name, upload date, and row index
+                    item_name = row[nama_index] if nama_index is not None else ''
+                    upload_date = datetime.date.today().strftime('%Y-%m-%d')
+                    filename = f"media_bulk_{item_name}_{upload_date}_{row_index}.jpg"
+                    
+                    # Specify the full path including the media directory
+                    image_path = os.path.join(settings.MEDIA_ROOT, filename)
+                    
+                    # Save the image to the media directory
+                    image.save(image_path)
+
+                    # Extract price currency or use default value 'IDR'
+                    price_currency = row[price_currency_index] if price_currency_index is not None else 'IDR'
+
+                    # Create and save instance with image path
+                    instance = Items(
+                        nama=row[nama_index] if nama_index is not None else '',
+                        catatan=row[catatan_index] if catatan_index is not None else '',
+                        category=category_instance,
+                        quantity=row[quantity_index] if quantity_index is not None else 0,
+                        unit=row[unit_index] if unit_index is not None else '',
+                        price=row[price_index] if price_index is not None else 0,
+                        price_currency=price_currency,
+                        gambar=filename,
+                        upload_type="bulk"
+                    )
+                    instance.save()
+            else:
+                # Handle case where 'Gambar' column title is not found
+                return JsonResponse("Error: 'Gambar' column title not found.")
+
+    else:
+        form = ExcelUploadForm()
+    
+    # Render the upload form template
+    return render(request, 'item/upload_excel.html', {'form': form})
 
 
 # -------------------- Delete multiple items -------------------- #
@@ -813,7 +863,6 @@ def delete_selected_rows(request, model, key):
             return JsonResponse({'success': False, 'error': str(e)})
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request method'})
-# Wrapper functions
     
 def delete_selected_rows_item(request):
     return delete_selected_rows(request, Items, 'SKU')
