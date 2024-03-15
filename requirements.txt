@@ -9,3 +9,4 @@ pillow
 pandas
 requests
 openpyxl-image-loader
+openpyxl
