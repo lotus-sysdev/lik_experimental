@@ -110,20 +110,20 @@ class SupplierForm(forms.ModelForm):
             'nama_pt': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'PT. Lotus Lestari Raya'}),
             'telp': RegionalPhoneNumberWidget(region='ID', attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
             'npwp': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'xx.xxx.xxx.x-xxx.xxx or xxxx xxxx xxxx xxxx'}),
-            'faktur': forms.CheckboxInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'nama_pt': 'Nama Perusahaan',
             'telp': 'No. Telpon',
-            'terms_of_payment': 'Terms of Payment',
             'npwp': 'NPWP',
-            'faktur': 'Faktur Pajak',
         }
         choices = {
             'terms_of_payment': (('Cash', 'Cash'), ('Cash in Advance', 'Cash in Advance'), ('14 Hari', 'net 14 hari'), ('30 hari', 'net 30 hari'), ('45 hari', 'net 45 hari'),),
+            'pengiriman': (('Soft Copy', 'Soft Copy'), ('Hard Copy', 'Hard Copy'), ('Keduanya', 'Keduanya')),
         }
 
     terms_of_payment = forms.ChoiceField(choices=Meta.choices['terms_of_payment'], widget=forms.Select(attrs={'class': 'form-control'}), label='Terms of Payment')
+    pengiriman = forms.ChoiceField(choices=Meta.choices['pengiriman'], widget=forms.Select(attrs={'class': 'form-control'}), label='Pengiriman Faktur dan Invoice')
+
 
 class CustPICForms(forms.ModelForm):
     class Meta:

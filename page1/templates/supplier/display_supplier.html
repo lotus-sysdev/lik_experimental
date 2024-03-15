@@ -20,8 +20,8 @@
           <option value="1">Nama Perusahaan</option>
           <option value="2">No. Telpon</option>
           <option value="3">Terms of Payment</option>
+          <option value="5">Pengiriman Faktur & Invoice</option>
           <option value="4">NPWP</option>
-          <option value="5">Faktur Pajak</option>
           <!-- Add more options for additional columns -->
         </select>
         <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
@@ -32,8 +32,8 @@
             <th>Nama Perusahaan</th>
             <th>No. Telpon</th>
             <th>Terms of Payment</th>
+            <th>Pengiriman Faktur & Invoice</th>
             <th>NPWP</th>
-            <th>Faktur Pajak</th>
             <th>Edit/Delete</th>
           </tr>
         </thead>
@@ -44,8 +44,8 @@
             <td>{{ s.nama_pt }}</td>
             <td>{{ s.telp }}</td>
             <td>{{ s.terms_of_payment }}</td>
+            <td>{{ s.pengiriman }}</td>
             <td>{{ s.npwp }}</td>
-            <td>{% if s.faktur %}Yes{% else %}No{% endif %}</td>
             <td>
               <a href="{% url 'supplier_detail' s.supp_id %}">View</a>
             </td>

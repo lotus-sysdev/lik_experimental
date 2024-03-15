@@ -1,8 +1,6 @@
 import datetime
 from django.db import models
-from django.contrib.auth.models import User, AbstractUser, Group
-import uuid
-from django.forms import ValidationError
+from django.contrib.auth.models import User, AbstractUser
 from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 from djmoney.models.fields import MoneyField
@@ -18,6 +16,22 @@ class Customer(models.Model):
     pengiriman = models.CharField(max_length=50)
     npwp = models.CharField(max_length=255)
 
+    def save(self, *args, **kwargs):
+        if not self.cust_id:  # Generate cust_id only if it's not set
+            current_year = timezone.now().year % 100  # Get the last two digits of the year
+            last_customer = Customer.objects.filter(cust_id__gte=current_year*10000).order_by('-cust_id').first()
+            if last_customer:
+                last_id = last_customer.cust_id
+                last_year = last_id // 10000  # Extract the year part from the cust_id
+                if last_year == current_year:  # If it's the same year, increment the sequence
+                    new_id = last_id + 1
+                else:  # If it's a new year, start the sequence from '0001'
+                    new_id = current_year * 10000 + 1
+            else:
+                new_id = current_year * 10000 + 1
+            self.cust_id = new_id
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.nama_pt
 
@@ -25,9 +39,25 @@ class Supplier(models.Model):
     supp_id = models.IntegerField(primary_key = True)
     nama_pt = models.CharField(max_length=255)
     telp = PhoneNumberField()
-    terms_of_payment = models.CharField(max_length=10)
+    terms_of_payment = models.CharField(max_length=50)
+    pengiriman = models.CharField(max_length=50)
     npwp = models.CharField(max_length=255)
-    faktur = models.BooleanField()
+
+    def save(self, *args, **kwargs):
+        if not self.supp_id: 
+            current_year = timezone.now().year % 100  
+            last_supplier = Supplier.objects.filter(supp_id__gte=current_year*10000).order_by('-supp_id').first()
+            if last_supplier:
+                last_id = last_supplier.supp_id
+                last_year = last_id // 10000  # Extract the year part from the cust_id
+                if last_year == current_year:  # If it's the same year, increment the sequence
+                    new_id = last_id + 1
+                else:  # If it's a new year, start the sequence from '0001'
+                    new_id = current_year * 10000 + 1
+            else:
+                new_id = current_year * 10000 + 1
+            self.supp_id = new_id
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nama_pt
