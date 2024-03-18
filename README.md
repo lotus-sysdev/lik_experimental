@@ -75,7 +75,7 @@ Use the `BLANK_README.md` to get started.
 * [![Python][Python]][Python-url]
 * [![JavaScript][JavaScript]][JS-url]
 * [![HTML5][HTML5]][HTML-url]
-* [![Django][Django]][Next-url]
+* [![Django][Django]][Django-url]
 * [![Bootstrap][Bootstrap.com]][Bootstrap-url]
 * [![JQuery][JQuery.com]][JQuery-url]
 
