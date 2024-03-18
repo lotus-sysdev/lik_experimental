@@ -42,7 +42,7 @@ class Supplier(models.Model):
     nama_pt = models.CharField(max_length=255)
     telp = PhoneNumberField()
     terms_of_payment = models.CharField(max_length=50)
-    pengiriman = models.CharField(max_length=50)
+    pengiriman = models.CharField(max_length=50, null=True)
     npwp = models.CharField(max_length=255)
 
     def save(self, *args, **kwargs):
