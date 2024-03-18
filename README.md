@@ -53,18 +53,21 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
+Welcome to Lotus Solusindo, a comprehensive web-based platform designed to streamline order management and facilitate collaboration among employees. Whether you're handling customer orders, managing suppliers, or tracking inventory, Lotus Solusindo offers a centralized solution to streamline your operations.
+
 [![Product Name Screen Shot][product-screenshot]](http://159.223.33.190/)
 
-There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+Lotus Solusindo empowers employees with intuitive tools to manage customers, suppliers, items, and orders efficiently. Here's what you can accomplish with Lotus Solusindo:
 
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
-* You shouldn't be doing the same tasks over and over like creating a README from scratch
-* You should implement DRY principles to the rest of your life :smile:
+* **Customer Management**: Easily input and manage customer information, keeping track of their orders and preferences for seamless customer service.
+* **Supplier Management**: Maintain a database of suppliers, manage supplier contacts, and track orders placed with suppliers for timely procurement.
+* **Item Management**: Organize and categorize items in your inventory, with features for adding new items, updating quantities, and setting pricing.
+* **Order Logging**: Log various types of orders, including purchases from suppliers, work orders for internal processes, and delivery orders for customer shipments.
+* **Streamlined Workflow**: Lotus Solusindo provides a user-friendly interface to streamline your workflow, making it easy for employees to record and track orders from initiation to fulfillment.
 
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
+Efficient order management is crucial for the success of any business, and Lotus Solusindo is here to simplify the process for you. With its robust features and user-friendly interface, Lotus Solusindo empowers your team to deliver exceptional service and streamline operations.
 
-Use the `BLANK_README.md` to get started.
+Feel free to explore the demo and discover how Lotus Solusindo can optimize your order management process and enhance collaboration among your employees!
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -86,7 +89,7 @@ Use the `BLANK_README.md` to get started.
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
+This is an example of setting up your project locally.
 To get a local copy up and running follow these simple example steps.
 
 ### Installation
@@ -162,7 +165,7 @@ Don't forget to give the project a star! Thanks again!
 <!-- CONTACT -->
 ## Contact
 
-Justin Theofilus Yonathan - [TheoTrgl](https://github.com/Theotrgl) - justin.yonathan@binus.ac.id
+Justin Theofilus Yonathan - [Theotrgl](https://github.com/Theotrgl) - justin.yonathan@binus.ac.id
 
 Pandya Limawan - [pan-dya](https://github.com/pan-dya) - pandya.limawan@gmail.com
 
