@@ -1,4 +1,5 @@
 {% load static %}
+{% load auth_extras %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -35,11 +36,13 @@
             <li><a class="sidebar-a" href="/log_book">Log Book</a></li>
         </ul>
 
-      <!-- <ul class="list-unstyled CTAs">
+      <ul class="list-unstyled CTAs">
+        {% if request.user|has_group:"Admin" %}
         <li>
-          <a class="sidebar-a" class="settings" href=""> Settings </a>
+          <a class="sidebar-a" class="settings" href="/user_action_logs"> User Action Logs </a>
         </li>
-      </ul> -->
+        {% endif %}
+      </ul>
     </nav>
 
     <script type="text/javascript">

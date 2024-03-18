@@ -25,6 +25,8 @@ class Customer(models.Model):
                 last_year = last_id // 10000  # Extract the year part from the cust_id
                 if last_year == current_year:  # If it's the same year, increment the sequence
                     new_id = last_id + 1
+                    if new_id % 10000 == 0:  # Check if the new_id has exceeded 9999
+                        new_id = current_year * 100000 + 1  # Increment a zero in front of it
                 else:  # If it's a new year, start the sequence from '0001'
                     new_id = current_year * 10000 + 1
             else:
@@ -52,6 +54,8 @@ class Supplier(models.Model):
                 last_year = last_id // 10000  # Extract the year part from the cust_id
                 if last_year == current_year:  # If it's the same year, increment the sequence
                     new_id = last_id + 1
+                    if new_id % 10000 == 0:  # Check if the new_id has exceeded 9999
+                        new_id = current_year * 100000 + 1  # Increment a zero in front of it
                 else:  # If it's a new year, start the sequence from '0001'
                     new_id = current_year * 10000 + 1
             else:
