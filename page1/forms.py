@@ -510,7 +510,7 @@ class LogBookForm(forms.ModelForm):
             'start' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Mulai Kunjungan'}),
             'end' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Selesai Kunjungan'}),
             'nama_dikunjungi' : forms.TextInput(attrs={'class':'form-control', 'placeholder':'Nama Yang Dikunjungi'}),
-            'tujuan_lainnya': forms.TextInput(attrs={'class': 'form-control', 'disabled': "True"}),
+            'tujuan_lainnya': forms.TextInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'nama': 'Nama Pengunjung',
@@ -522,6 +522,9 @@ class LogBookForm(forms.ModelForm):
             'end' : 'Jam Selesai',
             'nama_dikunjungi' : 'Nama Yang Dikunjungi',
             'tujuan_lainnya': 'Lainnya',
+        }
+        required = {
+            'tujuan_lainnya': False,  # Set tujuan_lainnya as not required
         }
 
 class ExcelUploadForm(forms.Form):

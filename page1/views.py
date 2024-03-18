@@ -811,7 +811,7 @@ def upload_excel(request):
                             image_cell = chr(65 + column_titles.index('gambar')) + str(row_index + 2)
                             image = image_loader.get(image_cell)
 
-                            image = image.resize((100, 100), Image.ANTIALIAS)
+                            image = image.resize((100, 100), Image.Resampling.LANCZOS)
 
                             # Generate filename including item name, upload date, and row index
                             item_name = row[nama_index] if nama_index is not None else ''
@@ -916,14 +916,16 @@ def add_additional_address(request):
 
 
 # -------------------- Log Book Basics -------------------- #
+@login_required
+@FO_Only
 def add_log(request):
     start_param = request.GET.get('start')
     end_param = request.GET.get('end')
     initial_data = {'start': start_param, 'end': end_param}
-    return add_entity_view(request, LogBookForm, 'log_book/add_log.html', 'calendar', initial=initial_data)
+    return add_entity_view(request, LogBookForm, 'log_book/add_log.html', 'log_book', initial=initial_data)
 
 @login_required
-@Messenger_Only
+@FO_Only
 def log_book(request):  
     all_events = LogBook.objects.all()
     context = {
@@ -932,7 +934,7 @@ def log_book(request):
     return render(request,'log_book/log-book.html',context)
 
 @login_required
-@Messenger_Only
+@FO_Only
 def lb_all_events(request):                                                                                                 
     all_events = LogBook.objects.all()                                                                                    
     out = []                                                                                                             
@@ -950,7 +952,7 @@ def lb_all_events(request):
     return JsonResponse(out, safe=False) 
  
 @login_required
-@Messenger_Only
+@FO_Only
 def lb_add_event(request):
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
@@ -961,7 +963,7 @@ def lb_add_event(request):
     return JsonResponse(data)
  
 @login_required
-@Messenger_Only
+@FO_Only
 def lb_update(request):
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
@@ -976,7 +978,7 @@ def lb_update(request):
     return JsonResponse(data)
  
 @login_required
-@Messenger_Only
+@FO_Only
 def lb_remove(request):
     id = request.GET.get("id", None)
     event = LogBook.objects.get(id=id)
@@ -985,16 +987,16 @@ def lb_remove(request):
     return JsonResponse(data)
 
 @login_required
-@Messenger_Only
+@FO_Only
 def log_detail(request, id):
     return entity_detail(request, LogBook, LogBookForm, "id", id, 'log_book/log_detail.html')
 
 @login_required
-@Messenger_Only
+@FO_Only
 def edit_log(request, id):
     return edit_entity(request, LogBook, LogBookForm, 'id', id)
 
 @login_required
-@Messenger_Only
+@FO_Only
 def delete_log(request, id):
     return delete_entity(request, LogBook, 'id', id)
