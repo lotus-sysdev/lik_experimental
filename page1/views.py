@@ -811,7 +811,7 @@ def upload_excel(request):
                             image_cell = chr(65 + column_titles.index('gambar')) + str(row_index + 2)
                             image = image_loader.get(image_cell)
 
-                            image = image.resize((100, 100), Image.ANTIALIAS)
+                            image = image.resize((100, 100), Image.Resampling.LANCZOS)
 
                             # Generate filename including item name, upload date, and row index
                             item_name = row[nama_index] if nama_index is not None else ''
