@@ -1,19 +1,16 @@
 In order to add role to the project, you need to 
 
-<<<<<<< Updated upstream
-groups = ['GA',  'Accounting', 'Messenger', 'Admin', 'FO']
-=======
 1. run py manage.py shell
->>>>>>> Stashed changes
+
 
 2. paste
 
 
-    from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group
 
-    groups = ['GA',  'Accounting', 'Messenger', 'Admin']
+groups = ['GA',  'Accounting', 'Messenger', 'Admin']
 
-    for group_name in groups:
-        Group.objects.get_or_create(name=group_name)
+for group_name in groups:
+    Group.objects.get_or_create(name=group_name)
 
 3. exit
