@@ -10,9 +10,9 @@ class ReportForm(forms.ModelForm):
         widgets = {
             'plat' : forms.TextInput(attrs={'class':'form-control', 'placeholder': 'BG 123 XY'}),
             'driver' : forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nama Driver'}),
-            'PO' : forms.TextInput(attrs={'class': 'form-control', 'placeholder': ''}),
-            'DO' : forms.NumberInput(attrs={'class': 'form-control', 'placeholder': ''}),
-            'no_tiket' : forms.NumberInput(attrs={'class': 'form-control', 'placeholder': ''}),
+            'PO' : forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'YY/MM/XXXX'}),
+            'DO' : forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'XXX XXX'}),
+            'no_tiket' : forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'I1900 XXX XXX'}),
             'berat' : forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '1000, 2000, ...'}),
             'tanggal' : forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'reject' : forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '100, 200, ...'})
