@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'page1',
+    'lik',
     'phonenumber_field',
     'django_select2',
     'djmoney',

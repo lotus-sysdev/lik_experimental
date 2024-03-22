@@ -1,45 +1,61 @@
-{% load static %}
-{% load auth_extras %}
+{% load static %} {% load auth_extras %}
 
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'sidebar/style.css' %}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'sidebar/style.css' %}" />
 
     <title>Sidebar</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <nav id="sidebar">
       <div class="sidebar-header">
         <h3><a href="/" class="sidebar-a">Lotus Solusindo</a></h3>
       </div>
 
-        <ul class="list-unstyled components">
-            <p class="font-weight-bold">Navigation</p>
-            <li><a class="sidebar-a" href="/">Dashboard</a></li>
-            <li class="active">
-                <a href="#dataSubmenu" data-toggle="collapse" aria-expanded="true"
-                    class="dropdown-toggle sidebar-a">Data Tables</a>
-                <ul class="collapse list-unstyled show" id="dataSubmenu">
-                    <li><a class="sidebar-a" href="/display_customer">Customer</a></li>
-                    <li><a class="sidebar-a" href="/display_supplier">Supplier</a></li>
-                    <li><a class="sidebar-a" href="/display_item">Item</a></li>
-                    <li><a class="sidebar-a" href="/display_purchase">Purchase Order</a></li>
-                    <li><a class="sidebar-a" href="/display_work">Work Order</a></li>
-                </ul>
+      <ul class="list-unstyled components">
+        <p class="font-weight-bold">Navigation</p>
+        <li><a class="sidebar-a" href="/">Dashboard</a></li>
+        <li class="active">
+          <a
+            href="#dataSubmenu"
+            data-toggle="collapse"
+            aria-expanded="true"
+            class="dropdown-toggle sidebar-a"
+            >Data Tables</a
+          >
+          <ul class="collapse list-unstyled show" id="dataSubmenu">
+            <li><a class="sidebar-a" href="/display_customer">Customer</a></li>
+            <li><a class="sidebar-a" href="/display_supplier">Supplier</a></li>
+            <li><a class="sidebar-a" href="/display_item">Item</a></li>
+            <li>
+              <a class="sidebar-a" href="/display_purchase">Purchase Order</a>
             </li>
-            <li><a class="sidebar-a" href="/calendar">Delivery Order</a></li>
-            <li><a class="sidebar-a" href="/log_book">Log Book</a></li>
-        </ul>
+            <li><a class="sidebar-a" href="/display_work">Work Order</a></li>
+          </ul>
+        </li>
+        <li><a class="sidebar-a" href="/calendar">Delivery Order</a></li>
+        <li><a class="sidebar-a" href="/log_book">Log Book</a></li>
+      </ul>
+
+      <div class="sidebar-header">
+        <h3><a href="/" class="sidebar-a">Lotus Logging</a></h3>
+      </div>
+
+      <ul class="list-unstyled components">
+        <li><a class="sidebar-a" href="/">Dashboard</a></li>
+        <li><a class="sidebar-a" href="/display_report">Report</a></li>
+      </ul>
 
       <ul class="list-unstyled CTAs">
         {% if request.user|has_group:"Admin" %}
         <li>
-          <a class="sidebar-a" class="settings" href="/user_action_logs"> User Action Logs </a>
+          <a class="sidebar-a" class="settings" href="/user_action_logs">
+            User Action Logs
+          </a>
         </li>
         {% endif %}
       </ul>
@@ -53,6 +69,5 @@
         });
       });
     </script>
-</body>
-
+  </body>
 </html>

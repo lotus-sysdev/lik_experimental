@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import authenticate
 # from django_measurement.forms import MeasurementField, MeasurementWidget
-from .custom_widget import MeasurementField, MeasurementWidget
+from django_measurement.forms import MeasurementField, MeasurementWidget
 
 from phonenumber_field.formfields import RegionalPhoneNumberWidget
 from django.core.exceptions import ValidationError

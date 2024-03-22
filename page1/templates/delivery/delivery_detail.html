@@ -46,7 +46,10 @@
               <p>{{ form.package_dimensions.errors }}</p>
             </div>
             <div class="form-group">
-              {{ form.package_mass.label_tag }} {{ form.package_mass }}
+              {{ form.package_mass.label_tag }} 
+              <div class="d-flex" style="width: 33%;">
+                {{ form.package_mass }}
+              </div>
             </div>
           </div>
         </div>
