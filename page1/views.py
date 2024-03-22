@@ -241,11 +241,13 @@ def add_item(request):
                 
                 # Resize the image
                 img = img.resize((100, 100))  # Change the dimensions as needed
-                
+                regex_pattern = r'/'
+                replacement_string = '.'
+                nama_cleaned = re.sub(regex_pattern, replacement_string, item.nama)
                 # Save the resized image
                 # image_name = f"{item.nama}.{image.name.split('.')[-1]}"
                 # image_path = os.path.join(settings.MEDIA_ROOT, image_name)
-                resized_image_name = f"media_{item.nama}_{item.Tanggal}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
+                resized_image_name = f"media_{nama_cleaned}_{item.Tanggal}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
                 resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
                 img.save(resized_image_path)
                 
@@ -766,6 +768,7 @@ def upload_csv(request):
 
     return render(request, 'item/upload_csv.html')
 
+import re
 def upload_excel(request):
     error_message = []
     processed_items = []
@@ -782,6 +785,7 @@ def upload_excel(request):
                 header_row = next(worksheet.iter_rows(values_only=True))
                 column_titles = [str(cell).strip().lower() for cell in header_row]
 
+                
                 # Get column indices based on titles
                 nama_index = column_titles.index('nama') if 'nama' in column_titles else None
                 catatan_index = column_titles.index('catatan') if 'catatan' in column_titles else None
@@ -812,11 +816,14 @@ def upload_excel(request):
                             image = image_loader.get(image_cell)
 
                             image = image.resize((100, 100), Image.Resampling.LANCZOS)
-
+                            regex_pattern = r'/'
+                            replacement_string = '-'
+                            
                             # Generate filename including item name, upload date, and row index
                             item_name = row[nama_index] if nama_index is not None else ''
+                            item_name_cleaned = re.sub(regex_pattern, replacement_string, item_name)
                             upload_date = datetime.date.today().strftime('%Y-%m-%d')
-                            filename = f"media_bulk_{item_name}_{upload_date}_{row_index}.jpg"
+                            filename = f"media_bulk_{item_name_cleaned}_{upload_date}_{row_index}.jpg"
                             
                             # Specify the full path including the media directory
                             image_path = os.path.join(settings.MEDIA_ROOT, filename)
