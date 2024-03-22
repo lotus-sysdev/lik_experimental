@@ -1,0 +1,89 @@
+from django.shortcuts import render
+
+from django.shortcuts import get_object_or_404, redirect, render
+from .models import *
+from .forms import *
+from django.http import JsonResponse
+# Create your views here.
+def delete_selected_rows(request, model, key):
+    if request.method == 'POST':
+        selected_ids = request.POST.getlist('selected_ids[]')  # Assuming you're sending an array of selected IDs
+        try:
+            selected_items = model.objects.filter(**{f'{key}__in': selected_ids})
+
+            selected_items.delete()  # Delete the selected rows from the database
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+def add_entity_view(request, entity_form, template_name, redirect_template, initial = None):
+    entity_form_instance = entity_form(request.POST or None)
+    if request.method == 'POST':
+        form = entity_form(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(redirect_template)
+    else:
+        print(initial)
+        if (initial):
+            form = (entity_form(initial=initial))
+            entity_form_instance = form
+        else: 
+            form = entity_form()
+
+    return render(request, template_name, {'entity_form': entity_form_instance})
+
+def entity_detail(request, entity_model, entity_form, entity_id_field, entity_id, template_name, extra_context=None):
+    entity = get_object_or_404(entity_model, **{entity_id_field: entity_id})
+    form = entity_form(instance=entity)
+    context = {'entity': entity, 'form': form, 'entity_id': entity_id}
+
+    if extra_context:
+        context.update(extra_context)
+
+    return render(request, template_name, context)
+
+def delete_entity(request, entity_model, entity_id_field, entity_id):
+    entity = get_object_or_404(entity_model, **{entity_id_field: entity_id})
+
+    if request.method == 'POST':
+        entity.delete()
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False, 'message': 'Invalid request method'})
+    
+def edit_entity(request, entity_model, entity_form, entity_id_field, entity_id):
+    entity = get_object_or_404(entity_model, **{entity_id_field: entity_id})
+
+    if request.method == 'POST':
+        form = entity_form(request.POST, instance=entity)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        form = entity_form(instance=entity)
+
+    return render(request, 'edit_entity.html', {'form': form})
+
+def display_report(request):
+    entities = Report.objects.all()
+    return render(request, 'Report/display_report.html', {'entities': entities})
+
+def delete_selected_rows_report(request):
+    return delete_selected_rows(request, Report, 'id')
+
+def add_report(request):
+    return add_entity_view(request, ReportForm, 'Report/add_report.html', 'display_report')
+
+def report_detail(request, id):
+    return entity_detail(request, Report, ReportForm, 'id', id, 'Report/report_detail.html')
+
+def delete_report(request, id):
+    return delete_entity(request, Report, 'id', id)
+
+def edit_report(request, id):
+    return edit_entity(request, Report, ReportForm, 'id', id)
