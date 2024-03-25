@@ -1,9 +1,10 @@
-from django.shortcuts import render
-
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from .serializers import *
 from .models import *
 from .forms import *
-from django.http import JsonResponse
+from rest_framework import generics
 # Create your views here.
 def delete_selected_rows(request, model, key):
     if request.method == 'POST':
@@ -76,8 +77,22 @@ def display_report(request):
 def delete_selected_rows_report(request):
     return delete_selected_rows(request, Report, 'id')
 
-def add_report(request):
-    return add_entity_view(request, ReportForm, 'Report/add_report.html', 'display_report')
+def add_report(request, initial=None):
+    entity_form_instance = ReportForm(request.POST or None)
+    if request.method == 'POST':
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            form.save()
+            # return redirect(redirect_template)
+    else:
+        print(initial)
+        if (initial):
+            form = (ReportForm(initial=initial))
+            entity_form_instance = form
+        else: 
+            form = ReportForm()
+
+    return render(request, 'Report/add_report.html', {'entity_form': entity_form_instance})
 
 def report_detail(request, id):
     return entity_detail(request, Report, ReportForm, 'id', id, 'Report/report_detail.html')
@@ -87,3 +102,7 @@ def delete_report(request, id):
 
 def edit_report(request, id):
     return edit_entity(request, Report, ReportForm, 'id', id)
+
+class add_report_mobile(generics.CreateAPIView):
+    queryset = Report.objects.all()
+    serializer_class = ReportSerializer

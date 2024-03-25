@@ -35,6 +35,8 @@ LOGIN_URL = 'login/'
 # Application definition
 
 INSTALLED_APPS = [
+    'rest_framework',
+    'corsheaders',
     'requests',
     'jazzmin',
     'django.contrib.admin',
@@ -62,8 +64,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'page1.middleware.UserActionMiddleware',
     'admin_reorder.middleware.ModelAdminReorder',
+    'corsheaders.middleware.CorsMiddleware',
 ]
-
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8081',  # Adjust this to match your React Native app's origin
+]
 ROOT_URLCONF = 'LotusSolusindo.urls'
 
 TEMPLATES = [

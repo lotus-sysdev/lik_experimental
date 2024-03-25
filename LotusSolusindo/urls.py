@@ -23,7 +23,7 @@ from page1 import views
 
 urlpatterns = [
     path('', include("page1.urls")),
-    path('', include("lik.urls")),
+    path('api/', include("lik.urls")),
     path('admin/', admin.site.urls),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
