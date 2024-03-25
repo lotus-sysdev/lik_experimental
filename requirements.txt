@@ -5,6 +5,8 @@ django-select2
 django-jazzmin
 django-money
 django-measurement
+django-cors-headers
+djangorestframework
 pillow
 pandas
 requests
