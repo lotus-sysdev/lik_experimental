@@ -13,7 +13,16 @@
     <div class="form-group w-50">
       <form method="post">
         {% csrf_token %}
-        {{entity_form.as_p}}    
+        {% for field in entity_form %}
+        {{ field.label_tag }}
+            <div class="form-group">
+              {{ field }}
+              {% for error in field.errors %}
+              <span class="text-danger">{{ error }}</span>
+              {% endfor %}
+            </div>
+        {% endfor %}
+        <!-- {{entity_form.as_p}}     -->
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>
     </div>
