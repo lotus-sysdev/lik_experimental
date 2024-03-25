@@ -28,10 +28,10 @@ media/*
 
 # Migrations
 # Ignore migration .py files
-**/migrations/*.py
+# **/migrations/*.py
 
 # Optionally, ignore migration .pyc files (byte-compiled Python files)
-**/migrations/*.pyc
+# **/migrations/*.pyc
 
 # If you are using Windows, you might also want to ignore .pyo files
-**/migrations/*.pyo
+# **/migrations/*.pyo
