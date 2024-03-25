@@ -10,3 +10,4 @@ pandas
 requests
 openpyxl-image-loader
 openpyxl
+django-modeladmin-reorder

@@ -67,6 +67,10 @@ class Supplier(models.Model):
         return self.nama_pt
 
 class CustomerPIC(models.Model):
+    class Meta:
+        verbose_name = "Customer PIC"
+        verbose_name_plural = "Customer PICs"
+
     customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
     nama = models.CharField(max_length=255)
     email = models.EmailField()
@@ -74,6 +78,10 @@ class CustomerPIC(models.Model):
     Role = models.CharField(max_length=50)
 
 class SupplierPIC(models.Model):
+    class Meta:
+        verbose_name = "Supplier PIC"
+        verbose_name_plural = "Supplier PICs"
+
     supplier_id = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     nama = models.CharField(max_length=255)
     email = models.EmailField()
@@ -81,12 +89,20 @@ class SupplierPIC(models.Model):
     Role = models.CharField(max_length=50)
 
 class Category(models.Model):
+    class Meta:
+        verbose_name = "Category"
+        verbose_name_plural = "Categories"
+
     name = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.name
 
 class Items(models.Model):
+    class Meta:
+        verbose_name = "Item"
+        verbose_name_plural = "Items"
+
     SKU = models.CharField(max_length=20, primary_key = True, unique = True)
     upload_type = models.CharField(max_length=10, default = "manual")
     Tanggal = models.DateField(default=timezone.now)
@@ -130,6 +146,10 @@ class Items(models.Model):
         super().save(*args, **kwargs)
         
 class ItemSumber(models.Model):
+    class Meta:
+        verbose_name = "Item Sumber"
+        verbose_name_plural = "Items Sources"
+
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
     TYPE_CHOICES = (
         ('Online Store', 'Online Store'),
@@ -144,6 +164,10 @@ class ItemSumber(models.Model):
     url = models.URLField(blank=True, null=True)
     
 class CustomerAlamat(models.Model):
+    class Meta:
+        verbose_name = "Customer Address"
+        verbose_name_plural = "Customer Addresses"
+
     customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
     TYPE_CHOICES = (
         ('penagihan', 'Alamat Penagihan'),
@@ -157,6 +181,10 @@ class CustomerAlamat(models.Model):
     detail = models.CharField(max_length=50)
 
 class SupplierAlamat(models.Model):
+    class Meta:
+        verbose_name = "Supplier Address"
+        verbose_name_plural = "Supplier Addresses"
+
     supplier_id = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     TYPE_CHOICES = (
         ('penagihan', 'Alamat Penagihan'),
@@ -173,6 +201,10 @@ def default_date():
     return datetime.date(1900, 1, 1)
 
 class PurchaseOrder(models.Model):
+    class Meta:
+        verbose_name = "Purchase Order"
+        verbose_name_plural = "Purchase Orders"
+
     supplier= models.ForeignKey(Supplier, on_delete=models.CASCADE)
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
     revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, validators=[MinMoneyValidator(0)])
@@ -212,6 +244,10 @@ class PurchaseOrder(models.Model):
         super(PurchaseOrder, self).save(*args, **kwargs)
 
 class WorkOrder(models.Model):
+    class Meta:
+        verbose_name = "Work Order"
+        verbose_name_plural = "Work Orders"
+
     customer= models.ForeignKey(Customer, on_delete=models.CASCADE)
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
     revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, validators=[MinMoneyValidator(0)])
@@ -252,6 +288,10 @@ class WorkOrder(models.Model):
         super(WorkOrder, self).save(*args, **kwargs)
 
 class UserActionLog(models.Model):
+    class Meta:
+        verbose_name = "User Action Log"
+        verbose_name_plural = "User Action Logs"
+
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     action = models.CharField(max_length=255)
     payload = models.TextField(blank=True)
@@ -285,6 +325,10 @@ class Vehicle(models.Model):
         return self.nomor_plat
 
 class DeliveryAddresses(models.Model):
+    class Meta:
+        verbose_name = "Delivery Address"
+        verbose_name_plural = "Delivery Addresses"
+        
     provinsi = models.CharField(max_length=255)
     kota = models.CharField(max_length=50)
     kecamatan = models.CharField(max_length=50)
@@ -295,6 +339,10 @@ class DeliveryAddresses(models.Model):
         return self.detail
 
 class Events(models.Model):
+    class Meta:
+        verbose_name = "Delivery Order"
+        verbose_name_plural = "Delivery Orders"
+
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=30, null = True)
     start = models.DateTimeField(null = True, blank = True)
@@ -311,6 +359,10 @@ class Events(models.Model):
         return self.title
 
 class LogBook(models.Model):
+    class Meta:
+        verbose_name = "Log Book"
+        verbose_name_plural = "Log Books"
+
     id = models.AutoField(primary_key=True)
     instansi_asal = models.CharField(max_length = 255, null = True)
     nama = models.CharField(max_length=50, null = True)
@@ -335,6 +387,7 @@ class LogBook(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.start.strftime('%Y-%m-%d') if self.start else 'No start date'})"
+
 class User(AbstractUser):
     email = models.EmailField(max_length = 100, unique=True)
 
@@ -343,4 +396,3 @@ class User(AbstractUser):
 
     groups = models.ManyToManyField('auth.Group', related_name='custom_user_set', blank=True)
     user_permissions = models.ManyToManyField('auth.Permission', related_name='custom_user_set', blank=True)
-
