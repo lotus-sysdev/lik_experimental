@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Report(models.Model):
@@ -11,3 +12,6 @@ class Report(models.Model):
     berat = models.PositiveIntegerField( null=True)
     tanggal = models.DateField( null=True)
     reject = models.PositiveIntegerField( null=True)
+
+    def __str__ (self):
+        return str(self.tanggal)

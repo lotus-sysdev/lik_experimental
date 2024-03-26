@@ -11,7 +11,9 @@
     <div class="form-inline mb-2">
       <select id="columnFilter"  class="form-control btn-info">
         <option value="0">Upload Type</option>
-        <option value="1">Tanggal</option>
+        <option value="1">Tanggal Input</option>
+        <option value="1">Tanggal Pesan</option>
+        <option value="1">Customer</option>
         <option value="2">SKU</option>
         <option value="3">Nama</option>
         <option value="4">Kategori</option>
@@ -29,6 +31,8 @@
         <tr>
           <th>Upload Type</th>
           <th>Tanggal Input</th>
+          <th>Tanggal Pesan</th>
+          <th>Customer</th>
           <th>SKU</th>
           <th>Nama</th>
           <th>Category</th>
@@ -45,6 +49,8 @@
         <tr {% if i.is_approved %} style="background-color: #ccffc7;" {% endif %}>
             <td>{{i.upload_type}}</td>
             <td>{{ i.Tanggal }}</td>
+            <td>{{ i.tanggal_pemesanan }}</td>
+            <td><a href="{% url 'customer_detail' cust_id=i.customer.cust_id %}">{{i.customer}}</a></td>
             <td>{{ i.SKU }}</td>
             <td>{{ i.nama }}</td>
             <td>{{ i.category.name }}</td>
@@ -69,7 +75,7 @@
       style: "multi",
     },
     columnDefs: [ {
-        targets: 7, // Target the first column (adjust the index as needed)
+        targets: 9, // Target the first column (adjust the index as needed)
         render: function ( data, type, row ) {
             if (type === 'display') {
                 if (data.startsWith('IDR')) {
