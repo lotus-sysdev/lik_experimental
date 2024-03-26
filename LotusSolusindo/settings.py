@@ -65,9 +65,13 @@ MIDDLEWARE = [
     'page1.middleware.UserActionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8081',  # Adjust this to match your React Native app's origin
-]
+CORS_ALLOW_ALL_ORIGINS = True
+
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:8081',
+#     'http://192.168.160.169:8081', 
+#      # Adjust this to match your React Native app's origin
+# ]
 
 ROOT_URLCONF = 'LotusSolusindo.urls'
 
