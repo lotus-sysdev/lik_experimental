@@ -238,6 +238,7 @@ class ItemForm(forms.ModelForm):
         fields = '__all__'
         exclude = ['SKU', 'gambar_resized', 'is_approved','upload_type']
         widgets = {
+            'customer' : Select2Widget(attrs={'class':'form-control'}),
             'nama': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Baterai AA'}),
             'quantity': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '1, 2, 3, ...'}),
             'price': MoneyWidget(attrs={'class': 'form-control', 'placeholder': '100000'}),
@@ -247,6 +248,7 @@ class ItemForm(forms.ModelForm):
             'catatan': forms.Textarea(attrs={'class': 'form-control', 'placeholder':"Masukkan Spesifikasi Barang"}),
         }
         labels = {
+            'customer':'Customer',
             'nama': 'Nama Barang',
             'quantity': 'Kuantitas',
             'unit': 'Satuan',
@@ -258,7 +260,7 @@ class ItemForm(forms.ModelForm):
         choices = {
             'unit': UNIT_CHOICES,
         }
-    unit = forms.ChoiceField(choices=Meta.choices['unit'], widget=forms.Select(attrs={'class': 'form-control'}))
+    unit = forms.ChoiceField(choices=Meta.choices['unit'], widget=Select2Widget(attrs={'class': 'form-control'}))
 
 
     def clean_quantity(self):

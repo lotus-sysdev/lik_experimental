@@ -106,6 +106,8 @@ class Items(models.Model):
     SKU = models.CharField(max_length=20, primary_key = True, unique = True)
     upload_type = models.CharField(max_length=10, default = "manual")
     Tanggal = models.DateField(default=timezone.now)
+    tanggal_pemesanan = models.DateField(default=timezone.now)
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
     nama = models.CharField(max_length=255)
     catatan = models.CharField(max_length = 500, null = True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
