@@ -773,6 +773,7 @@ def upload_excel(request):
     error_message = []
     processed_items = []
     categories = Category.objects.all()
+    customers = Customer.objects.all()
     if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
         if form.is_valid():
@@ -787,9 +788,11 @@ def upload_excel(request):
 
                 
                 # Get column indices based on titles
+                tanggal_pemesanan_index = column_titles.index('tanggal_pemesanan') if 'tanggal_pemesanan' in column_titles else None
                 nama_index = column_titles.index('nama') if 'nama' in column_titles else None
                 catatan_index = column_titles.index('catatan') if 'catatan' in column_titles else None
                 category_index = column_titles.index('category') if 'category' in column_titles else None
+                customer_index = column_titles.index('customer') if 'customer' in column_titles else None
                 quantity_index = column_titles.index('quantity') if 'quantity' in column_titles else None
                 unit_index = column_titles.index('unit') if 'unit' in column_titles else None
                 price_index = column_titles.index('price') if 'price' in column_titles else None
@@ -810,6 +813,9 @@ def upload_excel(request):
                             # Extract category information
                             category_name = row[category_index] if category_index is not None else ''
                             category_instance, _ = Category.objects.get_or_create(name=category_name)
+
+                            customer_name = row[customer_index] if customer_index is not None else ''
+                            customer_instance, _ = Customer.objects.get_or_create(nama_pt=customer_name)
 
                             # Load image from specified cell
                             image_cell = chr(65 + column_titles.index('gambar')) + str(row_index + 2)
@@ -836,9 +842,11 @@ def upload_excel(request):
 
                             # Create and save instance with image path
                             instance = Items(
+                                tanggal_pemesanan = row[tanggal_pemesanan_index] if tanggal_pemesanan_index is not None else upload_date,
                                 nama=row[nama_index] if nama_index is not None else '',
                                 catatan=row[catatan_index] if catatan_index is not None else '',
                                 category=category_instance,
+                                customer=customer_instance,
                                 quantity=row[quantity_index] if quantity_index is not None else 0,
                                 unit=row[unit_index] if unit_index is not None else '',
                                 price=row[price_index] if price_index is not None else 0,
@@ -857,7 +865,7 @@ def upload_excel(request):
                     # Handle case where 'Gambar' column title is not found
                     raise ValueError("'gambar' column title not found in the Excel file")
                 
-                return render(request, 'item/upload_excel.html', {'form': form, 'categories': categories, 'error_message': error_message, 'processed_items': processed_items})
+                return render(request, 'item/upload_excel.html', {'form': form, 'categories': categories, 'customers': customers, 'error_message': error_message, 'processed_items': processed_items})
                 
             except openpyxl.utils.exceptions.InvalidFileException:
                 error_message = "Invalid Excel file format. Please upload a valid Excel file."
@@ -870,7 +878,7 @@ def upload_excel(request):
         form = ExcelUploadForm()
     
     # Render the upload form template
-    return render(request, 'item/upload_excel.html', {'form': form, 'categories': categories, 'error_message': error_message})
+    return render(request, 'item/upload_excel.html', {'form': form, 'categories': categories, 'customers': customers, 'error_message': error_message})
 
 
 # -------------------- Delete multiple items -------------------- #

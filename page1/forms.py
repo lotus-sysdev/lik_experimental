@@ -231,6 +231,9 @@ class ItemForm(forms.ModelForm):
             ('Pair', 'Pair'),
             ('Pcs', 'Pcs'),
             ('Unit', 'Unit'),
+            ('Rim', 'Rim'),
+            ('Roll', 'Roll'),
+            ('Set', 'Set'),
             ('Lainnya', 'Lainnya')
         )
     
@@ -245,6 +248,7 @@ class ItemForm(forms.ModelForm):
             'gambar': forms.ClearableFileInput(attrs={'class': 'form-control-file', 'accept': 'image/*'}),
             'category': Select2Widget(attrs={'class': 'form-control'}),
             'Tanggal': forms.DateInput(attrs={'type': 'date', 'class': 'form-control','required': False}),
+            'tanggal_pemesanan': forms.DateInput(attrs={'type': 'date', 'class': 'form-control','required': False}),
             'catatan': forms.Textarea(attrs={'class': 'form-control', 'placeholder':"Masukkan Spesifikasi Barang"}),
         }
         labels = {
@@ -255,7 +259,8 @@ class ItemForm(forms.ModelForm):
             'price': 'Harga',
             'gambar': 'Gambar',
             'category': 'Kategori',
-            'Tanggal': 'Tanggal Input'
+            'Tanggal': 'Tanggal Input',
+            'tanggal_pemesanan': 'Tanggal Pesan'
         }
         choices = {
             'unit': UNIT_CHOICES,

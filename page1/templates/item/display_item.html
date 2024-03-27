@@ -138,7 +138,7 @@
         console.error("Table is not initialized.");
         return;
     }
-        var selectedIDs = table.rows('.selected').data().toArray().map(row => row[2]); // Get SKUs of selected rows using DataTables API
+        var selectedIDs = table.rows('.selected').data().toArray().map(row => row[4]); // Get SKUs of selected rows using DataTables API
         selectedIDs.forEach(function(value) {
         console.log('selected_ids[]:', value);
         });
