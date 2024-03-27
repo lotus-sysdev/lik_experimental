@@ -35,8 +35,8 @@ LOGIN_URL = 'login/'
 # Application definition
 
 INSTALLED_APPS = [
-    # 'rest_framework_simplejwt.token_blacklist',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'requests',
     'jazzmin',
@@ -67,9 +67,20 @@ MIDDLEWARE = [
     'admin_reorder.middleware.ModelAdminReorder',
     'corsheaders.middleware.CorsMiddleware',
 ]
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8081',  # Adjust this to match your React Native app's origin
-]
+CORS_ALLOW_ALL_ORIGINS = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+}
+TOKEN_EXPIRE_SECONDS = 60 * 60 * 24
+
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:8081',
+#     'http://192.168.160.169:8081', 
+#      # Adjust this to match your React Native app's origin
+# ]
 
 ROOT_URLCONF = 'LotusSolusindo.urls'
 
