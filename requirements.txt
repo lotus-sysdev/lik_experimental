@@ -15,3 +15,5 @@ openpyxl-image-loader
 openpyxl
 gunicorn 
 psycopg2-binary
+django-modeladmin-reorder
+
