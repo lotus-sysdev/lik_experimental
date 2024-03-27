@@ -177,9 +177,9 @@ class CustomerAlamat(models.Model):
     )
     type = models.CharField(max_length=15, choices=TYPE_CHOICES)
     provinsi = models.CharField(max_length=255)
-    kota = models.CharField(max_length=50)
-    kecamatan = models.CharField(max_length=50)
-    kelurahan = models.CharField(max_length=50)
+    kota = models.CharField(max_length=255)
+    kecamatan = models.CharField(max_length=255)
+    kelurahan = models.CharField(max_length=255)
     detail = models.CharField(max_length=500)
 
     def __str__ (self):
@@ -197,9 +197,9 @@ class SupplierAlamat(models.Model):
     )
     type = models.CharField(max_length=15, choices=TYPE_CHOICES)
     provinsi = models.CharField(max_length=255)
-    kota = models.CharField(max_length=50)
-    kecamatan = models.CharField(max_length=50)
-    kelurahan = models.CharField(max_length=50)
+    kota = models.CharField(max_length=255)
+    kecamatan = models.CharField(max_length=255)
+    kelurahan = models.CharField(max_length=255)
     detail = models.CharField(max_length=500)
 
 def default_date():
@@ -335,10 +335,10 @@ class DeliveryAddresses(models.Model):
         verbose_name_plural = "Delivery Addresses"
         
     provinsi = models.CharField(max_length=255)
-    kota = models.CharField(max_length=50)
-    kecamatan = models.CharField(max_length=50)
-    kelurahan = models.CharField(max_length=50)
-    detail = models.CharField(max_length=50)
+    kota = models.CharField(max_length=255)
+    kecamatan = models.CharField(max_length=255)
+    kelurahan = models.CharField(max_length=255)
+    detail = models.CharField(max_length=500)
     
     def __str__(self):
         return self.detail
