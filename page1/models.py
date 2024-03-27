@@ -106,7 +106,7 @@ class Items(models.Model):
     SKU = models.CharField(max_length=20, primary_key = True, unique = True)
     upload_type = models.CharField(max_length=10, default = "manual")
     Tanggal = models.DateField(default=timezone.now)
-    tanggal_pemesanan = models.DateField(default=timezone.now)
+    tanggal_pemesanan = models.DateField(default=timezone.now, null=True)
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
     nama = models.CharField(max_length=255)
     catatan = models.CharField(max_length = 500, null = True)
@@ -180,7 +180,10 @@ class CustomerAlamat(models.Model):
     kota = models.CharField(max_length=50)
     kecamatan = models.CharField(max_length=50)
     kelurahan = models.CharField(max_length=50)
-    detail = models.CharField(max_length=50)
+    detail = models.CharField(max_length=500)
+
+    def __str__ (self):
+        return (f'{self.customer_id}-{self.type}') 
 
 class SupplierAlamat(models.Model):
     class Meta:
@@ -197,7 +200,7 @@ class SupplierAlamat(models.Model):
     kota = models.CharField(max_length=50)
     kecamatan = models.CharField(max_length=50)
     kelurahan = models.CharField(max_length=50)
-    detail = models.CharField(max_length=50)
+    detail = models.CharField(max_length=500)
 
 def default_date():
     return datetime.date(1900, 1, 1)
