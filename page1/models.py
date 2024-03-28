@@ -165,6 +165,46 @@ class ItemSumber(models.Model):
     email = models.EmailField(blank=True, null=True)
     url = models.URLField(blank=True, null=True)
     
+class Provinsi(models.Model):
+    class Meta:
+        verbose_name = "Provinsi"
+        verbose_name_plural = "Provinsi"
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+
+class Kota(models.Model):
+    class Meta:
+        verbose_name = "Kota/Kabupaten"
+        verbose_name_plural = "Kota/Kabupaten"
+    id = models.IntegerField(primary_key=True)
+    provinsi_id = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+    
+    
+class Kecamatan(models.Model):
+    class Meta:
+        verbose_name = "Kecamatan"
+        verbose_name_plural = "Kecamatan"
+    id = models.IntegerField(primary_key=True)
+    kota_id = models.ForeignKey(Kota, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+    
+    
+class Kelurahan(models.Model):
+    class Meta:
+        verbose_name = "Kelurahan/Desa"
+        verbose_name_plural = "Kelurahan/Desa"
+    id = models.IntegerField(primary_key=True)
+    kecamatan_id = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+
 class CustomerAlamat(models.Model):
     class Meta:
         verbose_name = "Customer Address"
@@ -334,11 +374,11 @@ class DeliveryAddresses(models.Model):
         verbose_name = "Delivery Address"
         verbose_name_plural = "Delivery Addresses"
         
-    provinsi = models.CharField(max_length=255)
-    kota = models.CharField(max_length=50)
-    kecamatan = models.CharField(max_length=50)
-    kelurahan = models.CharField(max_length=50)
-    detail = models.CharField(max_length=50)
+    provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
+    kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
+    kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
+    kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    detail = models.CharField(max_length=500)
     
     def __str__(self):
         return self.detail

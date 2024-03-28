@@ -14,4 +14,4 @@ class Report(models.Model):
     reject = models.PositiveIntegerField( null=True)
 
     def __str__ (self):
-        return str(self.tanggal)
+        return str(self.no_tiket)

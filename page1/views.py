@@ -1015,3 +1015,6 @@ def edit_log(request, id):
 @FO_Only
 def delete_log(request, id):
     return delete_entity(request, LogBook, 'id', id)
+
+
+# -------------------- Alamat -------------------- #
