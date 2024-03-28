@@ -181,8 +181,7 @@ class Kota(models.Model):
     provinsi_id = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     def __str__(self):
-        return self.name
-    
+        return self.name 
     
 class Kecamatan(models.Model):
     class Meta:
@@ -192,8 +191,7 @@ class Kecamatan(models.Model):
     kota_id = models.ForeignKey(Kota, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     def __str__(self):
-        return self.name
-    
+        return self.name  
     
 class Kelurahan(models.Model):
     class Meta:

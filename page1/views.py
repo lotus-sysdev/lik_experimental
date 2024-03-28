@@ -918,6 +918,7 @@ def delete_selected_rows_PO(request):
 
 def delete_selected_rows_WO(request):
     return delete_selected_rows(request, WorkOrder, 'id')
+
 def add_additional_address(request):
     if request.method == 'POST':
         form = AdditionalAddressForm(request.POST)
@@ -1017,4 +1018,51 @@ def delete_log(request, id):
     return delete_entity(request, LogBook, 'id', id)
 
 
-# -------------------- Alamat -------------------- #
+# -------------------- Dependable Alamat -------------------- #
+def get_kota(request):
+    if request.method == 'GET':
+        province_id = request.GET.get('province_id')
+        cities = Kota.objects.filter(provinsi_id=province_id).values('id', 'name')
+        return JsonResponse(list(cities), safe=False)
+    return JsonResponse({'error': 'Invalid request'})
+
+def get_kecamatan(request):
+    if request.method == 'GET':
+        city_id = request.GET.get('city_id')
+        district = Kecamatan.objects.filter(kota_id=city_id).values('id', 'name')
+        return JsonResponse(list(district), safe=False)
+    return JsonResponse({'error': 'Invalid request'})
+
+def get_kelurahan(request):
+    if request.method == 'GET':
+        district_id = request.GET.get('district_id')
+        village = Kelurahan.objects.filter(kecamatan_id=district_id).values('id', 'name')
+        return JsonResponse(list(village), safe=False)
+    return JsonResponse({'error': 'Invalid request'})
+
+def get_region_details(request):
+    region_type = request.GET.get('region_type')
+    region_id = request.GET.get('region_id')
+
+    if region_type == 'kelurahan':
+        kelurahan = Kelurahan.objects.get(pk=region_id)
+        data = {
+            'kecamatan_id': kelurahan.kecamatan_id,
+            'kota_id': kelurahan.kecamatan.kota_id,
+            'provinsi_id': kelurahan.kecamatan.kota.provinsi_id,
+        }
+    elif region_type == 'kecamatan':
+        kecamatan = Kecamatan.objects.get(pk=region_id)
+        data = {
+            'kota_id': kecamatan.kota_id,
+            'provinsi_id': kecamatan.kota.provinsi_id,
+        }
+    elif region_type == 'kota':
+        kota = Kota.objects.get(pk=region_id)
+        data = {
+            'provinsi_id': kota.provinsi_id,
+        }
+    else:
+        data = {}
+
+    return JsonResponse(data)
