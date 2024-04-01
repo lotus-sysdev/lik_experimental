@@ -6,6 +6,7 @@ import pandas as pd
 import requests
 import datetime
 
+from django.core import serializers
 from django.core.files.base import ContentFile
 # from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -15,7 +16,7 @@ from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.urls import reverse
 
@@ -28,8 +29,8 @@ from openpyxl_image_loader import SheetImageLoader
 
 # -------------------- Placeholder for homepage --------------------#
 @login_required
-def placeholder(request):
-    return render(request, 'home.html')
+def success(request):
+    return render(request, 'success.html')
 
 
 # -------------------- Common Functions --------------------#
@@ -555,9 +556,12 @@ def logout_view(request):
 
 
 # -------------------- User Action Logs -------------------- #
+@login_required
+@Admin_Only
 def user_action_logs(request):
     logs = UserActionLog.objects.all().order_by('-timestamp')[:100]  # Get the last 10 logs
     return render(request, 'logs.html', {'logs': logs})
+
 
 
 # -------------------- Delivery Order -------------------- #
@@ -596,7 +600,7 @@ def all_events(request):
     return JsonResponse(out, safe=False) 
  
 @login_required
-@Messenger_Only
+@FO_Only
 def add_event(request):
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
@@ -607,7 +611,7 @@ def add_event(request):
     return JsonResponse(data)
  
 @login_required
-@Messenger_Only
+@FO_Only
 def update(request):
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
@@ -622,7 +626,7 @@ def update(request):
     return JsonResponse(data)
  
 @login_required
-@Messenger_Only
+@FO_Only
 def remove(request):
     id = request.GET.get("id", None)
     event = Events.objects.get(id=id)
@@ -633,10 +637,10 @@ def remove(request):
 # Forms for adding delivery order, messenger, and vehicle
 # Delivery form functionality
 @login_required
-@Messenger_Only
+@FO_Only
 def delivery_form(request):
     max_forms = 3  # Maximum number of forms allowed
-
+    
     if request.method == 'POST':
         num_forms = int(request.POST.get('num_forms', 1))  # Get the submitted number of forms
 
@@ -661,14 +665,13 @@ def delivery_form(request):
 
         num_forms = int(request.session.get('num_forms', 1))
         # print(num_forms)
-
         forms = [DeliveryForm(initial=initial_data, prefix=str(i)) for i in range(1, num_forms + 1)]
 
     context = {'forms': forms, 'max_forms': max_forms}
     return render(request, 'delivery/delivery_form.html', context)
 
 @login_required
-@Messenger_Only
+@FO_Only
 def update_num_forms(request):
     if request.method == 'POST':
         num_forms = int(request.POST.get('num_forms', 1))
@@ -681,17 +684,17 @@ def update_num_forms(request):
 
 # Display, edit, and delete delivery
 @login_required
-@Messenger_Only
+@FO_Only
 def delivery_detail(request, id):
     return entity_detail(request, Events, DeliveryForm, "id", id, 'delivery/delivery_detail.html')
 
 @login_required
-@Messenger_Only
+@FO_Only
 def edit_delivery(request, id):
     return edit_entity(request, Events, DeliveryForm, 'id', id)
 
 @login_required
-@Messenger_Only
+@FO_Only
 def delete_delivery(request, id):
     return delete_entity(request, Events, 'id', id)
 
@@ -829,7 +832,7 @@ def upload_excel(request):
                             item_name = row[nama_index] if nama_index is not None else ''
                             item_name_cleaned = re.sub(regex_pattern, replacement_string, item_name)
                             upload_date = datetime.date.today().strftime('%Y-%m-%d')
-                            filename = f"media_bulk_{item_name_cleaned}_{upload_date}_{row_index}.jpg"
+                            filename = f"media_bulk_{item_name_cleaned}_{upload_date}_{row_index}.png"
                             
                             # Specify the full path including the media directory
                             image_path = os.path.join(settings.MEDIA_ROOT, filename)
@@ -918,18 +921,27 @@ def delete_selected_rows_PO(request):
 
 def delete_selected_rows_WO(request):
     return delete_selected_rows(request, WorkOrder, 'id')
+
+@login_required
+@FO_Only
 def add_additional_address(request):
     if request.method == 'POST':
         form = AdditionalAddressForm(request.POST)
         if form.is_valid():
             form.save()  # This saves the form data to the database
-            return redirect('/calendar')
+            return redirect('success')
     else:
         form = AdditionalAddressForm()
     
     return render(request, 'delivery/add_delivery_address.html', {'form': form})
 
-
+@login_required
+@FO_Only
+def get_location_data(request):
+    # Fetch data from your database or any other source
+    delivery_addresses = DeliveryAddresses.objects.all()
+    data = serializers.serialize('json', delivery_addresses)
+    return JsonResponse(data, safe=False)
 # -------------------- Log Book Basics -------------------- #
 @login_required
 @FO_Only
