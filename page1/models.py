@@ -9,7 +9,7 @@ from django_measurement.models import MeasurementField
 from measurement.measures import Mass
 
 class Customer(models.Model):
-    cust_id = models.IntegerField(primary_key=True)
+    cust_id = models.AutoField(primary_key=True)
     nama_pt = models.CharField(max_length=255)
     telp = PhoneNumberField()
     terms_of_payment = models.CharField(max_length=15)
@@ -38,7 +38,7 @@ class Customer(models.Model):
         return self.nama_pt
 
 class Supplier(models.Model):
-    supp_id = models.IntegerField(primary_key = True)
+    supp_id = models.AutoField(primary_key = True)
     nama_pt = models.CharField(max_length=255)
     telp = PhoneNumberField()
     terms_of_payment = models.CharField(max_length=50)
@@ -371,7 +371,7 @@ class DeliveryAddresses(models.Model):
     class Meta:
         verbose_name = "Delivery Address"
         verbose_name_plural = "Delivery Addresses"
-        
+
     provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
     kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
     kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
@@ -391,6 +391,7 @@ class Events(models.Model):
     start = models.DateTimeField(null = True, blank = True)
     end = models.DateTimeField(null = True, blank = True)
     messenger = models.ForeignKey(Messenger,on_delete=models.SET_NULL, null=True)
+    keterangan = models.CharField(max_length = 500, null=True)
     start_location = models.ForeignKey(DeliveryAddresses, related_name= "delivery_start_location", on_delete=models.CASCADE, null =True)
     destination = models.ForeignKey(DeliveryAddresses, related_name="delivery_destination",on_delete=models.CASCADE, null =True)
     vehicle = models.ForeignKey(Vehicle,on_delete=models.SET_NULL, null=True)

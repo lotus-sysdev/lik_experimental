@@ -2,7 +2,7 @@ from django.urls import path, re_path
 from .views import *
 
 urlpatterns = [
-    path('', placeholder,name='index'),
+    path('success/', success ,name='success'),
 
     # form add urls
     path('add_customer/', add_customer, name='add_customer'),
@@ -106,6 +106,7 @@ urlpatterns = [
     path('forbidden/', forbidden, name='forbidden'),
 
     path('add_additional_address/', add_additional_address, name='add_additional_address'),
+    path('get_location_data/', get_location_data, name="get_location_data" ),
 
     # Log Book
     path('log_book/', log_book, name="log_book"),

@@ -469,6 +469,7 @@ class DeliveryForm(forms.ModelForm):
             'package_name': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Nama Paket'}),
             'messenger': Select2Widget(attrs={'class':'form-control'}),
             'vehicle': Select2Widget(attrs={'class':'form-control'}),
+            'keterangan': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Tuliskan Keterangan Pengantaran Disini'}),
             'start_location': Select2Widget(attrs={'class': 'form-control'}),
             'destination': Select2Widget(attrs={'class': 'form-control'}),
             'start' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Keberangkatan'}),
@@ -476,6 +477,7 @@ class DeliveryForm(forms.ModelForm):
             'package_dimensions' : DimensionsInput(attrs={'class':'form-control'}),
         }
         labels = {
+            'keterangan' : 'Keterangan',
             'title' : 'Judul',
             'package_name' : 'Nama Paket',
             'messenger' : 'Pengantar',
