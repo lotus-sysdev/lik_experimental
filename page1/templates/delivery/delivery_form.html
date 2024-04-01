@@ -36,12 +36,17 @@
           <div id="location_container">
             <div class="form-group">
               {{ form.start_location.label_tag }}{{form.start_location }}
+              <button type="button" id="updateSelect2Btn" class="btn btn-primary"><i class="fas fa-sync-alt"></i></button>
             </div>
             <div class="form-group">
               {{ form.destination.label_tag }} {{ form.destination }}
             </div>
-            <a href="{% url 'add_additional_address'%}">Tambahkan Alamat Baru</a>
           </div>
+          <div class="form-group">
+            {{ form.keterangan.label_tag }} {{ form.keterangan }}
+          </div>
+          <!-- <a href="{% url 'add_additional_address'%}">Tambahkan Alamat Baru</a> -->
+          <button type="button" id="add-address-btn" class="btn btn-secondary">Tambah Alamat Baru</button>
         </div>
 
         <div class="col-md-5 mr-5">
@@ -95,12 +100,25 @@
     </button>
   </div>
 </form>
+
+<div id="popup-container" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 999;">
+  <div id="popup-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 10px;">
+    <!-- Include the content of your popup page here -->
+    <button id="close-popup-btn" style="position: absolute; top: 23px; right: 50px;"><i class="fas fa-times"></i></button>
+    <!-- For example, you can include an iframe with the URL of your popup page -->
+    <iframe src="{% url 'add_additional_address' %}" style="width: 70vh; height: 50vh; border: none;"></iframe>
+  </div>
+</div>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const addFormButton = document.getElementById("add-form");
     const removeFormButton = document.getElementById("remove-form");
     const numFormsInput = document.getElementById("id_num_forms");
     const formsContainer = document.getElementById("forms-container");
+    const addAddressBtn = document.getElementById("add-address-btn");
+    const popupContainer = document.getElementById("popup-container");
+    const popupContent = document.getElementById("popup-content");
+    const closePopupBtn = document.getElementById("close-popup-btn");
 
     addFormButton.addEventListener("click", function () {
       const currentNumForms = parseInt(numFormsInput.value, 10);
@@ -121,12 +139,53 @@
       }
     });
 
+    addAddressBtn.addEventListener("click", function () {
+      // Show the popup container as a modal overlay
+      popupContainer.style.display = "block";
+    });
+
+    closePopupBtn.addEventListener("click", function () {
+      // Hide the popup container
+      popupContainer.style.display = "none";
+    });
     function addForm() {
       const newForm = document.createElement("fieldset");
       newForm.className = "delivery-form";
 
       formsContainer.appendChild(newForm);
     }
+    function fetchSelect2DataAndUpdate() {
+      $.ajax({
+          url: '{% url "get_location_data" %}', // URL to your Django view
+          method: 'GET',
+          success: function(response) {
+              // Parse the JSON response
+              var data = JSON.parse(response);
+              
+              // Clear existing options in Select2 dropdowns
+              $('#id_1-start_location').empty();
+              $('#id_1-destination').empty();
+
+              // Populate Select2 dropdowns with data
+              data.forEach(function(item) {
+                  $('#id_1-start_location').append('<option value="' + item.pk + '">' + item.fields.detail + '</option>');
+                  $('#id_1-destination').append('<option value="' + item.pk + '">' + item.fields.detail + '</option>');
+              });
+
+              // Trigger Select2 to update
+              $('#id_1-start_location').trigger('change');
+              $('#id_1-destination').trigger('change');
+          },
+          error: function(xhr, status, error) {
+              // Handle error
+              console.error(error);
+          }
+      });
+    }
+
+    $('#updateSelect2Btn').click(function() {
+      fetchSelect2DataAndUpdate();
+    });
 
     function removeForm() {
       const lastForm = formsContainer.lastElementChild;
