@@ -30,6 +30,10 @@ from openpyxl_image_loader import SheetImageLoader
 
 # -------------------- Placeholder for homepage --------------------#
 @login_required
+def home(request):
+    return render(request, 'home.html')
+
+@login_required
 def success(request):
     return render(request, 'success.html')
 
