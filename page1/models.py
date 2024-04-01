@@ -214,10 +214,10 @@ class CustomerAlamat(models.Model):
         ('pengiriman', 'Alamat Pengiriman'),
     )
     type = models.CharField(max_length=15, choices=TYPE_CHOICES)
-    provinsi = models.CharField(max_length=255)
-    kota = models.CharField(max_length=50)
-    kecamatan = models.CharField(max_length=50)
-    kelurahan = models.CharField(max_length=50)
+    provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
+    kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
+    kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
+    kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
     detail = models.CharField(max_length=500)
 
     def __str__ (self):
@@ -234,10 +234,10 @@ class SupplierAlamat(models.Model):
         ('pengiriman', 'Alamat Pengiriman'),
     )
     type = models.CharField(max_length=15, choices=TYPE_CHOICES)
-    provinsi = models.CharField(max_length=255)
-    kota = models.CharField(max_length=50)
-    kecamatan = models.CharField(max_length=50)
-    kelurahan = models.CharField(max_length=50)
+    provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
+    kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
+    kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
+    kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
     detail = models.CharField(max_length=500)
 
 def default_date():

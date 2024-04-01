@@ -171,10 +171,10 @@ class CustAlamatForms(forms.ModelForm):
         fields = '__all__'
         exclude = ['customer_id']
         widgets = {
-            'provinsi': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'DKI Jakarta'}),
-            'kota': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Jakarta Barat'}),
-            'kecamatan': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Kembangan'}),
-            'kelurahan': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Srengseng'}),
+            'provinsi': Select2Widget(attrs={'class': 'form-control'}),
+            'kota': Select2Widget(attrs={'class': 'form-control'}),
+            'kecamatan': Select2Widget(attrs={'class': 'form-control'}),
+            'kelurahan': Select2Widget(attrs={'class': 'form-control'}),
             'detail': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ruko, Jl. Permata Regency Jl. H. Kelik No.31 Blok C, RT.1/RW.6,'}),
         }
         labels = {
@@ -195,10 +195,10 @@ class SuppAlamattForms(forms.ModelForm):
         fields = '__all__'
         exclude = ['supplier_id']
         widgets = {
-            'provinsi': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'DKI Jakarta'}),
-            'kota': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Jakarta Barat'}),
-            'kecamatan': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Kembangan'}),
-            'kelurahan': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Srengseng'}),
+            'provinsi': Select2Widget(attrs={'class': 'form-control'}),
+            'kota': Select2Widget(attrs={'class': 'form-control'}),
+            'kecamatan': Select2Widget(attrs={'class': 'form-control'}),
+            'kelurahan': Select2Widget(attrs={'class': 'form-control'}),
             'detail': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ruko, Jl. Permata Regency Jl. H. Kelik No.31 Blok C, RT.1/RW.6,'}),
         }
         labels = {
