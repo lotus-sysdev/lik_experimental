@@ -108,7 +108,7 @@ urlpatterns = [
     path('add_additional_address/', add_additional_address, name='add_additional_address'),
     path('get_location_data/', get_location_data, name="get_location_data" ),
 
-    #Log Book
+    # Log Book
     path('log_book/', log_book, name="log_book"),
     path('lb_all_events/', lb_all_events, name='lb_all_events'), 
     path('lb_add_event/', lb_add_event, name='lb_add_event'), 
@@ -118,5 +118,11 @@ urlpatterns = [
     path('log_detail/<int:id>', log_detail, name='log_detail'),
     path('edit_log/<int:id>/', edit_log, name='edit_log'),
     path('delete_log/<int:id>/', delete_log, name='delete_log'),
+
+    # Dependable Addresses
+    path('get_kota/', get_kota, name='get_kota'),
+    path('get_kecamatan/', get_kecamatan, name='get_kecamatan'),
+    path('get_kelurahan/', get_kelurahan, name='get_kelurahan'),
+    path('get_region_details/', get_region_details, name='get_region_details'),
 ]
 

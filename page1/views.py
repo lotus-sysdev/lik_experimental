@@ -5,10 +5,11 @@ from PIL import Image
 import pandas as pd
 import requests
 import datetime
+import re
 
 from django.core import serializers
 from django.core.files.base import ContentFile
-# from django.core.files import File
+from django.core import serializers
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import redirect, render, get_object_or_404
 from django.conf import settings
@@ -771,7 +772,6 @@ def upload_csv(request):
 
     return render(request, 'item/upload_csv.html')
 
-import re
 def upload_excel(request):
     error_message = []
     processed_items = []
@@ -811,59 +811,63 @@ def upload_excel(request):
                 if gambar_row_index is not None:
                     # Load image from the 'Gambar' column for each row
                     image_loader = SheetImageLoader(worksheet)
+
                     for row_index, row in enumerate(worksheet.iter_rows(min_row=gambar_row_index + 2, values_only=True)):
-                        try: 
-                            # Extract category information
-                            category_name = row[category_index] if category_index is not None else ''
-                            category_instance, _ = Category.objects.get_or_create(name=category_name)
+                        if all(index is not None for index in [nama_index, category_index, customer_index, quantity_index, unit_index, price_index]):
+                            try: 
+                                # Extract category information
+                                category_name = row[category_index] if category_index is not None else ''
+                                category_instance, _ = Category.objects.get_or_create(name=category_name)
 
-                            customer_name = row[customer_index] if customer_index is not None else ''
-                            customer_instance, _ = Customer.objects.get_or_create(nama_pt=customer_name)
+                                customer_name = row[customer_index] if customer_index is not None else ''
+                                customer_instance, _ = Customer.objects.get_or_create(nama_pt=customer_name)
 
-                            # Load image from specified cell
-                            image_cell = chr(65 + column_titles.index('gambar')) + str(row_index + 2)
-                            image = image_loader.get(image_cell)
+                                # Load image from specified cell
+                                image_cell = chr(65 + column_titles.index('gambar')) + str(row_index + 2)
+                                image = image_loader.get(image_cell)
 
-                            image = image.resize((100, 100), Image.Resampling.LANCZOS)
-                            regex_pattern = r'/'
-                            replacement_string = '-'
-                            
-                            # Generate filename including item name, upload date, and row index
-                            item_name = row[nama_index] if nama_index is not None else ''
-                            item_name_cleaned = re.sub(regex_pattern, replacement_string, item_name)
-                            upload_date = datetime.date.today().strftime('%Y-%m-%d')
-                            filename = f"media_bulk_{item_name_cleaned}_{upload_date}_{row_index}.png"
-                            
-                            # Specify the full path including the media directory
-                            image_path = os.path.join(settings.MEDIA_ROOT, filename)
-                            
-                            # Save the image to the media directory
-                            image.save(image_path)
+                                image = image.resize((100, 100), Image.Resampling.LANCZOS)
+                                regex_pattern = r'[\\/:"*?<>|\']'
+                                replacement_string = '-'
+                                
+                                # Generate filename including item name, upload date, and row index
+                                item_name = row[nama_index] if nama_index is not None else ''
+                                item_name_cleaned = re.sub(regex_pattern, replacement_string, item_name)
+                                upload_date = datetime.date.today().strftime('%Y-%m-%d')
+                                filename = f"media_bulk_{item_name_cleaned}_{upload_date}_{row_index}.png"
+                                
+                                # Specify the full path including the media directory
+                                image_path = os.path.join(settings.MEDIA_ROOT, filename)
+                                
+                                # Save the image to the media directory
+                                image.save(image_path)
 
-                            # Extract price currency or use default value 'IDR'
-                            price_currency = row[price_currency_index] if price_currency_index is not None else 'IDR'
+                                # Extract price currency or use default value 'IDR'
+                                price_currency = row[price_currency_index] if price_currency_index is not None else 'IDR'
 
-                            # Create and save instance with image path
-                            instance = Items(
-                                tanggal_pemesanan = row[tanggal_pemesanan_index] if tanggal_pemesanan_index is not None else upload_date,
-                                nama=row[nama_index] if nama_index is not None else '',
-                                catatan=row[catatan_index] if catatan_index is not None else '',
-                                category=category_instance,
-                                customer=customer_instance,
-                                quantity=row[quantity_index] if quantity_index is not None else 0,
-                                unit=row[unit_index] if unit_index is not None else '',
-                                price=row[price_index] if price_index is not None else 0,
-                                price_currency=price_currency,
-                                gambar=filename,
-                                upload_type="bulk"
-                            )
-                            instance.save()
-                            processed_items.append(instance)
-                    
-                        except Exception as e:
-                            error_message.append(f"Error on cell {row_index + 1}: {str(e)}")
-                            print(processed_items)
-                            continue
+                                # Create and save instance with image path
+                                instance = Items(
+                                    tanggal_pemesanan = row[tanggal_pemesanan_index] if tanggal_pemesanan_index is not None else upload_date,
+                                    nama=row[nama_index] if nama_index is not None else '',
+                                    catatan=row[catatan_index] if catatan_index is not None else '',
+                                    category=category_instance,
+                                    customer=customer_instance,
+                                    quantity=row[quantity_index] if quantity_index is not None else 0,
+                                    unit=row[unit_index] if unit_index is not None else '',
+                                    price=row[price_index] if price_index is not None else 0,
+                                    price_currency=price_currency,
+                                    gambar=filename,
+                                    upload_type="bulk"
+                                )
+                                instance.save() 
+                                processed_items.append(instance)
+                        
+                            except Exception as e:
+                                error_message.append(f"Error on cell {row_index + 1}: {str(e)}")
+                                # print(processed_items)
+                                continue
+                        else:
+                            error_message.append(f"Error on cell {row_index + 1}: Required column(s) not found.")   
                 else:
                     # Handle case where 'Gambar' column title is not found
                     raise ValueError("'gambar' column title not found in the Excel file")
@@ -1027,3 +1031,53 @@ def edit_log(request, id):
 @FO_Only
 def delete_log(request, id):
     return delete_entity(request, LogBook, 'id', id)
+
+
+# -------------------- Dependable Alamat -------------------- #
+def get_kota(request):
+    if request.method == 'GET':
+        province_id = request.GET.get('province_id')
+        cities = Kota.objects.filter(provinsi_id=province_id).values('id', 'name')
+        return JsonResponse(list(cities), safe=False)
+    return JsonResponse({'error': 'Invalid request'})
+
+def get_kecamatan(request):
+    if request.method == 'GET':
+        city_id = request.GET.get('city_id')
+        district = Kecamatan.objects.filter(kota_id=city_id).values('id', 'name')
+        return JsonResponse(list(district), safe=False)
+    return JsonResponse({'error': 'Invalid request'})
+
+def get_kelurahan(request):
+    if request.method == 'GET':
+        district_id = request.GET.get('district_id')
+        village = Kelurahan.objects.filter(kecamatan_id=district_id).values('id', 'name')
+        return JsonResponse(list(village), safe=False)
+    return JsonResponse({'error': 'Invalid request'})
+
+def get_region_details(request):
+    region_id = request.GET.get('region_id')
+
+    if region_id:
+        data = {}
+        if len(region_id) == 4:  # Kota ID
+            kota = Kota.objects.get(pk=region_id)
+            data['kota_id'] = kota.id
+            data['provinsi_id'] = kota.provinsi_id.id
+        elif len(region_id) == 7:  # Kecamatan ID
+            kecamatan = Kecamatan.objects.get(pk=region_id)
+            data['kecamatan_id'] = kecamatan.id
+            data['kota_id'] = kecamatan.kota_id.id
+            data['provinsi_id'] = kecamatan.kota_id.provinsi_id.id
+        elif len(region_id) == 10:  # Kelurahan ID
+            kelurahan = Kelurahan.objects.get(pk=region_id)
+            data['kelurahan_id'] = kelurahan.id
+            data['kecamatan_id'] = kelurahan.kecamatan_id.id
+            data['kota_id'] = kelurahan.kecamatan_id.kota_id.id
+            data['provinsi_id'] = kelurahan.kecamatan_id.kota_id.provinsi_id.id
+
+        return JsonResponse(data)
+    else:
+        data = {}
+
+    return JsonResponse(data)

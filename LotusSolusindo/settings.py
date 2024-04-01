@@ -251,7 +251,8 @@ JAZZMIN_SETTINGS = {
         {"model": "auth.User"},
 
         # App with dropdown menu to all its models pages (Permissions checked against models)
-        {"app": "books"},
+        {"app": "page1"},
+        {"app": "lik"},
     ],
 
     #############
@@ -271,7 +272,7 @@ JAZZMIN_SETTINGS = {
     "hide_models": [],
 
     # List of apps (and/or models) to base side menu ordering off of (does not need to contain all apps/models)
-    "order_with_respect_to": ["auth", "page1.customer", "page1.supplier", "page1.items", "page1.itemsumber", "page1.category", "page1.customeralamat", "page1.supplieralamat", "page1.deliveryaddresses", "page1.customerpic", "page1.supplierpic", "page1.events", "page1.purchaseorder", "page1.workorder", "page1.messenger", "page1.vehicle", "page1.logbook", "page1.useractionlog"],
+    "order_with_respect_to": ["auth", "page1.customer", "page1.supplier", "page1.items", "page1.itemsumber", "page1.category", "page1.customeralamat", "page1.supplieralamat", "page1.deliveryaddresses", 'page1.provinsi', 'page1.kota', 'page1.kecamatan', 'page1.kelurahan', "page1.customerpic", "page1.supplierpic", "page1.events", "page1.purchaseorder", "page1.workorder", "page1.messenger", "page1.vehicle", "page1.logbook", "page1.useractionlog"],
 
 
     # Custom icons for side menu apps/models See https://fontawesome.com/icons?d=gallery&m=free&v=5.0.0,5.0.1,5.0.10,5.0.11,5.0.12,5.0.13,5.0.2,5.0.3,5.0.4,5.0.5,5.0.6,5.0.7,5.0.8,5.0.9,5.1.0,5.1.1,5.2.0,5.3.0,5.3.1,5.4.0,5.4.1,5.4.2,5.13.0,5.12.0,5.11.2,5.11.1,5.10.0,5.9.0,5.8.2,5.8.1,5.7.2,5.7.1,5.7.0,5.6.3,5.5.0,5.4.2
@@ -350,7 +351,7 @@ ADMIN_REORDER = (
     {'app': 'auth', 'label': 'Authentication and Authorization'},
     # {'app': 'page1', 'label':'Models', 'models': ('page1.customer', 'page1.supplier', 'page1.items')},
     # {'app': 'page1', 'label':'Items', 'models': ('page1.itemsumber', 'page1.category')},
-    # {'app': 'page1', 'label':'Addresses', 'models': ('page1.customeralamat', 'page1.supplieralamat', 'deliveryaddresses')},
+    # {'app': 'page1', 'label':'Addresses', 'models': ('page1.customeralamat', 'page1.supplieralamat', 'page1.deliveryaddresses', 'page1.provinsi', 'page1.kota', 'page1.kecamatan', 'page1.kelurahan')},
     # {'app': 'page1', 'label':'PICs', 'models': ('page1.customerpic', 'page1.supplierpic')},
     # {'app': 'page1', 'label':'Orders', 'models': ('page1.events', 'page1.purchaseorder', 'page1.workorder')},
     # {'app': 'page1', 'label':'Delivery', 'models': ('page1.messenger', 'page1.vehicle')},

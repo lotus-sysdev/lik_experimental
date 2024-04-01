@@ -28,7 +28,7 @@ media/*
 
 # Migrations
 # Ignore migration .py files
-migrations/*
+migrations/
 
 !migrations/.gitkeep
 
