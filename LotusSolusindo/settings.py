@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-rj@lh5#&q==hsgz0-_+p!v0dykoosn!^4%nxyj)-j^&uhy1r*w
 DEBUG = True
 # DEBUG = False
 
-ALLOWED_HOSTS = ["159.223.33.190", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["159.223.33.190", "127.0.0.1", "localhost", "192.168.1.23", "192.168.160.169"]
 
 LOGIN_URL = 'login/'
 
@@ -67,7 +67,7 @@ MIDDLEWARE = [
     'admin_reorder.middleware.ModelAdminReorder',
     'corsheaders.middleware.CorsMiddleware',
 ]
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -76,11 +76,12 @@ REST_FRAMEWORK = {
 }
 TOKEN_EXPIRE_SECONDS = 60 * 60 * 24
 
-# CORS_ALLOWED_ORIGINS = [
-#     'http://localhost:8081',
-#     'http://192.168.160.169:8081', 
-#      # Adjust this to match your React Native app's origin
-# ]
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8081',
+    'http://192.168.160.169:8081', 
+    'http://192.168.1.23:8081'
+     # Adjust this to match your React Native app's origin
+]
 
 ROOT_URLCONF = 'LotusSolusindo.urls'
 

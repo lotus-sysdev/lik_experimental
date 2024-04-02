@@ -33,6 +33,10 @@ from openpyxl_image_loader import SheetImageLoader
 def success(request):
     return render(request, 'success.html')
 
+@login_required
+def home(request):
+    return render(request, 'home.html')
+
 
 # -------------------- Common Functions --------------------#
 # Adding entity (Customer and Supplier)

@@ -3,6 +3,7 @@ from .views import *
 
 urlpatterns = [
     path('success/', success ,name='success'),
+    path('', home ,name='home'),
 
     # form add urls
     path('add_customer/', add_customer, name='add_customer'),
