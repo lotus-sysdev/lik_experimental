@@ -712,6 +712,21 @@ def add_messenger(request):
 def add_vehicle(request):
     return add_entity_view(request, VehicleForm, 'delivery/add_vehicle.html', 'calendar')
 
+def get_messenger(request):
+    vehicle_id = request.GET.get('vehicle')
+    print(vehicle_id)
+
+    if vehicle_id:
+        data = {}
+        vehicle = Vehicle.objects.get(pk=vehicle_id)
+        data['messenger'] = vehicle.messenger.id
+
+        return JsonResponse(data)
+    else:
+        data = {}
+
+    return JsonResponse(data)
+
 
 # -------------------- Error Pages -------------------- #
 def forbidden(request):
@@ -937,7 +952,7 @@ def add_additional_address(request):
         form = AdditionalAddressForm(request.POST)
         if form.is_valid():
             form.save()  # This saves the form data to the database
-            return redirect('success')
+            # return redirect('success')
     else:
         form = AdditionalAddressForm()
     
@@ -950,6 +965,8 @@ def get_location_data(request):
     delivery_addresses = DeliveryAddresses.objects.all()
     data = serializers.serialize('json', delivery_addresses)
     return JsonResponse(data, safe=False)
+
+
 # -------------------- Log Book Basics -------------------- #
 @login_required
 @FO_Only

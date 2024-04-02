@@ -103,6 +103,7 @@ urlpatterns = [
 
     path('add_messenger/', add_messenger, name='add_messenger'),
     path('add_vehicle/', add_vehicle, name='add_vehicle'),
+    path('get_messenger/', get_messenger, name='get_messenger'),
 
     path('forbidden/', forbidden, name='forbidden'),
 
