@@ -363,7 +363,7 @@ def item_detail(request, SKU):
 @GA_required
 def edit_item(request, SKU):
     entity = get_object_or_404(Items,SKU=SKU)
-    entity_approved = entity.is_approved
+    # entity_approved = entity.is_approved
 
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES, instance=entity)
@@ -382,7 +382,7 @@ def edit_item(request, SKU):
                 # Update the item's image field with the new image path
                 form.instance.gambar = resized_image_name
 
-            entity.is_approved = entity_approved
+            # entity.is_approved = entity_approved
 
             form.save()
 
