@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load auth_extras %}
 
 {% block title %}Item Data Table{% endblock %}
 
@@ -50,7 +51,13 @@
             <td>{{i.upload_type}}</td>
             <td>{{ i.Tanggal }}</td>
             <td>{{ i.tanggal_pemesanan }}</td>
-            <td><a href="{% url 'customer_detail' cust_id=i.customer.cust_id %}">{{i.customer}}</a></td>
+            <td>
+              {% if i.customer %}
+                <a href="{% url 'customer_detail' cust_id=i.customer.cust_id %}">{{i.customer}}</a>
+              {% else %}
+                None
+              {% endif %}
+            </td>
             <td>{{ i.SKU }}</td>
             <td>{{ i.nama }}</td>
             <td>{{ i.category.name }}</td>
@@ -67,9 +74,12 @@
 <a href="/add_item">Add Item</a><br/>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   var table;
   function initializeDataTable() {
+  var isAdmin = "{{ request.user|has_group:'Admin' }}";
+  console.log(isAdmin)
   table = new DataTable("#itemTable",{
     select: {
       style: "multi",
@@ -119,8 +129,19 @@
               className: "btn-danger",
               action: deleteSelectedRows,
             },
+            { 
+              text: "{% if request.user|has_group:'Admin' %} Approve {% endif %}", 
+              className: "btn-success",
+              action: approveRows,
+              init: function(api, node, config) {
+                // Hide the button if the user is not in the Admin group
+                if (isAdmin === 'False'){
+                  $(node).addClass('d-none');
+                }
+              }
+            },
             { extend: "colvis", className: "btn-info" },
-          ],
+          ],  
           dom:{
             button: {
               className: "btn",
@@ -170,6 +191,45 @@
             });
         }
     }
+
+  function approveRows() {
+    if (!table) {
+        console.error("Table is not initialized.");
+        return;
+    }
+        var selectedIDs = table.rows('.selected').data().toArray().map(row => row[4]); // Get SKUs of selected rows using DataTables API
+        selectedIDs.forEach(function(value) {
+        console.log('selected_ids[]:', value);
+        });
+        if (selectedIDs.length === 0) {
+            alert('Please select at least one row to approve.');
+            return;
+        }
+
+        if (confirm('Are you sure you want to approve the selected rows?')) {
+            const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+            $.ajax({
+                url: '{% url "approve_selected_rows" %}',
+                type: 'POST',
+                data: {selected_ids: selectedIDs, csrfmiddlewaretoken: csrfToken },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Reload or update the table after successful deletion
+                        location.reload(); // Assuming you're using AJAX to populate the table
+                        // Optionally, provide feedback to the user
+                        alert('Selected rows approved successfully.');
+                    } else {
+                        alert('Error approving selected rows: ' + response.error);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('Error approving selected rows: ' + error);
+                },
+            });
+        }
+  }
+
   $(document).ready(function() {
     initializeDataTable();
     $('#columnSearch').on('keyup', function() {

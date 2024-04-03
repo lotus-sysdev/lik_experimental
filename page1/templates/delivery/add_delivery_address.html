@@ -9,16 +9,38 @@
     {% block content %}
     <h2>Add Alamat</h2>
     <div class="form-group">
-      <form method="post" class="mt-3">
+      <form method="post" class="mt-3" id="address-form">
         {% csrf_token %} {{ form.as_p }}
         <div>
           <button type="submit" class="btn btn-primary">Submit</button>
-          <a href="{% url 'calendar' %}" class="btn btn-secondary ml-2">Back</a>
         </div>
       </form>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+      $(document).ready(function () {
+            $('#address-form').submit(function (e) {
+                e.preventDefault(); // Prevent default form submission
+                var form = $(this);
+                $.ajax({
+                    url: form.attr('action'), // Form action URL
+                    method: form.attr('method'), // Form method (POST in this case)
+                    data: form.serialize(), // Serialize form data
+                    success: function (response) {
+                        // Close the popup (assuming the iframe is contained in the parent page)
+                        window.parent.$('#popup-container').hide();
+                        // Call fetchSelect2DataAndUpdate function (assuming it's defined in the parent page)
+                        window.parent.fetchSelect2DataAndUpdate();
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle error
+                        console.error(error);
+                    }
+                });
+            });
+        });
+
       $(document).ready(function () {
         $("#id_kelurahan, #id_kecamatan, #id_kota").change(function () {
           var regionId = $(this).val();
