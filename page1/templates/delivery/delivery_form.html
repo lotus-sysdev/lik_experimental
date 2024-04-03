@@ -134,6 +134,7 @@
     <iframe src="{% url 'add_additional_address' %}" class="iframe"></iframe>
   </div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   $(document).ready(function () {
@@ -155,6 +156,7 @@
       });
     });
   });
+
   document.addEventListener("DOMContentLoaded", function () {
     const addFormButton = document.getElementById("add-form");
     const removeFormButton = document.getElementById("remove-form");
@@ -201,38 +203,8 @@
     }
 
     $('#updateSelect2Btn').click(function() {
-      $(this).toggleClass('spin-animation');
       fetchSelect2DataAndUpdate();
     });
-
-    function fetchSelect2DataAndUpdate() {
-      $.ajax({
-          url: '{% url "get_location_data" %}', // URL to your Django view
-          method: 'GET',
-          success: function(response) {
-              // Parse the JSON response
-              var data = JSON.parse(response);
-              
-              // Clear existing options in Select2 dropdowns
-              $('#id_1-start_location').empty();
-              $('#id_1-destination').empty();
-
-              // Populate Select2 dropdowns with data
-              data.forEach(function(item) {
-                  $('#id_1-start_location').append('<option value="' + item.pk + '">' + item.fields.detail + '</option>');
-                  $('#id_1-destination').append('<option value="' + item.pk + '">' + item.fields.detail + '</option>');
-              });
-
-              // Trigger Select2 to update
-              $('#id_1-start_location').trigger('change');
-              $('#id_1-destination').trigger('change');
-          },
-          error: function(xhr, status, error) {
-              // Handle error
-              console.error(error);
-          }
-      });
-    }
 
     function removeForm() {
       const lastForm = formsContainer.lastElementChild;
@@ -258,6 +230,43 @@
       });
     }
   });
+  function fetchSelect2DataAndUpdate() {
+      $.ajax({
+          url: '{% url "get_location_data" %}', // URL to your Django view
+          method: 'GET',
+          beforeSend: function(){
+            $('#updateSelect2Btn').addClass('spin-animation');
+          },
+          success: function(response) {
+              // Parse the JSON response
+              var data = JSON.parse(response);
+              
+              // Clear existing options in Select2 dropdowns
+              $('#id_1-start_location, #id_2-start_location, #id_3-start_location').empty();
+              $('#id_1-destination, #id_2-destination, #id_3-destination').empty();
+
+              // Populate Select2 dropdowns with data
+              data.forEach(function(item) {
+                  $('#id_1-start_location, #id_2-start_location, #id_3-start_location').append('<option value="' + item.pk + '">' + item.fields.detail + '</option>');
+                  $('#id_1-destination, #id_2-destination, #id_3-destination').append('<option value="' + item.pk + '">' + item.fields.detail + '</option>');
+              });
+
+              // Trigger Select2 to update
+              var newestItem = data[data.length - 1];
+              $('#id_1-start_location, #id_2-start_location, #id_3-start_location').val(newestItem.pk).trigger('change');
+              $('#id_1-destination, #id_2-destination, #id_3-destination').val(newestItem.pk).trigger('change');
+          },
+          error: function(xhr, status, error) {
+              // Handle error
+              console.error(error);
+          },
+          complete: function() {
+            setTimeout(function() {
+                $('#updateSelect2Btn').removeClass('spin-animation');
+            }, 300); // 1000 milliseconds = 1 second
+          }
+      });
+    }
 
 </script>
 {% endblock %}
