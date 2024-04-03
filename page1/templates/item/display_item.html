@@ -70,6 +70,8 @@
 <script>
   var table;
   function initializeDataTable() {
+  var isAdmin = "{{ request.user|has_group:'Admin' }}";
+  // console.log(isAdmin)
   table = new DataTable("#itemTable",{
     select: {
       style: "multi",
@@ -81,6 +83,7 @@
                 if (data.startsWith('IDR')) {
                     // Replace commas with periods and periods with commas
                     data = data.replace(/,/g, '#').replace(/\./g, ',').replace(/#/g, '.');
+                    data = data.substr(0, data.indexOf(',')); // Get substring until the first comma
                     data = data.substr(0, 3) + ' ' + data.substr(3);
                     return data
                 }else if(data.startsWith('$')){
