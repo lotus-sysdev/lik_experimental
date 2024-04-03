@@ -165,6 +165,14 @@ class ItemSumber(models.Model):
     email = models.EmailField(blank=True, null=True)
     url = models.URLField(blank=True, null=True)
     
+class ItemChangeLog(models.Model):
+    item = models.ForeignKey(Items, on_delete=models.CASCADE)
+    date_time = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    field_changed = models.CharField(max_length=100)
+    old_value = models.TextField(null=True, blank=True)
+    new_value = models.TextField(null=True, blank=True)
+
 class Provinsi(models.Model):
     class Meta:
         verbose_name = "Provinsi"

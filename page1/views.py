@@ -334,7 +334,25 @@ def delete_supplier(request, supp_id):
 def item_detail(request, SKU):
     entity = get_object_or_404(Items, SKU=SKU)
     item_sumber = ItemSumber.objects.filter(item=SKU)
-    context = {'entity':entity, 'item_sumber':item_sumber, 'form':ItemForm(instance=entity)}
+    change_logs = ItemChangeLog.objects.filter(item=entity)
+    field_label_mapping = {
+        'customer': 'Customer',
+        'Tanggal': 'Tanggal Input',
+        'tanggal_pemesanan': 'Tanggal Pemesanan',
+        'nama': 'Nama Barang',
+        'catatan': 'Catatan',
+        'quantity': 'Kuantitas',
+        'unit': 'Satuan',
+        'price': 'Harga',
+        'gambar': 'Gambar',
+        'is_approved': 'Approved',
+        'price currency': 'Mata Uang',
+    }
+    
+    for log in change_logs:
+        log.field_changed = field_label_mapping.get(log.field_changed, log.field_changed)
+
+    context = {'entity':entity, 'item_sumber':item_sumber, 'form':ItemForm(instance=entity), 'change_logs':change_logs, 'field_label_mapping': field_label_mapping}
     return render(request, 'item/item_detail.html', context)
 
 @login_required
@@ -363,6 +381,7 @@ def edit_item(request, SKU):
             entity.is_approved = entity_approved
 
             form.save()
+
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'success': False, 'errors': form.errors})
