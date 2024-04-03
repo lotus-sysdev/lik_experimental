@@ -51,7 +51,13 @@
             <td>{{i.upload_type}}</td>
             <td>{{ i.Tanggal }}</td>
             <td>{{ i.tanggal_pemesanan }}</td>
-            <td><a href="{% url 'customer_detail' cust_id=i.customer.cust_id %}">{{i.customer}}</a></td>
+            <td>
+              {% if i.customer %}
+                <a href="{% url 'customer_detail' cust_id=i.customer.cust_id %}">{{i.customer}}</a>
+              {% else %}
+                None
+              {% endif %}
+            </td>
             <td>{{ i.SKU }}</td>
             <td>{{ i.nama }}</td>
             <td>{{ i.category.name }}</td>

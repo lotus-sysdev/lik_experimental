@@ -234,6 +234,7 @@ class ItemForm(forms.ModelForm):
             ('Rim', 'Rim'),
             ('Roll', 'Roll'),
             ('Set', 'Set'),
+            ('Lembar', 'Lembar'),
             ('Lainnya', 'Lainnya')
         )
     
