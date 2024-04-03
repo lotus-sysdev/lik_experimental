@@ -239,7 +239,7 @@ class ItemForm(forms.ModelForm):
     
         model = Items
         fields = '__all__'
-        exclude = ['SKU', 'gambar_resized', 'is_approved','upload_type']
+        exclude = ['SKU', 'gambar_resized', 'upload_type']
         widgets = {
             'customer' : Select2Widget(attrs={'class':'form-control'}),
             'nama': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Baterai AA'}),
@@ -250,6 +250,7 @@ class ItemForm(forms.ModelForm):
             'Tanggal': forms.DateInput(attrs={'type': 'date', 'class': 'form-control','required': False}),
             'tanggal_pemesanan': forms.DateInput(attrs={'type': 'date', 'class': 'form-control','required': False}),
             'catatan': forms.Textarea(attrs={'class': 'form-control', 'placeholder':"Masukkan Spesifikasi Barang"}),
+            'is_approved': forms.CheckboxInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'customer':'Customer',
@@ -260,7 +261,8 @@ class ItemForm(forms.ModelForm):
             'gambar': 'Gambar',
             'category': 'Kategori',
             'Tanggal': 'Tanggal Input',
-            'tanggal_pemesanan': 'Tanggal Pesan'
+            'tanggal_pemesanan': 'Tanggal Pesan',
+            'is_approved': 'Approved',
         }
         choices = {
             'unit': UNIT_CHOICES,

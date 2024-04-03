@@ -341,6 +341,7 @@ def item_detail(request, SKU):
 @GA_required
 def edit_item(request, SKU):
     entity = get_object_or_404(Items,SKU=SKU)
+    entity_approved = entity.is_approved
 
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES, instance=entity)
@@ -358,6 +359,8 @@ def edit_item(request, SKU):
                 
                 # Update the item's image field with the new image path
                 form.instance.gambar = resized_image_name
+
+            entity.is_approved = entity_approved
 
             form.save()
             return JsonResponse({'success': True})
@@ -791,6 +794,8 @@ def upload_csv(request):
 
     return render(request, 'item/upload_csv.html')
 
+@login_required
+@GA_required
 def upload_excel(request):
     error_message = []
     processed_items = []
@@ -908,6 +913,7 @@ def upload_excel(request):
 
 
 # -------------------- Delete multiple items -------------------- #
+@login_required
 def delete_selected_rows(request, model, key):
     if request.method == 'POST':
         selected_ids = request.POST.getlist('selected_ids[]')  # Assuming you're sending an array of selected IDs
@@ -929,7 +935,8 @@ def delete_selected_rows(request, model, key):
             return JsonResponse({'success': False, 'error': str(e)})
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request method'})
-    
+
+@GA_required
 def delete_selected_rows_item(request):
     return delete_selected_rows(request, Items, 'SKU')
 
@@ -945,6 +952,25 @@ def delete_selected_rows_PO(request):
 def delete_selected_rows_WO(request):
     return delete_selected_rows(request, WorkOrder, 'id')
 
+
+# -------------------- Approve Items -------------------- #
+@login_required
+@Admin_Only
+def approve_selected_rows(request):
+    if request.method == 'POST':
+        selected_ids = request.POST.getlist('selected_ids[]')  # Assuming you're sending an array of selected IDs
+        try:
+            selected_items = Items.objects.filter(**{f'{"SKU"}__in': selected_ids})
+            selected_items.update(is_approved = True)  # Delete the selected rows from the database
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+
+# -------------------- Address Data -------------------- #
 @login_required
 @FO_Only
 def add_additional_address(request):
