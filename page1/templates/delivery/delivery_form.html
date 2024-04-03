@@ -5,6 +5,29 @@
 
 <body>
 {% block content %}
+<style>
+  .iframe {
+    width: 50vh; 
+    height: 90vh; 
+    border: none; 
+  }
+  @media (max-width: 480px) {
+    .iframe {
+      width: 37vh;
+    }
+  }
+  @keyframes spin {
+    0% {transform: rotate(0deg);}
+    100% {transform: rotate(360deg);}
+  }
+  .spin-animation{
+    animation: spin 0.3s linear;
+  }
+  .btn:focus, .btn.focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+</style>
 <form id="delivery-form" method="post" enctype="multipart/form-data">
   {% csrf_token %}
 
@@ -36,17 +59,19 @@
           <div id="location_container">
             <div class="form-group">
               {{ form.start_location.label_tag }}{{form.start_location }}
-              <button type="button" id="updateSelect2Btn" class="btn btn-primary"><i class="fas fa-sync-alt"></i></button>
             </div>
             <div class="form-group">
               {{ form.destination.label_tag }} {{ form.destination }}
+            </div>
+            <div class="d-flex">
+              <button type="button" id="add-address-btn" class="btn btn-sm btn-link">Tambah Alamat Baru</button>
+              <button type="button" id="updateSelect2Btn" class="btn btn-sm btn-link"><i class="fas fa-sync-alt"></i></button>
             </div>
           </div>
           <div class="form-group">
             {{ form.keterangan.label_tag }} {{ form.keterangan }}
           </div>
           <!-- <a href="{% url 'add_additional_address'%}">Tambahkan Alamat Baru</a> -->
-          <button type="button" id="add-address-btn" class="btn btn-secondary">Tambah Alamat Baru</button>
         </div>
 
         <div class="col-md-5 mr-5">
@@ -78,10 +103,10 @@
         <div class="col-md-5 mr-5">
           <h5>Kurir</h5>
           <div class="form-group">
-            {{ form.messenger.label_tag }} {{ form.messenger }}
+            {{ form.vehicle.label_tag }} {{ form.vehicle }}
           </div>
           <div class="form-group">
-            {{ form.vehicle.label_tag }} {{ form.vehicle }}
+            {{ form.messenger.label_tag }} {{ form.messenger }}
           </div>
         </div>
       </div>
@@ -101,15 +126,37 @@
   </div>
 </form>
 
-<div id="popup-container" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 999;">
+<div id="popup-container" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 999; overflow-y: auto;">
   <div id="popup-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 10px;">
     <!-- Include the content of your popup page here -->
-    <button id="close-popup-btn" style="position: absolute; top: 23px; right: 50px;"><i class="fas fa-times"></i></button>
+    <button id="close-popup-btn" style="position: absolute; top: 23px; right: 2vh;" class="btn btn-link"><i class="fas fa-times" style="color: #000;"></i></button>
     <!-- For example, you can include an iframe with the URL of your popup page -->
-    <iframe src="{% url 'add_additional_address' %}" style="width: 70vh; height: 50vh; border: none;"></iframe>
+    <iframe src="{% url 'add_additional_address' %}" class="iframe"></iframe>
   </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+  $(document).ready(function () {
+    $("#id_1-vehicle").change(function () {
+      var vehicle = $(this).val();
+      $.ajax({
+        url: "{% url 'get_messenger' %}",
+        data: {
+          vehicle: vehicle,
+        },
+        dataType: "json",
+        success: function (data) {
+          // Fill the fields with data returned from the server
+          if ("messenger" in data) {
+            $("#id_2-vehicle, #id_3-vehicle").val(vehicle);
+            $("#id_1-messenger, #id_2-messenger, #id_3-messenger").val(data.messenger);
+          }
+        },
+      });
+    });
+  });
+
   document.addEventListener("DOMContentLoaded", function () {
     const addFormButton = document.getElementById("add-form");
     const removeFormButton = document.getElementById("remove-form");
@@ -154,34 +201,6 @@
 
       formsContainer.appendChild(newForm);
     }
-    function fetchSelect2DataAndUpdate() {
-      $.ajax({
-          url: '{% url "get_location_data" %}', // URL to your Django view
-          method: 'GET',
-          success: function(response) {
-              // Parse the JSON response
-              var data = JSON.parse(response);
-              
-              // Clear existing options in Select2 dropdowns
-              $('#id_1-start_location').empty();
-              $('#id_1-destination').empty();
-
-              // Populate Select2 dropdowns with data
-              data.forEach(function(item) {
-                  $('#id_1-start_location').append('<option value="' + item.pk + '">' + item.fields.detail + '</option>');
-                  $('#id_1-destination').append('<option value="' + item.pk + '">' + item.fields.detail + '</option>');
-              });
-
-              // Trigger Select2 to update
-              $('#id_1-start_location').trigger('change');
-              $('#id_1-destination').trigger('change');
-          },
-          error: function(xhr, status, error) {
-              // Handle error
-              console.error(error);
-          }
-      });
-    }
 
     $('#updateSelect2Btn').click(function() {
       fetchSelect2DataAndUpdate();
@@ -211,6 +230,44 @@
       });
     }
   });
+  function fetchSelect2DataAndUpdate() {
+      $.ajax({
+          url: '{% url "get_location_data" %}', // URL to your Django view
+          method: 'GET',
+          beforeSend: function(){
+            $('#updateSelect2Btn').addClass('spin-animation');
+          },
+          success: function(response) {
+              // Parse the JSON response
+              var data = JSON.parse(response);
+              
+              // Clear existing options in Select2 dropdowns
+              $('#id_1-start_location, #id_2-start_location, #id_3-start_location').empty();
+              $('#id_1-destination, #id_2-destination, #id_3-destination').empty();
+
+              // Populate Select2 dropdowns with data
+              data.forEach(function(item) {
+                  $('#id_1-start_location, #id_2-start_location, #id_3-start_location').append('<option value="' + item.pk + '">' + item.fields.detail + '</option>');
+                  $('#id_1-destination, #id_2-destination, #id_3-destination').append('<option value="' + item.pk + '">' + item.fields.detail + '</option>');
+              });
+
+              // Trigger Select2 to update
+              var newestItem = data[data.length - 1];
+              $('#id_1-start_location, #id_2-start_location, #id_3-start_location').val(newestItem.pk).trigger('change');
+              $('#id_1-destination, #id_2-destination, #id_3-destination').val(newestItem.pk).trigger('change');
+          },
+          error: function(xhr, status, error) {
+              // Handle error
+              console.error(error);
+          },
+          complete: function() {
+            setTimeout(function() {
+                $('#updateSelect2Btn').removeClass('spin-animation');
+            }, 300); // 1000 milliseconds = 1 second
+          }
+      });
+    }
+
 </script>
 {% endblock %}
 </body>

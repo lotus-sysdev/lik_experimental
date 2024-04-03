@@ -30,6 +30,10 @@ from openpyxl_image_loader import SheetImageLoader
 
 # -------------------- Placeholder for homepage --------------------#
 @login_required
+def home(request):
+    return render(request, 'home.html')
+
+@login_required
 def success(request):
     return render(request, 'success.html')
 
@@ -334,13 +338,32 @@ def delete_supplier(request, supp_id):
 def item_detail(request, SKU):
     entity = get_object_or_404(Items, SKU=SKU)
     item_sumber = ItemSumber.objects.filter(item=SKU)
-    context = {'entity':entity, 'item_sumber':item_sumber, 'form':ItemForm(instance=entity)}
+    change_logs = ItemChangeLog.objects.filter(item=entity)
+    field_label_mapping = {
+        'customer': 'Customer',
+        'Tanggal': 'Tanggal Input',
+        'tanggal_pemesanan': 'Tanggal Pemesanan',
+        'nama': 'Nama Barang',
+        'catatan': 'Catatan',
+        'quantity': 'Kuantitas',
+        'unit': 'Satuan',
+        'price': 'Harga',
+        'gambar': 'Gambar',
+        'is_approved': 'Approved',
+        'price currency': 'Mata Uang',
+    }
+    
+    for log in change_logs:
+        log.field_changed = field_label_mapping.get(log.field_changed, log.field_changed)
+
+    context = {'entity':entity, 'item_sumber':item_sumber, 'form':ItemForm(instance=entity), 'change_logs':change_logs, 'field_label_mapping': field_label_mapping}
     return render(request, 'item/item_detail.html', context)
 
 @login_required
 @GA_required
 def edit_item(request, SKU):
     entity = get_object_or_404(Items,SKU=SKU)
+    entity_approved = entity.is_approved
 
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES, instance=entity)
@@ -359,7 +382,10 @@ def edit_item(request, SKU):
                 # Update the item's image field with the new image path
                 form.instance.gambar = resized_image_name
 
+            entity.is_approved = entity_approved
+
             form.save()
+
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'success': False, 'errors': form.errors})
@@ -712,6 +738,21 @@ def add_messenger(request):
 def add_vehicle(request):
     return add_entity_view(request, VehicleForm, 'delivery/add_vehicle.html', 'calendar')
 
+def get_messenger(request):
+    vehicle_id = request.GET.get('vehicle')
+    print(vehicle_id)
+
+    if vehicle_id:
+        data = {}
+        vehicle = Vehicle.objects.get(pk=vehicle_id)
+        data['messenger'] = vehicle.messenger.id
+
+        return JsonResponse(data)
+    else:
+        data = {}
+
+    return JsonResponse(data)
+
 
 # -------------------- Error Pages -------------------- #
 def forbidden(request):
@@ -776,6 +817,8 @@ def upload_csv(request):
 
     return render(request, 'item/upload_csv.html')
 
+@login_required
+@GA_required
 def upload_excel(request):
     error_message = []
     processed_items = []
@@ -893,6 +936,7 @@ def upload_excel(request):
 
 
 # -------------------- Delete multiple items -------------------- #
+@login_required
 def delete_selected_rows(request, model, key):
     if request.method == 'POST':
         selected_ids = request.POST.getlist('selected_ids[]')  # Assuming you're sending an array of selected IDs
@@ -914,7 +958,8 @@ def delete_selected_rows(request, model, key):
             return JsonResponse({'success': False, 'error': str(e)})
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request method'})
-    
+
+@GA_required
 def delete_selected_rows_item(request):
     return delete_selected_rows(request, Items, 'SKU')
 
@@ -930,6 +975,25 @@ def delete_selected_rows_PO(request):
 def delete_selected_rows_WO(request):
     return delete_selected_rows(request, WorkOrder, 'id')
 
+
+# -------------------- Approve Items -------------------- #
+@login_required
+@Admin_Only
+def approve_selected_rows(request):
+    if request.method == 'POST':
+        selected_ids = request.POST.getlist('selected_ids[]')  # Assuming you're sending an array of selected IDs
+        try:
+            selected_items = Items.objects.filter(**{f'{"SKU"}__in': selected_ids})
+            selected_items.update(is_approved = True)  # Delete the selected rows from the database
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+
+# -------------------- Address Data -------------------- #
 @login_required
 @FO_Only
 def add_additional_address(request):
@@ -937,7 +1001,7 @@ def add_additional_address(request):
         form = AdditionalAddressForm(request.POST)
         if form.is_valid():
             form.save()  # This saves the form data to the database
-            return redirect('success')
+            # return redirect('success')
     else:
         form = AdditionalAddressForm()
     
@@ -950,6 +1014,8 @@ def get_location_data(request):
     delivery_addresses = DeliveryAddresses.objects.all()
     data = serializers.serialize('json', delivery_addresses)
     return JsonResponse(data, safe=False)
+
+
 # -------------------- Log Book Basics -------------------- #
 @login_required
 @FO_Only

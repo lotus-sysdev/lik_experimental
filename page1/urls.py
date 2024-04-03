@@ -2,6 +2,7 @@ from django.urls import path, re_path
 from .views import *
 
 urlpatterns = [
+    path('', home ,name='index'),
     path('success/', success ,name='success'),
     path('', home ,name='home'),
 
@@ -45,7 +46,6 @@ urlpatterns = [
     path('delete_item/<str:SKU>/', delete_item, name='delete_item'),
     # path('upload_csv/', upload_csv, name='upload_csv'),
     path('upload_excel/', upload_excel, name='upload_excel'),
-
     
     # Deletion of multiple rows
     path('delete_selected_rows_item/', delete_selected_rows_item, name='delete_selected_rows_item'),
@@ -56,6 +56,7 @@ urlpatterns = [
 
     # Item approval
     path('approve_item/<str:SKU>', approve_item, name='approve_item'),
+    path('approve_selected_rows/', approve_selected_rows, name='approve_selected_rows'),
     
     # Sumber url
     path('add_sumber/<str:SKU>',add_sumber, name='add_sumber'),
@@ -103,6 +104,7 @@ urlpatterns = [
 
     path('add_messenger/', add_messenger, name='add_messenger'),
     path('add_vehicle/', add_vehicle, name='add_vehicle'),
+    path('get_messenger/', get_messenger, name='get_messenger'),
 
     path('forbidden/', forbidden, name='forbidden'),
 

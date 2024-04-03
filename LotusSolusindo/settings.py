@@ -64,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'page1.middleware.UserActionMiddleware',
+    'page1.middleware.CurrentUserMiddleware',
     'admin_reorder.middleware.ModelAdminReorder',
     'corsheaders.middleware.CorsMiddleware',
 ]

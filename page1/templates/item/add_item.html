@@ -12,7 +12,14 @@
     <div class="form-group w-50">
         <form method="post" enctype=multipart/form-data>
             {% csrf_token %}
-            {{ item_form.as_p }}
+                {% for field in item_form %}
+                    {% if field.name != 'is_approved' %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{field}}
+                        </div>
+                    {% endif %}
+                {% endfor %}
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
