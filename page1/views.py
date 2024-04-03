@@ -37,6 +37,10 @@ def home(request):
 def success(request):
     return render(request, 'success.html')
 
+@login_required
+def home(request):
+    return render(request, 'home.html')
+
 
 # -------------------- Common Functions --------------------#
 # Adding entity (Customer and Supplier)
