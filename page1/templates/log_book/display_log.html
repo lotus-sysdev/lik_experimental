@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+<html>
+  <head>
+    {% block title %}LogBook Data Table{% endblock %}
+  </head>
+  <body>
+    {% block content %}
+    <h1>LogBook List</h1>
+    {% csrf_token %}
+    <div>
+      <table
+        id="logbookTable"
+        class="table table-bordered table-striped w-100 table-lg table-responsive-lg"
+      >
+      <div class="form-inline mb-2">
+        <select id="columnFilter" class="form-control btn-info">
+          <option value="0">Nama (Pengunjung)</option>
+          <option value="1">Email</option>
+          <option value="2">Nomor Telpon</option>
+          <option value="3">Instansi Asal</option>
+          <option value="4">Tujuan Kunjungan</option>
+          <option value="5">Lainnya</option>
+          <option value="6">Nama (Dikunjungi)</option>
+          <option value="7">Jenis Kunjungan</option>
+          <option value="8">Waktu Mulai</option>
+          <option value="9">Waktu Selesai</option>
+          <!-- Add more options for additional columns -->
+        </select>
+        <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
+      </div>
+        <thead class="thead-light">
+          <tr>
+            <th>Nama (Pengunjung)</th>
+            <th>Email</th>
+            <th>Nomor Telpon</th>
+            <th>Instansi Asal</th>
+            <th>Tujuan Kunjungan</th>
+            <th>Alasan (Lainnya)</th>
+            <th>Nama (Dikunjungi)</th>
+            <th>Jenis Kunjungan</th>
+            <th>Waktu Mulai</th>
+            <th>Waktu Selesai</th>
+            <th>Edit</th>
+          </tr>
+        </thead>
+        <tbody class="tbody">
+          {% for log in entities %}
+          <tr>
+            <td>{{ log.nama }}</td>
+            <td>{{ log.email }}</td>
+            <td>{{ log.telp }}</td>
+            <td>{{ log.instansi_asal }}</td>
+            <td>{{ log.tujuan }}</td>
+            <td>{{ log.tujuan_lainnya }}</td>
+            <td>{{log.nama_dikunjungi }}</td>
+            <td>{{ log.tipe }}</td>
+            <td>{{ log.start }}</td>
+            <td>{{ log.end }}</td>
+            <td>
+              <a href="{% url 'log_detail' log.id %}">View</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <script>
+      var table;
+      function initializeDataTable() {
+        table = new DataTable("#logbookTable", {
+          select: {
+          style: "multi",
+        },
+          lengthMenu: [
+            [10, 25, 50, 100, -1],
+            [10, 25, 50, 100, "All"],
+          ],
+          layout: {
+            top2Start: {
+              buttons: {
+                buttons: [
+                  { extend: "pdf", 
+                    className: "btn-primary",  
+                    exportOptions: {
+                      columns: ':visible'
+                    } 
+                  },
+                  {
+                    text: "Delete Rows",
+                    className: "btn-danger",
+                    action: deleteSelectedRows,
+                  },
+                  { extend: "colvis", className: "btn-info" },
+                ],
+                dom: {
+                  button: {
+                    className: "btn",
+                  },
+                },
+              },
+            },
+            // top2Start:'pageLength'
+          },
+        });
+      }
+      function deleteSelectedRows(){
+    if (!table) {
+        console.error("Table is not initialized.");
+        return;
+    }
+        var selectedIDs = table.rows('.selected').data().toArray().map(row => row[0]); // Get SKUs of selected rows using DataTables API
+        selectedIDs.forEach(function(value) {
+        console.log('selected_ids[]:', value);
+        });
+        if (selectedIDs.length === 0) {
+            alert('Please select at least one row to delete.');
+            return;
+        }
+
+        if (confirm('Are you sure you want to delete the selected rows?')) {
+            const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+            $.ajax({
+                url: '{% url "delete_selected_rows_cust" %}',
+                type: 'POST',
+                data: {selected_ids: selectedIDs, csrfmiddlewaretoken: csrfToken },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Reload or update the table after successful deletion
+                        location.reload(); // Assuming you're using AJAX to populate the table
+                        // Optionally, provide feedback to the user
+                        alert('Selected rows deleted successfully.');
+                    } else {
+                        alert('Error deleting selected rows: ' + response.error);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('Error deleting selected rows: ' + error);
+                },
+            });
+        }
+    }
+      $(document).ready(function() {
+        initializeDataTable();
+        $("#columnSearch").on("keyup", function() {
+          columnSearch(); // Call the columnSearch function when the user types in the input field
+        });
+
+        // Function to perform column-specific search
+        function columnSearch() {
+          var columnIndex = $("#columnFilter").val(); // Get the index of the selected column
+          var searchValue = $("#columnSearch")
+            .val()
+            .trim(); // Get the value of the search input and remove leading/trailing whitespace
+          table
+            .column(columnIndex)
+            .search(searchValue)
+            .draw(); // Apply search to the selected column
+        }
+      });
+    </script>
+    {% endblock %}
+  </body>
+</html>

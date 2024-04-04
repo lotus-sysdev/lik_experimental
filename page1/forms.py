@@ -512,13 +512,14 @@ class VehicleForm(forms.ModelForm):
 class LogBookForm(forms.ModelForm):
     class Meta:
         model = LogBook
-        fields = ['nama', 'instansi_asal', 'email','telp', 'tujuan', 'tujuan_lainnya', 'start','end','nama_dikunjungi']
+        fields = ['nama', 'instansi_asal', 'email','telp', 'tujuan', 'tipe', 'tujuan_lainnya', 'start','end','nama_dikunjungi']
         widgets = {
             'nama': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Nama Pengunjung'}),
             'instansi_asal': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Institusi/Perusahaan'}),
             'email': forms.TextInput(attrs={'class':'form-control', 'placeholder': 'contoh@abc.com'}),
             'telp': RegionalPhoneNumberWidget(region='ID', attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
             'tujuan':forms.Select(attrs={'class': 'form-control'}),
+            'tipe': forms.Select(attrs={'class': 'form-control'}),
             'start' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Mulai Kunjungan'}),
             'end' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Selesai Kunjungan'}),
             'nama_dikunjungi' : forms.TextInput(attrs={'class':'form-control', 'placeholder':'Nama Yang Dikunjungi'}),
@@ -529,6 +530,7 @@ class LogBookForm(forms.ModelForm):
             'instansi_asal': 'Institusi/Pengunjung Asal',
             'email': 'Email',
             'telp': 'No. Telpon',
+            'tipe': 'Jenis Kunjungan',
             'tujuan': 'Tujuan Kunjungan',
             'start' : 'Jam Mulai',
             'end' : 'Jam Selesai',

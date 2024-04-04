@@ -736,6 +736,11 @@ def edit_delivery(request, id):
 def delete_delivery(request, id):
     return delete_entity(request, Events, 'id', id)
 
+@login_required
+@FO_Only
+def display_delivery(request):
+    return display_entities(request, Events, 'delivery/display_delivery.html')
+
 # Adding messenger and vehicle
 @login_required
 def add_messenger(request):
@@ -1041,6 +1046,11 @@ def log_book(request):
     }
     return render(request,'log_book/log-book.html',context)
 
+@login_required
+@FO_Only
+def display_log(request):
+    return display_entities(request, LogBook, 'log_book/display_log.html')
+                            
 @login_required
 @FO_Only
 def lb_all_events(request):                                                                                                 
