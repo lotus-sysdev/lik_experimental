@@ -37,8 +37,35 @@
             <li><a class="sidebar-a" href="/display_work">Work Order</a></li>
           </ul>
         </li>
-        <li><a class="sidebar-a" href="/calendar">Delivery Order</a></li>
-        <li><a class="sidebar-a" href="/log_book">Log Book</a></li>
+        {% if request.user|has_group:'FO' or request.user|has_group:'Messenger' or request.user|has_group:'Admin' %}
+        <li class="active">
+          <a
+            href="#dataSubmenu"
+            data-toggle="collapse"
+            aria-expanded="true"
+            class="dropdown-toggle sidebar-a"
+            >Front Office</a
+          >
+          <ul class="collapse list-unstyled show" id="dataSubmenu">
+              {% if request.user|has_group:'FO' or request.user|has_group:'Messenger' or request.user|has_group:'Admin' %}
+              <li><a class="sidebar-a" href="/calendar">Delivery Order</a></li>
+              {% endif %}
+              
+              {% if request.user|has_group:'FO' or request.user|has_group:'Admin' %}
+              <li><a class="sidebar-a" href="/log_book">Log Book</a></li>
+              {% endif %}
+
+              {% if request.user|has_group:'FO' or request.user|has_group:'Admin' %}
+              <li><a class="sidebar-a" href="/display_delivery">Delivery Table</a></li>
+              {% endif %}
+
+              {% if request.user|has_group:'FO' or request.user|has_group:'Admin' %}
+              <li><a class="sidebar-a" href="/display_log">Log Book Table</a></li>
+              {% endif %}
+          </ul>
+        </li>
+        {% endif %}
+
       </ul>
 
       <div class="sidebar-header">
