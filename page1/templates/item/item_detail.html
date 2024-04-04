@@ -102,32 +102,28 @@
                 {% endif %}
                 <div class="mt-4">
                     <h2>Changes:</h2>
-                    <div class="card">
-                        <div class="card-body">
-                            <table class="table table-bordered table-responsive-lg">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>User</th>
-                                        <th>Field</th>
-                                        <th>Before</th>
-                                        <th>After</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for log in change_logs %}
-                                    <tr>
-                                        <td>{{ log.date_time }}</td>
-                                        <td>{{ log.user }}</td>
-                                        <td>{{ log.field_changed }}</td>
-                                        <td>{{ log.old_value }}</td>
-                                        <td>{{ log.new_value }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <table class="table table-bordered table-responsive-lg">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Field</th>
+                                <th>Before</th>
+                                <th>After</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in change_logs %}
+                            <tr>
+                                <td>{{ log.date_time }}</td>
+                                <td>{{ log.user }}</td>
+                                <td>{{ log.field_changed }}</td>
+                                <td>{{ log.old_value }}</td>
+                                <td>{{ log.new_value }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
