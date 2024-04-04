@@ -40,13 +40,13 @@
         {% if request.user|has_group:'FO' or request.user|has_group:'Messenger' or request.user|has_group:'Admin' %}
         <li class="active">
           <a
-            href="#dataSubmenu"
+            href="#frontOfficeSubmenu"
             data-toggle="collapse"
             aria-expanded="true"
             class="dropdown-toggle sidebar-a"
             >Front Office</a
           >
-          <ul class="collapse list-unstyled show" id="dataSubmenu">
+          <ul class="collapse list-unstyled show" id="frontOfficeSubmenu">
               {% if request.user|has_group:'FO' or request.user|has_group:'Messenger' or request.user|has_group:'Admin' %}
               <li><a class="sidebar-a" href="/calendar">Delivery Order</a></li>
               {% endif %}
