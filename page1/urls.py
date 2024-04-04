@@ -97,6 +97,7 @@ urlpatterns = [
     path('remove/', remove, name='remove'),
     path('delivery_form/', delivery_form, name='delivery_form'),
     path('update_num_forms/', update_num_forms, name='update_num_forms'),
+    path('display_delivery/',display_delivery, name='display_delivery'),
 
     path('delivery_detail/<int:id>', delivery_detail, name='delivery_detail'),
     path('edit_delivery/<int:id>/', edit_delivery, name='edit_delivery'),
@@ -121,6 +122,7 @@ urlpatterns = [
     path('log_detail/<int:id>', log_detail, name='log_detail'),
     path('edit_log/<int:id>/', edit_log, name='edit_log'),
     path('delete_log/<int:id>/', delete_log, name='delete_log'),
+    path('display_log/',display_log, name='display_log'),
 
     # Dependable Addresses
     path('get_kota/', get_kota, name='get_kota'),
