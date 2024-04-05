@@ -4,9 +4,10 @@ import csv
 from PIL import Image
 import pandas as pd
 import requests
-import datetime
+from datetime import datetime, timedelta
 import re
 
+from django.db.models import Q
 from django.core import serializers
 from django.core.files.base import ContentFile
 from django.core import serializers
@@ -289,7 +290,17 @@ def display_supplier(request):
 @login_required
 @GA_required
 def display_item(request):
-    return display_entities(request, Items, 'item/display_item.html')
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+
+    if start_date_str and end_date_str:
+        start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1)
+        entities = Items.objects.filter(tanggal_pemesanan__range=[start_date, end_date])
+    else:
+        entities = Items.objects.all()
+
+    return render(request, 'item/display_item.html', {'entities': entities})
 
 
 # -------------------- Customer Functions -------------------- #
