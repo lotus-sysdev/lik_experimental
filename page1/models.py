@@ -443,6 +443,32 @@ class LogBook(models.Model):
     def __str__(self):
         return f"{self.title} ({self.start.strftime('%Y-%m-%d') if self.start else 'No start date'})"
 
+class Employee(models.Model):
+    id = models.AutoField(primary_key=True)
+    employeeId = models.CharField(max_length=10)
+    name = models.CharField(max_length=255)
+    position = models.CharField(max_length=255)
+    department = models.CharField(max_length=255)
+    join_date = models.DateField()
+    no_telp = PhoneNumberField()
+    gender = models.CharField(max_length=10)
+    status = models.CharField(max_length=100)
+    tempat_lahir = models.CharField(max_length = 255)
+    tanggal_lahir = models.DateField()
+    no_ktp = models.BigIntegerField()
+    no_rek = models.BigIntegerField()
+
+class EmployeeAlamat(models.Model):
+    employee_id = models.ForeignKey(Employee, on_delete=models.CASCADE, null=True)
+    provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
+    kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
+    kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
+    kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    detail = models.CharField(max_length=500)
+
+    def __str__ (self):
+        return (f'{self.employee_id.name}') 
+
 class User(AbstractUser):
     email = models.EmailField(max_length = 100, unique=True)
 

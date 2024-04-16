@@ -994,6 +994,9 @@ def delete_selected_rows_delivery(request):
 def delete_selected_rows_logbook(request):
     return delete_selected_rows(request, LogBook, 'id')
 
+def delete_selected_rows_employee(request):
+    return delete_selected_rows(request, Employee, 'id')
+
 
 # -------------------- Approve Items -------------------- #
 @login_required
@@ -1175,3 +1178,20 @@ def get_region_details(request):
         data = {}
 
     return JsonResponse(data)
+
+def add_employee(request):
+    return add_entity_view(request, EmployeeForm, 'employee/add_employee.html', 'display_employee')
+
+def display_employee(request):
+    return display_entities(request, Employee, 'employee/display_employee.html')
+
+def employee_detail(request, id):
+    employee_alamat = EmployeeAlamat.objects.filter(employee_id=id)
+    extra_context = {'employee_alamat':employee_alamat}
+    return entity_detail(request, Employee, EmployeeForm, 'id', id, 'employee/employee_detail.html', extra_context)
+
+def edit_employee(request, id):
+    return edit_entity(request, Employee, EmployeeForm, 'id', id)
+
+def delete_employee(request, id):
+    return delete_entity(request, Employee, 'id', id)
