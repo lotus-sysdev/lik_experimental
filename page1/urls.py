@@ -53,6 +53,8 @@ urlpatterns = [
     path('delete_selected_rows_supp/', delete_selected_rows_supp, name='delete_selected_rows_supp'),
     path('delete_selected_rows_PO/', delete_selected_rows_PO, name='delete_selected_rows_PO'),
     path('delete_selected_rows_WO/', delete_selected_rows_WO, name='delete_selected_rows_WO'),
+    path('delete_selected_rows_delivery/', delete_selected_rows_delivery, name='delete_selected_rows_delivery'),
+    path('delete_selected_rows_logbook/', delete_selected_rows_logbook, name='delete_selected_rows_logbook'),
 
     # Item approval
     path('approve_item/<str:SKU>', approve_item, name='approve_item'),

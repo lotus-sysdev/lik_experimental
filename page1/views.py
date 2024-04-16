@@ -750,6 +750,7 @@ def add_messenger(request):
 def add_vehicle(request):
     return add_entity_view(request, VehicleForm, 'delivery/add_vehicle.html', 'calendar')
 
+@login_required
 def get_messenger(request):
     vehicle_id = request.GET.get('vehicle')
     print(vehicle_id)
@@ -986,6 +987,12 @@ def delete_selected_rows_PO(request):
 
 def delete_selected_rows_WO(request):
     return delete_selected_rows(request, WorkOrder, 'id')
+
+def delete_selected_rows_delivery(request):
+    return delete_selected_rows(request, Events, 'id')
+
+def delete_selected_rows_logbook(request):
+    return delete_selected_rows(request, LogBook, 'id')
 
 
 # -------------------- Approve Items -------------------- #

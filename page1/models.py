@@ -248,6 +248,9 @@ class SupplierAlamat(models.Model):
     kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
     detail = models.CharField(max_length=500)
 
+    def __str__ (self):
+        return (f'{self.supplier_id}-{self.type}') 
+
 def default_date():
     return datetime.date(1900, 1, 1)
 
