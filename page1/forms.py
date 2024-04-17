@@ -475,8 +475,6 @@ class DeliveryForm(forms.ModelForm):
             'keterangan': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Tuliskan Keterangan Pengantaran Disini'}),
             'start_location': Select2Widget(attrs={'class': 'form-control'}),
             'destination': Select2Widget(attrs={'class': 'form-control'}),
-            'start' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Keberangkatan'}),
-            'end' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Kedatangan'}),
             'package_dimensions' : DimensionsInput(attrs={'class':'form-control'}),
         }
         labels = {
@@ -494,6 +492,16 @@ class DeliveryForm(forms.ModelForm):
         measurement=Mass,
         unit_choices=(("kg","kg"), ("g","g")),
         widget = MeasurementWidget(attrs={'class':'form-control', 'placeholder':'10'}, unit_choices=(("kg","kg"), ("g","g"))),
+    )
+    start = forms.DateTimeField(
+        widget=widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'placeholder': 'Jam Keberangkatan'}),
+        label='Jam Keberangkatan',
+        required=True  # Make start field required
+    )
+    end = forms.DateTimeField(
+        widget=widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'placeholder': 'Jam Kedatangan'}),
+        label='Jam Kedatangan',
+        required=True  # Make end field required
     )
     package_dimensions = DimensionsField()
 
@@ -563,7 +571,74 @@ class AdditionalAddressForm(forms.ModelForm):
             'detail': 'Alamat Detail',
         }
 class EmployeeForm(forms.ModelForm):
+    def validate_no_ktp(value):
+        if len(value) != 16 or not value.isdigit():
+            raise ValidationError('Nomor KTP harus terdiri dari 16 digit angka.', code='invalid_no_ktp')
+        
+    def validate_no_rek(value):
+        if not (10 <= len(value) <= 20) or not value.isdigit():
+            raise ValidationError(_('Nomor Rekening harus terdiri dari 10-20 digit angka.'), code='invalid_no_rek')
+
     class Meta:
         model = Employee
         fields = '__all__'
         exclude = ['id']
+        widgets = {
+            'employeeId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Employee ID'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nama'}),
+            'position': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Posisi'}),
+            'department': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Departemen'}),
+            'join_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'no_telp': RegionalPhoneNumberWidget(region='ID', attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
+            'tempat_lahir': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Tempat Lahir'}),
+            'tanggal_lahir': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
+        labels = {
+            'employeeId': 'Employee ID',
+            'name': 'Nama',
+            'position': 'Posisi',
+            'department': 'Departemen',
+            'join_date': 'Tanggal Join',
+            'no_telp': 'Nomor Telpon',
+            'gender': 'Gender',
+            'tempat_lahir': 'Tempat Lahir',
+            'tanggal_lahir': 'Tanggal Lahir',
+        }
+        choices = {
+            'gender': (('Male', 'Male'), ('Female', 'Female')),
+            'status': (('Belum Kawin', 'Belum Kawin'), ('Kawin', 'Kawin'), ('Cerai Hidup', 'Cerai Hidup'), ('Cerai Mati', 'Cerai Mati'),),
+        }
+    
+    no_ktp = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'xxxxxxxxxxxxxxxx'}),
+        validators=[validate_no_ktp],
+        label='Nomor KTP'
+    )
+    no_rek = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'xxxxxxxxxxxxxxxx'}),
+        validators=[validate_no_rek],
+        label='Nomor Rekening'
+    )
+    gender = forms.ChoiceField(choices=Meta.choices['gender'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jenis Kelamin')
+    status = forms.ChoiceField(choices=Meta.choices['status'], widget=forms.Select(attrs={'class': 'form-control'}), label='Status Kawin')
+
+
+class EmployeeAlamatForm(forms.ModelForm):
+    class Meta:
+        model = EmployeeAlamat
+        fields = '__all__'
+        exclude = ['employee_id']
+        widgets = {
+            'provinsi': Select2Widget(attrs={'class': 'form-control'}),
+            'kota': Select2Widget(attrs={'class': 'form-control'}),
+            'kecamatan': Select2Widget(attrs={'class': 'form-control'}),
+            'kelurahan': Select2Widget(attrs={'class': 'form-control'}),
+            'detail': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ruko, Jl. Permata Regency Jl. H. Kelik No.31 Blok C, RT.1/RW.6,'}),
+        }
+        labels = {
+            'provinsi': 'Provinsi',
+            'kota': 'Kota',
+            'kecamatan': 'Kecamatan',
+            'kelurahan': 'Kelurahan',
+            'detail': 'Alamat Detail',
+        }
