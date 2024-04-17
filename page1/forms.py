@@ -562,8 +562,62 @@ class AdditionalAddressForm(forms.ModelForm):
             'kelurahan': 'Kelurahan / Desa',
             'detail': 'Alamat Detail',
         }
+
 class EmployeeForm(forms.ModelForm):
     class Meta:
         model = Employee
         fields = '__all__'
         exclude = ['id']
+        widgets = {
+            'employeeId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Employee ID'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nama'}),
+            'position': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Posisi'}),
+            'department': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Departemen'}),
+            'join_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'no_telp': RegionalPhoneNumberWidget(region='ID', attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
+            'tempat_lahir': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Tempat Lahir'}),
+            'tanggal_lahir': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'no_ktp': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'xxxxxxxxxxxxxxxx'}),
+            'no_rek': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'xxxxxxxxxxxxxxxx'}),
+        }
+        labels = {
+            'employeeId': 'Employee ID',
+            'name': 'Nama',
+            'position': 'Posisi',
+            'department': 'Departemen',
+            'join_date': 'Tanggal Join',
+            'no_telp': 'Nomor Telpon',
+            'gender': 'Gender',
+            'tempat_lahir': 'Tempat Lahir',
+            'tanggal_lahir': 'Tanggal Lahir',
+            'no_ktp': 'Nomor KTP',
+            'no_rek': 'Nomor Rekening',
+        }
+        choices = {
+            'gender': (('Male', 'Male'), ('Female', 'Female')),
+            'status': (('Belum Kawin', 'Belum Kawin'), ('Kawin', 'Kawin'), ('Cerai Hidup', 'Cerai Hidup'), ('Cerai Mati', 'Cerai Mati'),),
+        }
+
+    gender = forms.ChoiceField(choices=Meta.choices['gender'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jenis Kelamin')
+    status = forms.ChoiceField(choices=Meta.choices['status'], widget=forms.Select(attrs={'class': 'form-control'}), label='Status Kawin')
+
+
+class EmployeeAlamatForm(forms.ModelForm):
+    class Meta:
+        model = EmployeeAlamat
+        fields = '__all__'
+        exclude = ['employee_id']
+        widgets = {
+            'provinsi': Select2Widget(attrs={'class': 'form-control'}),
+            'kota': Select2Widget(attrs={'class': 'form-control'}),
+            'kecamatan': Select2Widget(attrs={'class': 'form-control'}),
+            'kelurahan': Select2Widget(attrs={'class': 'form-control'}),
+            'detail': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ruko, Jl. Permata Regency Jl. H. Kelik No.31 Blok C, RT.1/RW.6,'}),
+        }
+        labels = {
+            'provinsi': 'Provinsi',
+            'kota': 'Kota',
+            'kecamatan': 'Kecamatan',
+            'kelurahan': 'Kelurahan',
+            'detail': 'Alamat Detail',
+        }

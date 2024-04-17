@@ -139,5 +139,9 @@ urlpatterns = [
     path('employee_detail/<int:id>', employee_detail, name='employee_detail'),
     path('edit_employee/<int:id>', edit_employee, name='edit_employee' ),
     path('delete_employee/<int:id>', delete_employee, name='delete_employee'),
+
+    path('add_employee_alamat/<int:id>/', add_employee_alamat, name='add_employee_alamat'),
+    path('edit_employee_alamat/<int:alamat_id>/', edit_employee_alamat, name='edit_employee_alamat'),
+    path('delete_employee_alamat/<int:alamat_id>/', delete_employee_alamat, name='delete_employee_alamat'),
 ]
 
