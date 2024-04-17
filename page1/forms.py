@@ -570,6 +570,7 @@ class AdditionalAddressForm(forms.ModelForm):
             'kelurahan': 'Kelurahan / Desa',
             'detail': 'Alamat Detail',
         }
+
 class EmployeeForm(forms.ModelForm):
     def validate_no_ktp(value):
         if len(value) != 16 or not value.isdigit():
