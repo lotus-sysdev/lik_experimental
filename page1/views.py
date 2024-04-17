@@ -1206,3 +1206,31 @@ def edit_employee(request, id):
 
 def delete_employee(request, id):
     return delete_entity(request, Employee, 'id', id)
+
+def add_employee_alamat(request, id):
+    redirect_url  = reverse('employee_detail', args=(id,))
+    return add_entity(request, id, Employee, EmployeeAlamatForm, 'employee/add_employee_alamat.html', 'id', 'employee_id', {'employee_id': id}, redirect_url=redirect_url)
+
+
+def edit_customer_alamat(request, alamat_id):
+    alamat = get_object_or_404(CustomerAlamat, id=alamat_id)
+    form = CustAlamatForms(request.POST or None, instance=alamat)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('customer_detail', cust_id=alamat.customer_id.pk)
+    return render(request, 'alamat/edit_customer_alamat.html', {'form': form, 'alamat': alamat})
+
+def edit_employee_alamat(request, alamat_id):
+    alamat = get_object_or_404(EmployeeAlamat, id=alamat_id)
+    form = EmployeeAlamatForm(request.POST or None, instance=alamat)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('employee_detail', id=alamat.employee_id.pk)
+    return render(request, 'employee/edit_employee_alamat.html', {'form': form, 'alamat': alamat})
+
+def delete_employee_alamat(request, alamat_id):
+    return delete_entity(request, EmployeeAlamat, 'id', alamat_id)
