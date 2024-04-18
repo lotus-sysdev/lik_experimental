@@ -16,87 +16,106 @@
       id="itemTable"
       class="table table-bordered table-striped w-100 table-responsive-lg"
     >
-      <div class="form-inline mb-2">
-        <select id="columnFilter"  class="form-control btn-info">
-          <option value="0">Upload Type</option>
-          <option value="1">Tanggal Input</option>
-          <option value="2">Tanggal Pesan</option>
-          <option value="3">Customer</option>
-          <option value="4">SKU</option>
-          <option value="5">Nama</option>
-          <option value="6">Kategori</option>
-          <option value="7">Jumlah</option>
-          <option value="8">Satuan</option>
-          <option value="9">Harga</option>
-          <option value="10">Approved</option>
+    <div class="form-inline mb-2">
+      <select id="columnFilter"  class="form-control btn-info">
+        <option value="0">Upload Type</option>
+        <option value="1">Tanggal Input</option>
+        <option value="2">Tanggal Pesan</option>
+        <option value="3">Customer</option>
+        <option value="4">PIC</option>
+        <option value="5">SKU</option>
+        <option value="6">Nama</option>
+        <option value="7">Kategori</option>
+        <option value="8">Catatan</option>
+        <option value="9">Jumlah</option>
+        <option value="10">Harga</option>
+        <option value="11">Link</option>
+        <option value="12">Approved</option>
 
-          <!-- Add more options for additional columns -->
-        </select>
-        <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
-      </div>
+        <!-- Add more options for additional columns -->
+      </select>
+      <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
+      <button id="searchButton" class="btn btn-primary">Search</button>
+      <button id="resetButtonCol" class="btn btn-secondary">Reset</button>
+    </div>
+    
+    <div class="form-inline mb-2">
+      <label class="mr-2" for="startDate">Start Date:</label>
+      <input type="date" id="startDate" class="form-control mr-2">
+      <label class="mr-2" for="endDate">End Date:</label>
+      <input type="date" id="endDate" class="form-control mr-2">
+
+      <button id="filterButton" class="btn btn-primary">Apply Filter</button>
       
-      <div class="form-inline mb-2">
-        <label class="mr-2" for="startDate">Start Date:</label>
-        <input type="date" id="startDate" class="form-control mr-2">
-        <label class="mr-2" for="endDate">End Date:</label>
-        <input type="date" id="endDate" class="form-control mr-2">
+      <select id="dateRange" class="form-control ml-2 btn-info">
+        <option value="">Select Date Range</option>
+        <option value="7">Last 7 days</option>
+        <option value="30">Last 30 days</option>
+        <option value="60">Last 60 days</option>
+        <option value="90">Last 90 days</option>
+        <option value="ytd">Current year to date</option>
+        <option value="365">Last 1 year (365 days)</option>
+        <option value="730">Last 2 years (730 days)</option>
+      </select>
 
-        <button id="filterButton" class="btn btn-primary">Apply Filter</button>
-        
-        <select id="dateRange" class="form-control ml-2 btn-info">
-          <option value="">Select Date Range</option>
-          <option value="7">Last 7 Days</option>
-          <option value="30">Last 30 Days</option>
-          <option value="365">Last 365 Days</option>
-          <option value="ytd">Year to Today</option>
-        </select>
+      <button id="resetButton" class="btn btn-secondary ml-2">Reset</button>
+    </div>
 
-        <button id="resetButton" class="btn btn-secondary ml-2">Reset</button>
-      </div>
-
-      <thead class="thead-light">
-        {% csrf_token %}
-        <tr>
-          <th>Upload Type</th>
-          <th>Tanggal Input</th>
-          <th>Tanggal Pesan</th>
-          <th>Customer</th>
-          <th>SKU</th>
-          <th>Nama</th>
-          <th>Category</th>
-          <th>Quantity</th>
-          <th>Satuan</th>
-          <th>Price</th>
-          <th>Gambar</th>
-          <th>Approved</th>
-          <th>Edit/Delete</th>
-        </tr>
-      </thead>
-    <tbody>
-        {% for i in entities %}
-        <tr {% if i.is_approved %} style="background-color: #ccffc7;" {% endif %}>
-            <td>{{i.upload_type}}</td>
-            <td>{{ i.Tanggal }}</td>
-            <td>{{ i.tanggal_pemesanan }}</td>
-            <td>
-              {% if i.customer %}
-                <a href="{% url 'customer_detail' cust_id=i.customer.cust_id %}">{{i.customer}}</a>
+    <thead class="thead-light">
+      {% csrf_token %}
+      <tr>
+        <th>Upload Type</th>
+        <th>Tanggal Input</th>
+        <th>Tanggal Pesan</th>
+        <th>Customer</th>
+        <th>PIC</th>
+        <th>SKU</th>
+        <th>Nama</th>
+        <th>Category</th>
+        <th>Catatan</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Gambar</th>
+        <th>Link</th>
+        <th>Approved</th>
+        <th>Edit/Delete</th>
+      </tr>
+    </thead>
+  <tbody>
+      {% for i in entities %}
+      <tr {% if i.is_approved %} style="background-color: #ccffc7;" {% endif %}>
+          <td>{{i.upload_type}}</td>
+          <td>{{ i.Tanggal }}</td>
+          <td>{{ i.tanggal_pemesanan }}</td>
+          <td>
+            {% if i.customer %}
+              {{i.customer}}
+            {% else %}
+              None
+            {% endif %}
+          </td>
+          <td>{{ i.pic }}</td>
+          <td>{{ i.SKU }}</td>
+          <td>{{ i.nama|slice:":50" }}{% if i.nama|length > 50%}...{% endif %}</td>
+          <td>{{ i.category.name }}</td>
+          <td>{{ i.catatan }}</td>
+          <td>{{ i.quantity }} {{i.unit}}</td>
+          <td>{{ i.price }}</td>
+          <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}" /></td>
+          <td>
+            {% for sumber in i.itemsumber_set.all %}
+              {% if sumber.url %}
+                  <a href="{{ sumber.url }}">{{ sumber.url|slice:":25" }}{% if sumber.url|length > 25 %}...{% endif %}</a>
               {% else %}
-                None
+                  None
               {% endif %}
-            </td>
-            <td>{{ i.SKU }}</td>
-            <td>{{ i.nama }}</td>
-            <td>{{ i.category.name }}</td>
-            <td>{{ i.quantity }}</td>
-            <td>{{ i.unit }}</td>
-            <td>{{ i.price }}</td>
-            <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}" /></td>
-            <td>{% if i.is_approved %}Yes{% else %}No{% endif %}</td>
-            <td><a href="{% url 'item_detail' i.SKU %}">View</a></td>
-        </tr>
-        {% endfor %}
-    </tbody>
+            {% endfor %}
+          </td>
+          <td>{% if i.is_approved %}Yes{% else %}No{% endif %}</td>
+          <td><a href="{% url 'item_detail' i.SKU %}">View</a></td>
+      </tr>
+      {% endfor %}
+  </tbody>
 </table>
 <a href="/add_item">Add Item</a><br/>
 </div>
@@ -112,7 +131,7 @@
       style: "multi",
     },
     columnDefs: [ {
-        targets: 9, // Target the first column (adjust the index as needed)
+        targets: 10, // Target the first column (adjust the index as needed)
         render: function ( data, type, row ) {
             if (type === 'display') {
                 if (data.startsWith('IDR')) {
@@ -132,6 +151,19 @@
             }
             return data;
         }
+    },{
+      targets: [4],
+      render: function(data, type, row, meta) {
+          if (type === 'display') {
+              if (data && data.includes('-')) {
+                  var picName = data.split('-')[1]; // Extract "John" part
+                  return picName.trim(); // Return the trimmed name
+              } else {
+                  return data; // Return the original data if it's null or doesn't contain a hyphen
+              }
+          }
+          return data;
+      }
     } ],
     lengthMenu: 
     [[10, 25, 50, 100, -1],
@@ -259,17 +291,30 @@
   }
 
   $(document).ready(function() {
-    initializeDataTable();
-    $('#columnSearch').on('keyup', function() {
-      columnSearch(); // Call the columnSearch function when the user types in the input field
-    });
+  initializeDataTable();
+  
+  // Trigger search on button click
+  $('#searchButton').on('click', function() {
+    columnSearch();
+  });
+  
+  // Reset search on button click
+  $('#resetButtonCol').on('click', function() {
+    resetSearch();
+  });
 
   // Function to perform column-specific search
-    function columnSearch() {
-      var columnIndex = $('#columnFilter').val(); // Get the index of the selected column
-      var searchValue = $('#columnSearch').val().trim(); // Get the value of the search input and remove leading/trailing whitespace
-      table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
-    }
+  function columnSearch() {
+    var columnIndex = $('#columnFilter').val(); // Get the index of the selected column
+    var searchValue = $('#columnSearch').val().trim(); // Get the value of the search input and remove leading/trailing whitespace
+    table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
+  }
+
+  // Function to reset search
+  function resetSearch() {
+    $('#columnSearch').val(''); // Clear the search input
+    table.search('').columns().search('').draw(); // Clear all column-specific searches and redraw the table
+  }
     
     $('#filterButton').click(function() {
       var startDate = $('#startDate').val();

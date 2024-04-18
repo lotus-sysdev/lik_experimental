@@ -111,7 +111,6 @@ def delete_report(request, id):
 def edit_report(request, id):
     return edit_entity(request, Report, ReportForm, 'id', id)
 
-@permission_classes([IsAuthenticated])
 class add_report_mobile(generics.CreateAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer

@@ -272,7 +272,7 @@ def add_item(request):
 
     else:
         form = ItemForm()
-    
+
     return render(request, 'item/add_item.html', {'item_form': form})
 
 
@@ -381,7 +381,6 @@ def edit_item(request, SKU):
         if form.is_valid():
             # Check if a new image file is provided
             new_image = request.FILES.get('gambar')
-            
             if new_image:
                 # Process the new image file (similar to the logic in your add_item view)
                 img = Image.open(new_image)
@@ -411,6 +410,12 @@ def edit_item(request, SKU):
         form = ItemForm(instance=entity)
 
     return render(request, 'edit_item.html', {'form': form})
+
+def get_pic_options(request):
+    customer_id = request.GET.get('cust_id')
+    pics = CustomerPIC.objects.filter(customer_id=customer_id)
+    data = [{'id': pic.id, 'name': pic.name} for pic in pics]
+    return JsonResponse(data, safe=False)
 
 @login_required
 @GA_required
