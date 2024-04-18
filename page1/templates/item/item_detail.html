@@ -19,7 +19,18 @@
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="{{ form.customer.id_for_label }}">Customer</label>
-                        {{ form.customer }}
+                        <!-- Manually add class="form-control" to the customer field -->
+                        <select name="{{ form.customer.name }}" id="{{ form.customer.id_for_label }}" class="form-control">
+                            {% for choice_value, choice_label in form.customer.field.choices %}
+                                <option value="{{ choice_value }}" {% if form.customer.value == choice_value %}selected{% endif %}>
+                                    {{ choice_label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.pic.id_for_label }}">PIC</label>
+                        {{ form.pic }}
                     </div>
                     <div class="form-group">
                         <label for="{{ form.Tanggal.id_for_label }}">Tanggal Input</label>
@@ -127,6 +138,57 @@
                 </div>
             </div>
         </div>
+        
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                console.log("Script Loaded");
+        
+                $("#id_customer").change(function () {
+                    console.log("Customer changed");
+                    var customerId = $(this).val();
+                    console.log("Customer ID:", customerId);
+                    
+                    if (customerId !== "") {
+                        $.ajax({
+                            url: "{% url 'get_customer_pics' %}",
+                            data: {
+                                customer_id: customerId,
+                            },
+                            dataType: "json",
+                            success: function (data) {
+                                console.log("AJAX Success:", data);
+                                $("#id_pic").empty(); // Clear pic dropdown
+                                $.each(data, function (index, pic) {
+                                    $("#id_pic").append(
+                                        '<option value="' + pic.id + '">' + pic.nama + "</option>"
+                                    );
+                                });
+                            },
+                            error: function(xhr, status, error) {
+                                console.log("AJAX Error:", error);
+                            }
+                        });
+                    }
+                });
+
+                $('#id_pic').change(function() {
+                    var picId = $(this).val();
+                    $.ajax({
+                        url:"{% url 'get_customer_by_pic' %}",
+                        data: {
+                            'pic_id': picId
+                        },
+                        dataType: 'json',
+                        success: function(data) {
+                            if (data && data.customer_id) {
+                                $('#id_customer').val(data.customer_id);
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
 
         <script>
             function confirmDeletion(){

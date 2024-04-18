@@ -148,5 +148,9 @@ urlpatterns = [
     # Get PICs
     path('get_customer_pics/', get_customer_pics, name='get_customer_pics'),
     path('get_customer_by_pic/', get_customer_by_pic, name='get_customer_by_pic'),
+
+    # Get Items
+    path('get_customer_item/', get_customer_item, name='get_customer_item'),
+    path('get_item_details/', get_item_details, name='get_item_details'),   
 ]
 

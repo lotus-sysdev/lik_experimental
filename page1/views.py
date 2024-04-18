@@ -455,6 +455,7 @@ def get_customer_by_pic(request):
     else: 
         return JsonResponse({'customer_id': None})
 
+
 # -------------------- Item Sumber Functions -------------------- #
 @login_required
 @GA_required
@@ -588,6 +589,55 @@ def delete_purchase(request, id):
 @Messenger_Forbidden
 def delete_work(request, id):
     return delete_entity(request, WorkOrder, 'id', id)
+
+
+def get_customer_pics(request):
+    if request.method == 'GET':
+        customer_id = request.GET.get('customer_id')
+        pics = CustomerPIC.objects.filter(customer_id=customer_id).values('id', 'nama')
+        return JsonResponse(list(pics), safe=False)
+    else:
+        return JsonResponse ({'error': 'Invalid Request'})
+
+def get_customer_by_pic(request):
+    if request.method == 'GET':
+        pic_id = request.GET.get('pic_id')
+        # try: 
+        customer_pic = CustomerPIC.objects.get(id=pic_id)
+        customer_id = customer_pic.customer_id.cust_id
+        # print(customer_pic)
+        return JsonResponse({'customer_id' : customer_id})
+        # except:
+        #     return JsonResponse({'customer_id' : None})
+    else: 
+        return JsonResponse({'customer_id': None})
+
+def get_customer_item(request):
+    if request.method == 'GET':
+        customer_id = request.GET.get('customer_id')
+        items = Items.objects.filter(customer=customer_id, is_approved=True).values('SKU', 'nama', 'price')
+        return JsonResponse(list(items), safe=False)
+    else:
+        return JsonResponse ({'error': 'Invalid Request'})
+
+def get_item_details(request):
+    if request.method == 'GET':
+        item_id = request.GET.get('item_id')
+        try:
+            item = Items.objects.get(SKU=item_id)
+            # Assuming 'price' is a field in your Item model
+            item_details = {
+                'SKU': item.SKU,
+                'nama': item.nama,
+                'price': str(item.price),
+                'price_currency': item.price_currency,
+            }
+            return JsonResponse(item_details)
+        except Items.DoesNotExist:
+            return JsonResponse({'error': 'Item not found'}, status=404)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+
   
 
 # -------------------- Login, Register, Logout Functions -------------------- #
