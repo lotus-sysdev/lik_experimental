@@ -31,6 +31,80 @@
             </div>
         </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+          console.log("Script Loaded");
+  
+          $("#id_customer").change(function () {
+              console.log("Customer changed");
+              var customerId = $(this).val();
+              // console.log("Customer ID:", customerId);
+              
+              if (customerId !== "") {
+                  $.ajax({
+                      url: "{% url 'get_customer_item' %}",
+                      data: {
+                          customer_id: customerId,
+                      },
+                      dataType: "json",
+                      success: function (data) {
+                          console.log("AJAX Success:", data);
+                          $("#id_item").empty(); // Clear pic dropdown
+                          $.each(data, function (index, item) {
+                              $("#id_item").append(
+                                  '<option value="' + item.SKU + '">' + item.nama + "</option>"
+                              );
+                          });
+                          updateRevenue()
+                      },
+                      error: function(xhr, status, error) {
+                          console.log("AJAX Error:", error);
+                      }
+                  });
+              }
+          });
+
+          $("#id_item").change(function () {
+            updateRevenue(); // Update revenue on item change
+          });
+
+
+          function updateRevenue() {
+            var selectedItemId = $("#id_item").val();
+
+            // Assuming 'itemData' contains the details of the selected item including its price
+            // You might need to adjust this part based on your data structure
+            var itemData = {
+                SKU: selectedItemId, // Assuming SKU is used to identify the item
+                price: 0, // Default price in case data does not provide it
+            };
+
+            // Here, you can use the selectedItemId to fetch the price of the item via another AJAX call
+            // This is a placeholder to demonstrate the approach
+            $.ajax({
+                url: "{% url 'get_item_details' %}", // Adjust URL for fetching item details
+                data: { item_id: selectedItemId },
+                dataType: "json",
+                success: function (itemDetails) {
+                    var priceString = itemDetails.price;
+                    var numericPrice = parseFloat(priceString.replace(/[^\d.-]/g, ''));
+                    var priceCurrency = itemDetails.price_currency
+                    // console.log("Numeric Price:", numericPrice);
+                    // console.log(itemDetails.price_currency)
+
+                    // Update the revenue element with the item price
+                    $("#id_revenue_PO_0").val(numericPrice);
+                    $("#id_revenue_PO_1").val(priceCurrency);
+                },
+                error: function(xhr, status, error) {
+                    console.log("Error fetching item details:", error);
+                }
+            });
+          }
+        });
+    </script>
     {% endblock %}
 </body>
 
