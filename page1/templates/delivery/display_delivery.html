@@ -52,8 +52,8 @@
           <tr>
             <td>{{ events.id }}</td>
             <td>{{ events.title }}</td>
-            <td>{{ events.start }}</td>
-            <td>{{ events.end }}</td>
+            <td>{{ events.start|date:"Y/m/d H:i:s" }}</td>
+            <td>{{ events.end|date:"Y/m/d H:i:s" }}</td>
             <td>{{ events.messenger }}</td>
             <td>{{ events.vehicle }}</td>
             <td>{{ events.start_location }}</td>

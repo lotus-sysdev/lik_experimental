@@ -108,6 +108,7 @@ class Items(models.Model):
     Tanggal = models.DateField(default=timezone.now)
     tanggal_pemesanan = models.DateField(default=timezone.now, null=True)
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
+    pic = models.ForeignKey(CustomerPIC, on_delete=models.SET_NULL, null=True)
     nama = models.CharField(max_length=255)
     catatan = models.CharField(max_length = 500, null = True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
