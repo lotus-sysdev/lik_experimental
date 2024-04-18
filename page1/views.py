@@ -241,6 +241,7 @@ def delete_supplier_alamat(request, alamat_id):
 @login_required
 @GA_required
 def add_item(request):
+    form_instance = ItemForm(request.POST or None)
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES)
         if form.is_valid():
@@ -260,8 +261,7 @@ def add_item(request):
                 # image_path = os.path.join(settings.MEDIA_ROOT, image_name)
                 resized_image_name = f"media_{nama_cleaned}_{item.Tanggal}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
                 resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
-                img.save(resized_image_path)
-                
+                img.save(resized_image_path)                
 
                 # os.remove(image_path)
 
@@ -273,7 +273,7 @@ def add_item(request):
     else:
         form = ItemForm()
     
-    return render(request, 'item/add_item.html', {'item_form': form})
+    return render(request, 'item/add_item.html', {'item_form': form_instance})
 
 
 # -------------------- Display Tables -------------------- #
@@ -434,6 +434,26 @@ def approve_item(request, SKU):
     item.save()
     # Redirect to the item list or any other appropriate view
     return redirect('display_item')
+
+def get_customer_pics(request):
+    if request.method == 'GET':
+        customer_id = request.GET.get('customer_id')
+        pics = CustomerPIC.objects.filter(customer_id=customer_id).values('id', 'nama')
+        return JsonResponse(list(pics), safe=False)
+    return JsonResponse ({'error': 'Invalid Request'})
+
+def get_customer_by_pic(request):
+    if request.method == 'GET':
+        pic_id = request.GET.get('pic_id')
+        # try: 
+        customer_pic = CustomerPIC.objects.get(id=pic_id)
+        customer_id = customer_pic.customer_id.cust_id
+        # print(customer_pic)
+        return JsonResponse({'customer_id' : customer_id})
+        # except:
+        #     return JsonResponse({'customer_id' : None})
+    else: 
+        return JsonResponse({'customer_id': None})
 
 # -------------------- Item Sumber Functions -------------------- #
 @login_required

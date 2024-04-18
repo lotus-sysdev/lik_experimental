@@ -5,7 +5,6 @@
 <head>
     <meta charset="UTF-8">
     {% block title %}Add Work Order{% endblock %}
-
 </head>
 
 <body>
@@ -20,7 +19,7 @@
           {% for error in entity_form.customer.errors %}
           <p class="text-danger">{{error}}</p>
           {% endfor %}
-          <a href="/add_supplier">Add</a>
+          <a href="/add_customer">Add</a>
         </div>
         <div class="form-group">
           {{entity_form.item.label_tag}}

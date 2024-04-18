@@ -121,7 +121,7 @@
       style: "multi",
     },
     columnDefs: [ {
-        targets: 10, // Target the first column (adjust the index as needed)
+        targets: 10,
         render: function ( data, type, row ) {
             if (type === 'display') {
                 if (data.startsWith('IDR')) {
@@ -141,7 +141,20 @@
             }
             return data;
         }
-    } ],
+    },{
+      targets: [4],
+      render: function(data, type, row, meta) {
+          if (type === 'display') {
+              if (data && data.includes('-')) {
+                  var picName = data.split('-')[1]; // Extract "John" part
+                  return picName.trim(); // Return the trimmed name
+              } else {
+                  return data; // Return the original data if it's null or doesn't contain a hyphen
+              }
+          }
+          return data;
+      }
+    }],
     columns: [{ visible: false }, { visible: false }, null, null, null, { visible: false }, { visible: true, width: "15%"}, { visible: true, width: "20%"}, null, null, { visible: true, width: "9%"}, null, null, null, null],
     lengthMenu: 
     [[10, 25, 50, 100, -1],

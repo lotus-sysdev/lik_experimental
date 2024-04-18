@@ -77,6 +77,9 @@ class CustomerPIC(models.Model):
     telp = PhoneNumberField()
     Role = models.CharField(max_length=50)
 
+    def __str__(self):
+        return f"{self.nama}"
+
 class SupplierPIC(models.Model):
     class Meta:
         verbose_name = "Supplier PIC"
@@ -87,6 +90,9 @@ class SupplierPIC(models.Model):
     email = models.EmailField()
     telp = PhoneNumberField()
     Role = models.CharField(max_length=50)
+    
+    def __str__(self):
+        return f"{self.customer_id.nama_pt}-{self.nama}"
 
 class Category(models.Model):
     class Meta:
