@@ -26,8 +26,8 @@
           <option value="5">Nama</option>
           <option value="6">Kategori</option>
           <option value="7">Jumlah</option>
-          <option value="8">Satuan</option>
-          <option value="9">Harga</option>
+          <option value="8">Harga</option>
+          <option value="9">Link</option>
           <option value="10">Approved</option>
 
           <!-- Add more options for additional columns -->
@@ -45,10 +45,13 @@
         
         <select id="dateRange" class="form-control ml-2 btn-info">
           <option value="">Select Date Range</option>
-          <option value="7">Last 7 Days</option>
-          <option value="30">Last 30 Days</option>
-          <option value="365">Last 365 Days</option>
-          <option value="ytd">Year to Today</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="60">Last 60 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="ytd">Current year to date</option>
+          <option value="365">Last 1 year (365 days)</option>
+          <option value="730">Last 2 years (730 days)</option>
         </select>
 
         <button id="resetButton" class="btn btn-secondary ml-2">Reset</button>
@@ -65,9 +68,9 @@
           <th>Nama</th>
           <th>Category</th>
           <th>Quantity</th>
-          <th>Satuan</th>
           <th>Price</th>
           <th>Gambar</th>
+          <th>Link</th>
           <th>Approved</th>
           <th>Edit/Delete</th>
         </tr>
@@ -78,20 +81,22 @@
             <td>{{i.upload_type}}</td>
             <td>{{ i.Tanggal }}</td>
             <td>{{ i.tanggal_pemesanan }}</td>
-            <td>
-              {% if i.customer %}
-                <a href="{% url 'customer_detail' cust_id=i.customer.cust_id %}">{{i.customer}}</a>
-              {% else %}
-                None
-              {% endif %}
-            </td>
+            <td>{{i.customer}}</td>
             <td>{{ i.SKU }}</td>
-            <td>{{ i.nama }}</td>
+            <td>{{ i.nama|slice:":50" }}{% if i.nama|length > 50%}...{% endif %}</td>
             <td>{{ i.category.name }}</td>
-            <td>{{ i.quantity }}</td>
-            <td>{{ i.unit }}</td>
+            <td>{{ i.quantity }} {{ i.unit }}</td>
             <td>{{ i.price }}</td>
             <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}" /></td>
+            <td>
+              {% for sumber in i.itemsumber_set.all %}
+                {% if sumber.url %}
+                    <a href="{{ sumber.url }}">{{ sumber.url|slice:":25" }}{% if sumber.url|length > 25 %}...{% endif %}</a>
+                {% else %}
+                    None
+                {% endif %}
+              {% endfor %}
+            </td>
             <td>{% if i.is_approved %}Yes{% else %}No{% endif %}</td>
             <td><a href="{% url 'item_detail' i.SKU %}">View</a></td>
         </tr>
@@ -112,7 +117,7 @@
       style: "multi",
     },
     columnDefs: [ {
-        targets: 9, // Target the first column (adjust the index as needed)
+        targets: 8, // Target the first column (adjust the index as needed)
         render: function ( data, type, row ) {
             if (type === 'display') {
                 if (data.startsWith('IDR')) {
@@ -296,9 +301,18 @@
         } else if (dateRange === '30') {
             endDate = formatDate(new Date()); // Today's date
             startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 29))); // Date 30 days ago
+        } else if (dateRange === '60') {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 59))); // Date 30 days ago
+        } else if (dateRange === '90') {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 89))); // Date 30 days ago
         } else if (dateRange === '365') {
             endDate = formatDate(new Date()); // Today's date
             startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 364))); // Date 365 days ago
+        } else if (dateRange === '730') {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 729))); // Date 365 days ago
         } else if (dateRange === 'ytd') {
             endDate = formatDate(new Date()); // Today's date
             startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year

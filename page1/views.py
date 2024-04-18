@@ -292,15 +292,16 @@ def display_supplier(request):
 def display_item(request):
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
+    item_sumber = ItemSumber.objects.all()
 
     if start_date_str and end_date_str:
         start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
-        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1)
+        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
         entities = Items.objects.filter(tanggal_pemesanan__range=[start_date, end_date])
     else:
         entities = Items.objects.all()
 
-    return render(request, 'item/display_item.html', {'entities': entities})
+    return render(request, 'item/display_item.html', {'entities': entities, 'item_sumber':item_sumber})
 
 
 # -------------------- Customer Functions -------------------- #
