@@ -255,10 +255,11 @@ def add_item(request):
                 regex_pattern = r'/'
                 replacement_string = '.'
                 nama_cleaned = re.sub(regex_pattern, replacement_string, item.nama)
+                curr_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
                 # Save the resized image
                 # image_name = f"{item.nama}.{image.name.split('.')[-1]}"
                 # image_path = os.path.join(settings.MEDIA_ROOT, image_name)
-                resized_image_name = f"media_{nama_cleaned}_{item.Tanggal}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
+                resized_image_name = f"media_{nama_cleaned}_{item.curr_datetime}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
                 resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
                 img.save(resized_image_path)
                 
@@ -909,7 +910,7 @@ def upload_excel(request):
                                 # Generate filename including item name, upload date, and row index
                                 item_name = row[nama_index] if nama_index is not None else ''
                                 item_name_cleaned = re.sub(regex_pattern, replacement_string, item_name)
-                                upload_date = datetime.date.today().strftime('%Y-%m-%d')
+                                upload_date = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
                                 filename = f"media_bulk_{item_name_cleaned}_{upload_date}_{row_index}.png"
                                 
                                 # Specify the full path including the media directory
