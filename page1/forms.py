@@ -90,7 +90,11 @@ class CustomerForm(forms.ModelForm):
         }
 
     terms_of_payment = forms.ChoiceField(choices=Meta.choices['terms_of_payment'], widget=forms.Select(attrs={'class': 'form-control'}), label='Terms of Payment')
-    pengiriman = forms.ChoiceField(choices=Meta.choices['pengiriman'], widget=forms.Select(attrs={'class': 'form-control'}), label='Pengiriman Faktur dan Invoice')
+    pengiriman = forms.ChoiceField(
+        label='Pengirimian Faktur dan Invoice: ',
+        choices=Meta.choices['pengiriman'],
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'})
+    )
 
 class SupplierForm(forms.ModelForm):
     def clean_npwp(self):
@@ -122,7 +126,11 @@ class SupplierForm(forms.ModelForm):
         }
 
     terms_of_payment = forms.ChoiceField(choices=Meta.choices['terms_of_payment'], widget=forms.Select(attrs={'class': 'form-control'}), label='Terms of Payment')
-    pengiriman = forms.ChoiceField(choices=Meta.choices['pengiriman'], widget=forms.Select(attrs={'class': 'form-control'}), label='Pengiriman Faktur dan Invoice')
+    pengiriman = forms.ChoiceField(
+        label='Pengirimian Faktur dan Invoice: ',
+        choices=Meta.choices['pengiriman'],
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'})
+    )
 
 
 class CustPICForms(forms.ModelForm):
@@ -187,7 +195,11 @@ class CustAlamatForms(forms.ModelForm):
         choices = {
             'type': (('penagihan', 'Alamat Penagihan'), ('pengiriman', 'Alamat Pengiriman'),)
         }
-    type = forms.ChoiceField(choices=Meta.choices['type'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jenis Alamat')
+    type = forms.ChoiceField(
+        label='Jenis Alamat: ',
+        choices=Meta.choices['type'],
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'})
+    )
 
 class SuppAlamattForms(forms.ModelForm):
     class Meta:
@@ -211,7 +223,11 @@ class SuppAlamattForms(forms.ModelForm):
         choices = {
             'type': (('penagihan', 'Alamat Penagihan'), ('pengiriman', 'Alamat Pengiriman'),)
         }
-    type = forms.ChoiceField(choices=Meta.choices['type'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jenis Alamat')
+    type = forms.ChoiceField(
+        label='Jenis Alamat: ',
+        choices=Meta.choices['type'],
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'})
+    )
 
 class ItemForm(forms.ModelForm):
     class Meta:

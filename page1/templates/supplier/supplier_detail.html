@@ -18,7 +18,36 @@
                 <form id="editForm" method="post" action="{% url 'edit_supplier' entity.supp_id %}"
                     data-redirectUrl="{% url 'supplier_detail' entity.supp_id %}">
                     {% csrf_token %}
-                    {{ form.as_p }}
+                    <div class="mb-3">
+                    <!-- Other form fields -->
+                    {{ form.nama_pt.label_tag }}
+                    {{ form.nama_pt }}
+                    </div>
+                    <div class="mb-3">
+                    <!-- Other form fields -->
+                    {{ form.telp.label_tag }}
+                    {{ form.telp }}
+                    </div>
+                    <div class="mb-3">
+                    <!-- Other form fields -->
+                    {{ form.terms_of_payment.label_tag }}
+                    {{ form.terms_of_payment }}
+                    </div>
+                    <div class="mb-3 d-flex flex-column">
+                    <label class="form-label">{{ form.pengiriman.label }}</label>
+                    <div class="form-check form-check-inline">
+                        {% for radio in form.pengiriman %}
+                        <div class="form-check form-check-inline">
+                            {{ radio }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    </div>
+                    <div class="mb-3">
+                    <!-- Other form fields -->
+                    {{ form.npwp.label_tag }}
+                    {{ form.npwp }}
+                    </div>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </form>
 
