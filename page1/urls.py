@@ -132,6 +132,7 @@ urlpatterns = [
     path('get_kecamatan/', get_kecamatan, name='get_kecamatan'),
     path('get_kelurahan/', get_kelurahan, name='get_kelurahan'),
     path('get_region_details/', get_region_details, name='get_region_details'),
+    path('get_kode_pos/', get_kode_pos, name='get_kode_pos'),
 
     #Employee 
     path('add_employee/', add_employee, name='add_employee'),

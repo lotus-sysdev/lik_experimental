@@ -217,7 +217,16 @@ class Kelurahan(models.Model):
     name = models.CharField(max_length=100)
     def __str__(self):
         return self.name
-
+    
+class KodePos(models.Model):
+    class Meta:
+        verbose_name = "Kode Pos"
+        verbose_name_plural = "Kode Pos"
+    kode_pos = models.IntegerField()
+    kelurahan_id = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    def __str__(self):
+        return str(self.kode_pos)
+    
 class CustomerAlamat(models.Model):
     class Meta:
         verbose_name = "Customer Address"

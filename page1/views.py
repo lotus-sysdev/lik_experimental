@@ -1261,6 +1261,17 @@ def get_region_details(request):
 
     return JsonResponse(data)
 
+def get_kode_pos(request):
+    kelurahan_id = request.GET.get('kelurahan_id')
+    if kelurahan_id:
+        try:
+            kelurahan = KodePos.objects.get(kelurahan_id=kelurahan_id)
+            kode_pos = kelurahan.kode_pos
+            return JsonResponse({'kode_pos': kode_pos})
+        except KodePos.DoesNotExist:
+            pass
+    return JsonResponse({'error': 'Invalid Kelurahan ID'}, status=400)
+
 def add_employee(request):
     return add_entity_view(request, EmployeeForm, 'employee/add_employee.html', 'display_employee')
 
