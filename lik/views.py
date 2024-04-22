@@ -138,3 +138,13 @@ def login_user(request):
 def logout_user(request):
     request.user.auth_token.delete()
     return Response(status=status.HTTP_200_OK)
+
+def options_list(request):
+    # Sample dictionary data
+    options = [
+        {'label': 'Option 1', 'value': '1'},
+        {'label': 'Option 2', 'value': '2'},
+        {'label': 'Option 3', 'value': '3'},
+        {'label': 'Option 4', 'value': '4'},
+    ]
+    return JsonResponse(options, safe=False)

@@ -75,10 +75,10 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+        )
 }
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-# }
 TOKEN_EXPIRE_SECONDS = 60 * 60 * 24
 
 CORS_ALLOWED_ORIGINS = [
@@ -154,6 +154,7 @@ TIME_ZONE = 'Asia/Jakarta'
 USE_I18N = True
 
 USE_TZ = True
+
 
 
 # Static files (CSS, JavaScript, Images)
