@@ -12,6 +12,7 @@ from django.core import serializers
 from django.core.files.base import ContentFile
 from django.core import serializers
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import redirect, render, get_object_or_404
 from django.conf import settings
 from django.utils import timezone
@@ -1268,8 +1269,8 @@ def get_kode_pos(request):
             kelurahan = KodePos.objects.get(kelurahan_id=kelurahan_id)
             kode_pos = kelurahan.kode_pos
             return JsonResponse({'kode_pos': kode_pos})
-        except KodePos.DoesNotExist:
-            pass
+        except ObjectDoesNotExist:
+            return JsonResponse({'kode_pos': ''})
     return JsonResponse({'error': 'Invalid Kelurahan ID'}, status=400)
 
 def add_employee(request):

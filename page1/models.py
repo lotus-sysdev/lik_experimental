@@ -5,6 +5,7 @@ from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 from djmoney.models.fields import MoneyField
 from djmoney.models.validators import MinMoneyValidator
+from django.core.validators import MaxValueValidator
 from django_measurement.models import MeasurementField
 from measurement.measures import Mass
 
@@ -238,6 +239,7 @@ class CustomerAlamat(models.Model):
         ('pengiriman', 'Alamat Pengiriman'),
     )
     type = models.CharField(max_length=15, choices=TYPE_CHOICES)
+    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
     kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
     kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
@@ -258,6 +260,7 @@ class SupplierAlamat(models.Model):
         ('pengiriman', 'Alamat Pengiriman'),
     )
     type = models.CharField(max_length=15, choices=TYPE_CHOICES)
+    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
     kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
     kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
@@ -403,6 +406,7 @@ class DeliveryAddresses(models.Model):
     kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
     kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
     kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     detail = models.CharField(max_length=500)
     
     def __str__(self):

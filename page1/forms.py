@@ -183,6 +183,7 @@ class CustAlamatForms(forms.ModelForm):
             'kota': Select2Widget(attrs={'class': 'form-control'}),
             'kecamatan': Select2Widget(attrs={'class': 'form-control'}),
             'kelurahan': Select2Widget(attrs={'class': 'form-control'}),
+            'kode_pos': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Kode Pos'}),
             'detail': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ruko, Jl. Permata Regency Jl. H. Kelik No.31 Blok C, RT.1/RW.6,'}),
         }
         labels = {
@@ -190,6 +191,7 @@ class CustAlamatForms(forms.ModelForm):
             'kota': 'Kota',
             'kecamatan': 'Kecamatan',
             'kelurahan': 'Kelurahan',
+            'kode_pos': 'Kode Pos',
             'detail': 'Alamat Detail',
         }
         choices = {
@@ -211,6 +213,7 @@ class SuppAlamattForms(forms.ModelForm):
             'kota': Select2Widget(attrs={'class': 'form-control'}),
             'kecamatan': Select2Widget(attrs={'class': 'form-control'}),
             'kelurahan': Select2Widget(attrs={'class': 'form-control'}),
+            'kode_pos': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Kode Pos'}),
             'detail': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ruko, Jl. Permata Regency Jl. H. Kelik No.31 Blok C, RT.1/RW.6,'}),
         }
         labels = {
@@ -222,6 +225,9 @@ class SuppAlamattForms(forms.ModelForm):
         }
         choices = {
             'type': (('penagihan', 'Alamat Penagihan'), ('pengiriman', 'Alamat Pengiriman'),)
+        }
+        required = {
+            'kode_pos': False,
         }
     type = forms.ChoiceField(
         label='Jenis Alamat: ',
@@ -577,6 +583,7 @@ class AdditionalAddressForm(forms.ModelForm):
             'kota': Select2Widget(attrs={'class': 'form-control'}),
             'kecamatan': Select2Widget(attrs={'class': 'form-control'}),
             'kelurahan': Select2Widget(attrs={'class': 'form-control'}),
+            'kode_pos': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Kode Pos'}),
             'detail': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ruko, Jl. Permata Regency Jl. H. Kelik No.31 Blok C, RT.1/RW.6,'}),
         }
         labels = {
@@ -584,6 +591,7 @@ class AdditionalAddressForm(forms.ModelForm):
             'kota': 'Kota / Kabupaten',
             'kecamatan': 'Kecamatan',
             'kelurahan': 'Kelurahan / Desa',
+            'kode_pos': 'Kode Pos',
             'detail': 'Alamat Detail',
         }
 

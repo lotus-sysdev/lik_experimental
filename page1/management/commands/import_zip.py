@@ -13,7 +13,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         csv_file = kwargs['csv_file']
 
-        with open(csv_file, 'r') as file:
+        with open(csv_file, 'r', encoding='utf-8-sig') as file:
             reader = csv.reader(file)
             for row in reader:
                 kode_pos = row[0]
@@ -33,8 +33,10 @@ class Command(BaseCommand):
                         kelurahan_id=kelurahan
                     )
                     if created:
-                        self.stdout.write(self.style.SUCCESS(f'Successfully created KodePos {kode_pos}'))
+                        # self.stdout.write(self.style.SUCCESS(f'Successfully created KodePos {kode_pos}'))
+                        pass
                     else:
-                        self.stdout.write(self.style.SUCCESS(f'Successfully updated KodePos {kode_pos}'))
+                        # self.stdout.write(self.style.SUCCESS(f'Successfully updated KodePos {kode_pos}'))
+                        pass
                 except Exception as e:
                     self.stdout.write(self.style.ERROR(f'Error creating/updating KodePos {kode_pos}: {str(e)}'))
