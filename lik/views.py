@@ -114,6 +114,24 @@ class add_report_mobile(generics.CreateAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
 
+    def create(self, request, *args, **kwargs):
+        image_data = request.data.get('image_data')
+        # Handle image data as bytes here
+        # For example, you can save it directly to the model
+        report = Report.objects.create(
+            plat=request.data.get('plat'),
+            driver=request.data.get('driver'),
+            PO=request.data.get('PO'),
+            DO=request.data.get('DO'),
+            no_tiket=request.data.get('no_tiket'),
+            berat=request.data.get('berat'),
+            tanggal=request.data.get('tanggal'),
+            reject=request.data.get('reject'),
+            lokasi=request.data.get('lokasi'),
+            tujuan=request.data.get('tujuan'),
+        )
+        return super().create(request, *args, **kwargs)
+
 @api_view(['POST'])
 def register_user(request):
     serializer = UserSerializer(data=request.data)
@@ -131,6 +149,7 @@ def login_user(request):
         token, created = Token.objects.get_or_create(user=user)
         # Get user's groups
         groups = list(user.groups.values_list('id', flat=True))
+        print(groups)
         # Include groups in response data
         return Response({'token': token.key, 'groups': groups}, status=status.HTTP_200_OK)
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -160,10 +179,35 @@ def lokasi_options_list(request):
     ]
     return JsonResponse(lokasi_options, safe=False)
 
+# @permission_classes([IsAuthenticated])
 class GroupLokasiListAPIView(generics.ListAPIView):
     serializer_class = LokasiSerializer
 
     def get_queryset(self):
         group_id = self.kwargs['group_id']
-        lokasi_ids = Group_Lokasi.objects.filter(group_id=group_id).values_list('lokasi_id', flat=True)
+        group_lokasis = Group_Lokasi.objects.filter(group_id=group_id)
+        lokasi_ids = [lokasi.id for group_lokasi in group_lokasis for lokasi in group_lokasi.lokasi.all()]
         return Lokasi.objects.filter(id__in=lokasi_ids)
+    
+# @permission_classes([IsAuthenticated])
+class GroupTujuanListAPIView(generics.ListAPIView):
+    serializer_class = TujuanSerializer
+
+    def get_queryset(self):
+        group_id = self.kwargs['group_id']
+        group_tujuans = Group_Tujuan.objects.filter(group_id=group_id)
+        tujuan_ids = [tujuan.id for group_tujuan in group_tujuans for tujuan in group_tujuan.tujuan.all()]
+        return Tujuan.objects.filter(id__in=tujuan_ids)
+
+@permission_classes([IsAuthenticated])
+def upload_image(request):
+    if request.method == 'POST' and request.FILES.get('image'):
+        image_file = request.FILES['image']
+        # Process and save the image
+        # Example: save to a folder named 'uploads'
+        with open('uploads/' + image_file.name, 'wb+') as destination:
+            for chunk in image_file.chunks():
+                destination.write(chunk)
+        return JsonResponse({'message': 'Image uploaded successfully'})
+    else:
+        return JsonResponse({'error': 'No image found in the request'}, status=400)

@@ -23,7 +23,9 @@
           <option value="5">No. Tiket Timbang</option>
           <option value="6">Berat (Tonnase)</option>
           <option value="7">Catatan (Reject)</option>
-          <option value="8">Tanggal Keluar</option>
+          <option value="8">Lokasi Potong</option>
+          <option value="9">Pabrik Tujuan</option>
+          <option value="10">Tanggal Keluar</option>
           <!-- Add more options for additional columns -->
         </select>
         <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
@@ -38,6 +40,8 @@
             <th>No. Tiket Timbang</th>
             <th>Berat (Tonnase)</th>
             <th>Catatan (Reject)</th>
+            <th>Lokasi Potong</th>
+            <th>Tujuan Pabrik</th>
             <th>Tanggal Keluar</th>
             <th>Ubah</th>
           </tr>
@@ -53,6 +57,8 @@
             <td>{{ report.no_tiket }}</td>
             <td>{{ report.berat }} kg</td>
             <td>{{ report.reject }} kg</td>
+            <td>{{ report.lokasi }}</td>
+            <td>{{ report.tujuan }}</td>
             <td>{{ report.tanggal }}</td>
             <td>
               <a href="{% url 'report_detail' report.id %}">View</a>
