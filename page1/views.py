@@ -925,6 +925,7 @@ def upload_excel(request):
     processed_items = []
     categories = Category.objects.all()
     customers = Customer.objects.all()
+    customer_pics = CustomerPIC.objects.all()
     pic = CustomerPIC.objects.all()
     
     if request.method == 'POST':
@@ -969,6 +970,7 @@ def upload_excel(request):
                     for row_index, row in enumerate(worksheet.iter_rows(min_row=gambar_row_index + 2, values_only=True)):
                         if all(index is not None for index in [nama_index, category_index, customer_index, quantity_index, unit_index, price_index]):
                             try: 
+                                # print(f"Processing Row {row_index}: {row}")
                                 # Extract category information
                                 category_name = row[category_index] if category_index is not None else ''
                                 category_instance, _ = Category.objects.get_or_create(name=category_name)
@@ -976,7 +978,7 @@ def upload_excel(request):
                                 customer_name = row[customer_index] if customer_index is not None else ''
                                 customer_instance, _ = Customer.objects.get_or_create(nama_pt=customer_name)
                                 
-                                print(pic_index)
+                                # print(pic_index)
                                 pic_name = row[pic_index] if pic_index is not None else ''
                                 pic_instance, _ = CustomerPIC.objects.get_or_create(customer_id=customer_instance, nama = pic_name)
                                 
@@ -1018,9 +1020,9 @@ def upload_excel(request):
                                     gambar=filename,
                                     upload_type="bulk"
                                 )
-                                item_instance = instance.save() 
-                                
-                                processed_items.append(item_instance)
+                                instance.save() 
+                                # processed_items.append(instance)
+                                # print(f"Processed Items: {processed_items}")
                                 
                                 item_sumber_instance = ItemSumber.objects.create(
                                     item=instance,
@@ -1031,9 +1033,17 @@ def upload_excel(request):
                                     email=row[email_sumber_index] if email_sumber_index is not None else '',
                                     url=row[link_index] if link_index is not None else ''
                                 )
+                                item_sumber_instance.save()
+
+                                processed_items.append({
+                                    'instance': instance,
+                                    'url': item_sumber_instance.url if link_index is not None else ''
+                                })
+                                print(f"Processed Items: {processed_items}")
 
                             except Exception as e:
-                                error_message.append(f"Error on cell {row_index + 1}: {str(e)}")
+                                if "NOT NULL constraint failed: page1_category.name" not in str(e):
+                                    error_message.append(f"Error on cell {row_index + 1}: {str(e)}")
                                 # print(processed_items)
                                 continue
                         else:
@@ -1042,7 +1052,7 @@ def upload_excel(request):
                     # Handle case where 'Gambar' column title is not found
                     raise ValueError("'gambar' column title not found in the Excel file")
                 
-                return render(request, 'item/upload_excel.html', {'form': form, 'pic' : pic, 'categories': categories, 'customers': customers, 'error_message': error_message, 'processed_items': processed_items})
+                return render(request, 'item/upload_excel.html', {'form': form, 'pic' : pic, 'categories': categories, 'customers': customers, 'customerPIC': customer_pics, 'error_message': error_message, 'processed_items': processed_items})
                 
             except openpyxl.utils.exceptions.InvalidFileException:
                 error_message = "Invalid Excel file format. Please upload a valid Excel file."
@@ -1054,8 +1064,9 @@ def upload_excel(request):
     else:
         form = ExcelUploadForm()
     
+    # print("Processed Items:", processed_items)
     # Render the upload form template
-    return render(request, 'item/upload_excel.html', {'form': form, 'categories': categories, 'customers': customers, 'error_message': error_message})
+    return render(request, 'item/upload_excel.html', {'form': form, 'categories': categories, 'customers': customers, 'customerPIC': customer_pics, 'error_message': error_message})
 
 
 # -------------------- Delete multiple items -------------------- #
