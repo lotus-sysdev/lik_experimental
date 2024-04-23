@@ -257,10 +257,11 @@ def add_item(request):
                 regex_pattern = r'/'
                 replacement_string = '.'
                 nama_cleaned = re.sub(regex_pattern, replacement_string, item.nama)
+                curr_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
                 # Save the resized image
                 # image_name = f"{item.nama}.{image.name.split('.')[-1]}"
                 # image_path = os.path.join(settings.MEDIA_ROOT, image_name)
-                resized_image_name = f"media_{nama_cleaned}_{item.Tanggal}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
+                resized_image_name = f"media_{nama_cleaned}_{item.curr_datetime}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
                 resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
                 img.save(resized_image_path)                
 
@@ -273,9 +274,8 @@ def add_item(request):
 
     else:
         form = ItemForm()
-    
-    return render(request, 'item/add_item.html', {'item_form': form_instance})
 
+    return render(request, 'item/add_item.html', {'item_form': form_instance})
 
 # -------------------- Display Tables -------------------- #
 @login_required
@@ -383,7 +383,6 @@ def edit_item(request, SKU):
         if form.is_valid():
             # Check if a new image file is provided
             new_image = request.FILES.get('gambar')
-            
             if new_image:
                 # Process the new image file (similar to the logic in your add_item view)
                 img = Image.open(new_image)
@@ -413,6 +412,12 @@ def edit_item(request, SKU):
         form = ItemForm(instance=entity)
 
     return render(request, 'edit_item.html', {'form': form})
+
+def get_pic_options(request):
+    customer_id = request.GET.get('cust_id')
+    pics = CustomerPIC.objects.filter(customer_id=customer_id)
+    data = [{'id': pic.id, 'name': pic.name} for pic in pics]
+    return JsonResponse(data, safe=False)
 
 @login_required
 @GA_required
@@ -920,6 +925,8 @@ def upload_excel(request):
     processed_items = []
     categories = Category.objects.all()
     customers = Customer.objects.all()
+    pic = CustomerPIC.objects.all()
+    
     if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
         if form.is_valid():
@@ -943,7 +950,12 @@ def upload_excel(request):
                 unit_index = column_titles.index('unit') if 'unit' in column_titles else None
                 price_index = column_titles.index('price') if 'price' in column_titles else None
                 price_currency_index = column_titles.index('price_currency') if 'price_currency' in column_titles else None
-
+                jenis_sumber_index = column_titles.index('jenis_sumber') if 'jenis_sumber' in column_titles else None
+                link_index = column_titles.index('link') if 'link' in column_titles else None
+                telp_sumber_index = column_titles.index('telp_sumber') if 'telp_sumber' in column_titles else None
+                email_sumber_index = column_titles.index('email_sumber') if 'email_sumber' in column_titles else None
+                nama_sumber_index = column_titles.index('nama_sumber') if 'nama_sumber' in column_titles else None
+                pic_index = column_titles.index('pic') if 'pic' in column_titles else None
                 # Find the row containing the 'Gambar' column title
                 gambar_row_index = None
                 for row_index, row in enumerate(worksheet.iter_rows(values_only=True)):
@@ -954,7 +966,6 @@ def upload_excel(request):
                 if gambar_row_index is not None:
                     # Load image from the 'Gambar' column for each row
                     image_loader = SheetImageLoader(worksheet)
-
                     for row_index, row in enumerate(worksheet.iter_rows(min_row=gambar_row_index + 2, values_only=True)):
                         if all(index is not None for index in [nama_index, category_index, customer_index, quantity_index, unit_index, price_index]):
                             try: 
@@ -964,7 +975,11 @@ def upload_excel(request):
 
                                 customer_name = row[customer_index] if customer_index is not None else ''
                                 customer_instance, _ = Customer.objects.get_or_create(nama_pt=customer_name)
-
+                                
+                                print(pic_index)
+                                pic_name = row[pic_index] if pic_index is not None else ''
+                                pic_instance, _ = CustomerPIC.objects.get_or_create(customer_id=customer_instance, nama = pic_name)
+                                
                                 # Load image from specified cell
                                 image_cell = chr(65 + column_titles.index('gambar')) + str(row_index + 2)
                                 image = image_loader.get(image_cell)
@@ -976,7 +991,7 @@ def upload_excel(request):
                                 # Generate filename including item name, upload date, and row index
                                 item_name = row[nama_index] if nama_index is not None else ''
                                 item_name_cleaned = re.sub(regex_pattern, replacement_string, item_name)
-                                upload_date = datetime.date.today().strftime('%Y-%m-%d')
+                                upload_date = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
                                 filename = f"media_bulk_{item_name_cleaned}_{upload_date}_{row_index}.png"
                                 
                                 # Specify the full path including the media directory
@@ -995,6 +1010,7 @@ def upload_excel(request):
                                     catatan=row[catatan_index] if catatan_index is not None else '',
                                     category=category_instance,
                                     customer=customer_instance,
+                                    pic = pic_instance,
                                     quantity=row[quantity_index] if quantity_index is not None else 0,
                                     unit=row[unit_index] if unit_index is not None else '',
                                     price=row[price_index] if price_index is not None else 0,
@@ -1002,9 +1018,20 @@ def upload_excel(request):
                                     gambar=filename,
                                     upload_type="bulk"
                                 )
-                                instance.save() 
-                                processed_items.append(instance)
-                        
+                                item_instance = instance.save() 
+                                
+                                processed_items.append(item_instance)
+                                
+                                item_sumber_instance = ItemSumber.objects.create(
+                                    item=instance,
+                                    # Assuming you have corresponding columns for other fields
+                                    jenis_sumber=row[nama_sumber_index] if nama_sumber_index is not None else 'Online Store',
+                                    nama_perusahaan=row[nama_sumber_index] if nama_sumber_index is not None else 'Empty Name',
+                                    telp=row[telp_sumber_index] if telp_sumber_index is not None else '',
+                                    email=row[email_sumber_index] if email_sumber_index is not None else '',
+                                    url=row[link_index] if link_index is not None else ''
+                                )
+
                             except Exception as e:
                                 error_message.append(f"Error on cell {row_index + 1}: {str(e)}")
                                 # print(processed_items)
@@ -1015,7 +1042,7 @@ def upload_excel(request):
                     # Handle case where 'Gambar' column title is not found
                     raise ValueError("'gambar' column title not found in the Excel file")
                 
-                return render(request, 'item/upload_excel.html', {'form': form, 'categories': categories, 'customers': customers, 'error_message': error_message, 'processed_items': processed_items})
+                return render(request, 'item/upload_excel.html', {'form': form, 'pic' : pic, 'categories': categories, 'customers': customers, 'error_message': error_message, 'processed_items': processed_items})
                 
             except openpyxl.utils.exceptions.InvalidFileException:
                 error_message = "Invalid Excel file format. Please upload a valid Excel file."

@@ -18,12 +18,12 @@
           <option value="0">ID</option>
           <option value="1">Plat Nomor</option>
           <option value="2">Driver</option>
-          <option value="2">No. PO</option>
-          <option value="2">No. DO</option>
-          <option value="3">No. Tiket Timbang</option>
-          <option value="4">Berat (Tonnase)</option>
-          <option value="6">Tanggal Keluar</option>
-          <option value="6">Catatan (Reject)</option>
+          <option value="3">No. PO</option>
+          <option value="4">No. DO</option>
+          <option value="5">No. Tiket Timbang</option>
+          <option value="6">Berat (Tonnase)</option>
+          <option value="7">Catatan (Reject)</option>
+          <option value="8">Tanggal Keluar</option>
           <!-- Add more options for additional columns -->
         </select>
         <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
@@ -37,8 +37,8 @@
             <th>No. DO</th>
             <th>No. Tiket Timbang</th>
             <th>Berat (Tonnase)</th>
-            <th>Tanggal Keluar</th>
             <th>Catatan (Reject)</th>
+            <th>Tanggal Keluar</th>
             <th>Ubah</th>
           </tr>
         </thead>
@@ -52,8 +52,8 @@
             <td>{{ report.DO }}</td>
             <td>{{ report.no_tiket }}</td>
             <td>{{ report.berat }} kg</td>
-            <td>{{ report.tanggal }}</td>
             <td>{{ report.reject }} kg</td>
+            <td>{{ report.tanggal }}</td>
             <td>
               <a href="{% url 'report_detail' report.id %}">View</a>
             </td>
