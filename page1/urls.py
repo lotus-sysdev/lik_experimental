@@ -53,9 +53,6 @@ urlpatterns = [
     path('delete_selected_rows_supp/', delete_selected_rows_supp, name='delete_selected_rows_supp'),
     path('delete_selected_rows_PO/', delete_selected_rows_PO, name='delete_selected_rows_PO'),
     path('delete_selected_rows_WO/', delete_selected_rows_WO, name='delete_selected_rows_WO'),
-    path('delete_selected_rows_delivery/', delete_selected_rows_delivery, name='delete_selected_rows_delivery'),
-    path('delete_selected_rows_logbook/', delete_selected_rows_logbook, name='delete_selected_rows_logbook'),
-    path('delete_selected_rows_employee/', delete_selected_rows_employee, name='delete_selected_rows_employee'),
 
     # Item approval
     path('approve_item/<str:SKU>', approve_item, name='approve_item'),
@@ -132,12 +129,5 @@ urlpatterns = [
     path('get_kecamatan/', get_kecamatan, name='get_kecamatan'),
     path('get_kelurahan/', get_kelurahan, name='get_kelurahan'),
     path('get_region_details/', get_region_details, name='get_region_details'),
-
-    #Employee 
-    path('add_employee/', add_employee, name='add_employee'),
-    path('display_employee/', display_employee, name='display_employee'),
-    path('employee_detail/<int:id>', employee_detail, name='employee_detail'),
-    path('edit_employee/<int:id>', edit_employee, name='edit_employee' ),
-    path('delete_employee/<int:id>', delete_employee, name='delete_employee'),
 ]
 
