@@ -23,9 +23,7 @@
           center: "title",
           right: "month,agendaWeek,agendaDay", // Add the custom button to the header
         },
-        eventLongPressDelay: 300,
-        timeFormat: 'H(:mm)',
-        slotLabelFormat:"HH:mm",
+        eventLongPressDelay: 700,
         events: function (start, end, timezone, callback) {
           $.ajax({
             url: '/lb_all_events',

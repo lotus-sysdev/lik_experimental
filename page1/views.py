@@ -4,10 +4,9 @@ import csv
 from PIL import Image
 import pandas as pd
 import requests
-from datetime import datetime, timedelta
+import datetime
 import re
 
-from django.db.models import Q
 from django.core import serializers
 from django.core.files.base import ContentFile
 from django.core import serializers
@@ -255,11 +254,10 @@ def add_item(request):
                 regex_pattern = r'/'
                 replacement_string = '.'
                 nama_cleaned = re.sub(regex_pattern, replacement_string, item.nama)
-                curr_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
                 # Save the resized image
                 # image_name = f"{item.nama}.{image.name.split('.')[-1]}"
                 # image_path = os.path.join(settings.MEDIA_ROOT, image_name)
-                resized_image_name = f"media_{nama_cleaned}_{item.curr_datetime}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
+                resized_image_name = f"media_{nama_cleaned}_{item.Tanggal}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
                 resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
                 img.save(resized_image_path)
                 
@@ -273,7 +271,7 @@ def add_item(request):
 
     else:
         form = ItemForm()
-
+    
     return render(request, 'item/add_item.html', {'item_form': form})
 
 
@@ -291,17 +289,7 @@ def display_supplier(request):
 @login_required
 @GA_required
 def display_item(request):
-    start_date_str = request.GET.get('start_date')
-    end_date_str = request.GET.get('end_date')
-
-    if start_date_str and end_date_str:
-        start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
-        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1)
-        entities = Items.objects.filter(tanggal_pemesanan__range=[start_date, end_date])
-    else:
-        entities = Items.objects.all()
-
-    return render(request, 'item/display_item.html', {'entities': entities})
+    return display_entities(request, Items, 'item/display_item.html')
 
 
 # -------------------- Customer Functions -------------------- #
@@ -375,13 +363,14 @@ def item_detail(request, SKU):
 @GA_required
 def edit_item(request, SKU):
     entity = get_object_or_404(Items,SKU=SKU)
-    entity_approved = entity.is_approved
-    
+    # entity_approved = entity.is_approved
+
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES, instance=entity)
         if form.is_valid():
             # Check if a new image file is provided
             new_image = request.FILES.get('gambar')
+            
             if new_image:
                 # Process the new image file (similar to the logic in your add_item view)
                 img = Image.open(new_image)
@@ -393,15 +382,8 @@ def edit_item(request, SKU):
                 # Update the item's image field with the new image path
                 form.instance.gambar = resized_image_name
 
-            if request.user.groups.filter(name='Admin').exists():
-                new_approved_raw = request.POST.get('is_approved', 'off')
-                new_approved = new_approved_raw == "on"
-                print(new_approved)
-                if new_approved != entity.is_approved:
-                    entity.is_approved = new_approved
-            else:
-                entity.is_approved = entity_approved
-                
+            # entity.is_approved = entity_approved
+
             form.save()
 
             return JsonResponse({'success': True})
@@ -411,12 +393,6 @@ def edit_item(request, SKU):
         form = ItemForm(instance=entity)
 
     return render(request, 'edit_item.html', {'form': form})
-
-def get_pic_options(request):
-    customer_id = request.GET.get('cust_id')
-    pics = CustomerPIC.objects.filter(customer_id=customer_id)
-    data = [{'id': pic.id, 'name': pic.name} for pic in pics]
-    return JsonResponse(data, safe=False)
 
 @login_required
 @GA_required
@@ -767,7 +743,6 @@ def add_messenger(request):
 def add_vehicle(request):
     return add_entity_view(request, VehicleForm, 'delivery/add_vehicle.html', 'calendar')
 
-@login_required
 def get_messenger(request):
     vehicle_id = request.GET.get('vehicle')
     print(vehicle_id)
@@ -854,8 +829,6 @@ def upload_excel(request):
     processed_items = []
     categories = Category.objects.all()
     customers = Customer.objects.all()
-    pic = CustomerPIC.objects.all()
-    
     if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
         if form.is_valid():
@@ -879,12 +852,7 @@ def upload_excel(request):
                 unit_index = column_titles.index('unit') if 'unit' in column_titles else None
                 price_index = column_titles.index('price') if 'price' in column_titles else None
                 price_currency_index = column_titles.index('price_currency') if 'price_currency' in column_titles else None
-                jenis_sumber_index = column_titles.index('jenis_sumber') if 'jenis_sumber' in column_titles else None
-                link_index = column_titles.index('link') if 'link' in column_titles else None
-                telp_sumber_index = column_titles.index('telp_sumber') if 'telp_sumber' in column_titles else None
-                email_sumber_index = column_titles.index('email_sumber') if 'email_sumber' in column_titles else None
-                nama_sumber_index = column_titles.index('nama_sumber') if 'nama_sumber' in column_titles else None
-                pic_index = column_titles.index('pic') if 'pic' in column_titles else None
+
                 # Find the row containing the 'Gambar' column title
                 gambar_row_index = None
                 for row_index, row in enumerate(worksheet.iter_rows(values_only=True)):
@@ -895,6 +863,7 @@ def upload_excel(request):
                 if gambar_row_index is not None:
                     # Load image from the 'Gambar' column for each row
                     image_loader = SheetImageLoader(worksheet)
+
                     for row_index, row in enumerate(worksheet.iter_rows(min_row=gambar_row_index + 2, values_only=True)):
                         if all(index is not None for index in [nama_index, category_index, customer_index, quantity_index, unit_index, price_index]):
                             try: 
@@ -904,11 +873,7 @@ def upload_excel(request):
 
                                 customer_name = row[customer_index] if customer_index is not None else ''
                                 customer_instance, _ = Customer.objects.get_or_create(nama_pt=customer_name)
-                                
-                                print(pic_index)
-                                pic_name = row[pic_index] if pic_index is not None else ''
-                                pic_instance, _ = CustomerPIC.objects.get_or_create(customer_id=customer_instance, nama = pic_name)
-                                
+
                                 # Load image from specified cell
                                 image_cell = chr(65 + column_titles.index('gambar')) + str(row_index + 2)
                                 image = image_loader.get(image_cell)
@@ -920,7 +885,7 @@ def upload_excel(request):
                                 # Generate filename including item name, upload date, and row index
                                 item_name = row[nama_index] if nama_index is not None else ''
                                 item_name_cleaned = re.sub(regex_pattern, replacement_string, item_name)
-                                upload_date = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+                                upload_date = datetime.date.today().strftime('%Y-%m-%d')
                                 filename = f"media_bulk_{item_name_cleaned}_{upload_date}_{row_index}.png"
                                 
                                 # Specify the full path including the media directory
@@ -939,7 +904,6 @@ def upload_excel(request):
                                     catatan=row[catatan_index] if catatan_index is not None else '',
                                     category=category_instance,
                                     customer=customer_instance,
-                                    pic = pic_instance,
                                     quantity=row[quantity_index] if quantity_index is not None else 0,
                                     unit=row[unit_index] if unit_index is not None else '',
                                     price=row[price_index] if price_index is not None else 0,
@@ -947,20 +911,9 @@ def upload_excel(request):
                                     gambar=filename,
                                     upload_type="bulk"
                                 )
-                                item_instance = instance.save() 
-                                
-                                processed_items.append(item_instance)
-                                
-                                item_sumber_instance = ItemSumber.objects.create(
-                                    item=instance,
-                                    # Assuming you have corresponding columns for other fields
-                                    jenis_sumber=row[nama_sumber_index] if nama_sumber_index is not None else 'Online Store',
-                                    nama_perusahaan=row[nama_sumber_index] if nama_sumber_index is not None else 'Empty Name',
-                                    telp=row[telp_sumber_index] if telp_sumber_index is not None else '',
-                                    email=row[email_sumber_index] if email_sumber_index is not None else '',
-                                    url=row[link_index] if link_index is not None else ''
-                                )
-
+                                instance.save() 
+                                processed_items.append(instance)
+                        
                             except Exception as e:
                                 error_message.append(f"Error on cell {row_index + 1}: {str(e)}")
                                 # print(processed_items)
@@ -971,7 +924,7 @@ def upload_excel(request):
                     # Handle case where 'Gambar' column title is not found
                     raise ValueError("'gambar' column title not found in the Excel file")
                 
-                return render(request, 'item/upload_excel.html', {'form': form, 'pic' : pic, 'categories': categories, 'customers': customers, 'error_message': error_message, 'processed_items': processed_items})
+                return render(request, 'item/upload_excel.html', {'form': form, 'categories': categories, 'customers': customers, 'error_message': error_message, 'processed_items': processed_items})
                 
             except openpyxl.utils.exceptions.InvalidFileException:
                 error_message = "Invalid Excel file format. Please upload a valid Excel file."
@@ -1026,15 +979,6 @@ def delete_selected_rows_PO(request):
 
 def delete_selected_rows_WO(request):
     return delete_selected_rows(request, WorkOrder, 'id')
-
-def delete_selected_rows_delivery(request):
-    return delete_selected_rows(request, Events, 'id')
-
-def delete_selected_rows_logbook(request):
-    return delete_selected_rows(request, LogBook, 'id')
-
-def delete_selected_rows_employee(request):
-    return delete_selected_rows(request, Employee, 'id')
 
 
 # -------------------- Approve Items -------------------- #
@@ -1217,20 +1161,3 @@ def get_region_details(request):
         data = {}
 
     return JsonResponse(data)
-
-def add_employee(request):
-    return add_entity_view(request, EmployeeForm, 'employee/add_employee.html', 'display_employee')
-
-def display_employee(request):
-    return display_entities(request, Employee, 'employee/display_employee.html')
-
-def employee_detail(request, id):
-    employee_alamat = EmployeeAlamat.objects.filter(employee_id=id)
-    extra_context = {'employee_alamat':employee_alamat}
-    return entity_detail(request, Employee, EmployeeForm, 'id', id, 'employee/employee_detail.html', extra_context)
-
-def edit_employee(request, id):
-    return edit_entity(request, Employee, EmployeeForm, 'id', id)
-
-def delete_employee(request, id):
-    return delete_entity(request, Employee, 'id', id)

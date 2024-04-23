@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Report(models.Model):
@@ -15,17 +15,3 @@ class Report(models.Model):
 
     def __str__ (self):
         return str(self.no_tiket)
-
-class Lokasi(models.Model):
-    nama = models.CharField(max_length=100)
-    detail = models.SlugField(unique=True)
-
-    def __str__(self):
-        return self.nama
-
-class Group_Lokasi(models.Model):
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    lokasi = models.ManyToManyField(Lokasi)
-
-    def __str__(self):
-        return str(self.group)

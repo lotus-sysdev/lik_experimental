@@ -242,7 +242,6 @@ class ItemForm(forms.ModelForm):
         fields = '__all__'
         exclude = ['SKU', 'gambar_resized', 'upload_type']
         widgets = {
-            'pic' : Select2Widget(attrs={'class':'form-control'}),
             'customer' : Select2Widget(attrs={'class':'form-control'}),
             'nama': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Baterai AA'}),
             'quantity': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '1, 2, 3, ...'}),
@@ -255,7 +254,6 @@ class ItemForm(forms.ModelForm):
             'is_approved': forms.CheckboxInput(attrs={'class': 'form-control'}),
         }
         labels = {
-            'pic':'PIC',
             'customer':'Customer',
             'nama': 'Nama Barang',
             'quantity': 'Kuantitas',
@@ -564,8 +562,3 @@ class AdditionalAddressForm(forms.ModelForm):
             'kelurahan': 'Kelurahan / Desa',
             'detail': 'Alamat Detail',
         }
-class EmployeeForm(forms.ModelForm):
-    class Meta:
-        model = Employee
-        fields = '__all__'
-        exclude = ['id']
