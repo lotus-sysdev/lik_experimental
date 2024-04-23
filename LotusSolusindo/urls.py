@@ -26,12 +26,6 @@ urlpatterns = [
     path('', include("page1.urls")),
     path('api/', include("lik.urls")),
     path('admin/', admin.site.urls),
-    path('token/', 
-          jwt_views.TokenObtainPairView.as_view(), 
-          name ='token_obtain_pair'),
-     path('token/refresh/', 
-          jwt_views.TokenRefreshView.as_view(), 
-          name ='token_refresh')
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler404 = 'page1.views.page_not_found'

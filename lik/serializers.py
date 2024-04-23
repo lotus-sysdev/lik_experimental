@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Report
+from .models import Report, Lokasi
 
 class ReportSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,3 +16,8 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
+
+class LokasiSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lokasi
+        fields = '__all__'
