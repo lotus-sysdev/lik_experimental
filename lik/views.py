@@ -6,13 +6,12 @@ from rest_framework import generics, status
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
-from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate
 
 from .serializers import *
 from .models import *
 from .forms import *
-
 # Create your views here.
 def delete_selected_rows(request, model, key):
     if request.method == 'POST':
@@ -126,11 +125,14 @@ def register_user(request):
 @api_view(['POST'])
 def login_user(request):
     username = request.data.get('username')
-    password = request.data.get('password')
+    password = request.data.get('password') 
     user = authenticate(username=username, password=password)
     if user is not None:
         token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key}, status=status.HTTP_200_OK)
+        # Get user's groups
+        groups = list(user.groups.values_list('id', flat=True))
+        # Include groups in response data
+        return Response({'token': token.key, 'groups': groups}, status=status.HTTP_200_OK)
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['POST'])
@@ -138,3 +140,30 @@ def login_user(request):
 def logout_user(request):
     request.user.auth_token.delete()
     return Response(status=status.HTTP_200_OK)
+
+@permission_classes([IsAuthenticated])
+def tujuan_options_list(request):
+    # Sample dictionary data
+    options = [
+        {'label': 'Sumatra Prima Fiberboard', 'value': 'spf'},
+        {'label': 'Cipta Mandala', 'value': 'cipta-mandala'},
+    ]
+    return JsonResponse(options, safe=False)
+
+@permission_classes([IsAuthenticated])
+def lokasi_options_list(request):
+    # Sample dictionary data
+    lokasi_options = [
+        {'label': 'Muara Enim', 'value': 'muara-enim'},
+        {'label': 'Perkebunan Rakyat', 'value': 'perkebunan-rakyat'},
+        {'label': 'Gunung Rajo', 'value': 'gunung-rajo'},
+    ]
+    return JsonResponse(lokasi_options, safe=False)
+
+class GroupLokasiListAPIView(generics.ListAPIView):
+    serializer_class = LokasiSerializer
+
+    def get_queryset(self):
+        group_id = self.kwargs['group_id']
+        lokasi_ids = Group_Lokasi.objects.filter(group_id=group_id).values_list('lokasi_id', flat=True)
+        return Lokasi.objects.filter(id__in=lokasi_ids)

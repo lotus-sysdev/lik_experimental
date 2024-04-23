@@ -2,68 +2,69 @@
 
 <html>
   <head>
-    {% block title %}Delivery Data Table{% endblock %}
+    {% block title %}Employee Data Table{% endblock %}
   </head>
   <body>
     {% block content %}
-    <h1>Delivery List</h1>
+    <h1>Employee List</h1>
     {% csrf_token %}
     <div>
       <table
-        id="deliveryTable"
+        id="employeeTable"
         class="table table-bordered table-striped w-100 table-lg table-responsive-lg"
       >
       <div class="form-inline mb-2">
         <select id="columnFilter" class="form-control btn-info">
-          <option value="0">Judul</option>
-          <option value="1">Waktu Mulai</option>
-          <option value="2">Waktu Selesai</option>
-          <option value="3">Kurir</option>
-          <option value="4">Kendaraan</option>
-          <option value="5">Keterangan</option>
-          <option value="6">Lokasi Awal</option>
-          <option value="7">Destinasi</option>
-          <option value="8">Nama Paket</option>
-          <option value="9">Dimensi Paket</option>
-          <option value="10">Berat Paket</option>
+            <option value="0">Employee ID</option>
+            <option value="1">Name</option>
+            <option value="2">Position</option>
+            <option value="3">Department/Unit</option>
+            <option value="4">Join Date</option>
+            <option value="5">Phone No.</option>
+            <option value="6">Gender</option>
+            <option value="7">Status</option>
+            <option value="8">Birth Place</option>
+            <option value="9">Birth Date</option>
+            <option value="10">ID No.</option>
+            <option value="11">Bank No.</option>
           <!-- Add more options for additional columns -->
         </select>
         <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
       </div>
         <thead class="thead-light">
           <tr>
-            <th>ID</th>
-            <th>Judul</th>
-            <th>Waktu Mulai</th>
-            <th>Waktu Sampai</th>
-            <th>Kurir</th>
-            <th>Kendaraan</th>
-            <th>Lokasi Awal</th>
-            <th>Destinasi</th>
-            <th>Keterangan</th>
-            <th>Nama Paket</th>
-            <th>Dimensi Paket</th>
-            <th>Berat Paket</th>
-            <th>Edit/Delete</th>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Position</th>
+            <th>Department/Unit</th>
+            <th>Join Date</th>
+            <th>Phone No.</th>
+            <th>Gender</th>
+            <th>Status</th>
+            <th>Birth Place</th>
+            <th>Birth Date</th>
+            <th>ID No.</th>
+            <th>Bank No.</th>
+            <th>Edit</th>
           </tr>
         </thead>
         <tbody class="tbody">
-          {% for events in entities %}
+          {% for employee in entities %}
           <tr>
-            <td>{{ events.id }}</td>
-            <td>{{ events.title }}</td>
-            <td>{{ events.start }}</td>
-            <td>{{ events.end }}</td>
-            <td>{{ events.messenger }}</td>
-            <td>{{ events.vehicle }}</td>
-            <td>{{ events.start_location }}</td>
-            <td>{{ events.destination }}</td>
-            <td>{{ events.keterangan }}</td>
-            <td>{{ events.package_name }}</td>
-            <td>{{ events.package_dimensions }}</td>
-            <td>{{ events.package_mass }}</td>
+            <td>{{employee.employeeId }}</td>
+            <td>{{ employee.name }}</td>
+            <td>{{ employee.position }}</td>
+            <td>{{ employee.department }}</td>
+            <td>{{ employee.join_date }}</td>
+            <td>{{ employee.no_telp }}</td>
+            <td>{{ employee.gender }}</td>
+            <td>{{ employee.status }}</td>
+            <td>{{ employee.tempat_lahir }}</td>
+            <td>{{ employee.tanggal_lahir }}</td>
+            <td>{{ employee.no_ktp }}</td>
+            <td>{{ employee.no_rek }}</td>
             <td>
-              <a href="{% url 'delivery_detail' events.id %}">View</a>
+              <a href="{% url 'employee_detail' employee.id %}">View</a>
             </td>
           </tr>
           {% endfor %}
@@ -73,7 +74,7 @@
     <script>
       var table;
       function initializeDataTable() {
-        table = new DataTable("#deliveryTable", {
+        table = new DataTable("#employeeTable", {
           select: {
           style: "multi",
         },
@@ -126,7 +127,7 @@
         if (confirm('Are you sure you want to delete the selected rows?')) {
             const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
             $.ajax({
-                url: '{% url "delete_selected_rows_delivery" %}',
+                url: '{% url "delete_selected_rows_employee" %}',
                 type: 'POST',
                 data: {selected_ids: selectedIDs, csrfmiddlewaretoken: csrfToken },
                 dataType: 'json',
@@ -165,6 +166,7 @@
         }
       });
     </script>
+    <a href="/add_employee">Add Employee</a>
     {% endblock %}
   </body>
 </html>

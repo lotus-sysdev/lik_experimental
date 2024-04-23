@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+from datetime import timedelta
 import os
 from pathlib import Path
 import phonenumber_field
@@ -28,7 +29,7 @@ SECRET_KEY = 'django-insecure-rj@lh5#&q==hsgz0-_+p!v0dykoosn!^4%nxyj)-j^&uhy1r*w
 DEBUG = True
 # DEBUG = False
 
-ALLOWED_HOSTS = ["159.223.33.190", "127.0.0.1", "localhost", "192.168.1.23", "192.168.160.169"]
+ALLOWED_HOSTS = ["159.223.33.190", "127.0.0.1", "localhost", "192.168.1.23", "192.168.1.49"]
 
 LOGIN_URL = 'login/'
 
@@ -74,6 +75,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticated',
+    #     )
 }
 TOKEN_EXPIRE_SECONDS = 60 * 60 * 24
 
@@ -150,6 +154,7 @@ TIME_ZONE = 'Asia/Jakarta'
 USE_I18N = True
 
 USE_TZ = True
+
 
 
 # Static files (CSS, JavaScript, Images)

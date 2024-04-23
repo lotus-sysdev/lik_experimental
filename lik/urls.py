@@ -12,5 +12,8 @@ urlpatterns = [
     path('register_user/', register_user, name="register_user"),
     path('login_user/', login_user, name="login_user"),
     path('logout_user/', logout_user, name="logout_user"),
+    path('tujuan_options/', tujuan_options_list, name='tujuan_options'),
+    path('lokasi_options/', lokasi_options_list, name='lokasi_options'),
+    path('group/<int:group_id>/lokasi/', GroupLokasiListAPIView.as_view(), name='group_lokasi_list'),
 ]
 
