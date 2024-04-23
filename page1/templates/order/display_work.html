@@ -54,11 +54,11 @@
           <td>{{ work.item }}</td>
           <td>{{ work.revenue_PO }}</td>
           <td>{{ work.nomor_PO }}</td>
-          <td>{{ work.tanggal_PO }}</td>
-          <td>{{ work.tanggal_process }}</td>
-          <td>{{ work.tanggal_input_accurate }}</td>
-          <td>{{ work.tanggal_pengiriman_barang }}</td>
-          <td>{{ work.tanggal_pengiriman_invoice }}</td>
+          <td>{{ work.tanggal_PO|date:"Y/m/d" }}</td>
+          <td>{{ work.tanggal_process|date:"Y/m/d" }}</td>
+          <td>{{ work.tanggal_input_accurate|date:"Y/m/d" }}</td>
+          <td>{{ work.tanggal_pengiriman_barang|date:"Y/m/d" }}</td>
+          <td>{{ work.tanggal_pengiriman_invoice|date:"Y/m/d" }}</td>
           <td>{{ work.status }}</td>
           <td>
             <a href="{% url 'work_detail' work.id %}">View</a>
@@ -81,12 +81,10 @@
               if (type === "display") {
                 if (data.startsWith("IDR")) {
                   // Replace commas with periods and periods with commas
-                  data = data
-                    .replace(/,/g, "#")
-                    .replace(/\./g, ",")
-                    .replace(/#/g, ".");
-                  data = data.substr(0, 3) + " " + data.substr(3);
-                  return data;
+                  data = data.replace(/,/g, '#').replace(/\./g, ',').replace(/#/g, '.');
+                  data = data.substr(0, data.indexOf(',')); // Get substring until the first comma
+                  data = data.substr(0, 3) + ' ' + data.substr(3);
+                  return data
                 } else if (data.startsWith("$")) {
                   data = data.replace("$", "USD");
                   data = data.substr(0, 3) + " " + data.substr(3);

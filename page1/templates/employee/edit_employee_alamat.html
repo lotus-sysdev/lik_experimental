@@ -3,65 +3,19 @@
 <html>
 
 <head>
-    {% block title %}Edit Supplier Alamat{% endblock %}
+    {% block title %}Edit Employee Alamat{% endblock %}
 </head>
 
 <body>
     {% block content %}
-    <h2>Edit Supplier Alamat</h2>
+    <h2>Edit Employee Alamat</h2>
     <div class="form-group w-50">
       <form method="post" class="mt-3">
-        {% csrf_token %}
-        <div class="mb-3 d-flex flex-column">
-          <label class="form-label">{{ form.type.label }}</label>
-          <div class="form-check form-check-inline">
-            {% for radio in form.type %}
-              <div class="form-check form-check-inline">
-                {{ radio }}
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-    
-        <div class="mb-3">
-          <!-- Other form fields -->
-          {{ form.provinsi.label_tag }}
-          {{ form.provinsi }}
-        </div>
-    
-        <div class="mb-3">
-          <!-- Additional form fields -->
-          {{ form.kota.label_tag }}
-          {{ form.kota }}
-        </div>
-    
-        <div class="mb-3">
-          <!-- More form fields -->
-          {{ form.kecamatan.label_tag }}
-          {{ form.kecamatan }}
-        </div>
-    
-        <div class="mb-3">
-          <!-- Remaining form fields -->
-          {{ form.kelurahan.label_tag }}
-          {{ form.kelurahan }}
-        </div>
-
-        <div class="mb-3">
-          <!-- Remaining form fields -->
-          {{ form.kode_pos.label_tag }}
-          {{ form.kode_pos }}
-        </div>
-    
-        <div class="mb-3">
-          <!-- Textarea field -->
-          {{ form.detail.label_tag }}
-          {{ form.detail }}
-        </div>
+        {% csrf_token %} {{ form.as_p }}
         <div>
           <button type="submit" class="btn btn-primary">Save Changes</button>
           <a
-            href="{% url 'supplier_detail' supp_id=alamat.supplier_id.pk %}"
+            href="{% url 'employee_detail' id=alamat.employee_id.pk %}"
             class="btn btn-secondary ml-2"
             >Back to Customer Detail</a
           >
@@ -141,6 +95,7 @@
                   );
                 });
                 updateKecamatan(); // Update kecamatan dropdown
+                updateKelurahan(); // Update kelurahan dropdown
               },
             });
           }
@@ -171,24 +126,6 @@
             });
           }
         });
-
-        $("#id_kelurahan").change(function () {
-          var kelurahanId = $(this).val();
-          console.log("Kelurahan ID: " + kelurahanId)
-          if (kelurahanId !== ""){
-            $.ajax({
-              url: "{% url 'get_kode_pos' %}",
-              data: {
-                kelurahan_id : kelurahanId
-              },
-              dataType: "json",
-              success: function (data) {
-                var kodePos = data.kode_pos;
-                $("#id_kode_pos").val(kodePos);
-              },
-            })
-          }
-        })
 
         function updateKota() {
           var cityId = $("#id_kota").val();
@@ -245,27 +182,6 @@
 
         function updateKelurahan() {
           var kelurahanId = $("#id_kelurahan").val();
-          updateDetailWithKodePos(kelurahanId)
-        }
-
-        function updateDetailWithKodePos(regionId) {
-          if (regionId !== "") {
-            $.ajax({
-                url: "{% url 'get_kode_pos' %}",
-                data: {
-                    kelurahan_id: regionId  // Use regionId as kelurahan_id for simplicity
-                },
-                dataType: "json",
-                success: function (data) {
-                    var kodePos = parseInt(data.kode_pos)
-                    console.log(kodePos)
-                    $("#id_kode_pos").val(kodePos)
-                },
-                error: function (xhr, status, error) {
-                    console.error("AJAX Error:", error);  // Log AJAX error to console for debugging
-                }
-            });
-          }
         }
       });
     </script>

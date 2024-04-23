@@ -5,6 +5,7 @@ from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 from djmoney.models.fields import MoneyField
 from djmoney.models.validators import MinMoneyValidator
+from django.core.validators import MaxValueValidator
 from django_measurement.models import MeasurementField
 from measurement.measures import Mass
 
@@ -78,7 +79,7 @@ class CustomerPIC(models.Model):
     Role = models.CharField(max_length=50)
 
     def __str__(self):
-        return f"{self.customer_id.nama_pt}-{self.nama}"
+        return f"{self.nama}"
 
 class SupplierPIC(models.Model):
     class Meta:
@@ -90,6 +91,9 @@ class SupplierPIC(models.Model):
     email = models.EmailField()
     telp = PhoneNumberField()
     Role = models.CharField(max_length=50)
+    
+    def __str__(self):
+        return f"{self.customer_id.nama_pt}-{self.nama}"
 
 class Category(models.Model):
     class Meta:
@@ -214,7 +218,16 @@ class Kelurahan(models.Model):
     name = models.CharField(max_length=100)
     def __str__(self):
         return self.name
-
+    
+class KodePos(models.Model):
+    class Meta:
+        verbose_name = "Kode Pos"
+        verbose_name_plural = "Kode Pos"
+    kode_pos = models.IntegerField()
+    kelurahan_id = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    def __str__(self):
+        return str(self.kode_pos)
+    
 class CustomerAlamat(models.Model):
     class Meta:
         verbose_name = "Customer Address"
@@ -226,6 +239,7 @@ class CustomerAlamat(models.Model):
         ('pengiriman', 'Alamat Pengiriman'),
     )
     type = models.CharField(max_length=15, choices=TYPE_CHOICES)
+    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
     kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
     kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
@@ -246,6 +260,7 @@ class SupplierAlamat(models.Model):
         ('pengiriman', 'Alamat Pengiriman'),
     )
     type = models.CharField(max_length=15, choices=TYPE_CHOICES)
+    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
     kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
     kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
@@ -391,6 +406,7 @@ class DeliveryAddresses(models.Model):
     kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
     kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
     kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     detail = models.CharField(max_length=500)
     
     def __str__(self):

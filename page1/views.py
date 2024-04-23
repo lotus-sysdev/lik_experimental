@@ -12,6 +12,7 @@ from django.core import serializers
 from django.core.files.base import ContentFile
 from django.core import serializers
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import redirect, render, get_object_or_404
 from django.conf import settings
 from django.utils import timezone
@@ -241,6 +242,7 @@ def delete_supplier_alamat(request, alamat_id):
 @login_required
 @GA_required
 def add_item(request):
+    form_instance = ItemForm(request.POST or None)
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES)
         if form.is_valid():
@@ -261,8 +263,7 @@ def add_item(request):
                 # image_path = os.path.join(settings.MEDIA_ROOT, image_name)
                 resized_image_name = f"media_{nama_cleaned}_{item.curr_datetime}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
                 resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
-                img.save(resized_image_path)
-                
+                img.save(resized_image_path)                
 
                 # os.remove(image_path)
 
@@ -274,8 +275,7 @@ def add_item(request):
     else:
         form = ItemForm()
 
-    return render(request, 'item/add_item.html', {'item_form': form})
-
+    return render(request, 'item/add_item.html', {'item_form': form_instance})
 
 # -------------------- Display Tables -------------------- #
 @login_required
@@ -293,15 +293,16 @@ def display_supplier(request):
 def display_item(request):
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
+    item_sumber = ItemSumber.objects.all()
 
     if start_date_str and end_date_str:
         start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
-        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1)
+        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
         entities = Items.objects.filter(tanggal_pemesanan__range=[start_date, end_date])
     else:
         entities = Items.objects.all()
 
-    return render(request, 'item/display_item.html', {'entities': entities})
+    return render(request, 'item/display_item.html', {'entities': entities, 'item_sumber':item_sumber})
 
 
 # -------------------- Customer Functions -------------------- #
@@ -440,6 +441,27 @@ def approve_item(request, SKU):
     # Redirect to the item list or any other appropriate view
     return redirect('display_item')
 
+def get_customer_pics(request):
+    if request.method == 'GET':
+        customer_id = request.GET.get('customer_id')
+        pics = CustomerPIC.objects.filter(customer_id=customer_id).values('id', 'nama')
+        return JsonResponse(list(pics), safe=False)
+    return JsonResponse ({'error': 'Invalid Request'})
+
+def get_customer_by_pic(request):
+    if request.method == 'GET':
+        pic_id = request.GET.get('pic_id')
+        # try: 
+        customer_pic = CustomerPIC.objects.get(id=pic_id)
+        customer_id = customer_pic.customer_id.cust_id
+        # print(customer_pic)
+        return JsonResponse({'customer_id' : customer_id})
+        # except:
+        #     return JsonResponse({'customer_id' : None})
+    else: 
+        return JsonResponse({'customer_id': None})
+
+
 # -------------------- Item Sumber Functions -------------------- #
 @login_required
 @GA_required
@@ -573,6 +595,55 @@ def delete_purchase(request, id):
 @Messenger_Forbidden
 def delete_work(request, id):
     return delete_entity(request, WorkOrder, 'id', id)
+
+
+def get_customer_pics(request):
+    if request.method == 'GET':
+        customer_id = request.GET.get('customer_id')
+        pics = CustomerPIC.objects.filter(customer_id=customer_id).values('id', 'nama')
+        return JsonResponse(list(pics), safe=False)
+    else:
+        return JsonResponse ({'error': 'Invalid Request'})
+
+def get_customer_by_pic(request):
+    if request.method == 'GET':
+        pic_id = request.GET.get('pic_id')
+        # try: 
+        customer_pic = CustomerPIC.objects.get(id=pic_id)
+        customer_id = customer_pic.customer_id.cust_id
+        # print(customer_pic)
+        return JsonResponse({'customer_id' : customer_id})
+        # except:
+        #     return JsonResponse({'customer_id' : None})
+    else: 
+        return JsonResponse({'customer_id': None})
+
+def get_customer_item(request):
+    if request.method == 'GET':
+        customer_id = request.GET.get('customer_id')
+        items = Items.objects.filter(customer=customer_id, is_approved=True).values('SKU', 'nama', 'price')
+        return JsonResponse(list(items), safe=False)
+    else:
+        return JsonResponse ({'error': 'Invalid Request'})
+
+def get_item_details(request):
+    if request.method == 'GET':
+        item_id = request.GET.get('item_id')
+        try:
+            item = Items.objects.get(SKU=item_id)
+            # Assuming 'price' is a field in your Item model
+            item_details = {
+                'SKU': item.SKU,
+                'nama': item.nama,
+                'price': str(item.price),
+                'price_currency': item.price_currency,
+            }
+            return JsonResponse(item_details)
+        except Items.DoesNotExist:
+            return JsonResponse({'error': 'Item not found'}, status=404)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+
   
 
 # -------------------- Login, Register, Logout Functions -------------------- #
@@ -1218,6 +1289,17 @@ def get_region_details(request):
 
     return JsonResponse(data)
 
+def get_kode_pos(request):
+    kelurahan_id = request.GET.get('kelurahan_id')
+    if kelurahan_id:
+        try:
+            kelurahan = KodePos.objects.get(kelurahan_id=kelurahan_id)
+            kode_pos = kelurahan.kode_pos
+            return JsonResponse({'kode_pos': kode_pos})
+        except ObjectDoesNotExist:
+            return JsonResponse({'kode_pos': ''})
+    return JsonResponse({'error': 'Invalid Kelurahan ID'}, status=400)
+
 def add_employee(request):
     return add_entity_view(request, EmployeeForm, 'employee/add_employee.html', 'display_employee')
 
@@ -1234,3 +1316,31 @@ def edit_employee(request, id):
 
 def delete_employee(request, id):
     return delete_entity(request, Employee, 'id', id)
+
+def add_employee_alamat(request, id):
+    redirect_url  = reverse('employee_detail', args=(id,))
+    return add_entity(request, id, Employee, EmployeeAlamatForm, 'employee/add_employee_alamat.html', 'id', 'employee_id', {'employee_id': id}, redirect_url=redirect_url)
+
+
+def edit_customer_alamat(request, alamat_id):
+    alamat = get_object_or_404(CustomerAlamat, id=alamat_id)
+    form = CustAlamatForms(request.POST or None, instance=alamat)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('customer_detail', cust_id=alamat.customer_id.pk)
+    return render(request, 'alamat/edit_customer_alamat.html', {'form': form, 'alamat': alamat})
+
+def edit_employee_alamat(request, alamat_id):
+    alamat = get_object_or_404(EmployeeAlamat, id=alamat_id)
+    form = EmployeeAlamatForm(request.POST or None, instance=alamat)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('employee_detail', id=alamat.employee_id.pk)
+    return render(request, 'employee/edit_employee_alamat.html', {'form': form, 'alamat': alamat})
+
+def delete_employee_alamat(request, alamat_id):
+    return delete_entity(request, EmployeeAlamat, 'id', alamat_id)

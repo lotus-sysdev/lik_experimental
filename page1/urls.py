@@ -132,6 +132,7 @@ urlpatterns = [
     path('get_kecamatan/', get_kecamatan, name='get_kecamatan'),
     path('get_kelurahan/', get_kelurahan, name='get_kelurahan'),
     path('get_region_details/', get_region_details, name='get_region_details'),
+    path('get_kode_pos/', get_kode_pos, name='get_kode_pos'),
 
     #Employee 
     path('add_employee/', add_employee, name='add_employee'),
@@ -139,5 +140,18 @@ urlpatterns = [
     path('employee_detail/<int:id>', employee_detail, name='employee_detail'),
     path('edit_employee/<int:id>', edit_employee, name='edit_employee' ),
     path('delete_employee/<int:id>', delete_employee, name='delete_employee'),
+
+    # Employee Alamat
+    path('add_employee_alamat/<int:id>/', add_employee_alamat, name='add_employee_alamat'),
+    path('edit_employee_alamat/<int:alamat_id>/', edit_employee_alamat, name='edit_employee_alamat'),
+    path('delete_employee_alamat/<int:alamat_id>/', delete_employee_alamat, name='delete_employee_alamat'),
+
+    # Get PICs
+    path('get_customer_pics/', get_customer_pics, name='get_customer_pics'),
+    path('get_customer_by_pic/', get_customer_by_pic, name='get_customer_by_pic'),
+
+    # Get Items
+    path('get_customer_item/', get_customer_item, name='get_customer_item'),
+    path('get_item_details/', get_item_details, name='get_item_details'),   
 ]
 

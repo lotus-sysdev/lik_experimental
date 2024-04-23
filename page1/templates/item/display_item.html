@@ -4,122 +4,115 @@
 {% block title %}Item Data Table{% endblock %}
 
 {% block content %}
-    <style>
-      .custom-dropdown {
-        background-color: royalblue; /* Background color */
-        color: white;
-        border-color: royalblue; /* Border color */
-      }
-    </style>
-    <h1>Item List</h1>
-    <table
-      id="itemTable"
-      class="table table-bordered table-striped w-100 table-responsive-lg"
-    >
-    <div class="form-inline mb-2">
-      <select id="columnFilter"  class="form-control btn-info">
-        <option value="0">Upload Type</option>
-        <option value="1">Tanggal Input</option>
-        <option value="2">Tanggal Pesan</option>
-        <option value="3">Customer</option>
-        <option value="4">PIC</option>
-        <option value="5">SKU</option>
-        <option value="6">Nama</option>
-        <option value="7">Kategori</option>
-        <option value="8">Catatan</option>
-        <option value="9">Jumlah</option>
-        <option value="10">Harga</option>
-        <option value="12">Link</option>
-        <option value="13">Approved</option>
+<style>
+  .custom-dropdown {
+    background-color: royalblue; /* Background color */
+    color: white;
+    border-color: royalblue; /* Border color */
+  }
+</style>
+<h1>Item List</h1>
+<table
+    id="itemTable"
+    class="table table-bordered table-striped w-100 table-responsive-lg"
+>
+  <div class="form-inline mb-2">
+    <select id="columnFilter"  class="form-control btn-info">
+      <option value="0">Upload Type</option>
+      <option value="1">Tanggal Input</option>
+      <option value="2">Tanggal Pesan</option>
+      <option value="3">Customer</option>
+      <option value="4">PIC</option>
+      <option value="5">SKU</option>
+      <option value="6">Nama</option>
+      <option value="7">Kategori</option>
+      <option value="8">Catatan</option>
+      <option value="9">Jumlah</option>
+      <option value="10">Harga</option>
+      <option value="12">Link</option>
+      <option value="13">Approved</option>
 
-        <!-- Add more options for additional columns -->
-      </select>
-      <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
-      <button id="searchButton" class="btn btn-primary">Search</button>
-      <button id="resetButtonCol" class="btn btn-secondary">Reset</button>
-      <button id="filterDuplicatesButton" class="btn btn-warning">Check for Duplicates</button>
-    </div>
+      <!-- Add more options for additional columns -->
+    </select>
+    <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
+    <button id="searchButton" class="btn btn-primary">Search</button>
+    <button id="resetButtonCol" class="btn btn-secondary">Reset</button>
+    <button id="filterDuplicatesButton" class="btn btn-warning">Check for Duplicates</button>
+  </div>
+  
+  <div class="form-inline mb-2">
+    <label class="mr-2" for="startDate">Start Date:</label>
+    <input type="date" id="startDate" class="form-control mr-2">
+    <label class="mr-2" for="endDate">End Date:</label>
+    <input type="date" id="endDate" class="form-control mr-2">
+
+    <button id="filterButton" class="btn btn-primary">Apply Filter</button>
     
-    <div class="form-inline mb-2">
-      <label class="mr-2" for="startDate">Start Date:</label>
-      <input type="date" id="startDate" class="form-control mr-2">
-      <label class="mr-2" for="endDate">End Date:</label>
-      <input type="date" id="endDate" class="form-control mr-2">
+    <select id="dateRange" class="form-control ml-2 btn-info">
+      <option value="">Select Date Range</option>
+      <option value="7">Last 7 days</option>
+      <option value="30">Last 30 days</option>
+      <option value="60">Last 60 days</option>
+      <option value="90">Last 90 days</option>
+      <option value="ytd">Current year to date</option>
+      <option value="365">Last 1 year (365 days)</option>
+      <option value="730">Last 2 years (730 days)</option>
+    </select>
 
-      <button id="filterButton" class="btn btn-primary">Apply Filter</button>
-      
-      <select id="dateRange" class="form-control ml-2 btn-info">
-        <option value="">Select Date Range</option>
-        <option value="7">Last 7 days</option>
-        <option value="30">Last 30 days</option>
-        <option value="60">Last 60 days</option>
-        <option value="90">Last 90 days</option>
-        <option value="ytd">Current year to date</option>
-        <option value="365">Last 1 year (365 days)</option>
-        <option value="730">Last 2 years (730 days)</option>
-      </select>
+    <button id="resetButton" class="btn btn-secondary ml-2">Reset</button>
+  </div>
 
-      <button id="resetButton" class="btn btn-secondary ml-2">Reset</button>
-    </div>
-
-    <thead class="thead-light">
-      {% csrf_token %}
-      <tr>
-        <th>Upload Type</th>
-        <th>Tanggal Input</th>
-        <th>Tanggal Pesan</th>
-        <th>Customer</th>
-        <th>PIC</th>
-        <th>SKU</th>
-        <th>Nama</th>
-        <th>Category</th>
-        <th>Catatan</th>
-        <th>Quantity</th>
-        <th>Price</th>
-        <th>Gambar</th>
-        <th>Link</th>
-        <th>Approved</th>
-        <th>Edit/Delete</th>
-      </tr>
-    </thead>
+  <thead class="thead-light">
+    {% csrf_token %}
+    <tr>
+      <th>Upload Type</th>
+      <th>Tanggal Input</th>
+      <th>Tanggal Pesan</th>
+      <th>Customer</th>
+      <th>PIC</th>
+      <th>SKU</th>
+      <th>Nama</th>
+      <th>Catatan</th>
+      <th>Category</th>
+      <th>Quantity</th>
+      <th>Price</th>
+      <th>Gambar</th>
+      <th>Link</th>
+      <th>Status (Approve)</th>
+      <th>Edit/Delete</th>
+    </tr>
+  </thead>
   <tbody>
-      {% for i in entities %}
-      <tr {% if i.is_approved %} style="background-color: #ccffc7;" {% endif %}>
-          <td>{{i.upload_type}}</td>
-          <td>{{ i.Tanggal }}</td>
-          <td>{{ i.tanggal_pemesanan }}</td>
-          <td>
-            {% if i.customer %}
-              {{i.customer}}
+    {% for i in entities %}
+    <tr {% if i.is_approved %} style="background-color: #ccffc7;" {% endif %}>
+        <td>{{i.upload_type}}</td>
+        <td>{{ i.Tanggal|date:"Y/m/d" }}</td>
+        <td>{{ i.tanggal_pemesanan|date:"Y/m/d" }}</td>
+        <td>{{ i.customer }}</td>
+        <td>{{ i.pic }}</td>
+        <td>{{ i.SKU }}</td>
+        <td>{{ i.nama }}</td>
+        <td>{{ i.catatan }}</td>
+        <td>{{ i.category.name }}</td>
+        <td>{{ i.quantity }} {{ i.unit }}</td>
+        <td>{{ i.price }}</td>
+        <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}" /></td>
+        <td>
+          {% for sumber in i.itemsumber_set.all %}
+            {% if sumber.url %}
+                <a href="{{ sumber.url }}">{{ sumber.url|slice:":20" }}{% if sumber.url|length > 20 %}...{% endif %}</a>
             {% else %}
-              None
+                None
             {% endif %}
-          </td>
-          <td>{{ i.pic }}</td>
-          <td>{{ i.SKU }}</td>
-          <td>{{ i.nama|slice:":50" }}{% if i.nama|length > 50%}...{% endif %}</td>
-          <td>{{ i.category.name }}</td>
-          <td>{{ i.catatan }}</td>
-          <td>{{ i.quantity }} {{i.unit}}</td>
-          <td>{{ i.price }}</td>
-          <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}" /></td>
-          <td>
-            {% for sumber in i.itemsumber_set.all %}
-              {% if sumber.url %}
-                  <a href="{{ sumber.url }}">{{ sumber.url|slice:":25" }}{% if sumber.url|length > 25 %}...{% endif %}</a>
-              {% else %}
-                  None
-              {% endif %}
-            {% endfor %}
-          </td>
-          <td>{% if i.is_approved %}Yes{% else %}No{% endif %}</td>
-          <td><a href="{% url 'item_detail' i.SKU %}">View</a></td>
-      </tr>
-      {% endfor %}
+          {% endfor %}
+        </td>
+        <td>{% if i.is_approved %}Yes{% else %}No{% endif %}</td>
+        <td><a href="{% url 'item_detail' i.SKU %}">View</a></td>
+    </tr>
+    {% endfor %}
   </tbody>
 </table>
 <a href="/add_item">Add Item</a><br/>
-</div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -132,7 +125,7 @@
       style: "multi",
     },
     columnDefs: [ {
-        targets: 10, // Target the first column (adjust the index as needed)
+        targets: 10,
         render: function ( data, type, row ) {
             if (type === 'display') {
                 if (data.startsWith('IDR')) {
@@ -165,7 +158,8 @@
           }
           return data;
       }
-    } ],
+    }],
+    columns: [{ visible: false }, { visible: false }, null, null, null, { visible: false }, { visible: true, width: "15%"}, { visible: true, width: "20%"}, null, null, { visible: true, width: "9%"}, null, null, null, null],
     lengthMenu: 
     [[10, 25, 50, 100, -1],
     [10, 25, 50, 100, "All"]
@@ -190,6 +184,16 @@
               className: "btn-danger",
               action: deleteSelectedRows,
             },
+            {
+              extend: 'copy',
+              text: 'Copy',
+              className:'btn-warning',
+              header: false,          // Disable export header tabla
+              exportOptions: {
+                  columns: [6,10]      // Select columns to be exported
+              },
+              title: null  
+            }, 
             { 
               text: "{% if request.user|has_group:'Admin' %} Approve {% endif %}", 
               className: "btn-success",
@@ -258,7 +262,8 @@
         console.error("Table is not initialized.");
         return;
     }
-        var selectedIDs = table.rows('.selected').data().toArray().map(row => row[4]); // Get SKUs of selected rows using DataTables API
+        var selectedIDs = table.rows('.selected').data().toArray().map(row => row[5]); // Get SKUs of selected rows using DataTables API
+        console.log(selectedIDs)
         selectedIDs.forEach(function(value) {
         console.log('selected_ids[]:', value);
         });
@@ -390,9 +395,18 @@
         } else if (dateRange === '30') {
             endDate = formatDate(new Date()); // Today's date
             startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 29))); // Date 30 days ago
+        } else if (dateRange === '60') {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 59))); // Date 30 days ago
+        } else if (dateRange === '90') {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 89))); // Date 30 days ago
         } else if (dateRange === '365') {
             endDate = formatDate(new Date()); // Today's date
             startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 364))); // Date 365 days ago
+        } else if (dateRange === '730') {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 729))); // Date 365 days ago
         } else if (dateRange === 'ytd') {
             endDate = formatDate(new Date()); // Today's date
             startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year

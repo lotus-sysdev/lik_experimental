@@ -69,6 +69,11 @@ MIDDLEWARE = [
     'admin_reorder.middleware.ModelAdminReorder',
     'corsheaders.middleware.CorsMiddleware',
 ]
+
+SERIALIZATION_MODULES = {
+    "json": "djmoney.serializers.json"
+}
+
 # CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
