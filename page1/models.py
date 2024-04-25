@@ -501,7 +501,7 @@ class EmployeeAlamat(models.Model):
 
 class Prospect(models.Model):
     prospect_id = models.AutoField(primary_key=True)
-    tanggal = models.DateField(default=timezone.now())
+    tanggal = models.DateField(default=timezone.now)
     nama = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     telp = PhoneNumberField() 
@@ -517,7 +517,7 @@ class ProspectLog(models.Model):
         verbose_name_plural = 'Prospect Logs'
 
     prospect_id = models.ForeignKey(Prospect, on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(default = timezone.now)
     type = models.CharField(max_length=100) 
     activity = models.CharField(max_length=500)
 

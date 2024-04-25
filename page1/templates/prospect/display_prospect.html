@@ -54,7 +54,7 @@
             <td>{{ prospect.in_charge }}</td>
             <td>{% if prospect.open %}Open{% else %}Closed{% endif %}</td>
             <td>
-              <a href="">Log</a>
+              <a href="{% url 'prospect_log' prospect.prospect_id%}">Log</a>
             </td>
             <td>
               <a href="{% url 'prospect_detail' prospect.prospect_id %}">View</a>

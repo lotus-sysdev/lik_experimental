@@ -23,6 +23,10 @@ from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.urls import reverse
 
+from django.conf import settings
+from django.core.mail import send_mail
+
+
 from .decorators import *
 from .forms import *
 from .models import *
@@ -1399,10 +1403,6 @@ def delete_employee_alamat(request, alamat_id):
 def display_prospect(request):
     return display_entities(request, Prospect, 'prospect/display_prospect.html')
 
-
-from django.conf import Settings
-from django.core.mail import send_mail
-
 @login_required
 def add_prospect(request):
     if request.method == 'POST':
@@ -1437,6 +1437,37 @@ def edit_prospect(request, prospect_id):
 def delete_prospect(request, prospect_id):
     return delete_entity(request, Prospect, 'prospect_id', prospect_id)
 
+# TICKETING FOR PROSPECT
+@login_required
+def prospect_log(request, prospect_id):
+    prospect = get_object_or_404(Prospect, prospect_id=prospect_id)
+    prospect_log = ProspectLog.objects.filter(prospect_id=prospect)
+    context = {'prospect': prospect, 'prospect_id': prospect_id, 'prospect_log': prospect_log}
+
+    return render(request, 'prospect/prospect_log.html', context)
+
+@login_required
+def add_prospect_log(request, prospect_id):
+    redirect_url  = reverse('prospect_log', args=(prospect_id,))
+    return add_entity(request, prospect_id, Prospect, ProspectLogForm, 'prospect/add_prospect_log.html', 'prospect_id', 'prospect_id', {'prospect_id': prospect_id}, redirect_url=redirect_url)
+
+@login_required
+def edit_prospect_log(request, log_id):
+    log = get_object_or_404(ProspectLog, id=log_id)
+    form = ProspectLogForm(request.POST or None, instance=log)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('prospect_log', prospect_id=log.prospect_id.pk)
+    return render(request, 'prospect/edit_prospect_log.html', {'form': form, 'log': log})
+
+@login_required
+def delete_prospect_log(request, log_id):
+    return delete_entity(request, ProspectLog, 'id', log_id)
+
+
+# EMAIL FUNCTIONS
 def send_email_reminder(request):
     threshold_date = timezone.now() - timedelta(days=7)
     outdated = Prospect.objects.filter(tanggal__lte = threshold_date)

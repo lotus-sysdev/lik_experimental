@@ -736,3 +736,34 @@ class ProspectAlamatForm(forms.ModelForm):
             'kode_pos': 'Kode Pos',
             'detail': 'Alamat Detail',
         }
+
+class ProspectLogForm(forms.ModelForm):
+    class Meta:
+        model = ProspectLog
+        fields = '__all__'
+        exclude = ['prospect_id']
+        widgets = {
+            'date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'type': forms.TextInput(attrs={'class': 'form-control'}),
+            'activity': forms.Textarea(attrs={'class': 'form-control'})
+        }
+        labels = {
+            'date': 'Waktu',
+            'activity': 'Aktivitas',
+        }
+        choices = {
+            'type': (
+                ('Meeting','Meeting'),
+                ('Phone Call', 'Panggilan Telepon'),
+                ('Email', 'Email'),
+                ('LinkedIn Outreach', 'Pengiriman Pesan LinkedIn'),
+                ('Networking Event', 'Acara Jaringan'),
+                ('Proposal Submission', 'Pengajuan Proposal'),
+                ('Site Visit', 'Kunjungan Lokasi'),
+                ('Negotiation', 'Negosiasi'),
+                ('Contract Signing', 'Penandatanganan Kontrak'),
+                ('Client Onboarding', 'Pendaftaran Klien'),
+                ),
+        }
+
+    type = forms.ChoiceField(choices=Meta.choices['type'], widget=forms.Select(attrs={'class': 'form-control'}), label='Tipe Kegiatan')

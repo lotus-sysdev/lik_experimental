@@ -160,6 +160,10 @@ urlpatterns = [
     path('add_prospect_alamat/<int:prospect_id>/', add_prospect_alamat, name='add_prospect_alamat'),
     path('edit_prospect_alamat/<int:alamat_id>/', edit_prospect_alamat, name='edit_prospect_alamat'),
     path('delete_prospect_alamat/<int:alamat_id>/', delete_prospect_alamat, name='delete_prospect_alamat'),
+    path('prospect_log/<int:prospect_id>/', prospect_log, name='prospect_log'),
+    path('add_prospect_log/<int:prospect_id>/', add_prospect_log, name='add_prospect_log'),
+    path('edit_prospect_log/<int:log_id>/', edit_prospect_log, name='edit_prospect_log'),
+    path('delete_prospect_log/<int:log_id>/', delete_prospect_log, name='delete_prospect_log'),
 
     # Get PICs
     path('get_customer_pics/', get_customer_pics, name='get_customer_pics'),
