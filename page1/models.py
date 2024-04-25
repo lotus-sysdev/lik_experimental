@@ -174,6 +174,10 @@ class ItemSumber(models.Model):
     url = models.URLField(blank=True, null=True)
     
 class ItemChangeLog(models.Model):
+    class Meta:
+        verbose_name = "Item Change Log"
+        verbose_name_plural = "Item Change Logs"
+
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
     date_time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -479,15 +483,71 @@ class Employee(models.Model):
     no_rek = models.BigIntegerField()
 
 class EmployeeAlamat(models.Model):
+    class Meta:
+        verbose_name = "Employee Address"
+        verbose_name_plural = "Employee Addresses"
+    
     employee_id = models.ForeignKey(Employee, on_delete=models.CASCADE, null=True)
     provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
     kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
     kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
     kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     detail = models.CharField(max_length=500)
 
     def __str__ (self):
         return (f'{self.employee_id.name}') 
+
+
+class Prospect(models.Model):
+    prospect_id = models.AutoField(primary_key=True)
+    tanggal = models.DateField(default=timezone.now())
+    nama = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
+    telp = PhoneNumberField() 
+    in_charge = models.ForeignKey(User, on_delete=models.CASCADE)
+    open = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.nama} (Prospect)"
+    
+class ProspectLog(models.Model):
+    class Meta:
+        verbose_name = 'Prospect Log'
+        verbose_name_plural = 'Prospect Logs'
+
+    prospect_id = models.ForeignKey(Prospect, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+    type = models.CharField(max_length=100) 
+    activity = models.CharField(max_length=500)
+
+class ProspectPIC(models.Model):
+    class Meta:
+        verbose_name = 'Prospect PIC'
+        verbose_name_plural = 'Prospect PICs'
+
+    prospect_id = models.ForeignKey(Prospect, on_delete=models.CASCADE)
+    nama = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
+    telp = PhoneNumberField()
+    Role  = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.nama}"
+
+class ProspectAddress(models.Model):
+    class Meta:
+        verbose_name = 'Prospect Address'
+        verbose_name_plural = 'Prospect Addresses'
+
+    prospect_id = models.ForeignKey(Prospect, on_delete=models.CASCADE)
+    provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
+    kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
+    kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
+    kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
+    detail = models.CharField(max_length=500)
+
 
 class User(AbstractUser):
     email = models.EmailField(max_length = 100, unique=True)
