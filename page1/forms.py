@@ -698,7 +698,7 @@ class ProspectForm(forms.ModelForm):
     class Meta:
         model = Prospect
         fields = '__all__'
-        exclude = ['prospect_id', 'in_charge']
+        exclude = ['prospect_id', 'in_charge', 'is_customer']
         widgets = {
             'tanggal': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'nama': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'PT. Lotus Lestari Raya'}),

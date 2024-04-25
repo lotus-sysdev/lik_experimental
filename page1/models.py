@@ -498,7 +498,6 @@ class EmployeeAlamat(models.Model):
     def __str__ (self):
         return (f'{self.employee_id.name}') 
 
-
 class Prospect(models.Model):
     prospect_id = models.AutoField(primary_key=True)
     tanggal = models.DateField(default=timezone.now)
@@ -507,6 +506,7 @@ class Prospect(models.Model):
     telp = PhoneNumberField() 
     in_charge = models.ForeignKey(User, on_delete=models.CASCADE)
     open = models.BooleanField(default=True)
+    is_customer = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.nama} (Prospect)"

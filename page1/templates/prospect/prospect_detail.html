@@ -26,6 +26,14 @@
                     {% csrf_token %}
                     <button type="button" class="btn btn-danger">Delete</button>
                 </form>
+                <form method="post" action="{% url 'convert_to_customer' prospect_id=entity.prospect_id %}" class="mt-2">
+                    {% csrf_token %}
+                    {% if entity.is_customer %}
+                        <button type="button" class="btn btn-success disabled" disabled>Already a Customer</button>
+                    {% else %}
+                        <button type="submit" class="btn btn-success">Convert to Customer</button>
+                    {% endif %}
+                </form>                
             </div>
 
             <!-- Right column for customer PICS and alamats -->

@@ -1455,7 +1455,6 @@ def add_prospect_log(request, prospect_id):
 def edit_prospect_log(request, log_id):
     log = get_object_or_404(ProspectLog, id=log_id)
     form = ProspectLogForm(request.POST or None, instance=log)
-
     if request.method == 'POST':
         if form.is_valid():
             form.save()
@@ -1466,6 +1465,52 @@ def edit_prospect_log(request, log_id):
 def delete_prospect_log(request, log_id):
     return delete_entity(request, ProspectLog, 'id', log_id)
 
+@login_required
+def convert_to_customer(request, prospect_id):
+    prospect = get_object_or_404(Prospect, pk=prospect_id)
+
+    # Create Customer object
+    customer = Customer(
+        nama_pt=prospect.nama,
+        telp=prospect.telp,
+        # Add other fields as needed
+    )
+    customer.save()
+
+    # Create CustomerPIC object if ProspectPIC exists
+    prospect_pic = prospect.prospectpic_set.first()
+    if prospect_pic:
+        customer_pic = CustomerPIC(
+            customer_id=customer,
+            nama=prospect_pic.nama,
+            email=prospect.email,
+            telp=prospect.telp,
+            Role=prospect_pic.Role
+        )
+        customer_pic.save()
+
+    # Create CustomerAlamat object if ProspectAddress exists
+    prospect_address = prospect.prospectaddress_set.first()
+    if prospect_address:
+        customer_address = CustomerAlamat(
+            customer_id=customer,
+            type='pengiriman',  # Assuming a default type
+            kode_pos=prospect_address.kode_pos,
+            provinsi=prospect_address.provinsi,
+            kota=prospect_address.kota,
+            kecamatan=prospect_address.kecamatan,
+            kelurahan=prospect_address.kelurahan,
+            detail=prospect_address.detail
+        )
+        customer_address.save()
+
+    # Deactivate Prospect
+    prospect.open = False
+    prospect.is_customer = True
+    prospect.save()
+
+    return redirect('display_prospect')  # Redirect to customer detail page
+
 
 # EMAIL FUNCTIONS
 def send_email_reminder(request):
@@ -1473,7 +1518,7 @@ def send_email_reminder(request):
     outdated = Prospect.objects.filter(tanggal__lte = threshold_date)
 
     for prospect in outdated:
-        subject = f"Reminder: Jangan lupa untuk followup dengan {prospect.nama}"
+        subject = f"Reminder: Jangan lupa untuk follow-up dengan {prospect.nama}"
         message = f"Halo {prospect.in_charge.nama},\n\n Ini adalah peringatan untuk follow up dengan prospek: {prospect.nama}.\n\nJika sudah, jangan lupa untuk update di Lotus Universe. \n\n Thank You!"
         from_email = settings.EMAIL_HOST_USER
         to_email = prospect.in_charge.email

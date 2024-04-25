@@ -13,6 +13,10 @@
         id="prospectTable"
         class="table table-bordered table-striped w-100 table-lg table-responsive-lg"
       >
+        <div class="legend mb-2">
+          <div style="display: inline-block; vertical-align: middle; margin-right: 10px; background-color: #ccffc7; width: 20px; height: 20px;"></div>
+          <span style="vertical-align: middle;"> = Customer</span>
+        </div>
         <div class="form-inline mb-2">
           <select id="columnFilter" class="form-control btn-info">
             <option value="1">Tanggal Input</option>
@@ -45,7 +49,7 @@
         </thead>
         <tbody class="tbody">
           {% for prospect in entities %}
-          <tr>
+          <tr {% if prospect.is_customer %} style="background-color: #ccffc7;" {% endif %}>
             <td>{{ prospect.prospect_id }}</td>
             <td>{{ prospect.tanggal|date:"Y/m/d" }}</td>
             <td>{{ prospect.nama }}</td>
