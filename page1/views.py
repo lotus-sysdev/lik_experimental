@@ -155,6 +155,12 @@ def add_supplier_pic(request, supp_id):
     return add_entity(request, supp_id, Supplier, SuppPICForms, 'pic/add_supp_pic.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id}, redirect_url=redirect_url)
 
 @login_required
+def add_prospect_pic(request, prospect_id):
+    redirect_url  = reverse('prospect_detail', args=(prospect_id,))
+    return add_entity(request, prospect_id, Prospect, ProspectPICForms, 'pic/add_prospect_pic.html', 'prospect_id', 'prospect_id', {'prospect_id': prospect_id}, redirect_url=redirect_url)
+
+
+@login_required
 @GA_required
 def add_customer_alamat(request, cust_id):
     redirect_url  = reverse('customer_detail', args=(cust_id,))
@@ -165,6 +171,11 @@ def add_customer_alamat(request, cust_id):
 def add_supplier_alamat(request, supp_id):
     redirect_url  = reverse('supplier_detail', args=(supp_id,))
     return add_entity(request, supp_id, Supplier, SuppAlamattForms, 'alamat/add_supplier_alamat.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id}, redirect_url=redirect_url)
+
+@login_required
+def add_prospect_alamat(request, prospect_id):
+    redirect_url  = reverse('prospect_detail', args=(prospect_id,))
+    return add_entity(request, prospect_id, Prospect, ProspectAlamatForm, 'alamat/add_prospect_alamat.html', 'prospect_id', 'prospect_id', {'prospect_id': prospect_id}, redirect_url=redirect_url)
 
 
 # -------------------- Edit and Delete Alamat and PIC -------------------- #
@@ -237,6 +248,38 @@ def edit_supplier_alamat(request, alamat_id):
 def delete_supplier_alamat(request, alamat_id):
     return delete_entity(request, SupplierAlamat, 'id', alamat_id)
 
+# Prospect
+@login_required
+def edit_prospect_pic(request, pic_id):
+    pic = get_object_or_404(ProspectPIC, id=pic_id)
+    form = ProspectPICForms(request.POST or None, instance=pic)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('prospect_detail', prospect_id=pic.prospect_id.pk)
+    return render(request, 'pic/edit_prospect_pic.html', {'form': form, 'pic': pic})
+
+@login_required
+def delete_prospect_pic(request, pic_id):
+    return delete_entity(request, ProspectPIC, 'id', pic_id)
+
+
+@login_required
+def edit_prospect_alamat(request, alamat_id):
+    alamat = get_object_or_404(ProspectAddress, id=alamat_id)
+    form = ProspectAlamatForm(request.POST or None, instance=alamat)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('prospect_detail', prospect_id=alamat.prospect_id.pk)
+    return render(request, 'alamat/edit_prospect_alamat.html', {'form': form, 'alamat': alamat})
+
+@login_required
+def delete_prospect_alamat(request, alamat_id):
+    return delete_entity(request, ProspectAddress, 'id', alamat_id)
+
 
 # -------------------- Add Item -------------------- #
 @login_required
@@ -261,7 +304,7 @@ def add_item(request):
                 # Save the resized image
                 # image_name = f"{item.nama}.{image.name.split('.')[-1]}"
                 # image_path = os.path.join(settings.MEDIA_ROOT, image_name)
-                resized_image_name = f"media_{nama_cleaned}_{item.curr_datetime}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
+                resized_image_name = f"media_{nama_cleaned}_{curr_datetime}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
                 resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
                 img.save(resized_image_path)                
 
@@ -1118,6 +1161,9 @@ def delete_selected_rows_logbook(request):
 def delete_selected_rows_employee(request):
     return delete_selected_rows(request, Employee, 'id')
 
+def delete_selected_rows_prospect(request):
+    return delete_selected_rows(request, Prospect, 'prospect_id')
+
 
 # -------------------- Approve Items -------------------- #
 @login_required
@@ -1311,6 +1357,8 @@ def get_kode_pos(request):
             return JsonResponse({'kode_pos': ''})
     return JsonResponse({'error': 'Invalid Kelurahan ID'}, status=400)
 
+
+# -------------------- Employee -------------------- #
 def add_employee(request):
     return add_entity_view(request, EmployeeForm, 'employee/add_employee.html', 'display_employee')
 
@@ -1332,17 +1380,6 @@ def add_employee_alamat(request, id):
     redirect_url  = reverse('employee_detail', args=(id,))
     return add_entity(request, id, Employee, EmployeeAlamatForm, 'employee/add_employee_alamat.html', 'id', 'employee_id', {'employee_id': id}, redirect_url=redirect_url)
 
-
-def edit_customer_alamat(request, alamat_id):
-    alamat = get_object_or_404(CustomerAlamat, id=alamat_id)
-    form = CustAlamatForms(request.POST or None, instance=alamat)
-
-    if request.method == 'POST':
-        if form.is_valid():
-            form.save()
-            return redirect('customer_detail', cust_id=alamat.customer_id.pk)
-    return render(request, 'alamat/edit_customer_alamat.html', {'form': form, 'alamat': alamat})
-
 def edit_employee_alamat(request, alamat_id):
     alamat = get_object_or_404(EmployeeAlamat, id=alamat_id)
     form = EmployeeAlamatForm(request.POST or None, instance=alamat)
@@ -1355,3 +1392,60 @@ def edit_employee_alamat(request, alamat_id):
 
 def delete_employee_alamat(request, alamat_id):
     return delete_entity(request, EmployeeAlamat, 'id', alamat_id)
+
+
+# -------------------- Prospect -------------------- #
+@login_required
+def display_prospect(request):
+    return display_entities(request, Prospect, 'prospect/display_prospect.html')
+
+
+from django.conf import Settings
+from django.core.mail import send_mail
+
+@login_required
+def add_prospect(request):
+    if request.method == 'POST':
+        message = 'test'
+        email = request.user.email
+        send_mail('Test Email', 'Email', settings.EMAIL_HOST_USER, [email], fail_silently=False)
+        form = ProspectForm(request.POST)
+        if form.is_valid():
+            # Create a Prospect instance but do not save it yet
+            prospect = form.save(commit=False)
+            # Set the creator field to the current authenticated user
+            prospect.in_charge = request.user
+            # Now save the Prospect instance with the creator assigned
+            prospect.save()
+            return redirect('display_prospect')  # Redirect to a success URL
+    else:
+        form = ProspectForm()
+    return render(request, 'prospect/add_prospect.html', {'entity_form': form})
+
+@login_required
+def prospect_detail(request, prospect_id):
+    prospect_pics = ProspectPIC.objects.filter(prospect_id=prospect_id)
+    prospect_alamat = ProspectAddress.objects.filter(prospect_id=prospect_id)
+    extra_context = {'prospect_pics':prospect_pics, 'prospect_alamat':prospect_alamat}
+    return entity_detail(request, Prospect, ProspectForm, 'prospect_id', prospect_id, 'prospect/prospect_detail.html', extra_context)
+
+@login_required
+def edit_prospect(request, prospect_id):
+    return edit_entity(request, Prospect, ProspectForm, 'prospect_id', prospect_id)
+
+@login_required
+def delete_prospect(request, prospect_id):
+    return delete_entity(request, Prospect, 'prospect_id', prospect_id)
+
+def send_email_reminder(request):
+    threshold_date = timezone.now() - timedelta(days=7)
+    outdated = Prospect.objects.filter(tanggal__lte = threshold_date)
+
+    for prospect in outdated:
+        subject = f"Reminder: Jangan lupa untuk followup dengan {prospect.nama}"
+        message = f"Halo {prospect.in_charge.nama},\n\n Ini adalah peringatan untuk follow up dengan prospek: {prospect.nama}.\n\nJika sudah, jangan lupa untuk update di Lotus Universe. \n\n Thank You!"
+        from_email = settings.EMAIL_HOST_USER
+        to_email = prospect.in_charge.email
+
+        send_mail(subject, message, from_email, [to_email], fail_silently=False)
+    return render(request)

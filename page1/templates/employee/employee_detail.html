@@ -36,7 +36,7 @@
                             {% for alamat in employee_alamat %}
                                 <li class="list-group-item h5 text-muted">
                                     {% if alamat.detail and alamat.kelurahan and alamat.kecamatan and alamat.kota and alamat.provinsi %}
-                                        {{ alamat.detail }}, {{ alamat.kelurahan }}, {{ alamat.kecamatan }}, {{ alamat.kota }}, {{ alamat.provinsi }}
+                                        {{ alamat.detail }}, {{ alamat.kelurahan }}, {{ alamat.kecamatan }}, {{ alamat.kota }}, {{ alamat.provinsi }}{% if alamat.kode_pos %}, {{ alamat.kode_pos }}{% endif %}
                                         <div class="mt-2">
                                             <a href="{% url 'edit_employee_alamat' entity.id %}" class="btn btn-sm btn-primary"><i class="fa fa-pen"></i></a>
                                             <button class="btn btn-sm btn-danger delete-alamat-btn" data-alamat-id="{{ alamat.id }}" data-alamat-detail="{{ alamat.detail }}"><i class="fa fa-times"></i></button>

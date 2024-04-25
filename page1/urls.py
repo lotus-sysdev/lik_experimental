@@ -56,6 +56,7 @@ urlpatterns = [
     path('delete_selected_rows_delivery/', delete_selected_rows_delivery, name='delete_selected_rows_delivery'),
     path('delete_selected_rows_logbook/', delete_selected_rows_logbook, name='delete_selected_rows_logbook'),
     path('delete_selected_rows_employee/', delete_selected_rows_employee, name='delete_selected_rows_employee'),
+    path('delete_selected_rows_prospect/', delete_selected_rows_prospect, name='delete_selected_rows_prospect'),
 
     # Item approval
     path('approve_item/<str:SKU>', approve_item, name='approve_item'),
@@ -75,6 +76,10 @@ urlpatterns = [
     path('edit_supplier_pic/<int:pic_id>/', edit_supplier_pic, name='edit_supplier_pic'),
     path('delete_supplier_pic/<int:pic_id>/', delete_supplier_pic, name='delete_supplier_pic'),
 
+    path('add_pic_prospect/<int:prospect_id>',add_prospect_pic,name='add_pic_prospect'),
+    path('edit_prospect_pic/<int:pic_id>/', edit_prospect_pic, name='edit_prospect_pic'),
+    path('delete_prospect_pic/<int:pic_id>/', delete_prospect_pic, name='delete_prospect_pic'),
+    
     # Alamat urls
     path('add_customer_alamat/<int:cust_id>/', add_customer_alamat, name='add_customer_alamat'),
     path('edit_customer_alamat/<int:alamat_id>/', edit_customer_alamat, name='edit_customer_alamat'),
@@ -145,6 +150,16 @@ urlpatterns = [
     path('add_employee_alamat/<int:id>/', add_employee_alamat, name='add_employee_alamat'),
     path('edit_employee_alamat/<int:alamat_id>/', edit_employee_alamat, name='edit_employee_alamat'),
     path('delete_employee_alamat/<int:alamat_id>/', delete_employee_alamat, name='delete_employee_alamat'),
+
+    # Prospect
+    path('display_prospect/', display_prospect, name='display_prospect'),
+    path('add_prospect/', add_prospect, name='add_prospect'),
+    path('prospect_detail/<int:prospect_id>', prospect_detail, name='prospect_detail'),
+    path('edit_prospect/<int:prospect_id>/', edit_prospect, name='edit_prospect'),
+    path('delete_prospect/<int:prospect_id>/', delete_prospect, name='delete_prospect'),
+    path('add_prospect_alamat/<int:prospect_id>/', add_prospect_alamat, name='add_prospect_alamat'),
+    path('edit_prospect_alamat/<int:alamat_id>/', edit_prospect_alamat, name='edit_prospect_alamat'),
+    path('delete_prospect_alamat/<int:alamat_id>/', delete_prospect_alamat, name='delete_prospect_alamat'),
 
     # Get PICs
     path('get_customer_pics/', get_customer_pics, name='get_customer_pics'),

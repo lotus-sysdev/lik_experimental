@@ -149,7 +149,7 @@ class CustPICForms(forms.ModelForm):
             'telp': 'No. Telpon',
         }
         choices = {
-            'Role': (('Finance', 'Finance'), ('General Affairs', 'General Affairs (GA)'), ('Sales', 'Sales'), ('Procurement', 'Procurement'),('Board of Directors', 'Board of Directors (BOD)'),)
+            'Role': (('Finance', 'Finance'), ('General Affairs', 'General Affairs (GA)'), ('Sales', 'Sales'), ('Procurement', 'Procurement'),('Board of Directors', 'Board of Directors (BOD)'), ('Merchandising', 'Merchandising'), ('Purchasing', 'Purchasing'))
         }
     Role = forms.ChoiceField(choices=Meta.choices['Role'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jabatan')
 
@@ -169,7 +169,28 @@ class SuppPICForms(forms.ModelForm):
             'telp': 'No. Telpon',
         }
         choices = {
-            'Role': (('Finance', 'Finance'), ('General Affairs', 'General Affairs (GA)'), ('Sales', 'Sales'), ('Procurement', 'Procurement'),('Board of Directors', 'Board of Directors (BOD)'),)
+            'Role': (('Finance', 'Finance'), ('General Affairs', 'General Affairs (GA)'), ('Sales', 'Sales'), ('Procurement', 'Procurement'),('Board of Directors', 'Board of Directors (BOD)'), ('Merchandising', 'Merchandising'), ('Purchasing', 'Purchasing'))
+        }
+    Role = forms.ChoiceField(choices=Meta.choices['Role'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jabatan')
+
+
+class ProspectPICForms(forms.ModelForm):
+    class Meta:
+        model = ProspectPIC
+        fields = '__all__'
+        exclude = ['prospect_id']
+        widgets = {
+            'nama': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nama'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'username@lotuslestari.co.id'}),
+            'telp': RegionalPhoneNumberWidget(region='ID', attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
+        }
+        labels = {
+            'nama': 'Nama',
+            'email': 'Email',
+            'telp': 'No. Telpon',
+        }
+        choices = {
+            'Role': (('Finance', 'Finance'), ('General Affairs', 'General Affairs (GA)'), ('Sales', 'Sales'), ('Procurement', 'Procurement'),('Board of Directors', 'Board of Directors (BOD)'), ('Merchandising', 'Merchandising'), ('Purchasing', 'Purchasing'))
         }
     Role = forms.ChoiceField(choices=Meta.choices['Role'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jabatan')
 
@@ -661,6 +682,7 @@ class EmployeeAlamatForm(forms.ModelForm):
             'kota': Select2Widget(attrs={'class': 'form-control'}),
             'kecamatan': Select2Widget(attrs={'class': 'form-control'}),
             'kelurahan': Select2Widget(attrs={'class': 'form-control'}),
+            'kode_pos': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Kode Pos'}),
             'detail': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ruko, Jl. Permata Regency Jl. H. Kelik No.31 Blok C, RT.1/RW.6,'}),
         }
         labels = {
@@ -668,5 +690,49 @@ class EmployeeAlamatForm(forms.ModelForm):
             'kota': 'Kota',
             'kecamatan': 'Kecamatan',
             'kelurahan': 'Kelurahan',
+            'kode_pos': 'Kode Pos',
+            'detail': 'Alamat Detail',
+        }
+
+class ProspectForm(forms.ModelForm):
+    class Meta:
+        model = Prospect
+        fields = '__all__'
+        exclude = ['prospect_id', 'in_charge']
+        widgets = {
+            'tanggal': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'nama': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'PT. Lotus Lestari Raya'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'user@lotuslestari.co.id'}),
+            'telp': RegionalPhoneNumberWidget(region='ID', attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
+        }
+        labels = {
+            'tanggal': 'Tanggal Input',
+            'nama': 'Nama Perusahaan',
+            'telp': 'No. Telpon',
+        }
+        choices = {
+            'open': ((True,'Open'), (False, 'Close'))
+        }
+    open = forms.ChoiceField(choices=Meta.choices['open'], widget=forms.Select(attrs={'class': 'form-control'}), label='Status')
+
+class ProspectAlamatForm(forms.ModelForm):
+    class Meta:
+        model = ProspectAddress
+        fields = '__all__'
+        exclude = ['prospect_id']
+        widgets = {
+            'provinsi': Select2Widget(attrs={'class': 'form-control'}),
+            'kota': Select2Widget(attrs={'class': 'form-control'}),
+            'kecamatan': Select2Widget(attrs={'class': 'form-control'}),
+            'kelurahan': Select2Widget(attrs={'class': 'form-control'}),
+            'kode_pos': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Kode Pos'}),
+            'detail': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ruko, Jl. Permata Regency Jl. H. Kelik No.31 Blok C, RT.1/RW.6,'}),
+        }
+        labels = {
+            'provinsi': 'Provinsi',
+            'kota': 'Kota',
+            'kecamatan': 'Kecamatan',
+            'kelurahan': 'Kelurahan',
+            'kode_pos': 'Kode Pos',
             'detail': 'Alamat Detail',
         }
