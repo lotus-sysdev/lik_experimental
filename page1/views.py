@@ -261,7 +261,7 @@ def add_item(request):
                 # Save the resized image
                 # image_name = f"{item.nama}.{image.name.split('.')[-1]}"
                 # image_path = os.path.join(settings.MEDIA_ROOT, image_name)
-                resized_image_name = f"media_{nama_cleaned}_{item.curr_datetime}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
+                resized_image_name = f"media_{nama_cleaned}_{curr_datetime}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
                 resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
                 img.save(resized_image_path)                
 
