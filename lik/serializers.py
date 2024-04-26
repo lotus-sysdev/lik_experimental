@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Report, Lokasi, Tujuan
-from drf_extra_fields.fields import Base64ImageField
 
 class ReportSerializer(serializers.ModelSerializer):
     foto = serializers.ImageField()
