@@ -15,5 +15,6 @@ urlpatterns = [
     path('tujuan_options/', tujuan_options_list, name='tujuan_options'),
     path('lokasi_options/', lokasi_options_list, name='lokasi_options'),
     path('group/<int:group_id>/lokasi/', GroupLokasiListAPIView.as_view(), name='group_lokasi_list'),
+    path('group/<int:group_id>/tujuan/', GroupTujuanListAPIView.as_view(), name='group_tujuan_list'),
 ]
 
