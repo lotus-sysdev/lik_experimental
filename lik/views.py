@@ -1,13 +1,20 @@
+from io import BytesIO
+import os
+from django.conf import settings
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import generics, status
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate
+from django.core.files.base import ContentFile
+
+from PIL import Image
 
 from .serializers import *
 from .models import *
@@ -113,24 +120,29 @@ def edit_report(request, id):
 class add_report_mobile(generics.CreateAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
+    parser_classes = (MultiPartParser, FormParser)
 
-    def create(self, request, *args, **kwargs):
-        image_data = request.data.get('image_data')
-        # Handle image data as bytes here
-        # For example, you can save it directly to the model
-        report = Report.objects.create(
-            plat=request.data.get('plat'),
-            driver=request.data.get('driver'),
-            PO=request.data.get('PO'),
-            DO=request.data.get('DO'),
-            no_tiket=request.data.get('no_tiket'),
-            berat=request.data.get('berat'),
-            tanggal=request.data.get('tanggal'),
-            reject=request.data.get('reject'),
-            lokasi=request.data.get('lokasi'),
-            tujuan=request.data.get('tujuan'),
-        )
-        return super().create(request, *args, **kwargs)
+    def perform_create(self, serializer):
+        # Get the image data from request.FILES
+        image_data = self.request.FILES.get('foto')
+        print(image_data)
+        if image_data:
+            # Open the image using PIL
+            image = Image.open(image_data)
+            image_name = str(image_data)
+            
+            resized_image = image.resize((100, 100))  # Change the dimensions as needed
+            resized_image_name = f'resized-{image_name}'
+            resized_image_path = os.path.join(settings.MEDIA_ROOT, 'report_photos', resized_image_name)
+            resized_image.save(resized_image_path)
+            
+            resized_image_name = f'resized-{image_name}'
+            # Delete the original image file
+            # os.remove(os.path.join(settings.MEDIA_ROOT, 'report_photos', image_name))
+
+            serializer.validated_data['foto'] = os.path.join('report_photos', resized_image_name)
+        # Call the serializer's save method to create the Report instance
+        serializer.save()
 
 @api_view(['POST'])
 def register_user(request):

@@ -43,6 +43,7 @@
             <th>Lokasi Potong</th>
             <th>Tujuan Pabrik</th>
             <th>Tanggal Keluar</th>
+            <th>Foto</th>
             <th>Ubah</th>
           </tr>
         </thead>
@@ -60,6 +61,7 @@
             <td>{{ report.lokasi }}</td>
             <td>{{ report.tujuan }}</td>
             <td>{{ report.tanggal }}</td>
+            <td><img src="{{ report.foto.url }}" alt="{{ report.id }}"/></td>
             <td>
               <a href="{% url 'report_detail' report.id %}">View</a>
             </td>
