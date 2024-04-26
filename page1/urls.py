@@ -160,11 +160,16 @@ urlpatterns = [
     path('add_prospect_alamat/<int:prospect_id>/', add_prospect_alamat, name='add_prospect_alamat'),
     path('edit_prospect_alamat/<int:alamat_id>/', edit_prospect_alamat, name='edit_prospect_alamat'),
     path('delete_prospect_alamat/<int:alamat_id>/', delete_prospect_alamat, name='delete_prospect_alamat'),
-    path('prospect_log/<int:prospect_id>/', prospect_log, name='prospect_log'),
-    path('add_prospect_log/<int:prospect_id>/', add_prospect_log, name='add_prospect_log'),
-    path('edit_prospect_log/<int:log_id>/', edit_prospect_log, name='edit_prospect_log'),
-    path('delete_prospect_log/<int:log_id>/', delete_prospect_log, name='delete_prospect_log'),
+    
+    path('prospect_ticket/<int:prospect_id>/', prospect_ticket, name='prospect_ticket'),
+    path('add_prospect_ticket/<int:prospect_id>/', add_prospect_ticket, name='add_prospect_ticket'),
+    path('edit_prospect_ticket/<int:log_id>/', edit_prospect_ticket, name='edit_prospect_ticket'),
+    path('delete_prospect_ticket/<int:log_id>/', delete_prospect_ticket, name='delete_prospect_ticket'),
     path('convert/<int:prospect_id>/', convert_to_customer, name='convert_to_customer'),
+
+    path('add_ticket_log/<int:prospect_id>', add_ticket_log, name='add_ticket_log'),
+    path('edit_ticket_log/<int:log_id>/', edit_ticket_log, name='edit_ticket_log'),
+    path('delete_ticket_log/<int:log_id>/', delete_ticket_log, name='delete_ticket_log'),
 
     # Get PICs
     path('get_customer_pics/', get_customer_pics, name='get_customer_pics'),

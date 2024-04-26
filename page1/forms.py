@@ -710,10 +710,6 @@ class ProspectForm(forms.ModelForm):
             'nama': 'Nama Perusahaan',
             'telp': 'No. Telpon',
         }
-        choices = {
-            'open': ((True,'Open'), (False, 'Close'))
-        }
-    open = forms.ChoiceField(choices=Meta.choices['open'], widget=forms.Select(attrs={'class': 'form-control'}), label='Status')
 
 class ProspectAlamatForm(forms.ModelForm):
     class Meta:
@@ -737,9 +733,9 @@ class ProspectAlamatForm(forms.ModelForm):
             'detail': 'Alamat Detail',
         }
 
-class ProspectLogForm(forms.ModelForm):
+class ProspectTicketForm(forms.ModelForm):
     class Meta:
-        model = ProspectLog
+        model = ProspectTicket
         fields = '__all__'
         exclude = ['prospect_id']
         widgets = {
@@ -764,6 +760,22 @@ class ProspectLogForm(forms.ModelForm):
                 ('Contract Signing', 'Penandatanganan Kontrak'),
                 ('Client Onboarding', 'Pendaftaran Klien'),
                 ),
+            'open' : ((True, 'Open'), (False, 'Close')),
         }
 
     type = forms.ChoiceField(choices=Meta.choices['type'], widget=forms.Select(attrs={'class': 'form-control'}), label='Tipe Kegiatan')
+    open = forms.ChoiceField(choices=Meta.choices['open'], widget=forms.Select(attrs={'class': 'form-control'}), label='Status')
+
+class TicketLogForm(forms.ModelForm):
+    class Meta:
+        model = TicketLog
+        fields = '__all__'
+        exclude = ['ticket_id']
+        widgets = {
+            'date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'detail': forms.Textarea(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'date': 'Waktu',
+            'detail': 'Detail Aktivitas',
+        }

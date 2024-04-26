@@ -1406,9 +1406,6 @@ def display_prospect(request):
 @login_required
 def add_prospect(request):
     if request.method == 'POST':
-        message = 'test'
-        email = request.user.email
-        send_mail('Test Email', 'Email', settings.EMAIL_HOST_USER, [email], fail_silently=False)
         form = ProspectForm(request.POST)
         if form.is_valid():
             # Create a Prospect instance but do not save it yet
@@ -1439,32 +1436,56 @@ def delete_prospect(request, prospect_id):
 
 # TICKETING FOR PROSPECT
 @login_required
-def prospect_log(request, prospect_id):
+def prospect_ticket(request, prospect_id):
     prospect = get_object_or_404(Prospect, prospect_id=prospect_id)
-    prospect_log = ProspectLog.objects.filter(prospect_id=prospect)
-    context = {'prospect': prospect, 'prospect_id': prospect_id, 'prospect_log': prospect_log}
+    prospect_tickets = ProspectTicket.objects.filter(prospect_id=prospect).order_by('-date')
 
-    return render(request, 'prospect/prospect_log.html', context)
+    context = {'prospect': prospect, 'prospect_id': prospect_id, 'prospect_tickets': prospect_tickets}
 
-@login_required
-def add_prospect_log(request, prospect_id):
-    redirect_url  = reverse('prospect_log', args=(prospect_id,))
-    return add_entity(request, prospect_id, Prospect, ProspectLogForm, 'prospect/add_prospect_log.html', 'prospect_id', 'prospect_id', {'prospect_id': prospect_id}, redirect_url=redirect_url)
+    return render(request, 'prospect/prospect_ticket.html', context)
 
 @login_required
-def edit_prospect_log(request, log_id):
-    log = get_object_or_404(ProspectLog, id=log_id)
-    form = ProspectLogForm(request.POST or None, instance=log)
+def add_prospect_ticket(request, prospect_id):
+    redirect_url  = reverse('prospect_ticket', args=(prospect_id,))
+    return add_entity(request, prospect_id, Prospect, ProspectTicketForm, 'prospect/add_prospect_ticket.html', 'prospect_id', 'prospect_id', {'prospect_id': prospect_id}, redirect_url=redirect_url)
+
+@login_required
+def edit_prospect_ticket(request, log_id):
+    log = get_object_or_404(ProspectTicket, id=log_id)
+    form = ProspectTicketForm(request.POST or None, instance=log)
     if request.method == 'POST':
         if form.is_valid():
             form.save()
-            return redirect('prospect_log', prospect_id=log.prospect_id.pk)
-    return render(request, 'prospect/edit_prospect_log.html', {'form': form, 'log': log})
+            return redirect('prospect_ticket', prospect_id=log.prospect_id.pk)
+    return render(request, 'prospect/edit_prospect_ticket.html', {'form': form, 'log': log})
 
 @login_required
-def delete_prospect_log(request, log_id):
-    return delete_entity(request, ProspectLog, 'id', log_id)
+def delete_prospect_ticket(request, log_id):
+    return delete_entity(request, ProspectTicket, 'id', log_id)
 
+# LOG FOR TICKET
+@login_required
+def add_ticket_log(request, prospect_id):
+    entity = get_object_or_404(ProspectTicket, **{'id': prospect_id})
+    redirect_url = reverse('prospect_ticket', args=(entity.prospect_id.pk,))
+    return add_entity(request, prospect_id, ProspectTicket, TicketLogForm, 'prospect/log/add_ticket_log.html', 'id', 'ticket_id', {'ticket_id': prospect_id}, redirect_url=redirect_url)
+
+@login_required
+def edit_ticket_log(request, log_id):
+    log = get_object_or_404(TicketLog, id=log_id)
+    form = TicketLogForm(request.POST or None, instance=log)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('prospect_ticket', prospect_id=log.ticket_id.prospect_id.pk)
+    return render(request, 'prospect/log/edit_ticket_log.html', {'form': form, 'log': log})
+
+@login_required
+def delete_ticket_log(request, log_id):
+    return delete_entity(request, TicketLog, 'id', log_id)
+
+
+# CONVERT TO CUSTOMER
 @login_required
 def convert_to_customer(request, prospect_id):
     prospect = get_object_or_404(Prospect, pk=prospect_id)

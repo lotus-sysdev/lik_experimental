@@ -37,3 +37,5 @@ migrations/
 
 # If you are using Windows, you might also want to ignore .pyo files
 **/migrations/*.pyo
+
+venv/

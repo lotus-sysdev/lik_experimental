@@ -505,21 +505,37 @@ class Prospect(models.Model):
     email = models.EmailField(unique=True)
     telp = PhoneNumberField() 
     in_charge = models.ForeignKey(User, on_delete=models.CASCADE)
-    open = models.BooleanField(default=True)
     is_customer = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.nama} (Prospect)"
     
-class ProspectLog(models.Model):
+class ProspectTicket(models.Model):
     class Meta:
-        verbose_name = 'Prospect Log'
-        verbose_name_plural = 'Prospect Logs'
+        verbose_name = 'Prospect Ticket'
+        verbose_name_plural = 'Prospect Tickets'
 
     prospect_id = models.ForeignKey(Prospect, on_delete=models.CASCADE)
     date = models.DateTimeField(default = timezone.now)
     type = models.CharField(max_length=100) 
     activity = models.CharField(max_length=500)
+    open = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.prospect_id.nama} - {self.type}"
+
+class TicketLog(models.Model):
+    class Meta:
+        verbose_name = "Ticket Log"
+        verbose_name_plural = "Ticket Logs"
+    
+    ticket_id = models.ForeignKey(ProspectTicket, on_delete=models.CASCADE)
+    date = models.DateTimeField(default=timezone.now)
+    detail = models.CharField(max_length=500)
+
+    def __str__(self):
+        return f"{self.ticket_id.prospect_id.nama} - {self.date}"
+
 
 class ProspectPIC(models.Model):
     class Meta:

@@ -13,10 +13,6 @@
         id="prospectTable"
         class="table table-bordered table-striped w-100 table-lg table-responsive-lg"
       >
-        <div class="legend mb-2">
-          <div style="display: inline-block; vertical-align: middle; margin-right: 10px; background-color: #ccffc7; width: 20px; height: 20px;"></div>
-          <span style="vertical-align: middle;"> = Customer</span>
-        </div>
         <div class="form-inline mb-2">
           <select id="columnFilter" class="form-control btn-info">
             <option value="1">Tanggal Input</option>
@@ -42,23 +38,21 @@
             <th>Email</th>
             <th>No. Telpon</th>
             <th>In Charge</th>
-            <th>Status</th>
-            <th>Log</th>
+            <th>Ticket</th>
             <th>Edit/Delete</th>
           </tr>
         </thead>
         <tbody class="tbody">
           {% for prospect in entities %}
-          <tr {% if prospect.is_customer %} style="background-color: #ccffc7;" {% endif %}>
+          <tr>
             <td>{{ prospect.prospect_id }}</td>
             <td>{{ prospect.tanggal|date:"Y/m/d" }}</td>
             <td>{{ prospect.nama }}</td>
             <td>{{ prospect.email }}</td>
             <td>{{ prospect.telp }}</td>
             <td>{{ prospect.in_charge }}</td>
-            <td>{% if prospect.open %}Open{% else %}Closed{% endif %}</td>
             <td>
-              <a href="{% url 'prospect_log' prospect.prospect_id%}">Log</a>
+              <a href="{% url 'prospect_ticket' prospect.prospect_id%}">Ticket</a>
             </td>
             <td>
               <a href="{% url 'prospect_detail' prospect.prospect_id %}">View</a>
