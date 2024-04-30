@@ -23,10 +23,6 @@ from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.urls import reverse
 
-from django.conf import settings
-from django.core.mail import send_mail
-
-
 from .decorators import *
 from .forms import *
 from .models import *
@@ -323,6 +319,7 @@ def add_item(request):
         form = ItemForm()
 
     return render(request, 'item/add_item.html', {'item_form': form_instance})
+
 
 # -------------------- Display Tables -------------------- #
 @login_required
@@ -643,7 +640,6 @@ def delete_purchase(request, id):
 def delete_work(request, id):
     return delete_entity(request, WorkOrder, 'id', id)
 
-
 def get_customer_pics(request):
     if request.method == 'GET':
         customer_id = request.GET.get('customer_id')
@@ -692,7 +688,6 @@ def get_item_details(request):
         return JsonResponse({'error': 'Invalid request method'}, status=400)
 
   
-
 # -------------------- Login, Register, Logout Functions -------------------- #
 # Login, Register, and Logout
 def login_view(request):
@@ -734,7 +729,6 @@ def logout_view(request):
 def user_action_logs(request):
     logs = UserActionLog.objects.all().order_by('-timestamp')[:100]  # Get the last 10 logs
     return render(request, 'logs.html', {'logs': logs})
-
 
 
 # -------------------- Delivery Order -------------------- #
@@ -1484,7 +1478,6 @@ def edit_ticket_log(request, log_id):
 def delete_ticket_log(request, log_id):
     return delete_entity(request, TicketLog, 'id', log_id)
 
-
 # CONVERT TO CUSTOMER
 @login_required
 def convert_to_customer(request, prospect_id):
@@ -1531,18 +1524,3 @@ def convert_to_customer(request, prospect_id):
     prospect.save()
 
     return redirect('display_prospect')  # Redirect to customer detail page
-
-
-# EMAIL FUNCTIONS
-def send_email_reminder(request):
-    threshold_date = timezone.now() - timedelta(days=7)
-    outdated = Prospect.objects.filter(tanggal__lte = threshold_date)
-
-    for prospect in outdated:
-        subject = f"Reminder: Jangan lupa untuk follow-up dengan {prospect.nama}"
-        message = f"Halo {prospect.in_charge.nama},\n\n Ini adalah peringatan untuk follow up dengan prospek: {prospect.nama}.\n\nJika sudah, jangan lupa untuk update di Lotus Universe. \n\n Thank You!"
-        from_email = settings.EMAIL_HOST_USER
-        to_email = prospect.in_charge.email
-
-        send_mail(subject, message, from_email, [to_email], fail_silently=False)
-    return render(request)

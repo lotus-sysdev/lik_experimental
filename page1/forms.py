@@ -173,7 +173,6 @@ class SuppPICForms(forms.ModelForm):
         }
     Role = forms.ChoiceField(choices=Meta.choices['Role'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jabatan')
 
-
 class ProspectPICForms(forms.ModelForm):
     class Meta:
         model = ProspectPIC
@@ -709,6 +708,9 @@ class ProspectForm(forms.ModelForm):
             'tanggal': 'Tanggal Input',
             'nama': 'Nama Perusahaan',
             'telp': 'No. Telpon',
+        }
+        required = {
+            'email': False,
         }
 
 class ProspectAlamatForm(forms.ModelForm):

@@ -427,8 +427,8 @@ class Events(models.Model):
     end = models.DateTimeField(null = True, blank = True)
     messenger = models.ForeignKey(Messenger,on_delete=models.SET_NULL, null=True)
     keterangan = models.CharField(max_length = 500, null=True)
-    start_location = models.ForeignKey(DeliveryAddresses, related_name= "delivery_start_location", on_delete=models.CASCADE, null =True)
-    destination = models.ForeignKey(DeliveryAddresses, related_name="delivery_destination",on_delete=models.CASCADE, null =True)
+    start_location = models.ForeignKey(DeliveryAddresses, related_name= "delivery_start_location", on_delete=models.SET_NULL, null =True)
+    destination = models.ForeignKey(DeliveryAddresses, related_name="delivery_destination",on_delete=models.SET_NULL, null =True)
     vehicle = models.ForeignKey(Vehicle,on_delete=models.SET_NULL, null=True)
     package_name = models.CharField(max_length=100, null=True)
     package_dimensions = models.CharField(max_length=100, null=True)
@@ -502,7 +502,7 @@ class Prospect(models.Model):
     prospect_id = models.AutoField(primary_key=True)
     tanggal = models.DateField(default=timezone.now)
     nama = models.CharField(max_length=255)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, null=True, blank=True)
     telp = PhoneNumberField() 
     in_charge = models.ForeignKey(User, on_delete=models.CASCADE)
     is_customer = models.BooleanField(default=False)
@@ -535,7 +535,6 @@ class TicketLog(models.Model):
 
     def __str__(self):
         return f"{self.ticket_id.prospect_id.nama} - {self.date}"
-
 
 class ProspectPIC(models.Model):
     class Meta:
