@@ -7,7 +7,7 @@ import requests
 from datetime import datetime, timedelta
 import re
 
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.core import serializers
 from django.core.files.base import ContentFile
 from django.core import serializers
@@ -550,7 +550,30 @@ def add_PO(request):
 @login_required
 @GA_required
 def add_WO(request):
-     return add_entity_view(request, WorkForm, 'order/add_WO.html', 'display_work')
+    #  return add_entity_view(request, WorkForm, 'order/add_WO.html', 'display_work')
+    if request.method == 'POST':
+        form = WorkForm(request.POST)
+        items_formset = WorkItemFormSet(request.POST)
+
+        if form.is_valid() and items_formset.is_valid():
+            work_order = form.save()
+            items_formset = WorkItemFormSet(request.POST, instance=work_order)
+            if items_formset.is_valid():
+                # print("Valid Form")
+                # for form in items_formset:
+                #     form.instance.work_order = work_order
+                items_formset.save()
+                return redirect('display_work')
+            else:
+                print("Formset errors:", items_formset.errors)
+                print("Formset data:", request.POST)  # Print formset data for debugging purposes
+        else:
+            print("Main form errors:", form.errors)
+    else:
+        form = WorkForm()
+        items_formset = WorkItemFormSet()
+    
+    return render(request, 'order/add_WO.html', {'entity_form' : form, 'items_formset' : items_formset})
 
 # Display Purchase Order and Work Order
 @login_required
@@ -561,7 +584,11 @@ def display_purchase(request):
 @login_required
 @Messenger_Forbidden
 def display_work(request):
-    return display_entities(request, WorkOrder, 'order/display_work.html')
+    entities = WorkOrder.objects.all().prefetch_related(
+        Prefetch('workorderitems_set', queryset=WorkOrderItems.objects.select_related('item'))
+    )
+    items = WorkOrderItems.objects.all()
+    return render(request,'order/display_work.html', {'entities': entities, 'items':items})
 
 #  Detail of Purchase Order and Work Order
 @login_required
@@ -583,10 +610,29 @@ def work_detail(request, id):
     entity = get_object_or_404(WorkOrder, id = id)
 
     if request.user.groups.filter(name='GA').exists() or request.user.groups.filter(name='Admin').exists():
-            form =WorkForm(instance=entity)
+        form_class = WorkForm
     elif request.user.groups.filter(name='Accounting').exists():
-        form = WorkFormNGA(instance=entity)
-    context = {'entity': entity, 'form': form, 'entity_id': id}
+        form_class = WorkFormNGA
+
+    if request.method == 'POST':
+        form = form_class(request.POST, instance=entity)
+        items_formset = WorkItemFormSet(request.POST, instance=entity)
+        
+        if form.is_valid() and items_formset.is_valid():
+            # print("Valid")
+            form.save()
+            for form in items_formset:
+                print("form: ", form)
+                form.save()
+            items_formset.save()
+            return redirect('display_work')
+        else: 
+            print("Not Valid")
+    else:
+        form = form_class(instance=entity)
+        items_formset = WorkItemFormSet(instance=entity)
+
+    context = {'entity': entity, 'form': form, 'items_formset':items_formset, 'entity_id': id}
 
     return render(request, 'order/work_detail.html', context)
 
@@ -620,14 +666,26 @@ def edit_work(request, id):
             form = WorkForm(request.POST, instance=entity)
         elif request.user.groups.filter(name='Accounting').exists():
             form = WorkFormNGA(request.POST, instance=entity)
+
+        item_formset = WorkItemFormSet(request.POST, instance=entity)
         
-        if form.is_valid():
+        if form.is_valid() and item_formset.is_valid():
             form.save()
+            for form in item_formset:
+                if form.cleaned_data.get('delete'):
+                    form.delete()
+                else:
+                    form.instance.entity = entity 
+                    form.save()
+                # print(form)
+            item_formset.save()
             return JsonResponse({'success': True})
+            # return redirect('display_work')
         else:
+            print("Form Error:",  item_formset.errors)
             return JsonResponse({'success': False, 'errors': form.errors})
 
-    return render(request, 'order/work_detail.html', {'form': form})
+    return render(request, 'order/work_detail.html', {'form': form, 'item_formset': item_formset})
 
 # Delete Purchase Order and Work Order
 @login_required
@@ -680,6 +738,8 @@ def get_item_details(request):
                 'nama': item.nama,
                 'price': str(item.price),
                 'price_currency': item.price_currency,
+                'quantity': item.quantity,
+                'unit': item.unit,
             }
             return JsonResponse(item_details)
         except Items.DoesNotExist:

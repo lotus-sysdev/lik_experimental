@@ -1,6 +1,6 @@
 import re
 from django import forms
-from django.forms import widgets
+from django.forms import BaseInlineFormSet, inlineformset_factory, widgets
 from django_select2.forms import Select2Widget
 from .models import *
 
@@ -396,24 +396,42 @@ class WorkForm(forms.ModelForm):
         exclude = ['status']
         widgets = {
             'customer': Select2Widget(attrs={'class': 'form-control'}),
-            'item': Select2Widget(attrs={'class': 'form-control'}),
-            'revenue_PO': MoneyWidget(attrs={'class': 'form-control', 'placeholder': '100000'}),
+            # 'item': Select2Widget(attrs={'class': 'form-control'}),
+            'revenue_WO': MoneyWidget(attrs={'class': 'form-control', 'placeholder': '100000'}),
             'nomor_PO': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '012345'}),
-            'tanggal_PO': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'tanggal_WO': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'tanggal_process': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'tanggal_input_accurate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'tanggal_pengiriman_barang': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'tanggal_pengiriman_invoice': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         }
         labels = {
-            'revenue_PO': 'Revenue PO',
+            'revenue_WO': 'Revenue',
             'nomor_PO': 'Nomor PO',
-            'tanggal_PO': 'Tanggal PO',
+            'tanggal_WO': 'Tanggal PO',
             'tanggal_process': 'Tanggal Proses',
             'tanggal_input_accurate': 'Tanggal Input Accurate',
             'tanggal_pengiriman_barang': 'Tanggal Pengiriman Barang',
             'tanggal_pengiriman_invoice': 'Tanggal Pengiriman Invoice',
         }
+
+WorkItemFormSet = inlineformset_factory(
+    WorkOrder, 
+    WorkOrderItems, 
+    fields= "__all__", 
+    extra=1, 
+    can_delete=True, 
+    widgets={
+        'item': Select2Widget(attrs={'class': 'form-control'}),
+        'price': forms.NumberInput(attrs={'class': 'form-control'}),
+        'quantity': forms.TextInput(attrs={'class': 'form-control'}),
+    },
+    labels = {
+        'item': 'Item',
+        'price': 'Harga',
+        'quantity': 'Jumlah',
+    }
+)
 
 class WorkFormNGA(forms.ModelForm):
     class Meta:

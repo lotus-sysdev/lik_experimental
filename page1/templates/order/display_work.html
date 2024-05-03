@@ -17,15 +17,14 @@
       <select id="columnFilter" class="form-control btn-info">
         <option value="0">ID</option>
         <option value="1">Customer</option>
-        <option value="2">Item</option>
-        <option value="3">Revenue PO</option>
-        <option value="4">Nomor PO</option>
-        <option value="5">Tanggal PO</option>
-        <option value="6">Tanggal Proses</option>
-        <option value="7">Tanggal Input Accurate</option>
-        <option value="8">Tanggal Pengiriman Barang</option>
-        <option value="9">Tanggal Pengiriman Invoice</option>
-        <option value="10">Status</option>
+        <option value="2">Revenue WO</option>
+        <option value="3">Nomor WO</option>
+        <option value="4">Tanggal WO</option>
+        <option value="5">Tanggal Proses</option>
+        <option value="6">Tanggal Input Accurate</option>
+        <option value="7">Tanggal Pengiriman Barang</option>
+        <option value="8">Tanggal Pengiriman Invoice</option>
+        <option value="9">Status</option>
         <!-- Add more options for additional columns -->
       </select>
       <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
@@ -34,10 +33,10 @@
         <tr>
           <th>ID</th>
           <th>Customer</th>
-          <th>Item</th>
-          <th>Revenue PO</th>
+          <th>Items</th>
+          <th>Revenue WO</th>
           <th>Nomor PO</th>
-          <th>Tanggal PO</th>
+          <th>Tanggal WO</th>
           <th>Tanggal Proses</th>
           <th>Tanggal Input Accurate</th>
           <th>Tanggal Pengiriman Barang</th>
@@ -51,10 +50,14 @@
         <tr>
           <td>{{work.id}}</td>
           <td>{{ work.customer }}</td>
-          <td>{{ work.item }}</td>
-          <td>{{ work.revenue_PO }}</td>
+          <td>
+            {% for item in work.workorderitems_set.all %}
+            {{ item.item }},
+            {% endfor %}
+          </td>
+          <td>{{ work.revenue_WO }}</td>
           <td>{{ work.nomor_PO }}</td>
-          <td>{{ work.tanggal_PO|date:"Y/m/d" }}</td>
+          <td>{{ work.tanggal_WO|date:"Y/m/d" }}</td>
           <td>{{ work.tanggal_process|date:"Y/m/d" }}</td>
           <td>{{ work.tanggal_input_accurate|date:"Y/m/d" }}</td>
           <td>{{ work.tanggal_pengiriman_barang|date:"Y/m/d" }}</td>
