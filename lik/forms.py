@@ -26,12 +26,14 @@ class ReportForm(forms.ModelForm):
             'no_tiket' : forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'I1900 XXX XXX'}),
             'berat' : forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '1000, 2000, ...'}),
             'tanggal' : forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'reject' : forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '100, 200, ...'})
+            'reject' : forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '100, 200, ...'}),
+            'foto' : forms.TextInput(attrs ={'class': 'form-control'})
         }
         labels = {
             'PO' : 'Nomor PO',
             'DO' : 'Nomor DO',
             'no_tiket' : 'No. Tiket',
             'berat' : 'Berat (kg)',
-            'reject' : 'Reject (kg)'
+            'reject' : 'Reject (kg)',
+            'foto' : 'Foto'
         }
