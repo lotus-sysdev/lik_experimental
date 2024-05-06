@@ -31,7 +31,7 @@
           >
           <ul class="collapse list-unstyled show" id="salesSubmenu">
             {% if request.user|has_group:'Accounting' or request.user|has_group:'Admin' %}
-            <li><a class="sidebar-a" href="">Prospects</a></li>
+            <li><a class="sidebar-a" href="/display_prospect">Prospects</a></li>
             {% endif %}
 
 

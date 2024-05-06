@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    {% block title %}Add Employee Alamat{% endblock %}
+    {% block title %}Add Prospect Alamat{% endblock %}
   </head>
 
   <body>
@@ -15,7 +15,7 @@
         <div>
           <button type="submit" class="btn btn-primary">Submit</button>
           <a
-            href="{% url 'employee_detail' id=entity.id %}"
+            href="{% url 'prospect_detail' prospect_id=entity.prospect_id %}"
             class="btn btn-secondary ml-2"
             >Back</a
           >

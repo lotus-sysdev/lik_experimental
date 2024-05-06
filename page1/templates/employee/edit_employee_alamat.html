@@ -95,7 +95,6 @@
                   );
                 });
                 updateKecamatan(); // Update kecamatan dropdown
-                updateKelurahan(); // Update kelurahan dropdown
               },
             });
           }
@@ -126,6 +125,24 @@
             });
           }
         });
+
+        $("#id_kelurahan").change(function () {
+          var kelurahanId = $(this).val();
+          console.log("Kelurahan ID: " + kelurahanId)
+          if (kelurahanId !== ""){
+            $.ajax({
+              url: "{% url 'get_kode_pos' %}",
+              data: {
+                kelurahan_id : kelurahanId
+              },
+              dataType: "json",
+              success: function (data) {
+                var kodePos = data.kode_pos;
+                $("#id_kode_pos").val(kodePos);
+              },
+            })
+          }
+        })
 
         function updateKota() {
           var cityId = $("#id_kota").val();
@@ -182,6 +199,27 @@
 
         function updateKelurahan() {
           var kelurahanId = $("#id_kelurahan").val();
+          updateDetailWithKodePos(kelurahanId)
+        }
+
+        function updateDetailWithKodePos(regionId) {
+          if (regionId !== "") {
+            $.ajax({
+                url: "{% url 'get_kode_pos' %}",
+                data: {
+                    kelurahan_id: regionId  // Use regionId as kelurahan_id for simplicity
+                },
+                dataType: "json",
+                success: function (data) {
+                    var kodePos = parseInt(data.kode_pos)
+                    console.log(kodePos)
+                    $("#id_kode_pos").val(kodePos)
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", error);  // Log AJAX error to console for debugging
+                }
+            });
+          }
         }
       });
     </script>

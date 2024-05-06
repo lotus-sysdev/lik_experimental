@@ -7,7 +7,7 @@ import requests
 from datetime import datetime, timedelta
 import re
 
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.core import serializers
 from django.core.files.base import ContentFile
 from django.core import serializers
@@ -155,6 +155,12 @@ def add_supplier_pic(request, supp_id):
     return add_entity(request, supp_id, Supplier, SuppPICForms, 'pic/add_supp_pic.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id}, redirect_url=redirect_url)
 
 @login_required
+def add_prospect_pic(request, prospect_id):
+    redirect_url  = reverse('prospect_detail', args=(prospect_id,))
+    return add_entity(request, prospect_id, Prospect, ProspectPICForms, 'pic/add_prospect_pic.html', 'prospect_id', 'prospect_id', {'prospect_id': prospect_id}, redirect_url=redirect_url)
+
+
+@login_required
 @GA_required
 def add_customer_alamat(request, cust_id):
     redirect_url  = reverse('customer_detail', args=(cust_id,))
@@ -165,6 +171,11 @@ def add_customer_alamat(request, cust_id):
 def add_supplier_alamat(request, supp_id):
     redirect_url  = reverse('supplier_detail', args=(supp_id,))
     return add_entity(request, supp_id, Supplier, SuppAlamattForms, 'alamat/add_supplier_alamat.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id}, redirect_url=redirect_url)
+
+@login_required
+def add_prospect_alamat(request, prospect_id):
+    redirect_url  = reverse('prospect_detail', args=(prospect_id,))
+    return add_entity(request, prospect_id, Prospect, ProspectAlamatForm, 'alamat/add_prospect_alamat.html', 'prospect_id', 'prospect_id', {'prospect_id': prospect_id}, redirect_url=redirect_url)
 
 
 # -------------------- Edit and Delete Alamat and PIC -------------------- #
@@ -237,6 +248,38 @@ def edit_supplier_alamat(request, alamat_id):
 def delete_supplier_alamat(request, alamat_id):
     return delete_entity(request, SupplierAlamat, 'id', alamat_id)
 
+# Prospect
+@login_required
+def edit_prospect_pic(request, pic_id):
+    pic = get_object_or_404(ProspectPIC, id=pic_id)
+    form = ProspectPICForms(request.POST or None, instance=pic)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('prospect_detail', prospect_id=pic.prospect_id.pk)
+    return render(request, 'pic/edit_prospect_pic.html', {'form': form, 'pic': pic})
+
+@login_required
+def delete_prospect_pic(request, pic_id):
+    return delete_entity(request, ProspectPIC, 'id', pic_id)
+
+
+@login_required
+def edit_prospect_alamat(request, alamat_id):
+    alamat = get_object_or_404(ProspectAddress, id=alamat_id)
+    form = ProspectAlamatForm(request.POST or None, instance=alamat)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('prospect_detail', prospect_id=alamat.prospect_id.pk)
+    return render(request, 'alamat/edit_prospect_alamat.html', {'form': form, 'alamat': alamat})
+
+@login_required
+def delete_prospect_alamat(request, alamat_id):
+    return delete_entity(request, ProspectAddress, 'id', alamat_id)
+
 
 # -------------------- Add Item -------------------- #
 @login_required
@@ -276,6 +319,7 @@ def add_item(request):
         form = ItemForm()
 
     return render(request, 'item/add_item.html', {'item_form': form_instance})
+
 
 # -------------------- Display Tables -------------------- #
 @login_required
@@ -506,7 +550,30 @@ def add_PO(request):
 @login_required
 @GA_required
 def add_WO(request):
-     return add_entity_view(request, WorkForm, 'order/add_WO.html', 'display_work')
+    #  return add_entity_view(request, WorkForm, 'order/add_WO.html', 'display_work')
+    if request.method == 'POST':
+        form = WorkForm(request.POST)
+        items_formset = WorkItemFormSet(request.POST)
+
+        if form.is_valid() and items_formset.is_valid():
+            work_order = form.save()
+            items_formset = WorkItemFormSet(request.POST, instance=work_order)
+            if items_formset.is_valid():
+                # print("Valid Form")
+                # for form in items_formset:
+                #     form.instance.work_order = work_order
+                items_formset.save()
+                return redirect('display_work')
+            else:
+                print("Formset errors:", items_formset.errors)
+                print("Formset data:", request.POST)  # Print formset data for debugging purposes
+        else:
+            print("Main form errors:", form.errors)
+    else:
+        form = WorkForm()
+        items_formset = WorkItemFormSet()
+    
+    return render(request, 'order/add_WO.html', {'entity_form' : form, 'items_formset' : items_formset})
 
 # Display Purchase Order and Work Order
 @login_required
@@ -517,7 +584,11 @@ def display_purchase(request):
 @login_required
 @Messenger_Forbidden
 def display_work(request):
-    return display_entities(request, WorkOrder, 'order/display_work.html')
+    entities = WorkOrder.objects.all().prefetch_related(
+        Prefetch('workorderitems_set', queryset=WorkOrderItems.objects.select_related('item'))
+    )
+    items = WorkOrderItems.objects.all()
+    return render(request,'order/display_work.html', {'entities': entities, 'items':items})
 
 #  Detail of Purchase Order and Work Order
 @login_required
@@ -539,10 +610,29 @@ def work_detail(request, id):
     entity = get_object_or_404(WorkOrder, id = id)
 
     if request.user.groups.filter(name='GA').exists() or request.user.groups.filter(name='Admin').exists():
-            form =WorkForm(instance=entity)
+        form_class = WorkForm
     elif request.user.groups.filter(name='Accounting').exists():
-        form = WorkFormNGA(instance=entity)
-    context = {'entity': entity, 'form': form, 'entity_id': id}
+        form_class = WorkFormNGA
+
+    if request.method == 'POST':
+        form = form_class(request.POST, instance=entity)
+        items_formset = WorkItemFormSet(request.POST, instance=entity)
+        
+        if form.is_valid() and items_formset.is_valid():
+            # print("Valid")
+            form.save()
+            for form in items_formset:
+                print("form: ", form)
+                form.save()
+            items_formset.save()
+            return redirect('display_work')
+        else: 
+            print("Not Valid")
+    else:
+        form = form_class(instance=entity)
+        items_formset = WorkItemFormSet(instance=entity)
+
+    context = {'entity': entity, 'form': form, 'items_formset':items_formset, 'entity_id': id}
 
     return render(request, 'order/work_detail.html', context)
 
@@ -576,14 +666,26 @@ def edit_work(request, id):
             form = WorkForm(request.POST, instance=entity)
         elif request.user.groups.filter(name='Accounting').exists():
             form = WorkFormNGA(request.POST, instance=entity)
+
+        item_formset = WorkItemFormSet(request.POST, instance=entity)
         
-        if form.is_valid():
+        if form.is_valid() and item_formset.is_valid():
             form.save()
+            for form in item_formset:
+                if form.cleaned_data.get('delete'):
+                    form.delete()
+                else:
+                    form.instance.entity = entity 
+                    form.save()
+                # print(form)
+            item_formset.save()
             return JsonResponse({'success': True})
+            # return redirect('display_work')
         else:
+            print("Form Error:",  item_formset.errors)
             return JsonResponse({'success': False, 'errors': form.errors})
 
-    return render(request, 'order/work_detail.html', {'form': form})
+    return render(request, 'order/work_detail.html', {'form': form, 'item_formset': item_formset})
 
 # Delete Purchase Order and Work Order
 @login_required
@@ -595,7 +697,6 @@ def delete_purchase(request, id):
 @Messenger_Forbidden
 def delete_work(request, id):
     return delete_entity(request, WorkOrder, 'id', id)
-
 
 def get_customer_pics(request):
     if request.method == 'GET':
@@ -637,6 +738,8 @@ def get_item_details(request):
                 'nama': item.nama,
                 'price': str(item.price),
                 'price_currency': item.price_currency,
+                'quantity': item.quantity,
+                'unit': item.unit,
             }
             return JsonResponse(item_details)
         except Items.DoesNotExist:
@@ -645,7 +748,6 @@ def get_item_details(request):
         return JsonResponse({'error': 'Invalid request method'}, status=400)
 
   
-
 # -------------------- Login, Register, Logout Functions -------------------- #
 # Login, Register, and Logout
 def login_view(request):
@@ -687,7 +789,6 @@ def logout_view(request):
 def user_action_logs(request):
     logs = UserActionLog.objects.all().order_by('-timestamp')[:100]  # Get the last 10 logs
     return render(request, 'logs.html', {'logs': logs})
-
 
 
 # -------------------- Delivery Order -------------------- #
@@ -1118,6 +1219,9 @@ def delete_selected_rows_logbook(request):
 def delete_selected_rows_employee(request):
     return delete_selected_rows(request, Employee, 'id')
 
+def delete_selected_rows_prospect(request):
+    return delete_selected_rows(request, Prospect, 'prospect_id')
+
 
 # -------------------- Approve Items -------------------- #
 @login_required
@@ -1311,6 +1415,8 @@ def get_kode_pos(request):
             return JsonResponse({'kode_pos': ''})
     return JsonResponse({'error': 'Invalid Kelurahan ID'}, status=400)
 
+
+# -------------------- Employee -------------------- #
 def add_employee(request):
     return add_entity_view(request, EmployeeForm, 'employee/add_employee.html', 'display_employee')
 
@@ -1332,17 +1438,6 @@ def add_employee_alamat(request, id):
     redirect_url  = reverse('employee_detail', args=(id,))
     return add_entity(request, id, Employee, EmployeeAlamatForm, 'employee/add_employee_alamat.html', 'id', 'employee_id', {'employee_id': id}, redirect_url=redirect_url)
 
-
-def edit_customer_alamat(request, alamat_id):
-    alamat = get_object_or_404(CustomerAlamat, id=alamat_id)
-    form = CustAlamatForms(request.POST or None, instance=alamat)
-
-    if request.method == 'POST':
-        if form.is_valid():
-            form.save()
-            return redirect('customer_detail', cust_id=alamat.customer_id.pk)
-    return render(request, 'alamat/edit_customer_alamat.html', {'form': form, 'alamat': alamat})
-
 def edit_employee_alamat(request, alamat_id):
     alamat = get_object_or_404(EmployeeAlamat, id=alamat_id)
     form = EmployeeAlamatForm(request.POST or None, instance=alamat)
@@ -1355,3 +1450,137 @@ def edit_employee_alamat(request, alamat_id):
 
 def delete_employee_alamat(request, alamat_id):
     return delete_entity(request, EmployeeAlamat, 'id', alamat_id)
+
+
+# -------------------- Prospect -------------------- #
+@login_required
+def display_prospect(request):
+    return display_entities(request, Prospect, 'prospect/display_prospect.html')
+
+@login_required
+def add_prospect(request):
+    if request.method == 'POST':
+        form = ProspectForm(request.POST)
+        if form.is_valid():
+            # Create a Prospect instance but do not save it yet
+            prospect = form.save(commit=False)
+            # Set the creator field to the current authenticated user
+            prospect.in_charge = request.user
+            # Now save the Prospect instance with the creator assigned
+            prospect.save()
+            return redirect('display_prospect')  # Redirect to a success URL
+    else:
+        form = ProspectForm()
+    return render(request, 'prospect/add_prospect.html', {'entity_form': form})
+
+@login_required
+def prospect_detail(request, prospect_id):
+    prospect_pics = ProspectPIC.objects.filter(prospect_id=prospect_id)
+    prospect_alamat = ProspectAddress.objects.filter(prospect_id=prospect_id)
+    extra_context = {'prospect_pics':prospect_pics, 'prospect_alamat':prospect_alamat}
+    return entity_detail(request, Prospect, ProspectForm, 'prospect_id', prospect_id, 'prospect/prospect_detail.html', extra_context)
+
+@login_required
+def edit_prospect(request, prospect_id):
+    return edit_entity(request, Prospect, ProspectForm, 'prospect_id', prospect_id)
+
+@login_required
+def delete_prospect(request, prospect_id):
+    return delete_entity(request, Prospect, 'prospect_id', prospect_id)
+
+# TICKETING FOR PROSPECT
+@login_required
+def prospect_ticket(request, prospect_id):
+    prospect = get_object_or_404(Prospect, prospect_id=prospect_id)
+    prospect_tickets = ProspectTicket.objects.filter(prospect_id=prospect).order_by('-date')
+
+    context = {'prospect': prospect, 'prospect_id': prospect_id, 'prospect_tickets': prospect_tickets}
+
+    return render(request, 'prospect/prospect_ticket.html', context)
+
+@login_required
+def add_prospect_ticket(request, prospect_id):
+    redirect_url  = reverse('prospect_ticket', args=(prospect_id,))
+    return add_entity(request, prospect_id, Prospect, ProspectTicketForm, 'prospect/add_prospect_ticket.html', 'prospect_id', 'prospect_id', {'prospect_id': prospect_id}, redirect_url=redirect_url)
+
+@login_required
+def edit_prospect_ticket(request, log_id):
+    log = get_object_or_404(ProspectTicket, id=log_id)
+    form = ProspectTicketForm(request.POST or None, instance=log)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('prospect_ticket', prospect_id=log.prospect_id.pk)
+    return render(request, 'prospect/edit_prospect_ticket.html', {'form': form, 'log': log})
+
+@login_required
+def delete_prospect_ticket(request, log_id):
+    return delete_entity(request, ProspectTicket, 'id', log_id)
+
+# LOG FOR TICKET
+@login_required
+def add_ticket_log(request, prospect_id):
+    entity = get_object_or_404(ProspectTicket, **{'id': prospect_id})
+    redirect_url = reverse('prospect_ticket', args=(entity.prospect_id.pk,))
+    return add_entity(request, prospect_id, ProspectTicket, TicketLogForm, 'prospect/log/add_ticket_log.html', 'id', 'ticket_id', {'ticket_id': prospect_id}, redirect_url=redirect_url)
+
+@login_required
+def edit_ticket_log(request, log_id):
+    log = get_object_or_404(TicketLog, id=log_id)
+    form = TicketLogForm(request.POST or None, instance=log)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('prospect_ticket', prospect_id=log.ticket_id.prospect_id.pk)
+    return render(request, 'prospect/log/edit_ticket_log.html', {'form': form, 'log': log})
+
+@login_required
+def delete_ticket_log(request, log_id):
+    return delete_entity(request, TicketLog, 'id', log_id)
+
+# CONVERT TO CUSTOMER
+@login_required
+def convert_to_customer(request, prospect_id):
+    prospect = get_object_or_404(Prospect, pk=prospect_id)
+
+    # Create Customer object
+    customer = Customer(
+        nama_pt=prospect.nama,
+        telp=prospect.telp,
+        # Add other fields as needed
+    )
+    customer.save()
+
+    # Create CustomerPIC object if ProspectPIC exists
+    prospect_pic = prospect.prospectpic_set.first()
+    if prospect_pic:
+        customer_pic = CustomerPIC(
+            customer_id=customer,
+            nama=prospect_pic.nama,
+            email=prospect.email,
+            telp=prospect.telp,
+            Role=prospect_pic.Role
+        )
+        customer_pic.save()
+
+    # Create CustomerAlamat object if ProspectAddress exists
+    prospect_address = prospect.prospectaddress_set.first()
+    if prospect_address:
+        customer_address = CustomerAlamat(
+            customer_id=customer,
+            type='pengiriman',  # Assuming a default type
+            kode_pos=prospect_address.kode_pos,
+            provinsi=prospect_address.provinsi,
+            kota=prospect_address.kota,
+            kecamatan=prospect_address.kecamatan,
+            kelurahan=prospect_address.kelurahan,
+            detail=prospect_address.detail
+        )
+        customer_address.save()
+
+    # Deactivate Prospect
+    prospect.open = False
+    prospect.is_customer = True
+    prospect.save()
+
+    return redirect('display_prospect')  # Redirect to customer detail page
