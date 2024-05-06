@@ -15,17 +15,18 @@
       >
       <div class="form-inline mb-2">
         <select id="columnFilter" class="form-control btn-info">
-          <option value="0">Judul</option>
-          <option value="1">Waktu Mulai</option>
-          <option value="2">Waktu Selesai</option>
-          <option value="3">Kurir</option>
-          <option value="4">Kendaraan</option>
-          <option value="5">Keterangan</option>
-          <option value="6">Lokasi Awal</option>
-          <option value="7">Destinasi</option>
-          <option value="8">Nama Paket</option>
-          <option value="9">Dimensi Paket</option>
-          <option value="10">Berat Paket</option>
+          <option value="0">ID</option>
+          <option value="1">Judul</option>
+          <option value="2">Waktu Mulai</option>
+          <option value="3">Waktu Selesai</option>
+          <option value="4">Kurir</option>
+          <option value="5">Kendaraan</option>
+          <option value="6">Keterangan</option>
+          <option value="7">Lokasi Awal</option>
+          <option value="8">Destinasi</option>
+          <option value="9">Nama Paket</option>
+          <option value="10">Dimensi Paket</option>
+          <option value="11">Berat Paket</option>
           <!-- Add more options for additional columns -->
         </select>
         <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
@@ -50,8 +51,8 @@
           {% for events in entities %}
           <tr>
             <td>{{ events.title }}</td>
-            <td>{{ events.start }}</td>
-            <td>{{ events.end }}</td>
+            <td>{{ events.start|date:"Y/m/d H:i:s" }}</td>
+            <td>{{ events.end|date:"Y/m/d H:i:s" }}</td>
             <td>{{ events.messenger }}</td>
             <td>{{ events.vehicle }}</td>
             <td>{{ events.start_location }}</td>

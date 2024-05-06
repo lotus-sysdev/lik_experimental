@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+<html>
+
+<head>
+    {% block title %}Edit Prospect Ticket Log{% endblock %}
+</head>
+
+<body>
+    {% block content %}
+    <h2>Edit Prospect Ticket Log</h2>
+    <div class="form-group w-50">
+      <form method="post" class="mt-3">
+        {% csrf_token %} {{ form.as_p }}
+        <div>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <a
+            href="{% url 'prospect_ticket' prospect_id=log.ticket_id.prospect_id.pk %}"
+            class="btn btn-secondary ml-2"
+            >Back to Customer Detail</a
+          >
+        </div>
+      </form>
+    </div>
+    {% endblock %}
+</body>
+
+</html>

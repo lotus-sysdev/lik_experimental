@@ -18,7 +18,36 @@
                 <form id="editForm" method="post" action="{% url 'edit_customer' entity.cust_id %}"
                     data-redirectUrl="{% url 'customer_detail' entity.cust_id %}">
                     {% csrf_token %}
-                    {{ form.as_p }}
+                    <div class="mb-3">
+                    <!-- Other form fields -->
+                    {{ form.nama_pt.label_tag }}
+                    {{ form.nama_pt }}
+                    </div>
+                    <div class="mb-3">
+                    <!-- Other form fields -->
+                    {{ form.telp.label_tag }}
+                    {{ form.telp }}
+                    </div>
+                    <div class="mb-3">
+                    <!-- Other form fields -->
+                    {{ form.terms_of_payment.label_tag }}
+                    {{ form.terms_of_payment }}
+                    </div>
+                    <div class="mb-3 d-flex flex-column">
+                    <label class="form-label">{{ form.pengiriman.label }}</label>
+                    <div class="form-check form-check-inline">
+                        {% for radio in form.pengiriman %}
+                        <div class="form-check form-check-inline">
+                            {{ radio }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    </div>
+                    <div class="mb-3">
+                    <!-- Other form fields -->
+                    {{ form.npwp.label_tag }}
+                    {{ form.npwp }}
+                    </div>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </form>
                 <form id="deleteForm" method="post" action="{% url 'delete_customer' entity.cust_id %}"
@@ -74,7 +103,7 @@
                                         {% with pengiriman_count=pengiriman_count|add:1 %}
                                         <li class="list-group-item h5 text-muted">
                                             {% if alamat.detail and alamat.kelurahan and alamat.kecamatan and alamat.kota and alamat.provinsi %}
-                                                {{ alamat.detail }}, {{ alamat.kelurahan }}, {{ alamat.kecamatan }}, {{ alamat.kota }}, {{ alamat.provinsi }}
+                                                {{ alamat.detail }}, {{ alamat.kelurahan }}, {{ alamat.kecamatan }}, {{ alamat.kota }}, {{ alamat.provinsi }}{% if alamat.kode_pos %}, {{ alamat.kode_pos }}{% endif %}
                                                 <div class="mt-2">
                                                     <a href="{% url 'edit_customer_alamat' alamat.id %}" class="btn btn-sm btn-primary"><i class="fa fa-pen"></i></a>
                                                     <button class="btn btn-sm btn-danger delete-alamat-btn" data-alamat-id="{{ alamat.id }}" data-alamat-detail="{{ alamat.detail }}"><i class="fa fa-times"></i></button>

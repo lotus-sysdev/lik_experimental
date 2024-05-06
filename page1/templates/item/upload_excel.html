@@ -16,9 +16,16 @@
         <th>quantity</th>
         <th>unit</th>
         <th>price</th>
+        <th>price_currency</th>
         <th>gambar</th>
         <th>tanggal_pemesanan</th>
         <th>customer</th>
+        <th>pic</th>
+        <th>jenis_sumber</th>
+        <th>nama_sumber</th>
+        <th>telp_sumber</th>
+        <th>email_sumber</th>
+        <th>link</th>
       </tr>
     </thead>
     <tbody>
@@ -26,34 +33,39 @@
         <td>Item Name</td>
         <td>Catatan....</td>
         <td>
-          Kategori (Electronics,...) preferably the one available in existing
-          category
+          Kategori (Electronics,...) kategori yang sudah ada di <span class="h6">category</span>
         </td>
         <td>1, 2, 3, ...</td>
         <td>Unit, Box, Pcs, ...</td>
-        <td>100000000 (don't use separator)</td>
-        <td>image (no need for a link)</td>
+        <td>100000000 (tidak usah menggunakan titik atau koma)</td>
+        <td>IDR, USD, SGD, dll</td>
+        <td>image</td>
         <td>2024-03-27 (yyyy-mm-dd)</td>
-        <td>Name of Customer</td>
+        <td>Nama Customer</td>
+        <td>Nama PIC</td>
+        <td>Jenis Sumber</td>
+        <td>Nama Sumber</td>
+        <td>No Telp sumber (use +628... or 08...)</td>
+        <td>Email Sumber</td>
+        <td>Link sumber</td>
       </tr>
     </tbody>
   </table>
   <hr />
   <span class="h4">Note:</span>
   <p>
-    Row title must have the <span class="h5">exact name</span> without space or
-    capitalization.
+    Judul kolom harus memiliki <span class="h5">nama yang sama</span> tanpa spasi atau kapitalisasi.
   </p>
-  <p>Add row <span class="h5">price_currency</span> to specify the currency.</p>
+  <p>Tambahkan <span class="h5">price_currency</span> untuk menggunakan mata uang khusus.</p>
   <p>
-    <span class="h5">price_currency</span> should consists of 3 digits currency
-    code (IDR, USD, SGD, etc.)
+    <span class="h5">price_currency</span> harus terdiri dari 3 digit kode mata uang negara (IDR, USD, SGD, etc.)
   </p>
-  <p class="h5">Please choose one of these categories/units/customers</p>
+  <p>Tambahkan <span class="h5">jenis_sumber, nama_sumber, telp_sumber, atau email_sumber</span> untuk menspesifikasikan sumber.</p>
+  <p class="h5">Pilih salah satu kategori ini untuk kategori/satuan/customer/jenis sumber</p>
 
-  <div class="col-md-12">
+  <div class="col md-12">
     <div class="row">
-      <div class="col-md-4">
+      <div class="col-md-2">
         <p>Categories:</p>
         <div class="dropdown">
           <button
@@ -64,7 +76,7 @@
             aria-haspopup="true"
             aria-expanded="false"
           >
-            List of Categories
+            Pilihan Kategori
           </button>
           <div class="dropdown-menu" aria-labelledby="categoryDropdown">
             {% for category in categories %}
@@ -73,7 +85,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-2">
         <p>Units:</p>
         <div class="dropdown">
           <button
@@ -84,7 +96,7 @@
             aria-haspopup="true"
             aria-expanded="false"
           >
-            List of Units
+            Pilihan Satuan
           </button>
           <div class="dropdown-menu" aria-labelledby="unitDropdown">
             <a class="dropdown-item" href="#">Botol</a>
@@ -105,11 +117,13 @@
             <a class="dropdown-item" href="#">Rim</a>
             <a class="dropdown-item" href="#">Roll</a>
             <a class="dropdown-item" href="#">Set</a>
+            <a class="dropdown-item" href="#">Lembar</a>
+            <a class="dropdown-item" href="#">Galon</a>
             <a class="dropdown-item" href="#">Lainnya</a>
           </div>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-2">
         <p>Customers:</p>
         <div class="dropdown">
           <button
@@ -120,11 +134,52 @@
             aria-haspopup="true"
             aria-expanded="false"
           >
-            List of Customers
+            Pilihan Customer
           </button>
           <div class="dropdown-menu" aria-labelledby="customerDropdown">
             {% for customer in customers %}
             <a class="dropdown-item" href="#">{{ customer.nama_pt }}</a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <p>Jenis Sumber:</p>
+        <div class="dropdown">
+          <button
+            class="btn btn-warning dropdown-toggle"
+            type="button"
+            id="customerDropdown"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+          Pilihan Jenis Sumber
+          </button>
+          <div class="dropdown-menu" aria-labelledby="customerDropdown">
+            <a class="dropdown-item" href="#">Online Store</a>
+            <a class="dropdown-item" href="#">Pabrik</a>
+            <a class="dropdown-item" href="#">Reseller</a>
+            <a class="dropdown-item" href="#">Grosir</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <p>PIC:</p>
+        <div class="dropdown">
+          <button
+            class="btn btn-primary dropdown-toggle"
+            type="button"
+            id="customerDropdown"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            Pilihan PIC
+          </button>
+          <div class="dropdown-menu" aria-labelledby="customerDropdown">
+            {% for pic in customerPIC %}
+            <a class="dropdown-item" href="#">{{ pic.nama }} - {{ pic.customer_id }}</a>
             {% endfor %}
           </div>
         </div>
@@ -157,26 +212,30 @@
         <th>Gambar</th>
         <th>Tanggal Pesan</th>
         <th>Customer</th>
+        <th>Link</th>
+        <th>PIC</th>
       </tr>
     </thead>
     <tbody>
       {% for item in processed_items %}
       <tr>
-        <td>{{ item.nama }}</td>
-        <td>{{ item.catatan }}</td>
-        <td>{{ item.category }}</td>
-        <td>{{ item.quantity }}</td>
-        <td>{{ item.unit }}</td>
-        <td>{{ item.price }}</td>
-        <td>{{ item.price_currency }}</td>
+        <td>{{ item.instance.nama }}</td>
+        <td>{{ item.instance.catatan }}</td>
+        <td>{{ item.instance.category }}</td>
+        <td>{{ item.instance.quantity }}</td>
+        <td>{{ item.instance.unit }}</td>
+        <td>{{ item.instance.price }}</td>
+        <td>{{ item.instance.price_currency }}</td>
         <!-- Display image if available -->
         <td>
-          {% if item.gambar %}
-          <img src="{{ item.gambar.url }}" width="100" height="100" />
+          {% if item.instance.gambar %}
+          <img src="{{ item.instance.gambar.url }}" width="100" height="100" />
           {% else %} No image available {% endif %}
         </td>
-        <td>{{ item.tanggal_pemesanan }}</td>
-        <td>{{ item.customer }}</td>
+        <td>{{ item.instance.tanggal_pemesanan }}</td>
+        <td>{{ item.instance.customer }}</td>
+        <td>{{ item.url }}</td>
+        <td>{{ item.instance.pic }}</td>
       </tr>
       {% endfor %}
     </tbody>

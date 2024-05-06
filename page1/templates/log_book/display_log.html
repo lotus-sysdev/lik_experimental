@@ -53,10 +53,10 @@
             <td>{{ log.instansi_asal }}</td>
             <td>{{ log.tujuan }}</td>
             <td>{{ log.tujuan_lainnya }}</td>
-            <td>{{log.nama_dikunjungi }}</td>
+            <td>{{ log.nama_dikunjungi }}</td>
             <td>{{ log.tipe }}</td>
-            <td>{{ log.start }}</td>
-            <td>{{ log.end }}</td>
+            <td>{{ log.start|date:"Y/m/d H:i:s" }}</td>
+            <td>{{ log.end|date:"Y/m/d H:i:s" }}</td>
             <td>
               <a href="{% url 'log_detail' log.id %}">View</a>
             </td>

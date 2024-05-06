@@ -18,12 +18,14 @@
           <option value="0">ID</option>
           <option value="1">Plat Nomor</option>
           <option value="2">Driver</option>
-          <option value="2">No. PO</option>
-          <option value="2">No. DO</option>
-          <option value="3">No. Tiket Timbang</option>
-          <option value="4">Berat (Tonnase)</option>
-          <option value="6">Tanggal Keluar</option>
-          <option value="6">Catatan (Reject)</option>
+          <option value="3">No. PO</option>
+          <option value="4">No. DO</option>
+          <option value="5">No. Tiket Timbang</option>
+          <option value="6">Berat (Tonnase)</option>
+          <option value="7">Catatan (Reject)</option>
+          <option value="8">Lokasi Potong</option>
+          <option value="9">Pabrik Tujuan</option>
+          <option value="10">Tanggal Keluar</option>
           <!-- Add more options for additional columns -->
         </select>
         <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
@@ -39,6 +41,10 @@
             <th>Berat (Tonnase)</th>
             <th>Tanggal Keluar</th>
             <th>Catatan (Reject)</th>
+            <th>Lokasi Potong</th>
+            <th>Tujuan Pabrik</th>
+            <th>Tanggal Keluar</th>
+            <th>Foto</th>
             <th>Ubah</th>
           </tr>
         </thead>
@@ -54,6 +60,10 @@
             <td>{{ report.berat }} kg</td>
             <td>{{ report.tanggal }}</td>
             <td>{{ report.reject }} kg</td>
+            <td>{{ report.lokasi }}</td>
+            <td>{{ report.tujuan }}</td>
+            <td>{{ report.tanggal }}</td>
+            <td><img src="{{ report.foto.url }}" alt="{{ report.id }}"/></td>
             <td>
               <a href="{% url 'report_detail' report.id %}">View</a>
             </td>

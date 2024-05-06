@@ -1,13 +1,20 @@
+from io import BytesIO
+import os
+from django.conf import settings
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import generics, status
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.core.files.base import ContentFile
+
+from PIL import Image
 
 from .serializers import *
 from .models import *
@@ -114,6 +121,29 @@ def edit_report(request, id):
 class add_report_mobile(generics.CreateAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
+    parser_classes = (MultiPartParser, FormParser)
+
+    def perform_create(self, serializer):
+        # Get the image data from request.FILES
+        image_data = self.request.FILES.get('foto')
+        print(image_data)
+        if image_data:
+            # Open the image using PIL
+            image = Image.open(image_data)
+            image_name = str(image_data)
+            
+            resized_image = image.resize((100, 100))  # Change the dimensions as needed
+            resized_image_name = f'resized-{image_name}'
+            resized_image_path = os.path.join(settings.MEDIA_ROOT, 'report_photos', resized_image_name)
+            resized_image.save(resized_image_path)
+            
+            resized_image_name = f'resized-{image_name}'
+            # Delete the original image file
+            # os.remove(os.path.join(settings.MEDIA_ROOT, 'report_photos', image_name))
+
+            serializer.validated_data['foto'] = os.path.join('report_photos', resized_image_name)
+        # Call the serializer's save method to create the Report instance
+        serializer.save()
 
 @api_view(['POST'])
 def register_user(request):
@@ -130,7 +160,11 @@ def login_user(request):
     user = authenticate(username=username, password=password)
     if user is not None:
         token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key}, status=status.HTTP_200_OK)
+        # Get user's groups
+        groups = list(user.groups.values_list('id', flat=True))
+        print(groups)
+        # Include groups in response data
+        return Response({'token': token.key, 'groups': groups}, status=status.HTTP_200_OK)
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['POST'])
@@ -138,3 +172,55 @@ def login_user(request):
 def logout_user(request):
     request.user.auth_token.delete()
     return Response(status=status.HTTP_200_OK)
+
+@permission_classes([IsAuthenticated])
+def tujuan_options_list(request):
+    # Sample dictionary data
+    options = [
+        {'label': 'Sumatra Prima Fiberboard', 'value': 'spf'},
+        {'label': 'Cipta Mandala', 'value': 'cipta-mandala'},
+    ]
+    return JsonResponse(options, safe=False)
+
+@permission_classes([IsAuthenticated])
+def lokasi_options_list(request):
+    # Sample dictionary data
+    lokasi_options = [
+        {'label': 'Muara Enim', 'value': 'muara-enim'},
+        {'label': 'Perkebunan Rakyat', 'value': 'perkebunan-rakyat'},
+        {'label': 'Gunung Rajo', 'value': 'gunung-rajo'},
+    ]
+    return JsonResponse(lokasi_options, safe=False)
+
+# @permission_classes([IsAuthenticated])
+class GroupLokasiListAPIView(generics.ListAPIView):
+    serializer_class = LokasiSerializer
+
+    def get_queryset(self):
+        group_id = self.kwargs['group_id']
+        group_lokasis = Group_Lokasi.objects.filter(group_id=group_id)
+        lokasi_ids = [lokasi.id for group_lokasi in group_lokasis for lokasi in group_lokasi.lokasi.all()]
+        return Lokasi.objects.filter(id__in=lokasi_ids)
+    
+# @permission_classes([IsAuthenticated])
+class GroupTujuanListAPIView(generics.ListAPIView):
+    serializer_class = TujuanSerializer
+
+    def get_queryset(self):
+        group_id = self.kwargs['group_id']
+        group_tujuans = Group_Tujuan.objects.filter(group_id=group_id)
+        tujuan_ids = [tujuan.id for group_tujuan in group_tujuans for tujuan in group_tujuan.tujuan.all()]
+        return Tujuan.objects.filter(id__in=tujuan_ids)
+
+@permission_classes([IsAuthenticated])
+def upload_image(request):
+    if request.method == 'POST' and request.FILES.get('image'):
+        image_file = request.FILES['image']
+        # Process and save the image
+        # Example: save to a folder named 'uploads'
+        with open('uploads/' + image_file.name, 'wb+') as destination:
+            for chunk in image_file.chunks():
+                destination.write(chunk)
+        return JsonResponse({'message': 'Image uploaded successfully'})
+    else:
+        return JsonResponse({'error': 'No image found in the request'}, status=400)
