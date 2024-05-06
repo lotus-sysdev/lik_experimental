@@ -37,6 +37,9 @@
 
             {% if request.user|has_group:'Accounting' or request.user|has_group:'Admin' %}
             <li><a class="sidebar-a" href="/display_supplier">Supplier</a></li>
+            {% endif %}
+
+            {% if request.user|has_group:'GA' or request.user|has_group:'Admin' %}
             <li><a class="sidebar-a" href="/display_item">Item</a></li>
             {% endif %}
 
@@ -69,18 +72,21 @@
 
             {% if request.user|has_group:'GA' or request.user|has_group:'Accounting' or request.user|has_group:'Admin' %}
             <li><a class="sidebar-a" href="/display_work">Work Order</a></li>
+            {% endif %}
           </ul>
         </li>
+        {% endif %}
+
         {% if request.user|has_group:'FO' or request.user|has_group:'Messenger' or request.user|has_group:'Admin' %}
         <li class="active">
           <a
-            href="#dataSubmenu"
+            href="#frontOfficeSubmenu"
             data-toggle="collapse"
             aria-expanded="true"
             class="dropdown-toggle sidebar-a"
             >Front Office</a
           >
-          <ul class="collapse list-unstyled show" id="dataSubmenu">
+          <ul class="collapse list-unstyled show" id="frontOfficeSubmenu">
               {% if request.user|has_group:'FO' or request.user|has_group:'Messenger' or request.user|has_group:'Admin' %}
               <li><a class="sidebar-a" href="/calendar">Delivery Order</a></li>
               {% endif %}
@@ -108,7 +114,21 @@
 
       <ul class="list-unstyled components">
         <li><a class="sidebar-a" href="/">Dashboard</a></li>
-        <li><a class="sidebar-a" href="/display_report">Report</a></li>
+        <!-- <li><a class="sidebar-a" href="/api/display_report">Report</a></li> -->
+        <li class="active">
+          <a
+            href="#reportSubmenu"
+            data-toggle="collapse"
+            aria-expanded="true"
+            class="dropdown-toggle sidebar-a"
+            >Report</a
+          >
+          <ul class="collapse list-unstyled show" id="reportSubmenu">
+              {% if request.user|has_group:'FO' or request.user|has_group:'Messenger' or request.user|has_group:'Admin' %}
+              <li><a class="sidebar-a" href="/api/display_report">Report</a></li>
+              {% endif %}
+          </ul>
+        </li>
       </ul>
 
       <ul class="list-unstyled CTAs">
