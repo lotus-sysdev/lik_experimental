@@ -15,23 +15,22 @@
       >
       <div class="form-inline mb-2">
         <select id="columnFilter" class="form-control btn-info">
-          <option value="0">ID</option>
-          <option value="1">Nama (Pengunjung)</option>
-          <option value="2">Email</option>
-          <option value="3">Nomor Telpon</option>
-          <option value="4">Instansi Asal</option>
-          <option value="5">Tujuan Kunjungan</option>
-          <option value="6">Lainnya</option>
-          <option value="7">Nama (Dikunjungi)</option>
-          <option value="8">Jenis Kunjungan</option>
-          <option value="9">Waktu Mulai</option>
-          <option value="10">Waktu Selesai</option>
+          <option value="0">Nama (Pengunjung)</option>
+          <option value="1">Email</option>
+          <option value="2">Nomor Telpon</option>
+          <option value="3">Instansi Asal</option>
+          <option value="4">Tujuan Kunjungan</option>
+          <option value="5">Lainnya</option>
+          <option value="6">Nama (Dikunjungi)</option>
+          <option value="7">Jenis Kunjungan</option>
+          <option value="8">Waktu Mulai</option>
+          <option value="9">Waktu Selesai</option>
+          <!-- Add more options for additional columns -->
         </select>
         <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
       </div>
         <thead class="thead-light">
           <tr>
-            <th>ID</th>
             <th>Nama (Pengunjung)</th>
             <th>Email</th>
             <th>Nomor Telpon</th>
@@ -48,7 +47,6 @@
         <tbody class="tbody">
           {% for log in entities %}
           <tr>
-            <td>{{ log.id }}</td>
             <td>{{ log.nama }}</td>
             <td>{{ log.email }}</td>
             <td>{{ log.telp }}</td>
@@ -123,7 +121,7 @@
         if (confirm('Are you sure you want to delete the selected rows?')) {
             const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
             $.ajax({
-                url: '{% url "delete_selected_rows_logbook" %}',
+                url: '{% url "delete_selected_rows_cust" %}',
                 type: 'POST',
                 data: {selected_ids: selectedIDs, csrfmiddlewaretoken: csrfToken },
                 dataType: 'json',

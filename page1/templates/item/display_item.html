@@ -224,7 +224,7 @@
         console.error("Table is not initialized.");
         return;
     }
-        var selectedIDs = table.rows('.selected').data().toArray().map(row => row[5]); // Get SKUs of selected rows using DataTables API
+        var selectedIDs = table.rows('.selected').data().toArray().map(row => row[4]); // Get SKUs of selected rows using DataTables API
         selectedIDs.forEach(function(value) {
         console.log('selected_ids[]:', value);
         });
@@ -297,64 +297,9 @@
   }
 
   $(document).ready(function() {
-  initializeDataTable();
-  
-  $('#filterDuplicatesButton').on('click', function() {
-        filterDuplicates();
-    });
-
-    function filterDuplicates() {
-    var rows = table.rows().nodes(); // Get all rows in the DataTable
-
-    var uniqueRows = {}; // Object to store unique rows
-    var duplicateRows = []; // Array to store duplicate row nodes
-
-    // Iterate through each row
-    rows.each(function(index, row) {
-        var rowData = table.row(row).data(); // Get data for the current row
-        var rowDataStr = JSON.stringify(excludeColumns(rowData)); // Convert row data to a string for comparison
-
-        // Check if the row data already exists in the uniqueRows object
-        if (uniqueRows[rowDataStr]) {
-            // Duplicate row found, add both the current row and the original reference row to the duplicateRows array
-            duplicateRows.push(row);
-            duplicateRows.push(uniqueRows[rowDataStr]);
-        } else {
-            // Unique row, add it to the uniqueRows object
-            uniqueRows[rowDataStr] = row;
-        }
-    });
-
-    // Hide all rows
-    table.rows().nodes().to$().hide();
-
-    // Show only duplicate rows and their corresponding original reference rows
-    table.rows(duplicateRows).nodes().to$().show();
-    
-    table.draw();
-  }
-
-    // Function to exclude multiple columns from row data
-    function excludeColumns(rowData) {
-        var excludedColumns = [5, 11, 13, 14]; // Specify the indices of columns to be excluded (e.g., column index 3 and 5)
-        var rowDataCopy = rowData.slice(); // Create a copy of the row data array
-
-        // Set excluded column values to null
-        for (var i = 0; i < excludedColumns.length; i++) {
-            var columnIndex = excludedColumns[i];
-            rowDataCopy[columnIndex] = null;
-        }
-
-        return rowDataCopy;
-    }
-  // Trigger search on button click
-  $('#searchButton').on('click', function() {
-    columnSearch();
-  });
-  
-  // Reset search on button click
-  $('#resetButtonCol').on('click', function() {
-    resetSearch();
+    initializeDataTable();
+    $('#columnSearch').on('keyup', function() {
+    columnSearch(); // Call the columnSearch function when the user types in the input field
   });
 
   // Function to perform column-specific search

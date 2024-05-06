@@ -115,10 +115,9 @@ class Items(models.Model):
     Tanggal = models.DateField(default=timezone.now)
     tanggal_pemesanan = models.DateField(default=timezone.now, null=True)
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
-    pic = models.ForeignKey(CustomerPIC, on_delete= models.SET_NULL, null=True)
     nama = models.CharField(max_length=255)
     catatan = models.CharField(max_length = 500, null = True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     unit = models.CharField(max_length=10)
     price = MoneyField(max_digits=15, decimal_places=2, default_currency='IDR', blank= False, null= False, validators=[MinMoneyValidator(0)])
@@ -127,7 +126,7 @@ class Items(models.Model):
     
     def __str__(self):
         return self.nama
-    
+
     def save(self, *args, **kwargs):
         if not self.SKU or 'is_approved' in kwargs:
             # Generate SKU based on category and a unique number
@@ -270,9 +269,6 @@ class SupplierAlamat(models.Model):
     kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
     kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
     detail = models.CharField(max_length=500)
-
-    def __str__ (self):
-        return (f'{self.supplier_id}-{self.type}') 
 
 def default_date():
     return datetime.date(1900, 1, 1)

@@ -4,7 +4,7 @@ import csv
 from PIL import Image
 import pandas as pd
 import requests
-from datetime import datetime, timedelta
+import datetime
 import re
 
 from django.db.models import Q, Prefetch
@@ -300,7 +300,6 @@ def add_item(request):
                 regex_pattern = r'/'
                 replacement_string = '.'
                 nama_cleaned = re.sub(regex_pattern, replacement_string, item.nama)
-                curr_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
                 # Save the resized image
                 # image_name = f"{item.nama}.{image.name.split('.')[-1]}"
                 # image_path = os.path.join(settings.MEDIA_ROOT, image_name)
@@ -420,13 +419,14 @@ def item_detail(request, SKU):
 @GA_required
 def edit_item(request, SKU):
     entity = get_object_or_404(Items,SKU=SKU)
-    entity_approved = entity.is_approved
-    
+    # entity_approved = entity.is_approved
+
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES, instance=entity)
         if form.is_valid():
             # Check if a new image file is provided
             new_image = request.FILES.get('gambar')
+            
             if new_image:
                 # Process the new image file (similar to the logic in your add_item view)
                 img = Image.open(new_image)
@@ -438,15 +438,8 @@ def edit_item(request, SKU):
                 # Update the item's image field with the new image path
                 form.instance.gambar = resized_image_name
 
-            if request.user.groups.filter(name='Admin').exists():
-                new_approved_raw = request.POST.get('is_approved', 'off')
-                new_approved = new_approved_raw == "on"
-                print(new_approved)
-                if new_approved != entity.is_approved:
-                    entity.is_approved = new_approved
-            else:
-                entity.is_approved = entity_approved
-                
+            # entity.is_approved = entity_approved
+
             form.save()
 
             return JsonResponse({'success': True})
@@ -456,12 +449,6 @@ def edit_item(request, SKU):
         form = ItemForm(instance=entity)
 
     return render(request, 'edit_item.html', {'form': form})
-
-def get_pic_options(request):
-    customer_id = request.GET.get('cust_id')
-    pics = CustomerPIC.objects.filter(customer_id=customer_id)
-    data = [{'id': pic.id, 'name': pic.name} for pic in pics]
-    return JsonResponse(data, safe=False)
 
 @login_required
 @GA_required
@@ -939,7 +926,6 @@ def add_messenger(request):
 def add_vehicle(request):
     return add_entity_view(request, VehicleForm, 'delivery/add_vehicle.html', 'calendar')
 
-@login_required
 def get_messenger(request):
     vehicle_id = request.GET.get('vehicle')
     print(vehicle_id)
@@ -1052,12 +1038,7 @@ def upload_excel(request):
                 unit_index = column_titles.index('unit') if 'unit' in column_titles else None
                 price_index = column_titles.index('price') if 'price' in column_titles else None
                 price_currency_index = column_titles.index('price_currency') if 'price_currency' in column_titles else None
-                jenis_sumber_index = column_titles.index('jenis_sumber') if 'jenis_sumber' in column_titles else None
-                link_index = column_titles.index('link') if 'link' in column_titles else None
-                telp_sumber_index = column_titles.index('telp_sumber') if 'telp_sumber' in column_titles else None
-                email_sumber_index = column_titles.index('email_sumber') if 'email_sumber' in column_titles else None
-                nama_sumber_index = column_titles.index('nama_sumber') if 'nama_sumber' in column_titles else None
-                pic_index = column_titles.index('pic') if 'pic' in column_titles else None
+
                 # Find the row containing the 'Gambar' column title
                 gambar_row_index = None
                 for row_index, row in enumerate(worksheet.iter_rows(values_only=True)):
@@ -1068,6 +1049,7 @@ def upload_excel(request):
                 if gambar_row_index is not None:
                     # Load image from the 'Gambar' column for each row
                     image_loader = SheetImageLoader(worksheet)
+
                     for row_index, row in enumerate(worksheet.iter_rows(min_row=gambar_row_index + 2, values_only=True)):
                         if all(index is not None for index in [nama_index, category_index, customer_index, quantity_index, unit_index, price_index]):
                             try: 
@@ -1094,7 +1076,7 @@ def upload_excel(request):
                                 # Generate filename including item name, upload date, and row index
                                 item_name = row[nama_index] if nama_index is not None else ''
                                 item_name_cleaned = re.sub(regex_pattern, replacement_string, item_name)
-                                upload_date = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+                                upload_date = datetime.date.today().strftime('%Y-%m-%d')
                                 filename = f"media_bulk_{item_name_cleaned}_{upload_date}_{row_index}.png"
                                 
                                 # Specify the full path including the media directory
@@ -1113,7 +1095,6 @@ def upload_excel(request):
                                     catatan=row[catatan_index] if catatan_index is not None else '',
                                     category=category_instance,
                                     customer=customer_instance,
-                                    pic = pic_instance,
                                     quantity=row[quantity_index] if quantity_index is not None else 0,
                                     unit=row[unit_index] if unit_index is not None else '',
                                     price=row[price_index] if price_index is not None else 0,

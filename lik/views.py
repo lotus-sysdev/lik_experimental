@@ -10,7 +10,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.core.files.base import ContentFile
 
@@ -19,6 +19,7 @@ from PIL import Image
 from .serializers import *
 from .models import *
 from .forms import *
+
 # Create your views here.
 def delete_selected_rows(request, model, key):
     if request.method == 'POST':
@@ -155,7 +156,7 @@ def register_user(request):
 @api_view(['POST'])
 def login_user(request):
     username = request.data.get('username')
-    password = request.data.get('password') 
+    password = request.data.get('password')
     user = authenticate(username=username, password=password)
     if user is not None:
         token, created = Token.objects.get_or_create(user=user)
