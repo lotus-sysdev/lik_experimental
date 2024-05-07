@@ -1475,7 +1475,21 @@ def prospect_ticket(request, prospect_id):
     prospect = get_object_or_404(Prospect, prospect_id=prospect_id)
     prospect_tickets = ProspectTicket.objects.filter(prospect_id=prospect).order_by('-date')
 
-    context = {'prospect': prospect, 'prospect_id': prospect_id, 'prospect_tickets': prospect_tickets}
+    for prospect_ticket in prospect_tickets:
+        prospect_ticket.sorted_logs = prospect_ticket.ticketlog_set.order_by('-date')
+    
+    ticket_log_form = TicketLogForm()
+
+    if request.method == "POST":
+        entity = get_object_or_404(ProspectTicket, **{'id': request.POST.get('ticket_id')})
+        ticket_log_form = TicketLogForm(request.POST)
+        if ticket_log_form.is_valid():
+            setattr(ticket_log_form.instance, "ticket_id", entity)
+            # ticket_log_form.instance.ticket_id = request.POST.get('ticket_id')
+            ticket_log_form.save()
+            return redirect(request.path)
+
+    context = {'prospect': prospect, 'prospect_id': prospect_id, 'prospect_tickets': prospect_tickets, 'ticket_log_form': ticket_log_form,}
 
     return render(request, 'prospect/prospect_ticket.html', context)
 

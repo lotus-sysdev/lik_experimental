@@ -67,8 +67,8 @@
                 </button>
                 <a
                   {% if i.open %}
-                  href="{% url 'add_ticket_log' i.id %}"
-                  class="btn btn-sm btn-success"
+                  class="btn btn-sm btn-success add-new-log-btn"
+                  data-ticket-id="{{ i.id }}"
                   {% else %}
                   class="btn btn-sm btn-success disabled"
                   {% endif %}
@@ -79,7 +79,7 @@
             </div>
             <p class="card-text p-2">{{ i.activity }}</p>
             <hr>
-            {% for log in i.ticketlog_set.all %}
+            {% for log in i.sorted_logs.all %}
             <div class="d-flex">              
               <span class="mr-auto p-2">{{ log.date }} - {{ log.detail }}</span>
               <div class="p-2">
@@ -156,6 +156,29 @@
             }
           });
         });
+
+        document.querySelectorAll(".add-new-log-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                // Get the ticket ID
+                const ticketId = parseInt(btn.getAttribute("data-ticket-id"));
+
+                // Create a new form for adding a log
+                const newLogForm = document.createElement("div");
+                newLogForm.innerHTML = `
+                  <form method="post" class="mt-3">
+                    {% csrf_token %}
+                    {{ ticket_log_form.as_p }}
+                    <input type="hidden" name="ticket_id" value="${ticketId}">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                  </form>
+                `;
+
+                // Append the new form below the current logs section
+                const currentLogsSection = btn.closest(".card-body");
+                currentLogsSection.appendChild(newLogForm);
+            });
+        });
+
       });
 
       
@@ -173,6 +196,7 @@
             if (isConfirmed) {
               // If confirmed, make an Ajax request to delete the pic
               const logId = btn.getAttribute("data-log-ticket-id");
+              // console.log(logId)
               fetch(
                 "{% url 'delete_ticket_log' 0 %}".replace("0", logId),
                 {
