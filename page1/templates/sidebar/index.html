@@ -69,8 +69,10 @@
 
             {% if request.user|has_group:'GA' or request.user|has_group:'Accounting' or request.user|has_group:'Admin' %}
             <li><a class="sidebar-a" href="/display_work">Work Order</a></li>
+            {% endif %}
           </ul>
         </li>
+        {% endif %}
         {% if request.user|has_group:'FO' or request.user|has_group:'Messenger' or request.user|has_group:'Admin' %}
         <li class="active">
           <a
