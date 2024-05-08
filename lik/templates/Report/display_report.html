@@ -78,6 +78,12 @@
           <button id="resetButton" class="btn btn-secondary ml-2">Reset</button>
         </div>
 
+          <div class="custom-container container">
+            <p>Total Berat: <span class="font-weight-bold" id="totalBerat"></span> Kg</p>
+            <p>Total Reject: <span class="font-weight-bold" id="totalReject"></span> Kg</p>
+            <p>Jumlah Kendaraan: <span class="font-weight-bold" id="uniquePlatCount"></span></p>
+          </div>
+
         <thead class="thead-light">
           <tr>
             <th>Timestamp</th>
@@ -114,7 +120,7 @@
             {% else %}
             <td>None</td>
             {% endif %}
-            <td>{{ report.plat }}</td>
+            <td>{{ report.plat|upper }}</td>
             <td>{{ report.driver }}</td>
             <td>{{ report.PO }}</td>
             <td>{{ report.DO }}</td>
@@ -227,11 +233,24 @@
           });
         }
       }
+
       $(document).ready(function () {
         initializeDataTable();
+        calculateStats()
+
+        var searchTimeout;
+
+        $('.dt-search input')
+          .off()
+          .on('keyup', function () {
+            clearTimeout(searchTimeout)
+
+            searchTimeout = setTimeout(updateStatsAfterSearch, 500)
+        });
 
         $("#filterDuplicatesButton").on("click", function () {
           filterDuplicates();
+          calculateStats()
         });
 
         function filterDuplicates() {
@@ -283,6 +302,7 @@
 
         $("#resetFilterDuplicatesBtn").on("click", function () {
           resetFilterDuplicates();
+          calculateStats()
         });
 
         // Function to reset check duplicates button
@@ -295,10 +315,12 @@
 
         $("#searchButton").on("click", function () {
           columnSearch();
+          updateStatsAfterSearch()
         });
 
         $("#resetButtonCol").on("click", function () {
           resetSearch();
+          calculateStats()
         });
 
         // Function to perform column-specific search
@@ -306,12 +328,62 @@
           var columnIndex = $("#columnFilter").val(); // Get the index of the selected column
           var searchValue = $("#columnSearch").val().trim(); // Get the value of the search input and remove leading/trailing whitespace
           table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
+          updateStatsAfterSearch()
+        }
+
+        function calculateStats() {
+          var totalBerat = 0;
+          var totalReject = 0;
+          var uniquePlat = new Set();
+
+          // Iterate through each row in the DataTable
+          table.rows().every(function() {
+              var data = this.data();
+
+              // Accumulate berat and reject values
+              totalBerat += parseFloat(data[9]); // Assuming berat is at index 9
+              totalReject += parseFloat(data[10]); // Assuming reject is at index 10
+
+              // Collect unique plat values
+              uniquePlat.add(data[3]); // Assuming plat is at index 3
+
+              $("#totalBerat").text(totalBerat.toFixed(2)); // Assuming you want to display with two decimal places
+              $("#totalReject").text(totalReject.toFixed(2)); // Assuming you want to display with two decimal places
+              $("#uniquePlatCount").text(uniquePlat.size);
+          });
+        }
+
+        function updateStatsAfterSearch() {
+            var totalBerat = 0;
+            var totalReject = 0;
+            var uniquePlat = new Set();
+
+            // Iterate through each visible row in the DataTable
+            table.rows({ search: 'applied' }).every(function() {
+                var data = this.data();
+
+                // Accumulate berat and reject values
+                totalBerat += parseFloat(data[9]); // Assuming berat is at index 9
+                totalReject += parseFloat(data[10]); // Assuming reject is at index 10
+
+                // Collect unique plat values
+                uniquePlat.add(data[3]); // Assuming plat is at index 3
+            });
+
+            $("#totalBerat").text(totalBerat.toFixed(2)); // Assuming you want to display with two decimal places
+            $("#totalReject").text(totalReject.toFixed(2)); // Assuming you want to display with two decimal places
+            $("#uniquePlatCount").text(uniquePlat.size);
+
+            // Output or use the calculated statistics as needed
+            console.log("Total Berat after search:", totalBerat);
+            console.log("Total Reject after search:", totalReject);
         }
 
         // Function to reset search
         function resetSearch() {
           $("#columnSearch").val(""); // Clear the search input
           table.search("").columns().search("").draw(); // Clear all column-specific searches and redraw the table
+          calculateStats()
         }
 
         $("#filterButton").click(function () {
@@ -409,6 +481,7 @@
                 table.destroy();
               }
               initializeDataTable();
+              calculateStats()
             },
             error: function (xhr, status, error) {
               console.error("Error filtering data:", error);
