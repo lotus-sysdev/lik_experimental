@@ -4,7 +4,7 @@ import csv
 from PIL import Image
 import pandas as pd
 import requests
-import datetime
+from datetime import datetime, timedelta
 import re
 
 from django.db.models import Q, Prefetch
@@ -300,6 +300,7 @@ def add_item(request):
                 regex_pattern = r'/'
                 replacement_string = '.'
                 nama_cleaned = re.sub(regex_pattern, replacement_string, item.nama)
+                curr_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
                 # Save the resized image
                 # image_name = f"{item.nama}.{image.name.split('.')[-1]}"
                 # image_path = os.path.join(settings.MEDIA_ROOT, image_name)
@@ -1038,6 +1039,12 @@ def upload_excel(request):
                 unit_index = column_titles.index('unit') if 'unit' in column_titles else None
                 price_index = column_titles.index('price') if 'price' in column_titles else None
                 price_currency_index = column_titles.index('price_currency') if 'price_currency' in column_titles else None
+                jenis_sumber_index = column_titles.index('jenis_sumber') if 'jenis_sumber' in column_titles else None
+                link_index = column_titles.index('link') if 'link' in column_titles else None
+                telp_sumber_index = column_titles.index('telp_sumber') if 'telp_sumber' in column_titles else None
+                email_sumber_index = column_titles.index('email_sumber') if 'email_sumber' in column_titles else None
+                nama_sumber_index = column_titles.index('nama_sumber') if 'nama_sumber' in column_titles else None
+                pic_index = column_titles.index('pic') if 'pic' in column_titles else None
 
                 # Find the row containing the 'Gambar' column title
                 gambar_row_index = None
