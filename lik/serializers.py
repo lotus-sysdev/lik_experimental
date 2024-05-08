@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Report, Lokasi, Tujuan
-from drf_extra_fields.fields import Base64ImageField
+from .models import Report, Lokasi, Tujuan, Kayu
+
 
 class ReportSerializer(serializers.ModelSerializer):
     foto = serializers.ImageField()
@@ -13,7 +13,7 @@ class ReportSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['id','username', 'first_name','email', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -28,4 +28,9 @@ class LokasiSerializer(serializers.ModelSerializer):
 class TujuanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tujuan
+        fields = '__all__'
+
+class KayuSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Kayu
         fields = '__all__'

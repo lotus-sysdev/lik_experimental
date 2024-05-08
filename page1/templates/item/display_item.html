@@ -38,6 +38,7 @@
     <button id="searchButton" class="btn btn-primary mr-2">Search</button>
     <button id="resetButtonCol" class="btn btn-secondary mr-2">Reset</button>
     <button id="filterDuplicatesButton" class="btn btn-warning">Check for Duplicates</button>
+    <button id="resetFilterDuplicatesBtn" class="btn btn-secondary ml-2">Reset</button>
   </div>
   
   <div class="form-inline mb-2">
@@ -336,7 +337,7 @@
 
     // Function to exclude multiple columns from row data
     function excludeColumns(rowData) {
-        var excludedColumns = [5, 11, 13, 14]; // Specify the indices of columns to be excluded (e.g., column index 3 and 5)
+        var excludedColumns = [1, 5, 11, 13, 14]; // Specify the indices of columns to be excluded (e.g., column index 3 and 5)
         var rowDataCopy = rowData.slice(); // Create a copy of the row data array
 
         // Set excluded column values to null
@@ -347,6 +348,10 @@
 
         return rowDataCopy;
     }
+
+  $('#resetFilterDuplicatesBtn').on('click', function() {
+    resetFilterDuplicates();
+  })
   // Trigger search on button click
   $('#searchButton').on('click', function() {
     columnSearch();
@@ -362,6 +367,13 @@
     var columnIndex = $('#columnFilter').val(); // Get the index of the selected column
     var searchValue = $('#columnSearch').val().trim(); // Get the value of the search input and remove leading/trailing whitespace
     table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
+  }
+  // Function to reset check duplicates button
+  function resetFilterDuplicates() {
+    // Show all rows
+    table.rows().nodes().to$().show();
+    
+    table.draw();
   }
 
   // Function to reset search

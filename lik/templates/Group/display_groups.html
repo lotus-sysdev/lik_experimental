@@ -46,68 +46,39 @@
             Reset
           </button>
         </div>
-        <thead class="thead-light">
-          <tr>
-            <th>Timestamp</th>
-            <th>ID</th>
-            <th>Sender</th>
-            <th>Plat Nomor</th>
-            <th>Driver</th>
-            <th>No. PO</th>
-            <th>No. DO</th>
-            <th>No. Tiket Timbang</th>
-            <th>Jenis Kayu</th>
-            <th>Berat Netto (Kg)</th>
-            <th>Reject (Kg)</th>
-            <th>Lokasi Potong</th>
-            <th>Tujuan Pabrik</th>
-            <th>Tanggal Keluar</th>
-            <th>Foto</th>
-            <th>Ubah</th>
-          </tr>
-        </thead>
-        <tbody class="tbody">
-          {% for report in entities %}
-          <tr>
-            {% if report.date_time %}
-              <td>{{ report.date_time|date:"Y/m/d H:i:s" }}</td>
-            {% else %}
-              <td>None</td>
-            {% endif %}
-              <td>{{ report.id }}</td>
-            {% if report.sender.first_name %}
-              <td>{{ report.sender.first_name }}</td>
-            {% elif report.sender %}
-              <td>{{report.sender}}</td>
-            {% else %}
-              <td>None</td>
-            {% endif %}
-            <td>{{ report.plat }}</td>
-            <td>{{ report.driver }}</td>
-            <td>{{ report.PO }}</td>
-            <td>{{ report.DO }}</td>
-            <td>{{ report.no_tiket }}</td>
-            <td>{{ report.kayu }}</td>
-            <td>{{ report.berat }} kg</td>
-            <td>{{ report.reject }} kg</td>
-            <td>{{ report.lokasi }}</td>
-            <td>{{ report.tujuan }}</td>
-            <td>{{ report.tanggal|date:"Y/m/d" }}</td>
-            <td>
-              {% if report.og_foto and report.og_foto %}
-              <a href="{{ report.og_foto.url }}"
-                ><img src="{{ report.foto.url }}" alt="{{ report.id }}"
-              /></a>
-              {% elif report.foto %}
-              <!-- Display resized image if og_foto is empty but foto exists -->
-              <img src="{{ report.foto.url }}" alt="{{ report.id }}" />
-              {% endif %}
-            </td>
-            <td>
-              <a href="{% url 'report_detail' report.id %}">View</a>
-            </td>
-          </tr>
-          {% endfor %}
+        <thead>
+            <tr>
+              <th>Group</th>
+              <th>Kayu</th>
+              <th>Lokasi</th>
+              <th>Tujuan</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for data in group_data %}
+            <tr>
+                <td>{{ data.group }}</td>
+                <td>
+                    {% for kayu in all_kayu %}
+                        <input type="checkbox" name="kayu_{{ data.group.id }}" value="{{ kayu.id }}" {% if kayu in data.kayu %}checked{% endif %}> {{ kayu }}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for lokasi in all_lokasi %}
+                        <input type="checkbox" name="lokasi_{{ data.group.id }}" value="{{ lokasi.id }}" {% if lokasi in data.lokasi %}checked{% endif %}> {{ lokasi }}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for tujuan in all_tujuan %}
+                        <input type="checkbox" name="tujuan_{{ data.group.id }}" value="{{ tujuan.id }}" {% if tujuan in data.tujuan %}checked{% endif %}> {{ tujuan }}
+                    {% endfor %}
+                </td>
+                <td>
+                    <button class="save-button" disabled>Save</button>
+                </td>
+            </tr>
+            {% endfor %}
         </tbody>
       </table>
     </div>
@@ -115,10 +86,6 @@
       var table;
       function initializeDataTable() {
         table = new DataTable("#likTable", {
-          select: {
-            style: "multi",
-          },
-
           lengthMenu: [
             [10, 25, 50, 100, -1],
             [10, 25, 50, 100, "All"],
@@ -300,6 +267,78 @@
           table.search('').columns().search('').draw(); // Clear all column-specific searches and redraw the table
         }
       });
+      document.addEventListener("DOMContentLoaded", function() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(function(checkbox) {
+            checkbox.addEventListener("change", function() {
+                const row = this.closest("tr");
+                const saveButton = row.querySelector(".save-button");
+                saveButton.disabled = false;
+            });
+        });
+    });
+    $(document).ready(function() {
+        // Function to handle saving changes
+        function saveChanges(groupId, kayuIds, lokasiIds, tujuanIds) {
+            const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+            console.log(kayuIds, lokasiIds, tujuanIds);
+            $.ajax({
+                url: '{% url "save_group_changes" %}', // Replace with the URL of your server endpoint
+                type: 'POST',
+                data: {
+                    group_id: groupId,
+                    kayu_ids: kayuIds,
+                    lokasi_ids: lokasiIds,
+                    tujuan_ids: tujuanIds,
+                    csrfmiddlewaretoken: csrfToken
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        alert('Changes saved successfully.');
+                    } else {
+                        alert('Failed to save changes.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    alert('Failed to save changes.');
+                }
+            });
+        }
+
+        // Event listener for checkbox change
+        $('input[type="checkbox"]').on('change', function() {
+            const row = $(this).closest('tr');
+            const saveButton = row.find('.save-button');
+            saveButton.prop('disabled', false); // Enable the save button
+        });
+
+        // Event listener for save button click
+        $('.save-button').on('click', function() {
+            const row = $(this).closest('tr');
+            const groupId = row.find('td:first').text(); // Get group ID from the first cell in the row
+
+            // Get checked checkbox values for Kayu, Lokasi, and Tujuan
+            const kayuIds = row.find('input[name^="kayu_"]:checked').map(function() {
+                return $(this).val();
+            }).get();
+            const lokasiIds = row.find('input[name^="lokasi_"]:checked').map(function() {
+                return $(this).val();
+            }).get();
+            const tujuanIds = row.find('input[name^="tujuan_"]:checked').map(function() {
+                return $(this).val();
+            }).get();
+            // Call saveChanges function to send data to the server
+            console.log('Group ID:', groupId);
+            console.log('Kayu IDs:', kayuIds);
+            console.log('Lokasi IDs:', lokasiIds);
+            console.log('Tujuan IDs:', tujuanIds);
+
+        // Call saveChanges function to send data to the server
+        saveChanges(groupId, kayuIds, lokasiIds, tujuanIds);
+        });
+    });
     </script>
     <a href="/add_report">Add Report</a>
     {% endblock %}

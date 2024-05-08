@@ -5,5 +5,7 @@ from .models import *
 admin.site.register(Report)
 admin.site.register(Lokasi)
 admin.site.register(Tujuan)
+admin.site.register(Kayu)
 admin.site.register(Group_Lokasi)
 admin.site.register(Group_Tujuan)
+admin.site.register(Group_Kayu)
