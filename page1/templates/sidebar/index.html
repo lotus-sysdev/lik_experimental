@@ -107,31 +107,29 @@
       <div class="sidebar-header">
         <h3><a href="/" class="sidebar-a">Lotus Logging</a></h3>
       </div>
-      
+
       <ul class="list-unstyled components">
         <li><a class="sidebar-a" href="/">Dashboard</a></li>
-        {% if request.user|has_group:'GA' or request.user|has_group:'Admin' %}
         <li class="active">
           <a
-            href="#loggingReportSubmenu"
+            href="#reportSubmenu"
             data-toggle="collapse"
             aria-expanded="true"
             class="dropdown-toggle sidebar-a"
             >Logging Report</a
           >
-          <ul class="collapse list-unstyled show" id="logginReportSubmenu">
+          <ul class="collapse list-unstyled show" id="reportSubmenu">
               {% if request.user|has_group:'GA' or request.user|has_group:'Admin' %}
               <li><a class="sidebar-a" href="/api/display_report">Report</a></li>
               {% endif %}
           </ul>
         </li>
-        {% endif %}
       </ul>
 
       <ul class="list-unstyled CTAs">
         {% if request.user|has_group:"Admin" %}
         <li>
-          <a class="sidebar-a settings" href="/user_action_logs">
+          <a class="sidebar-a" class="settings" href="/user_action_logs">
             User Action Logs
           </a>
         </li>
