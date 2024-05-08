@@ -27,7 +27,7 @@ class ReportForm(forms.ModelForm):
             'berat' : forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '1000, 2000, ...'}),
             'tanggal' : forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'reject' : forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '100, 200, ...'}),
-            'foto' : forms.TextInput(attrs ={'class': 'form-control'})
+            'foto' : forms.ClearableFileInput(attrs={'class': 'form-control-file'})
         }
         labels = {
             'PO' : 'Nomor PO',

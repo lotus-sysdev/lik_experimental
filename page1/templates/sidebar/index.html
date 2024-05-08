@@ -107,7 +107,7 @@
       <div class="sidebar-header">
         <h3><a href="/" class="sidebar-a">Lotus Logging</a></h3>
       </div>
-
+      
       <ul class="list-unstyled components">
         <li><a class="sidebar-a" href="/">Dashboard</a></li>
         {% if request.user|has_group:'GA' or request.user|has_group:'Admin' %}
@@ -131,7 +131,7 @@
       <ul class="list-unstyled CTAs">
         {% if request.user|has_group:"Admin" %}
         <li>
-          <a class="sidebar-a" class="settings" href="/user_action_logs">
+          <a class="sidebar-a settings" href="/user_action_logs">
             User Action Logs
           </a>
         </li>
