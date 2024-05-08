@@ -1,23 +1,23 @@
 {% extends 'base.html' %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    {% block title %}Add Employee Alamat{% endblock %}
-  </head>
 
-  <body>
+<html>
+
+<head>
+    {% block title %}Edit Prospect Alamat{% endblock %}
+</head>
+
+<body>
     {% block content %}
-    <h2>Add Alamat</h2>
+    <h2>Edit Prospect Alamat</h2>
     <div class="form-group w-50">
       <form method="post" class="mt-3">
         {% csrf_token %} {{ form.as_p }}
         <div>
-          <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
           <a
-            href="{% url 'employee_detail' id=entity.id %}"
+            href="{% url 'prospect_detail' prospect_id=alamat.prospect_id.pk %}"
             class="btn btn-secondary ml-2"
-            >Back</a
+            >Back to Customer Detail</a
           >
         </div>
       </form>
@@ -99,6 +99,24 @@
             });
           }
         });
+
+        $("#id_kelurahan").change(function () {
+          var kelurahanId = $(this).val();
+          console.log("Kelurahan ID: " + kelurahanId)
+          if (kelurahanId !== ""){
+            $.ajax({
+              url: "{% url 'get_kode_pos' %}",
+              data: {
+                kelurahan_id : kelurahanId
+              },
+              dataType: "json",
+              success: function (data) {
+                var kodePos = data.kode_pos;
+                $("#id_kode_pos").val(kodePos);
+              },
+            })
+          }
+        })
 
         $("#id_kecamatan").change(function () {
           var districtId = $(this).val();
@@ -223,7 +241,7 @@
         }
       });
     </script>
-
     {% endblock %}
-  </body>
+</body>
+
 </html>

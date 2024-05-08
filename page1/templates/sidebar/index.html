@@ -31,15 +31,12 @@
           >
           <ul class="collapse list-unstyled show" id="salesSubmenu">
             {% if request.user|has_group:'Accounting' or request.user|has_group:'Admin' %}
-            <li><a class="sidebar-a" href="">Prospects</a></li>
+            <li><a class="sidebar-a" href="/display_prospect">Prospects</a></li>
             {% endif %}
 
 
             {% if request.user|has_group:'Accounting' or request.user|has_group:'Admin' %}
             <li><a class="sidebar-a" href="/display_supplier">Supplier</a></li>
-            {% endif %}
-
-            {% if request.user|has_group:'GA' or request.user|has_group:'Admin' %}
             <li><a class="sidebar-a" href="/display_item">Item</a></li>
             {% endif %}
 
@@ -76,17 +73,16 @@
           </ul>
         </li>
         {% endif %}
-
         {% if request.user|has_group:'FO' or request.user|has_group:'Messenger' or request.user|has_group:'Admin' %}
         <li class="active">
           <a
-            href="#frontOfficeSubmenu"
+            href="#dataSubmenu"
             data-toggle="collapse"
             aria-expanded="true"
             class="dropdown-toggle sidebar-a"
             >Front Office</a
           >
-          <ul class="collapse list-unstyled show" id="frontOfficeSubmenu">
+          <ul class="collapse list-unstyled show" id="dataSubmenu">
               {% if request.user|has_group:'FO' or request.user|has_group:'Messenger' or request.user|has_group:'Admin' %}
               <li><a class="sidebar-a" href="/calendar">Delivery Order</a></li>
               {% endif %}
@@ -114,19 +110,22 @@
       
       <ul class="list-unstyled components">
         <li><a class="sidebar-a" href="/">Dashboard</a></li>
+        {% if request.user|has_group:'GA' or request.user|has_group:'Admin' %}
         <li class="active">
           <a
-            href="#loggingSubmenu"
+            href="#loggingReportSubmenu"
             data-toggle="collapse"
             aria-expanded="true"
             class="dropdown-toggle sidebar-a"
             >Logging Report</a
           >
-          <ul class="collapse list-unstyled show" id="loggingSubmenu">
-            {% if request.user|has_group:'Admin' %}
+          <ul class="collapse list-unstyled show" id="logginReportSubmenu">
+              {% if request.user|has_group:'GA' or request.user|has_group:'Admin' %}
               <li><a class="sidebar-a" href="/api/display_report">Report</a></li>
-            {% endif %}
+              {% endif %}
+          </ul>
         </li>
+        {% endif %}
       </ul>
 
       <ul class="list-unstyled CTAs">

@@ -1,3 +1,8 @@
+from functools import wraps
+from django.http import HttpResponseForbidden
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import user_passes_test
+from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 
 

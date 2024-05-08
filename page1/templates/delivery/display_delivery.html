@@ -33,7 +33,6 @@
       </div>
         <thead class="thead-light">
           <tr>
-            <th>ID</th>
             <th>Judul</th>
             <th>Waktu Mulai</th>
             <th>Waktu Sampai</th>
@@ -51,7 +50,6 @@
         <tbody class="tbody">
           {% for events in entities %}
           <tr>
-            <td>{{ events.id }}</td>
             <td>{{ events.title }}</td>
             <td>{{ events.start|date:"Y/m/d H:i:s" }}</td>
             <td>{{ events.end|date:"Y/m/d H:i:s" }}</td>
@@ -127,7 +125,7 @@
         if (confirm('Are you sure you want to delete the selected rows?')) {
             const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
             $.ajax({
-                url: '{% url "delete_selected_rows_delivery" %}',
+                url: '{% url "delete_selected_rows_cust" %}',
                 type: 'POST',
                 data: {selected_ids: selectedIDs, csrfmiddlewaretoken: csrfToken },
                 dataType: 'json',

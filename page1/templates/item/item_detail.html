@@ -29,10 +29,6 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="{{ form.pic.id_for_label }}">PIC</label>
-                        {{ form.pic }}
-                    </div>
-                    <div class="form-group">
                         <label for="{{ form.Tanggal.id_for_label }}">Tanggal Input</label>
                         {{ form.Tanggal }}
                     </div>
@@ -113,28 +109,32 @@
                 {% endif %}
                 <div class="mt-4">
                     <h2>Changes:</h2>
-                    <table class="table table-bordered table-responsive-lg">
-                        <thead class="thead-light">
-                            <tr>
-                                <th>Date</th>
-                                <th>User</th>
-                                <th>Field</th>
-                                <th>Before</th>
-                                <th>After</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for log in change_logs %}
-                            <tr>
-                                <td>{{ log.date_time }}</td>
-                                <td>{{ log.user }}</td>
-                                <td>{{ log.field_changed }}</td>
-                                <td>{{ log.old_value }}</td>
-                                <td>{{ log.new_value }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table table-bordered table-responsive-lg">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>User</th>
+                                        <th>Field</th>
+                                        <th>Before</th>
+                                        <th>After</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in change_logs %}
+                                    <tr>
+                                        <td>{{ log.date_time }}</td>
+                                        <td>{{ log.user }}</td>
+                                        <td>{{ log.field_changed }}</td>
+                                        <td>{{ log.old_value }}</td>
+                                        <td>{{ log.new_value }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
