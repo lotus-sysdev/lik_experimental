@@ -101,7 +101,16 @@ def edit_entity(request, entity_model, entity_form, entity_id_field, entity_id):
     return render(request, 'edit_entity.html', {'form': form})
 
 def display_report(request):
-    entities = Report.objects.all()
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+
+    if start_date_str and end_date_str:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
+        entities = Report.objects.filter(tanggal__range=[start_date, end_date])
+    else:
+        entities = Report.objects.all()
+
     return render(request, 'Report/display_report.html', {'entities': entities})
 
 def delete_selected_rows_report(request):
