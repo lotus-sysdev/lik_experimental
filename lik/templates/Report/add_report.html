@@ -11,7 +11,7 @@
   {% block content %}
   <h2>Add Report</h2>
   <div class="form-group w-50">
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="row">
           <div class="col-md-6">
@@ -95,6 +95,15 @@
                 {% endfor %}
               </div>
           </div>
+      </div>
+
+      
+      <div class="form-group">
+        {{ entity_form.kayu.label_tag }}
+        {{ entity_form.kayu }}
+        {% for error in entity_form.kayu.errors %}
+        <span class="text-danger">{{ error }}</span>
+        {% endfor %}
       </div>
 
       <div class="row">

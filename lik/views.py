@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from io import BytesIO
 import os
+import uuid
 from django.conf import settings
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
@@ -15,7 +16,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.core.files.base import ContentFile
 from django.db import transaction
-
 
 from PIL import Image, ImageFile
 
@@ -116,13 +116,56 @@ def display_report(request):
 def delete_selected_rows_report(request):
     return delete_selected_rows(request, Report, 'id')
 
+def process_image(image, is_original):
+    upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    img = Image.open(image)
+
+    # Generate a unique identifier
+    unique_id = str(uuid.uuid4())[:8]  # Use the first 8 characters of a UUID
+    
+    # Strip file extension from the image filename
+    image_name_without_extension, extension = os.path.splitext(image.name)
+    
+    # Resize the image
+    if is_original:
+        resized_img = img.resize((500, 500))
+    else:
+        resized_img = img.resize((100, 100))
+    
+    # Construct the resized image name
+    if is_original:
+        resized_image_name = f"original-{upload_date}-{unique_id}-{extension}"
+    else:
+        resized_image_name = f"resized-{upload_date}-{unique_id}-{extension}"
+    
+    # Save the resized image
+    resized_image_path = os.path.join(settings.MEDIA_ROOT, 'report_photos', resized_image_name)
+    resized_img.save(resized_image_path)
+
+    relative_path = os.path.relpath(resized_image_path, settings.MEDIA_ROOT )
+    
+    return relative_path
+
 def add_report(request, initial=None):
-    entity_form_instance = ReportForm(request.POST or None)
+    entity_form_instance = ReportForm(request.POST or None, request.FILES or None)
     if request.method == 'POST':
-        form = ReportForm(request.POST)
+        form = ReportForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            # return redirect(redirect_template)
+            report = form.save(commit=False)
+            foto = request.FILES.get('foto')
+            og_foto = request.FILES.get('og_foto')
+
+            if foto:
+                resized_foto_path = process_image(foto, False)
+                form.instance.foto = resized_foto_path
+                report.save()
+            if og_foto:
+                resized_og_foto_path = process_image(og_foto, True)
+                form.instance.og_foto = resized_og_foto_path
+                report.save()
+
+            report.save()
+            return redirect('display_report')
     else:
         print(initial)
         if (initial):
@@ -140,7 +183,32 @@ def delete_report(request, id):
     return delete_entity(request, Report, 'id', id)
 
 def edit_report(request, id):
-    return edit_entity(request, Report, ReportForm, 'id', id)
+    entity = get_object_or_404(Report,id = id)
+    # entity_approved = entity.is_approved
+
+    if request.method == 'POST':
+        form = ReportForm(request.POST, request.FILES, instance=entity)
+        if form.is_valid():
+            # Check if a new image file is provided
+            foto = request.FILES.get('foto')
+            og_foto = request.FILES.get('og_foto')
+
+            if foto:
+                resized_foto_path = process_image(foto, False)
+                form.instance.foto = resized_foto_path
+            if og_foto:
+                resized_og_foto_path = process_image(og_foto, True)
+                form.instance.og_foto = resized_og_foto_path
+
+            form.save()
+
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        form = ReportForm(instance=entity)
+
+    return render(request, "/api/edit_report.html",{'form': form})
 
 # Set maximum image quality
 ImageFile.MAXBLOCK = 2**20
