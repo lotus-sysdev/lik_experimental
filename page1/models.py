@@ -117,7 +117,7 @@ class Items(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
     nama = models.CharField(max_length=255)
     catatan = models.CharField(max_length = 500, null = True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null = True)
     quantity = models.IntegerField()
     unit = models.CharField(max_length=10)
     price = MoneyField(max_digits=15, decimal_places=2, default_currency='IDR', blank= False, null= False, validators=[MinMoneyValidator(0)])

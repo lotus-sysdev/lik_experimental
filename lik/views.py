@@ -11,9 +11,9 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from django.core.files.base import ContentFile
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 
 
@@ -100,13 +100,16 @@ def edit_entity(request, entity_model, entity_form, entity_id_field, entity_id):
 
     return render(request, 'edit_entity.html', {'form': form})
 
+@login_required
 def display_report(request):
     entities = Report.objects.all()
     return render(request, 'Report/display_report.html', {'entities': entities})
 
+@login_required
 def delete_selected_rows_report(request):
     return delete_selected_rows(request, Report, 'id')
 
+@login_required
 def add_report(request, initial=None):
     entity_form_instance = ReportForm(request.POST or None)
     if request.method == 'POST':
@@ -124,12 +127,15 @@ def add_report(request, initial=None):
 
     return render(request, 'Report/add_report.html', {'entity_form': entity_form_instance})
 
+@login_required
 def report_detail(request, id):
     return entity_detail(request, Report, ReportForm, 'id', id, 'Report/report_detail.html')
 
+@login_required
 def delete_report(request, id):
     return delete_entity(request, Report, 'id', id)
 
+@login_required
 def edit_report(request, id):
     return edit_entity(request, Report, ReportForm, 'id', id)
 
@@ -150,7 +156,7 @@ class add_report_mobile(generics.CreateAPIView):
             image_name = str(image_data)
             
             og_image = image.resize((500, 500), Image.Resampling.LANCZOS)
-            upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+            upload_date = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
             og_image_name = f'original-{upload_date}-{image_name}'
             og_image_path = os.path.join(settings.MEDIA_ROOT,'report_photos', og_image_name)
             
@@ -239,7 +245,7 @@ def check_token(request, user_id):
     except User.DoesNotExist:
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
     
-
+@login_required
 def display_group(request):
     group_lokasi = Group_Lokasi.objects.all()
     group_tujuan = Group_Tujuan.objects.all()
@@ -271,6 +277,7 @@ def display_group(request):
 
     return render(request, 'Group/display_groups.html', {'group_data': group_data_list, 'all_kayu': all_kayu, 'all_lokasi': all_lokasi, 'all_tujuan': all_tujuan})
 
+@login_required
 @transaction.atomic
 def save_group_changes(request):
     if request.method == 'POST':
@@ -298,11 +305,11 @@ def save_group_changes(request):
 
             group_tujuan_instance = Group_Tujuan.objects.create(group=group)
             group_tujuan_instance.tujuan.add(*tujuan_ids)
-
+            
             return JsonResponse({'success': True})
         except Group.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Group not found'})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
-
+        
     return JsonResponse({'success': False, 'error': 'Invalid request method'})

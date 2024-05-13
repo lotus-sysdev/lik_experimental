@@ -31,7 +31,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["159.223.33.190", "127.0.0.1", "localhost", "192.168.1.62"]
 
-LOGIN_URL = 'login/'
+from django.urls import reverse_lazy
+LOGIN_URL = reverse_lazy('login')
 
 # Application definition
 
