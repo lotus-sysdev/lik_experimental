@@ -16,12 +16,63 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.core.files.base import ContentFile
 from django.db import transaction
+from django.db.models import Count
+from django.db.models.functions import Upper
+import json
 
 from PIL import Image, ImageFile
 
 from .serializers import *
 from .models import *
 from .forms import *
+
+def dashboard(request):
+    form = ReportFilterForm(request.GET)
+    total_reports = Report.objects.count()
+    reports_by_sender = Report.objects.values('sender__username').annotate(count=models.Count('id'))
+
+    if form.is_valid():
+        sender = form.cleaned_data.get('sender')
+        start_date = form.cleaned_data.get('start_date')
+        end_date = form.cleaned_data.get('end_date')
+
+        reports = Report.objects.all()
+
+        if sender:
+            reports = reports.filter(sender__username=sender)
+        if start_date and end_date:
+            reports = reports.filter(tanggal__range=[start_date, end_date])
+
+        kayu_counts = reports.values('kayu').annotate(count=Count('id'))
+        sender_counts = reports.values('sender__username').annotate(count=Count('id'))
+        plat_counts = reports.annotate(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
+
+        kayu_counts_serialized = json.dumps(list(kayu_counts))
+        sender_counts_serialized = json.dumps(list(sender_counts))
+        plat_counts_serialized = json.dumps(list(plat_counts))
+        print(sender_counts_serialized)
+        print(plat_counts_serialized)
+    else: 
+        reports = Report.objects.all()
+        kayu_counts = Report.objects.values('kayu').annotate(count=Count('id'))
+        sender_counts = Report.objects.values('sender__username').annotate(count=Count('id'))
+        plat_counts = Report.objects(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
+        
+        kayu_counts_serialized = json.dumps(list(kayu_counts))
+        sender_counts_serialized = json.dumps(list(sender_counts))
+        plat_counts_serialized = json.dumps(list(plat_counts))
+
+    context = {
+        'form' : form,
+        'reports' : reports,
+        'total_reports': total_reports,
+        'reports_by_sender': reports_by_sender,
+        'kayu_counts': kayu_counts_serialized,
+        'sender_counts': sender_counts_serialized,
+        'plat_counts': plat_counts_serialized,
+    }
+
+    return render(request, 'dashboard.html', context)
 
 # Create your views here.
 def delete_selected_rows(request, model, key):

@@ -1,7 +1,8 @@
 from django.urls import path, re_path
 from .views import *
 
-urlpatterns = [
+urlpatterns = [    
+    path('dashboard/', dashboard, name='dashboard'),
     path('display_report/', display_report, name='display_report'),
     path('delete_selected_rows_report/', delete_selected_rows_report, name='delete_selected_rows_report'),
     path('add_report/', add_report, name='add_report'),
