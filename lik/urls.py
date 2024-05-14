@@ -17,6 +17,7 @@ urlpatterns = [
     path('group/<int:group_id>/kayu/', GroupKayuListAPIView.as_view(), name='group_kayu_list'),
     path('check_token/<int:user_id>/', check_token, name='check_token'),
     path('display_group/', display_group, name='display_group'),
-    path('save_group_changes/', save_group_changes, name='save_group_changes')
+    path('save_group_changes/', save_group_changes, name='save_group_changes'),
+    path('display_foto/<path:url>', display_foto, name="display_foto")
 ]
 

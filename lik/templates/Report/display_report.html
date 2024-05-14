@@ -97,7 +97,7 @@
             <td>{{ report.tanggal|date:"Y/m/d" }}</td>
             <td>
               {% if report.og_foto and report.og_foto %}
-              <a href="{{ report.og_foto.url }}" target="_blank"
+              <a href="{% url 'display_foto' report.og_foto.url %}" target="_blank"
                 ><img src="{{ report.foto.url }}" alt="{{ report.id }}"
               /></a>
               {% elif report.foto %}

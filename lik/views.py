@@ -313,3 +313,10 @@ def save_group_changes(request):
             return JsonResponse({'success': False, 'error': str(e)})
         
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+@login_required
+def display_foto(request, url):
+    # Get the URL parameter 'url' from the request
+
+    # Render the display_image.html template with the image_url context variable
+    return render(request, 'Report/display_foto.html', {'url': url})
