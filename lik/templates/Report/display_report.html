@@ -89,6 +89,7 @@
             <th>Timestamp</th>
             <th>ID</th>
             <th>Sender</th>
+            <th>ID Tiket</th>
             <th>Plat Nomor</th>
             <th>Driver</th>
             <th>No. PO</th>
@@ -120,6 +121,7 @@
             {% else %}
             <td>None</td>
             {% endif %}
+            <td>{{ report.tiketId }}</td>
             <td>{{ report.plat|upper }}</td>
             <td>{{ report.driver }}</td>
             <td>{{ report.PO }}</td>
@@ -133,7 +135,7 @@
             <td>{{ report.tanggal|date:"Y/m/d" }}</td>
             <td>
               {% if report.og_foto and report.og_foto %}
-              <a href="{{ report.og_foto.url }}"
+              <a href="{% url 'display_foto' report.og_foto.url %}" target="_blank"
                 ><img src="{{ report.foto.url }}" alt="{{ report.id }}"
               /></a>
               {% elif report.foto %}

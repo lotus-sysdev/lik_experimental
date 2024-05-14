@@ -13,7 +13,7 @@
         id="likTable"
         class="table table-bordered table-striped w-100 table-lg table-responsive-lg"
       >
-        <div class="form-inline mb-2">
+        <!-- <div class="form-inline mb-2">
           <select id="columnFilter" class="form-control btn-info">
             <option value="0">Timestamp</option>
             <option value="1">ID</option>
@@ -29,9 +29,8 @@
             <option value="11">Lokasi Potong</option>
             <option value="12">Pabrik Tujuan</option>
             <option value="13">Tanggal Keluar</option>
-            <!-- Add more options for additional columns -->
-          </select>
-          <input
+          </select> -->
+          <!-- <input
             type="text"
             id="columnSearch"
             placeholder="Search in selected column"
@@ -44,7 +43,7 @@
           </button>
           <button id="resetFilterDuplicatesBtn" class="btn btn-secondary ml-2">
             Reset
-          </button>
+          </button> -->
         </div>
         <thead>
             <tr>
@@ -90,34 +89,7 @@
             [10, 25, 50, 100, -1],
             [10, 25, 50, 100, "All"],
           ],
-          layout: {
-            top2Start: {
-              buttons: {
-                buttons: [
-                  {
-                    extend: "excel",
-                    className: "btn-primary",
-                    exportOptions: {
-                      columns: ":visible",
-                      stripHtml: false,
-                    },
-                  },
-                  {
-                    text: "Delete Rows",
-                    className: "btn-danger",
-                    action: deleteSelectedRows,
-                  },
-                  { extend: "colvis", className: "btn-info" },
-                ],
-                dom: {
-                  button: {
-                    className: "btn",
-                  },
-                },
-              },
-            },
-            // top2Start:'pageLength'
-          },
+          responsive: true,
         });
       }
       function deleteSelectedRows() {
@@ -340,7 +312,7 @@
         });
     });
     </script>
-    <a href="/api/add_report">Add Report</a>
+    <a href="/add_report">Add Report</a>
     {% endblock %}
   </body>
 </html>
