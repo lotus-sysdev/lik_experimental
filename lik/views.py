@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from io import BytesIO
 import os
+import uuid
 from django.conf import settings
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
@@ -15,13 +16,63 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-
+from django.db.models import Count
+from django.db.models.functions import Upper
+import json
 
 from PIL import Image, ImageFile
 
 from .serializers import *
 from .models import *
 from .forms import *
+
+def dashboard(request):
+    form = ReportFilterForm(request.GET)
+    total_reports = Report.objects.count()
+    reports_by_sender = Report.objects.values('sender__username').annotate(count=models.Count('id'))
+
+    if form.is_valid():
+        sender = form.cleaned_data.get('sender')
+        start_date = form.cleaned_data.get('start_date')
+        end_date = form.cleaned_data.get('end_date')
+
+        reports = Report.objects.all()
+
+        if sender:
+            reports = reports.filter(sender__username=sender)
+        if start_date and end_date:
+            reports = reports.filter(tanggal__range=[start_date, end_date])
+
+        kayu_counts = reports.values('kayu').annotate(count=Count('id'))
+        sender_counts = reports.values('sender__username').annotate(count=Count('id'))
+        plat_counts = reports.annotate(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
+
+        kayu_counts_serialized = json.dumps(list(kayu_counts))
+        sender_counts_serialized = json.dumps(list(sender_counts))
+        plat_counts_serialized = json.dumps(list(plat_counts))
+        print(sender_counts_serialized)
+        print(plat_counts_serialized)
+    else: 
+        reports = Report.objects.all()
+        kayu_counts = Report.objects.values('kayu').annotate(count=Count('id'))
+        sender_counts = Report.objects.values('sender__username').annotate(count=Count('id'))
+        plat_counts = Report.objects(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
+        
+        kayu_counts_serialized = json.dumps(list(kayu_counts))
+        sender_counts_serialized = json.dumps(list(sender_counts))
+        plat_counts_serialized = json.dumps(list(plat_counts))
+
+    context = {
+        'form' : form,
+        'reports' : reports,
+        'total_reports': total_reports,
+        'reports_by_sender': reports_by_sender,
+        'kayu_counts': kayu_counts_serialized,
+        'sender_counts': sender_counts_serialized,
+        'plat_counts': plat_counts_serialized,
+    }
+
+    return render(request, 'dashboard.html', context)
 
 # Create your views here.
 def delete_selected_rows(request, model, key):
@@ -102,21 +153,72 @@ def edit_entity(request, entity_model, entity_form, entity_id_field, entity_id):
 
 @login_required
 def display_report(request):
-    entities = Report.objects.all()
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+
+    if start_date_str and end_date_str:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
+        entities = Report.objects.filter(tanggal__range=[start_date, end_date])
+    else:
+        entities = Report.objects.all()
+
     return render(request, 'Report/display_report.html', {'entities': entities})
 
 @login_required
 def delete_selected_rows_report(request):
     return delete_selected_rows(request, Report, 'id')
 
-@login_required
+def process_image(image, is_original):
+    upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    img = Image.open(image)
+
+    # Generate a unique identifier
+    unique_id = str(uuid.uuid4())[:8]  # Use the first 8 characters of a UUID
+    
+    # Strip file extension from the image filename
+    image_name_without_extension, extension = os.path.splitext(image.name)
+    
+    # Resize the image
+    if is_original:
+        resized_img = img.resize((500, 500))
+    else:
+        resized_img = img.resize((100, 100))
+    
+    # Construct the resized image name
+    if is_original:
+        resized_image_name = f"original-{upload_date}-{unique_id}-{extension}"
+    else:
+        resized_image_name = f"resized-{upload_date}-{unique_id}-{extension}"
+    
+    # Save the resized image
+    resized_image_path = os.path.join(settings.MEDIA_ROOT, 'report_photos', resized_image_name)
+    resized_img.save(resized_image_path)
+
+    relative_path = os.path.relpath(resized_image_path, settings.MEDIA_ROOT )
+    
+    return relative_path
+
 def add_report(request, initial=None):
-    entity_form_instance = ReportForm(request.POST or None)
+    entity_form_instance = ReportForm(request.POST or None, request.FILES or None)
     if request.method == 'POST':
-        form = ReportForm(request.POST)
+        form = ReportForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            # return redirect(redirect_template)
+            report = form.save(commit=False)
+            foto = request.FILES.get('foto')
+            og_foto = request.FILES.get('og_foto')
+
+            if foto:
+                resized_foto_path = process_image(foto, False)
+                form.instance.foto = resized_foto_path
+                report.save()
+            if og_foto:
+                resized_og_foto_path = process_image(og_foto, True)
+                form.instance.og_foto = resized_og_foto_path
+                report.save()
+
+            report.save()
+            return redirect('display_report')
     else:
         print(initial)
         if (initial):
@@ -137,7 +239,32 @@ def delete_report(request, id):
 
 @login_required
 def edit_report(request, id):
-    return edit_entity(request, Report, ReportForm, 'id', id)
+    entity = get_object_or_404(Report,id = id)
+    # entity_approved = entity.is_approved
+
+    if request.method == 'POST':
+        form = ReportForm(request.POST, request.FILES, instance=entity)
+        if form.is_valid():
+            # Check if a new image file is provided
+            foto = request.FILES.get('foto')
+            og_foto = request.FILES.get('og_foto')
+
+            if foto:
+                resized_foto_path = process_image(foto, False)
+                form.instance.foto = resized_foto_path
+            if og_foto:
+                resized_og_foto_path = process_image(og_foto, True)
+                form.instance.og_foto = resized_og_foto_path
+
+            form.save()
+
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        form = ReportForm(instance=entity)
+
+    return render(request, "/api/edit_report.html",{'form': form})
 
 # Set maximum image quality
 ImageFile.MAXBLOCK = 2**20

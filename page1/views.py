@@ -420,7 +420,7 @@ def item_detail(request, SKU):
 @GA_required
 def edit_item(request, SKU):
     entity = get_object_or_404(Items,SKU=SKU)
-    # entity_approved = entity.is_approved
+    entity_approved = entity.is_approved
 
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES, instance=entity)
@@ -438,6 +438,15 @@ def edit_item(request, SKU):
                 
                 # Update the item's image field with the new image path
                 form.instance.gambar = resized_image_name
+
+            if request.user.groups.filter(name='Admin').exists():
+                new_approved_raw = request.POST.get('is_approved', 'off')
+                new_approved = new_approved_raw == "on"
+                print(new_approved)
+                if new_approved != entity.is_approved:
+                    entity.is_approved = new_approved
+            else:
+                entity.is_approved = entity_approved
 
             # entity.is_approved = entity_approved
 
@@ -1482,7 +1491,9 @@ def prospect_ticket(request, prospect_id):
     prospect = get_object_or_404(Prospect, prospect_id=prospect_id)
     prospect_tickets = ProspectTicket.objects.filter(prospect_id=prospect).order_by('-date')
 
-    for prospect_ticket in prospect_tickets:
+    sorted_tickets = sorted(prospect_tickets, key=lambda x:(not x.open))
+
+    for prospect_ticket in sorted_tickets:
         prospect_ticket.sorted_logs = prospect_ticket.ticketlog_set.order_by('-date')
     
     ticket_log_form = TicketLogForm()
@@ -1496,7 +1507,7 @@ def prospect_ticket(request, prospect_id):
             ticket_log_form.save()
             return redirect(request.path)
 
-    context = {'prospect': prospect, 'prospect_id': prospect_id, 'prospect_tickets': prospect_tickets, 'ticket_log_form': ticket_log_form,}
+    context = {'prospect': prospect, 'prospect_id': prospect_id, 'prospect_tickets': sorted_tickets, 'ticket_log_form': ticket_log_form,}
 
     return render(request, 'prospect/prospect_ticket.html', context)
 

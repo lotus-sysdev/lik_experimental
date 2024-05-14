@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+<head>
+    {% block title %}LIK Dashboard{% endblock %}
+</head>
+<body>
+    {% block content %}
+    <h1>Dashboard</h1>
+    <form method="GET" action="{% url 'dashboard' %}" id="filterForm" class="container custom-container mt-2 mb-2">
+        <div class="row">
+            <div class="form-group col-md-3">
+                {{ form.sender.label_tag }}
+                {{ form.sender }}
+            </div>
+            <div class="form-group col-md-3">
+                <label>Date Range:</label>
+                <select id="date-range-select" onchange="updateDateRange()" class="form-control">
+                    <option value="">Select Date Range</option>
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="1-10">1-10 of this month</option>
+                    <option value="11-20">11-20 of this month</option>
+                    <option value="21-eom">21- End of this month</option>
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="60">Last 60 days</option>
+                    <option value="90">Last 90 days</option>
+                    <option value="365">Last 365 days</option>
+                    <option value="730">Last 730 days</option>
+                    <option value="ytd">Year to Date</option>
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                {{ form.start_date.label_tag }}
+                {{ form.start_date }}
+            </div>
+            <div class="form-group col-md-3">
+                {{ form.end_date.label_tag }}
+                {{ form.end_date }}
+            </div>
+        </div>
+        <div class="mt-2">
+            <button class="btn btn-primary" type="submit">Apply Filters</button>
+            <button class="btn btn-secondary" type="button" onclick="resetForm()">Reset</button>
+        </div>
+    </form>
+    
+
+    <div class="d-flex mt-4" style="gap: 5vh;">
+        <div class="card">
+            <h4 class="text-center card-header">Chart</h4>
+            <div id="chart-container" style="padding: 2vh;">
+                <canvas id="" style="max-width:200vw; max-height:200vh;"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <h4 class="text-center card-header">Jumlah Kendaraan</h4>
+            <div id="chart-container" style="padding: 2vh;">
+                <canvas id="platBarChart" style="max-width:200vw; max-height:200vh;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex mt-4" style="gap: 5vh;">
+        <div class="card">
+            <h4 class="text-center card-header">Distribusi Sender</h4>
+            <div id="chart-container" style="padding: 2vh;">
+                <canvas id="senderPieChart" style="max-width:200vw; max-height:200vh;"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <h4 class="text-center card-header">Distribusi Jenis Kayu</h4>
+            <div id="chart-container" style="padding: 2vh;">
+                <canvas id="kayuPieChart" style="max-width:200vw; max-height:200vh;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // LOAD PIE CHART
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get the serialized kayu counts data passed from the view
+            var kayuCounts = JSON.parse('{{ kayu_counts | escapejs }}');
+            var senderCounts = JSON.parse('{{ sender_counts | escapejs }}')
+
+            renderPieChart('kayuPieChart', kayuCounts, 'kayu', 'Jenis Kayu')
+            renderPieChart('senderPieChart', senderCounts, 'sender__username', 'Sender' )
+        });
+
+        function renderPieChart(canvasId, data, labelKey, chartLabel) {
+            var labels = [];
+            var dataValues = [];
+
+        data.forEach(function(item) {
+            if (item.hasOwnProperty(labelKey)) {
+                labels.push(item[labelKey]);
+            } else {
+                // Fallback to a default label key if the specified key doesn't exist
+                labels.push(item.defaultLabelKey);
+            }
+            dataValues.push(item.count);
+        });
+
+        var ctx = document.getElementById(canvasId).getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: dataValues,
+                    backgroundColor: [
+                        'rgba(28, 22, 120, 0.8)',  
+                        'rgba(133, 118, 255, 0.8)',
+                        'rgba(163, 255, 214, 0.8)',
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(255, 197, 90, 0.8)',
+                        'rgba(24, 156, 214, 0.8)',
+                    ],
+                    borderColor: [
+                        'rgba(28, 22, 120, 1)',  
+                        'rgba(133, 118, 255, 1)',
+                        'rgba(163, 255, 214, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 197, 90, 1)',
+                        'rgba(24, 156, 214, 1)',
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                title: {
+                    display: true,
+                    text: chartLabel,
+                }
+            }
+        });
+        }
+
+        // HORIZONTAL BAR CHART
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get the serialized plat counts data passed from the view
+            var platCounts = JSON.parse('{{ plat_counts | escapejs }}');
+
+            renderBarChart('platBarChart', platCounts, 'upper_plat', 'License Plates');
+        });
+
+        function renderBarChart(canvasId, data, labelKey, chartLabel) {
+            var labels = [];
+            var dataValues = [];
+
+            data.forEach(function(item) {
+                labels.push(item[labelKey]);
+                dataValues.push(item.count);
+            });
+
+            var ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: chartLabel,
+                        data: dataValues,
+                        backgroundColor: 'rgba(28, 22, 120, 0.8)', // Adjust color as needed
+                        borderColor: 'rgba(28, 22, 120, 1)',       // Adjust color as needed
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+        // FILTER FUNCTIONALITY
+        function resetForm() {
+            window.location.href = "{% url 'dashboard' %}"
+        }
+        function updateDateRange() {
+            var dateRange = document.getElementById("date-range-select").value;
+            var startDateInput = document.getElementById("id_start_date");
+            var endDateInput = document.getElementById("id_end_date");
+
+            var startDate = "";
+            var endDate = "";
+
+            if (dateRange === "today") {
+                startDate = formatDate(new Date());
+                endDate = startDate;
+            } else if (dateRange === "yesterday") {
+                var yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                startDate = formatDate(yesterday);
+                endDate = startDate;
+            } else if (dateRange === "1-10") {
+                startDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+                endDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 10));
+            } else if (dateRange === "11-20") {
+                startDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 11));
+                endDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 20));
+            } else if (dateRange === "21-eom") {
+                startDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 21));
+                endDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0));
+            } else if (dateRange === "7") {
+                endDate = formatDate(new Date()); // Today's date
+                startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 6))); // Date 7 days ago
+            } else if (dateRange === "30") {
+                endDate = formatDate(new Date()); // Today's date
+                startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 29))); // Date 30 days ago
+            } else if (dateRange === "60") {
+                endDate = formatDate(new Date()); // Today's date
+                startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 59))); // Date 60 days ago
+            } else if (dateRange === "90") {
+                endDate = formatDate(new Date()); // Today's date
+                startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 89))); // Date 90 days ago
+            } else if (dateRange === "365") {
+                endDate = formatDate(new Date()); // Today's date
+                startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 364))); // Date 365 days ago
+            } else if (dateRange === "730") {
+                endDate = formatDate(new Date()); // Today's date
+                startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 729))); // Date 730 days ago
+            } else if (dateRange === "ytd") {
+                endDate = formatDate(new Date()); // Today's date
+                startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year
+                startDate = formatDate(startDate);
+            }
+
+            startDateInput.value = startDate;
+            endDateInput.value = endDate;
+        }
+
+        // Helper function to format date as "YYYY-MM-DD"
+        function formatDate(date) {
+            var d = new Date(date),
+                month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+
+            if (month.length < 2) 
+                month = '0' + month;
+            if (day.length < 2) 
+                day = '0' + day;
+
+            return [year, month, day].join('-');
+        }
+    </script>
+    {% endblock %}
+</body>
+</html>

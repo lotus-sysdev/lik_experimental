@@ -38,7 +38,9 @@
             class="form-control w-25"
           />
           <button id="searchButton" class="btn btn-primary mr-2">Search</button>
-          <button id="resetButtonCol" class="btn btn-secondary mr-2">Reset</button>
+          <button id="resetButtonCol" class="btn btn-secondary mr-2">
+            Reset
+          </button>
           <button id="filterDuplicatesButton" class="btn btn-warning">
             Check for Duplicates
           </button>
@@ -46,6 +48,42 @@
             Reset
           </button>
         </div>
+
+        <div class="form-inline mb-2">
+          <label class="mr-2" for="startDate">Start Date:</label>
+          <input type="date" id="startDate" class="form-control mr-2" />
+          <label class="mr-2" for="endDate">End Date:</label>
+          <input type="date" id="endDate" class="form-control mr-2" />
+
+          <button id="filterButton" class="btn btn-primary">
+            Apply Filter
+          </button>
+
+          <select id="dateRange" class="form-control ml-2 btn-info">
+            <option value="">Select Date Range</option>
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="1-10">1-10 of This Month</option>
+            <option value="11-20">11-20 of This Month</option>
+            <option value="21-eom">21 to End of This Month</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="60">Last 60 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="ytd">Current year to date</option>
+            <option value="365">Last 1 year (365 days)</option>
+            <option value="730">Last 2 years (730 days)</option>
+          </select>
+
+          <button id="resetButton" class="btn btn-secondary ml-2">Reset</button>
+        </div>
+
+          <div class="custom-container container">
+            <p>Total Berat: <span class="font-weight-bold" id="totalBerat"></span> Kg</p>
+            <p>Total Reject: <span class="font-weight-bold" id="totalReject"></span> Kg</p>
+            <p>Jumlah Kendaraan: <span class="font-weight-bold" id="uniquePlatCount"></span></p>
+          </div>
+
         <thead class="thead-light">
           <tr>
             <th>Timestamp</th>
@@ -71,17 +109,17 @@
           {% for report in entities %}
           <tr>
             {% if report.date_time %}
-              <td>{{ report.date_time|date:"Y/m/d H:i:s" }}</td>
+            <td>{{ report.date_time|date:"Y/m/d H:i:s" }}</td>
             {% else %}
-              <td>None</td>
+            <td>None</td>
             {% endif %}
-              <td>{{ report.id }}</td>
+            <td>{{ report.id }}</td>
             {% if report.sender.first_name %}
-              <td>{{ report.sender.first_name }}</td>
+            <td>{{ report.sender.first_name }}</td>
             {% elif report.sender %}
-              <td>{{report.sender}}</td>
+            <td>{{report.sender}}</td>
             {% else %}
-              <td>None</td>
+            <td>None</td>
             {% endif %}
             <td>{{ report.tiketId }}</td>
             <td>{{ report.plat|upper }}</td>
@@ -165,7 +203,7 @@
           .data()
           .toArray()
           .map((row) => row[1]); // Get SKUs of selected rows using DataTables API
-        selectedIDs.forEach(function(value) {
+        selectedIDs.forEach(function (value) {
           console.log("selected_ids[]:", value);
         });
         if (selectedIDs.length === 0) {
@@ -181,7 +219,7 @@
             type: "POST",
             data: { selected_ids: selectedIDs, csrfmiddlewaretoken: csrfToken },
             dataType: "json",
-            success: function(response) {
+            success: function (response) {
               if (response.success) {
                 // Reload or update the table after successful deletion
                 location.reload(); // Assuming you're using AJAX to populate the table
@@ -191,31 +229,43 @@
                 alert("Error deleting selected rows: " + response.error);
               }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
               alert("Error deleting selected rows: " + error);
             },
           });
         }
       }
-      $(document).ready(function() {
+
+      $(document).ready(function () {
         initializeDataTable();
-        
-        
-        $("#filterDuplicatesButton").on("click", function() {
-          filterDuplicates();
+        calculateStats()
+
+        var searchTimeout;
+
+        $('.dt-search input')
+          .off()
+          .on('keyup', function () {
+            clearTimeout(searchTimeout)
+
+            searchTimeout = setTimeout(updateStatsAfterSearch, 500)
         });
-        
+
+        $("#filterDuplicatesButton").on("click", function () {
+          filterDuplicates();
+          calculateStats()
+        });
+
         function filterDuplicates() {
           var rows = table.rows().nodes(); // Get all rows in the DataTable
-          
+
           var uniqueRows = {}; // Object to store unique rows
           var allDuplicateRows = []; // Array to store all occurrences of duplicate row nodes
-          
+
           // Iterate through each row
-          rows.each(function(index, row) {
+          rows.each(function (index, row) {
             var rowData = table.row(row).data(); // Get data for the current row
             var rowDataStr = JSON.stringify(excludeColumns(rowData)); // Convert row data to a string for comparison
-            
+
             // Check if the row data already exists in the uniqueRows object
             if (uniqueRows[rowDataStr]) {
               // Duplicate row found, add both the current row index and the original reference row index to allDuplicateRows array
@@ -228,78 +278,217 @@
               uniqueRows[rowDataStr] = index;
             }
           });
-          
+
           // Hide all rows
-          table
-          .rows()
-          .nodes()
-          .to$()
-          .hide();
-          
+          table.rows().nodes().to$().hide();
+
           // Show all occurrences of duplicate rows and their corresponding original reference rows
-          table
-          .rows(allDuplicateRows)
-          .nodes()
-          .to$()
-          .show();
-          
+          table.rows(allDuplicateRows).nodes().to$().show();
+
           table.draw();
         }
-        
+
         // Function to exclude multiple columns from row data
         function excludeColumns(rowData) {
           var excludedColumns = [0, 1, 2, 14, 15]; // Specify the indices of columns to be excluded (e.g., column index 3 and 5)
           var rowDataCopy = rowData.slice(); // Create a copy of the row data array
-          
+
           // Set excluded column values to null
           for (var i = 0; i < excludedColumns.length; i++) {
             var columnIndex = excludedColumns[i];
             rowDataCopy[columnIndex] = null;
           }
-          
+
           return rowDataCopy;
         }
-        
-        $("#resetFilterDuplicatesBtn").on("click", function() {
+
+        $("#resetFilterDuplicatesBtn").on("click", function () {
           resetFilterDuplicates();
+          calculateStats()
         });
-        
+
         // Function to reset check duplicates button
         function resetFilterDuplicates() {
           // Show all rows
-          table
-          .rows()
-          .nodes()
-          .to$()
-          .show();
+          table.rows().nodes().to$().show();
 
           table.draw();
         }
 
-        $('#searchButton').on('click', function() {
+        $("#searchButton").on("click", function () {
           columnSearch();
+          updateStatsAfterSearch()
         });
 
-        $('#resetButtonCol').on('click', function() {
+        $("#resetButtonCol").on("click", function () {
           resetSearch();
+          calculateStats()
         });
 
         // Function to perform column-specific search
         function columnSearch() {
           var columnIndex = $("#columnFilter").val(); // Get the index of the selected column
-          var searchValue = $("#columnSearch")
-            .val()
-            .trim(); // Get the value of the search input and remove leading/trailing whitespace
-          table
-            .column(columnIndex)
-            .search(searchValue)
-            .draw(); // Apply search to the selected column
+          var searchValue = $("#columnSearch").val().trim(); // Get the value of the search input and remove leading/trailing whitespace
+          table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
+          updateStatsAfterSearch()
+        }
+
+        function calculateStats() {
+          var totalBerat = 0;
+          var totalReject = 0;
+          var uniquePlat = new Set();
+
+          // Iterate through each row in the DataTable
+          table.rows().every(function() {
+              var data = this.data();
+
+              // Accumulate berat and reject values
+              totalBerat += parseFloat(data[9]); // Assuming berat is at index 9
+              totalReject += parseFloat(data[10]); // Assuming reject is at index 10
+
+              // Collect unique plat values
+              uniquePlat.add(data[3]); // Assuming plat is at index 3
+
+              $("#totalBerat").text(totalBerat.toFixed(2)); // Assuming you want to display with two decimal places
+              $("#totalReject").text(totalReject.toFixed(2)); // Assuming you want to display with two decimal places
+              $("#uniquePlatCount").text(uniquePlat.size);
+          });
+        }
+
+        function updateStatsAfterSearch() {
+            var totalBerat = 0;
+            var totalReject = 0;
+            var uniquePlat = new Set();
+
+            // Iterate through each visible row in the DataTable
+            table.rows({ search: 'applied' }).every(function() {
+                var data = this.data();
+
+                // Accumulate berat and reject values
+                totalBerat += parseFloat(data[9]); // Assuming berat is at index 9
+                totalReject += parseFloat(data[10]); // Assuming reject is at index 10
+
+                // Collect unique plat values
+                uniquePlat.add(data[3]); // Assuming plat is at index 3
+            });
+
+            $("#totalBerat").text(totalBerat.toFixed(2)); // Assuming you want to display with two decimal places
+            $("#totalReject").text(totalReject.toFixed(2)); // Assuming you want to display with two decimal places
+            $("#uniquePlatCount").text(uniquePlat.size);
+
+            // Output or use the calculated statistics as needed
+            console.log("Total Berat after search:", totalBerat);
+            console.log("Total Reject after search:", totalReject);
         }
 
         // Function to reset search
         function resetSearch() {
-          $('#columnSearch').val(''); // Clear the search input
-          table.search('').columns().search('').draw(); // Clear all column-specific searches and redraw the table
+          $("#columnSearch").val(""); // Clear the search input
+          table.search("").columns().search("").draw(); // Clear all column-specific searches and redraw the table
+          calculateStats()
+        }
+
+        $("#filterButton").click(function () {
+          var startDate = $("#startDate").val();
+          var endDate = $("#endDate").val();
+          filterByDateRange(startDate, endDate);
+        });
+
+        $("#resetButton").click(function () {
+          $("#startDate").val("");
+          $("#endDate").val("");
+          $("#dateRange").val("");
+          filterByDateRange("", "");
+        });
+
+        $("#dateRange").change(function () {
+          var dateRange = $(this).val();
+          var startDate = "";
+          var endDate = "";
+
+          // Calculate start and end dates based on selected range
+          if (dateRange === "today") {
+            startDate = formatDate(new Date());
+            endDate = startDate;
+          } else if (dateRange === "yesterday") {
+            var yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            startDate = formatDate(yesterday);
+            endDate = startDate;
+          } else if (dateRange === "1-10") {
+            startDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+            endDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 10));
+          } else if (dateRange === "11-20") {
+            startDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 11));
+            endDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 20));
+          } else if (dateRange === "21-eom") {
+            startDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 21));
+            endDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0));
+          } else if (dateRange === "7") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 6))
+            ); // Date 7 days ago
+          } else if (dateRange === "30") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 29))
+            ); // Date 30 days ago
+          } else if (dateRange === "60") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 59))
+            ); // Date 30 days ago
+          } else if (dateRange === "90") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 89))
+            ); // Date 30 days ago
+          } else if (dateRange === "365") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 364))
+            ); // Date 365 days ago
+          } else if (dateRange === "730") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 729))
+            ); // Date 365 days ago
+          } else if (dateRange === "ytd") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year
+            startDate = formatDate(startDate);
+          }
+          filterByDateRange(startDate, endDate);
+        });
+        function formatDate(date) {
+          var year = date.getFullYear();
+          var month = ("0" + (date.getMonth() + 1)).slice(-2); // Months are zero-based
+          var day = ("0" + date.getDate()).slice(-2);
+          return year + "-" + month + "-" + day;
+        }
+
+        function filterByDateRange(startDate, endDate) {
+          $.ajax({
+            url: '{% url "display_report" %}',
+            type: "GET",
+            data: {
+              start_date: startDate,
+              end_date: endDate,
+            },
+            success: function (response) {
+              console.log("Success");
+              $("#likTable").html($(response).find("#likTable").html());
+              if (table) {
+                table.destroy();
+              }
+              initializeDataTable();
+              calculateStats()
+            },
+            error: function (xhr, status, error) {
+              console.error("Error filtering data:", error);
+            },
+          });
         }
       });
     </script>
