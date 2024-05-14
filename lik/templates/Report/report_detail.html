@@ -27,18 +27,24 @@
                               <span class="text-danger">{{ error }}</span>
                               {% endfor %}
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                              {{ form.sender.label_tag }}
-                              {{ form.sender }}
-                              {% for error in form.sender.errors %}
-                              <span class="text-danger">{{ error }}</span>
-                              {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-              
+                          </div>
+                          <div class="col-md-6">
+                              <div class="form-group">
+                                {{ form.sender.label_tag }}
+                                {{ form.sender }}
+                                {% for error in form.sender.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                                {% endfor %}
+                              </div>
+                          </div>
+                      </div>
+                      <div class="form-group">
+                        {{ form.tiketId.label_tag }}
+                        {{ form.tiketId }}
+                        {% for error in form.tiketId.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                      </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">

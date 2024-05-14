@@ -343,11 +343,11 @@
               var data = this.data();
 
               // Accumulate berat and reject values
-              totalBerat += parseFloat(data[9]); // Assuming berat is at index 9
-              totalReject += parseFloat(data[10]); // Assuming reject is at index 10
+              totalBerat += parseFloat(data[10]); // Assuming berat is at index 9
+              totalReject += parseFloat(data[11]); // Assuming reject is at index 10
 
               // Collect unique plat values
-              uniquePlat.add(data[3]); // Assuming plat is at index 3
+              uniquePlat.add(data[4]); // Assuming plat is at index 3
 
               $("#totalBerat").text(totalBerat.toFixed(2)); // Assuming you want to display with two decimal places
               $("#totalReject").text(totalReject.toFixed(2)); // Assuming you want to display with two decimal places

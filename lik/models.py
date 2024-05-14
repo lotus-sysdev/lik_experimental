@@ -26,28 +26,28 @@ class Report(models.Model):
     def __str__ (self):
         return str(self.no_tiket)
 
-    # def save(self, *args, **kwargs):
-    #     if not self.tiketId:
-    #         # Generate tiketId based on sender and a unique number
-    #         if self.sender:
-    #             sender_id_str = str(self.sender.pk).zfill(3)  # Use the sender ID, padded with leading zeros if needed
-    #             # sender_code = self.sender.username[:3].upper()  # Take the first three letters of the sender's username
+    def save(self, *args, **kwargs):
+        if not self.tiketId:
+            # Generate tiketId based on sender and a unique number
+            if self.sender:
+                sender_id_str = str(self.sender.pk).zfill(3)  # Use the sender ID, padded with leading zeros if needed
+                # sender_code = self.sender.username[:3].upper()  # Take the first three letters of the sender's username
 
-    #             # Retrieve the last tiketId for the same sender
-    #             last_report = Report.objects.filter(sender=self.sender).order_by('-date_time').first()
-    #             last_number = 0
-    #             if last_report and last_report.id:
-    #                 last_number = last_report.id
-    #             else:
-    #                 last_number = 0
+                # Retrieve the last tiketId for the same sender
+                last_report = Report.objects.filter(sender=self.sender).order_by('-date_time').first()
+                last_number = 0
+                if last_report and last_report.id:
+                    last_number = last_report.id
+                else:
+                    last_number = 0
 
-    #             current_date = self.date_time.strftime('%y%m%d')
+                current_date = self.date_time.strftime('%y%m%d')
                 
-    #             new_last_num = last_number + 1
-    #             new_tiketId = f"{current_date}{sender_id_str}{new_last_num}"  # Combine date, sender ID, and a 3-digit number
-    #             self.tiketId = new_tiketId
+                new_last_num = last_number + 1
+                new_tiketId = f"{current_date}{sender_id_str}{new_last_num}"  # Combine date, sender ID, and a 3-digit number
+                self.tiketId = new_tiketId
 
-    #     super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 
 class Lokasi(models.Model):
