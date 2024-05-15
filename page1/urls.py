@@ -78,7 +78,6 @@ urlpatterns = [
     path('add_pic_prospect/<int:prospect_id>',add_prospect_pic,name='add_pic_prospect'),
     path('edit_prospect_pic/<int:pic_id>/', edit_prospect_pic, name='edit_prospect_pic'),
     path('delete_prospect_pic/<int:pic_id>/', delete_prospect_pic, name='delete_prospect_pic'),
-
     # Alamat urls
     path('add_customer_alamat/<int:cust_id>/', add_customer_alamat, name='add_customer_alamat'),
     path('edit_customer_alamat/<int:alamat_id>/', edit_customer_alamat, name='edit_customer_alamat'),

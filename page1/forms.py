@@ -286,7 +286,7 @@ class ItemForm(forms.ModelForm):
         )
     
         model = Items
-        fields = '__all__'
+        fields = "__all__"
         exclude = ['SKU', 'gambar_resized', 'upload_type']
         widgets = {
             'pic' : Select2Widget(attrs={'class':'form-control'}),
@@ -408,7 +408,7 @@ class WorkForm(forms.ModelForm):
             'tanggal_pengiriman_invoice': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         }
         labels = {
-            'revenue_PO': 'Revenue PO',
+            'revenue_WO': 'Revenue',
             'nomor_PO': 'Nomor PO',
             'tanggal_WO': 'Tanggal PO',
             'tanggal_process': 'Tanggal Proses',
@@ -540,8 +540,6 @@ class DeliveryForm(forms.ModelForm):
             'keterangan': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Tuliskan Keterangan Pengantaran Disini'}),
             'start_location': Select2Widget(attrs={'class': 'form-control'}),
             'destination': Select2Widget(attrs={'class': 'form-control'}),
-            'start' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Keberangkatan'}),
-            'end' : widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class':'form-control', 'placeholder': 'Jam Kedatangan'}),
             'package_dimensions' : DimensionsInput(attrs={'class':'form-control'}),
         }
         labels = {
@@ -559,6 +557,16 @@ class DeliveryForm(forms.ModelForm):
         measurement=Mass,
         unit_choices=(("kg","kg"), ("g","g")),
         widget = MeasurementWidget(attrs={'class':'form-control', 'placeholder':'10'}, unit_choices=(("kg","kg"), ("g","g"))),
+    )
+    start = forms.DateTimeField(
+        widget=widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'placeholder': 'Jam Keberangkatan'}),
+        label='Jam Keberangkatan',
+        required=True  # Make start field required
+    )
+    end = forms.DateTimeField(
+        widget=widgets.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'placeholder': 'Jam Kedatangan'}),
+        label='Jam Kedatangan',
+        required=True  # Make end field required
     )
     package_dimensions = DimensionsField()
 

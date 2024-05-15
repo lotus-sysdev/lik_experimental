@@ -22,6 +22,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.urls import reverse
+from datetime import timedelta
 
 from .decorators import *
 from .forms import *
@@ -161,6 +162,12 @@ def add_prospect_pic(request, prospect_id):
     return add_entity(request, prospect_id, Prospect, ProspectPICForms, 'pic/add_prospect_pic.html', 'prospect_id', 'prospect_id', {'prospect_id': prospect_id}, redirect_url=redirect_url)
 
 @login_required
+def add_prospect_pic(request, prospect_id):
+    redirect_url  = reverse('prospect_detail', args=(prospect_id,))
+    return add_entity(request, prospect_id, Prospect, ProspectPICForms, 'pic/add_prospect_pic.html', 'prospect_id', 'prospect_id', {'prospect_id': prospect_id}, redirect_url=redirect_url)
+
+
+@login_required
 @GA_required
 def add_customer_alamat(request, cust_id):
     redirect_url  = reverse('customer_detail', args=(cust_id,))
@@ -285,6 +292,7 @@ def delete_prospect_alamat(request, alamat_id):
 @login_required
 @GA_required
 def add_item(request):
+    form_instance = ItemForm(request.POST or None)
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES)
         if form.is_valid():
@@ -305,8 +313,7 @@ def add_item(request):
                 # image_path = os.path.join(settings.MEDIA_ROOT, image_name)
                 resized_image_name = f"media_{nama_cleaned}_{curr_datetime}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
                 resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
-                img.save(resized_image_path)
-                
+                img.save(resized_image_path)                
 
                 # os.remove(image_path)
 
@@ -317,8 +324,8 @@ def add_item(request):
 
     else:
         form = ItemForm()
-    
-    return render(request, 'item/add_item.html', {'item_form': form})
+
+    return render(request, 'item/add_item.html', {'item_form': form_instance})
 
 
 # -------------------- Display Tables -------------------- #
@@ -748,6 +755,56 @@ def get_item_details(request):
         return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
+def get_customer_pics(request):
+    if request.method == 'GET':
+        customer_id = request.GET.get('customer_id')
+        pics = CustomerPIC.objects.filter(customer_id=customer_id).values('id', 'nama')
+        return JsonResponse(list(pics), safe=False)
+    else:
+        return JsonResponse ({'error': 'Invalid Request'})
+
+def get_customer_by_pic(request):
+    if request.method == 'GET':
+        pic_id = request.GET.get('pic_id')
+        # try: 
+        customer_pic = CustomerPIC.objects.get(id=pic_id)
+        customer_id = customer_pic.customer_id.cust_id
+        # print(customer_pic)
+        return JsonResponse({'customer_id' : customer_id})
+        # except:
+        #     return JsonResponse({'customer_id' : None})
+    else: 
+        return JsonResponse({'customer_id': None})
+
+def get_customer_item(request):
+    if request.method == 'GET':
+        customer_id = request.GET.get('customer_id')
+        items = Items.objects.filter(customer=customer_id, is_approved=True).values('SKU', 'nama', 'price')
+        return JsonResponse(list(items), safe=False)
+    else:
+        return JsonResponse ({'error': 'Invalid Request'})
+
+def get_item_details(request):
+    if request.method == 'GET':
+        item_id = request.GET.get('item_id')
+        try:
+            item = Items.objects.get(SKU=item_id)
+            # Assuming 'price' is a field in your Item model
+            item_details = {
+                'SKU': item.SKU,
+                'nama': item.nama,
+                'price': str(item.price),
+                'price_currency': item.price_currency,
+                'quantity': item.quantity,
+                'unit': item.unit,
+            }
+            return JsonResponse(item_details)
+        except Items.DoesNotExist:
+            return JsonResponse({'error': 'Item not found'}, status=404)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+  
 # -------------------- Login, Register, Logout Functions -------------------- #
 # Login, Register, and Logout
 def login_view(request):
