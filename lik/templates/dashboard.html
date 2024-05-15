@@ -1,259 +1,562 @@
 {% extends 'base.html' %}
 <head>
-    {% block title %}LIK Dashboard{% endblock %}
+  {% block title %}LIK Dashboard{% endblock %}
 </head>
 <body>
-    {% block content %}
-    <h1>Dashboard</h1>
-    <form method="GET" action="{% url 'dashboard' %}" id="filterForm" class="container custom-container mt-2 mb-2">
-        <div class="row">
-            <div class="form-group col-md-3">
-                {{ form.sender.label_tag }}
-                {{ form.sender }}
-            </div>
-            <div class="form-group col-md-3">
-                <label>Date Range:</label>
-                <select id="date-range-select" onchange="updateDateRange()" class="form-control">
-                    <option value="">Select Date Range</option>
-                    <option value="today">Today</option>
-                    <option value="yesterday">Yesterday</option>
-                    <option value="1-10">1-10 of this month</option>
-                    <option value="11-20">11-20 of this month</option>
-                    <option value="21-eom">21- End of this month</option>
-                    <option value="7">Last 7 days</option>
-                    <option value="30">Last 30 days</option>
-                    <option value="60">Last 60 days</option>
-                    <option value="90">Last 90 days</option>
-                    <option value="365">Last 365 days</option>
-                    <option value="730">Last 730 days</option>
-                    <option value="ytd">Year to Date</option>
-                </select>
-            </div>
-            <div class="form-group col-md-3">
-                {{ form.start_date.label_tag }}
-                {{ form.start_date }}
-            </div>
-            <div class="form-group col-md-3">
-                {{ form.end_date.label_tag }}
-                {{ form.end_date }}
-            </div>
-        </div>
-        <div class="mt-2">
-            <button class="btn btn-primary" type="submit">Apply Filters</button>
-            <button class="btn btn-secondary" type="button" onclick="resetForm()">Reset</button>
-        </div>
-    </form>
-    
+  {% block content %}
 
-    <div class="d-flex mt-4" style="gap: 5vh;">
-        <div class="card">
-            <h4 class="text-center card-header">Chart</h4>
-            <div id="chart-container" style="padding: 2vh;">
-                <canvas id="" style="max-width:200vw; max-height:200vh;"></canvas>
-            </div>
-        </div>
-        <div class="card">
-            <h4 class="text-center card-header">Jumlah Kendaraan</h4>
-            <div id="chart-container" style="padding: 2vh;">
-                <canvas id="platBarChart" style="max-width:200vw; max-height:200vh;"></canvas>
-            </div>
-        </div>
+  <style>
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(3, auto);
+      grid-gap: 30px;
+    }
+
+    .card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      /* padding: 20px; */
+    }
+
+    .card-header {
+      flex: 0 1 auto;
+    }
+
+    .card-body {
+      flex: 1 1 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr; /* Stack columns on smaller screens */
+        grid-template-rows: auto; /* Auto rows for responsive stacking */
+      }
+    }
+  </style>
+
+  <h1>Dashboard</h1>
+  <form
+    method="GET"
+    action="{% url 'dashboard' %}"
+    id="filterForm"
+    class="mt-2 mb-2"
+  >
+    <div class="row">
+      <div class="form-group col-md-3">
+        {{ form.sender.label_tag }} {{ form.sender }}
+      </div>
+      <div class="form-group col-md-3">
+        <label>Date Range:</label>
+        <select
+          id="date-range-select"
+          onchange="updateDateRange()"
+          class="form-control"
+        >
+          <option value="">Select Date Range</option>
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="1-10">1-10 of this month</option>
+          <option value="11-20">11-20 of this month</option>
+          <option value="21-eom">21- End of this month</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="60">Last 60 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="365">Last 365 days</option>
+          <option value="730">Last 730 days</option>
+          <option value="ytd">Year to Date</option>
+        </select>
+      </div>
+      <div class="form-group col-md-3">
+        {{ form.start_date.label_tag }} {{ form.start_date }}
+      </div>
+      <div class="form-group col-md-3">
+        {{ form.end_date.label_tag }} {{ form.end_date }}
+      </div>
     </div>
-
-    <div class="d-flex mt-4" style="gap: 5vh;">
-        <div class="card">
-            <h4 class="text-center card-header">Distribusi Sender</h4>
-            <div id="chart-container" style="padding: 2vh;">
-                <canvas id="senderPieChart" style="max-width:200vw; max-height:200vh;"></canvas>
-            </div>
-        </div>
-        <div class="card">
-            <h4 class="text-center card-header">Distribusi Jenis Kayu</h4>
-            <div id="chart-container" style="padding: 2vh;">
-                <canvas id="kayuPieChart" style="max-width:200vw; max-height:200vh;"></canvas>
-            </div>
-        </div>
+    <div class="mt-2">
+      <button class="btn btn-primary" type="submit">Apply Filters</button>
+      <button class="btn btn-secondary" type="button" onclick="resetForm()">
+        Reset
+      </button>
     </div>
+  </form>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // LOAD PIE CHART
-        document.addEventListener('DOMContentLoaded', function () {
-            // Get the serialized kayu counts data passed from the view
-            var kayuCounts = JSON.parse('{{ kayu_counts | escapejs }}');
-            var senderCounts = JSON.parse('{{ sender_counts | escapejs }}')
+  <div class="container dashboard-grid mt-4">
+    <div class="card">
+      <h4 class="text-center card-header">Another Chart</h4>
+      <div class="card-body">
+        <canvas id="chart1"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">One More Chart</h4>
+      <div class="card-body">
+        <canvas id="chart2"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">Distribusi Kayu / Bulan</h4>
+      <div class="card-body">
+        <canvas id="kayuMonthlyColumnChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">Jumlah Kendaraan</h4>
+      <div class="card-body">
+        <canvas id="platBarChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">Distribusi Sender</h4>
+      <div class="card-body">
+        <canvas id="senderPieChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">Distribusi Jenis Kayu</h4>
+      <div class="card-body">
+        <canvas id="kayuPieChart"></canvas>
+      </div>
+    </div>
+  </div>
 
-            renderPieChart('kayuPieChart', kayuCounts, 'kayu', 'Jenis Kayu')
-            renderPieChart('senderPieChart', senderCounts, 'sender__username', 'Sender' )
-        });
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <script>
+    // LOAD PIE CHART
+    document.addEventListener("DOMContentLoaded", function () {
+      // Get the serialized kayu counts data passed from the view
+      var kayuCounts = JSON.parse("{{ kayu_counts | escapejs }}");
+      var senderCounts = JSON.parse("{{ sender_counts | escapejs }}");
 
-        function renderPieChart(canvasId, data, labelKey, chartLabel) {
-            var labels = [];
-            var dataValues = [];
+      renderPieChart("kayuPieChart", kayuCounts, "kayu", "Jenis Kayu");
+      renderPieChart(
+        "senderPieChart",
+        senderCounts,
+        "sender__username",
+        "Sender"
+      );
 
-        data.forEach(function(item) {
-            if (item.hasOwnProperty(labelKey)) {
-                labels.push(item[labelKey]);
-            } else {
-                // Fallback to a default label key if the specified key doesn't exist
-                labels.push(item.defaultLabelKey);
-            }
-            dataValues.push(item.count);
-        });
+      var platCounts = JSON.parse("{{ plat_counts | escapejs }}");
 
-        var ctx = document.getElementById(canvasId).getContext('2d');
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: dataValues,
-                    backgroundColor: [
-                        'rgba(28, 22, 120, 0.8)',  
-                        'rgba(133, 118, 255, 0.8)',
-                        'rgba(163, 255, 214, 0.8)',
-                        'rgba(255, 99, 132, 0.8)',
-                        'rgba(255, 197, 90, 0.8)',
-                        'rgba(24, 156, 214, 0.8)',
-                    ],
-                    borderColor: [
-                        'rgba(28, 22, 120, 1)',  
-                        'rgba(133, 118, 255, 1)',
-                        'rgba(163, 255, 214, 1)',
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(255, 197, 90, 1)',
-                        'rgba(24, 156, 214, 1)',
-                    ],
-                    borderWidth: 1
-                }]
+      renderBarChart(
+        "platBarChart",
+        platCounts,
+        "upper_plat",
+        "License Plates"
+      );
+
+      var startDateInput = document.getElementById("id_start_date");
+      var endDateInput = document.getElementById("id_end_date");
+      var startDate = new Date(startDateInput.value);
+      var endDate = new Date(endDateInput.value);
+
+      // Check if the dates are valid, otherwise default to the current year
+      if (isNaN(startDate.getTime())) {
+        startDate = new Date(new Date().getFullYear(), 0, 1); // Default to January 1st of the current year
+      } else {
+        startDate.setHours(0, 0, 0, 0);
+      }
+      if (isNaN(endDate.getTime())) {
+        endDate = new Date(); // Default to today
+      } else {
+        endDate.setHours(23, 59, 59, 999);
+      }
+
+      // Generate dynamic labels based on the date range
+      var labels = generateLabels(startDate, endDate);
+
+      var kayuMonthlyCounts = JSON.parse(
+        "{{ kayu_counts_monthly | escapejs }}"
+      );
+
+      renderColumnChart(
+        "kayuMonthlyColumnChart",
+        kayuMonthlyCounts,
+        labels,
+        startDate,
+        endDate
+      );
+    });
+
+    function renderPieChart(canvasId, data, labelKey, chartLabel) {
+      var labels = [];
+      var dataValues = [];
+
+      data.forEach(function (item) {
+        if (item.hasOwnProperty(labelKey)) {
+          labels.push(item[labelKey]);
+        } else {
+          // Fallback to a default label key if the specified key doesn't exist
+          labels.push(item.defaultLabelKey);
+        }
+        dataValues.push(item.count);
+      });
+
+      var ctx = document.getElementById(canvasId).getContext("2d");
+      new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              data: dataValues,
+              backgroundColor: [
+                "rgba(28, 22, 120, 0.8)", // Dark Blue
+                "rgba(133, 118, 255, 0.8)", // Light Purple
+                "rgba(0, 128, 0, 0.8)", // Dark Green
+                "rgba(1, 123, 148, 0.8)", // Dark Teal
+                "rgba(255, 99, 71, 0.8)", // Dark Orange-Red
+                "rgba(245, 55, 12, 0.8)", // Bright Red
+              ],
+              borderColor: [
+                "rgba(28, 22, 120, 1)",
+                "rgba(133, 118, 255, 1)",
+                "rgba(0, 128, 0, 1)",
+                "rgba(1, 123, 148, 1)",
+                "rgba(255, 99, 71, 1)",
+                "rgba(245, 55, 12, 1)",
+              ],
+              borderWidth: 1,
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                title: {
-                    display: true,
-                    text: chartLabel,
-                }
-            }
-        });
-        }
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true, // Enable the legend
+            },
+            title: {
+              display: true,
+              text: chartLabel,
+            },
+            datalabels: {
+              formatter: (value, ctx) => {
+                let sum = 0;
+                let dataArr = ctx.chart.data.datasets[0].data;
+                dataArr.forEach((data) => {
+                  sum += data;
+                });
+                let percentage = ((value / sum) * 100).toFixed(2) + "%";
+                return percentage;
+              },
+              color: "white",
+              font: {
+                weight: "bold",
+              },
+              backgroundColor: function (context) {
+                return context.dataset.backgroundColor[context.dataIndex];
+              },
+              borderRadius: 4,
+              padding: 6,
+            },
+          },
+        },
+        plugins: [ChartDataLabels],
+      });
+    }
 
-        // HORIZONTAL BAR CHART
-        document.addEventListener('DOMContentLoaded', function () {
-            // Get the serialized plat counts data passed from the view
-            var platCounts = JSON.parse('{{ plat_counts | escapejs }}');
+    function renderBarChart(canvasId, data, labelKey, chartLabel) {
+      var labels = [];
+      var dataValues = [];
 
-            renderBarChart('platBarChart', platCounts, 'upper_plat', 'License Plates');
-        });
+      data.forEach(function (item) {
+        labels.push(item[labelKey]);
+        dataValues.push(item.count);
+      });
 
-        function renderBarChart(canvasId, data, labelKey, chartLabel) {
-            var labels = [];
-            var dataValues = [];
-
-            data.forEach(function(item) {
-                labels.push(item[labelKey]);
-                dataValues.push(item.count);
-            });
-
-            var ctx = document.getElementById(canvasId).getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: chartLabel,
-                        data: dataValues,
-                        backgroundColor: 'rgba(28, 22, 120, 0.8)', // Adjust color as needed
-                        borderColor: 'rgba(28, 22, 120, 1)',       // Adjust color as needed
-                        borderWidth: 1
-                    }]
+      var ctx = document.getElementById(canvasId).getContext("2d");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: chartLabel,
+              data: dataValues,
+              backgroundColor: [
+                "rgba(28, 22, 120, 0.6)",
+                "rgba(133, 118, 255, 0.6)",
+                "rgba(0, 128, 0, 0.6)",
+                "rgba(1, 123, 148, 0.6)",
+                "rgba(255, 99, 71, 0.6)",
+                "rgba(245, 55, 12, 0.6)",
+              ],
+              borderColor: [
+                "rgba(28, 22, 120, 1)",
+                "rgba(133, 118, 255, 1)",
+                "rgba(0, 128, 0, 1)",
+                "rgba(1, 123, 148, 1)",
+                "rgba(255, 99, 71, 1)",
+                "rgba(245, 55, 12, 1)",
+              ],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            xAxes: [
+              {
+                ticks: {
+                  beginAtZero: true,
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        xAxes: [{
-                            ticks: {
-                                beginAtZero: true
-                            }
-                        }]
-                    }
-                }
-            });
+              },
+            ],
+          },
+          indexAxis: "y",
+          plugins: {
+            legend: {
+              display: false, // Disable the legend
+            },
+            title: {
+              display: false, // Disable the chart title
+            },
+            datalabels: {
+              anchor: "center",
+              align: "center",
+              color: "white",
+              font: {
+                weight: "bold",
+              },
+            },
+          },
+        },
+        plugins: [ChartDataLabels],
+      });
+    }
+
+    function generateLabels(startDate, endDate) {
+      var labels = [];
+      var currentDate = new Date(startDate);
+
+      while (currentDate <= endDate) {
+        var month = currentDate.toLocaleString("default", { month: "short" });
+        var year = currentDate.getFullYear().toString().slice(-2);
+        labels.push(month + " " + year);
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      }
+
+      return labels;
+    }
+
+    function renderColumnChart(canvasId, data, labels, startDate, endDate) {
+      console.log("Start Date:", startDate);
+      console.log("End Date:", endDate);
+
+      var kayuLabels = [];
+      var kayuColors = {};
+
+      // Extract unique kayu types and assign colors
+      data.forEach(function (item, index) {
+        if (!kayuLabels.includes(item.kayu)) {
+          kayuLabels.push(item.kayu);
+          kayuColors[item.kayu] = getRandomColor(index); // Generate consistent colors for kayu types
         }
+      });
 
-        // FILTER FUNCTIONALITY
-        function resetForm() {
-            window.location.href = "{% url 'dashboard' %}"
+      // Initialize data array for each kayu type
+      var kayuData = Array.from({ length: kayuLabels.length }, () =>
+        new Array(labels.length).fill(0)
+      );
+
+      // Fill data array with counts
+      data.forEach(function (item) {
+        var itemDate = new Date(item.year, item.month - 1, item.day);
+        console.log("Item Date:", itemDate);
+
+        if (itemDate >= startDate && itemDate <= endDate) {
+          var monthIndex =
+            (itemDate.getFullYear() - startDate.getFullYear()) * 12 +
+            itemDate.getMonth() -
+            startDate.getMonth();
+          console.log("Month Index:", monthIndex);
+
+          var kayuIndex = kayuLabels.indexOf(item.kayu);
+          console.log("Kayu Index:", kayuIndex);
+
+          if (kayuIndex >= 0 && monthIndex >= 0 && monthIndex < labels.length) {
+            kayuData[kayuIndex][monthIndex] = item.count;
+            console.log("Updated kayuData:", kayuData);
+          }
         }
-        function updateDateRange() {
-            var dateRange = document.getElementById("date-range-select").value;
-            var startDateInput = document.getElementById("id_start_date");
-            var endDateInput = document.getElementById("id_end_date");
+      });
 
-            var startDate = "";
-            var endDate = "";
+      // Render column chart
+      var ctx = document.getElementById(canvasId).getContext("2d");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: kayuLabels.map(function (label, index) {
+            return {
+              label: label,
+              data: kayuData[index],
+              backgroundColor: kayuColors[label],
+              borderColor: "rgba(0, 0, 0, 1)", // Border color for consistency
+              borderWidth: 1,
+            };
+          }),
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            xAxes: [
+              {
+                stacked: true,
+              },
+            ],
+            yAxes: [
+              {
+                stacked: true,
+                ticks: {
+                  beginAtZero: true,
+                  stepSize: 1,
+                },
+              },
+            ],
+          },
+          plugins: {
+            datalabels: {
+              anchor: "center",
+              align: "end",
+              color: "white",
+              font: {
+                weight: "bold",
+              },
+              formatter: function (value, context) {
+                return value !== 0 ? value : "";
+              },
+            },
+          },
+        },
+        plugins: [ChartDataLabels],
+      });
+    }
+    // Function to generate consistent colors for kayu types
+    function getRandomColor(index) {
+      var colors = [
+        "#1C1678",
+        "#017B94",
+        "#008000",
+        "#8576FF",
+        "#FF6347",
+        "#F5370C",
+      ];
+      return colors[index % colors.length];
+    }
 
-            if (dateRange === "today") {
-                startDate = formatDate(new Date());
-                endDate = startDate;
-            } else if (dateRange === "yesterday") {
-                var yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-                startDate = formatDate(yesterday);
-                endDate = startDate;
-            } else if (dateRange === "1-10") {
-                startDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
-                endDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 10));
-            } else if (dateRange === "11-20") {
-                startDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 11));
-                endDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 20));
-            } else if (dateRange === "21-eom") {
-                startDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 21));
-                endDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0));
-            } else if (dateRange === "7") {
-                endDate = formatDate(new Date()); // Today's date
-                startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 6))); // Date 7 days ago
-            } else if (dateRange === "30") {
-                endDate = formatDate(new Date()); // Today's date
-                startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 29))); // Date 30 days ago
-            } else if (dateRange === "60") {
-                endDate = formatDate(new Date()); // Today's date
-                startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 59))); // Date 60 days ago
-            } else if (dateRange === "90") {
-                endDate = formatDate(new Date()); // Today's date
-                startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 89))); // Date 90 days ago
-            } else if (dateRange === "365") {
-                endDate = formatDate(new Date()); // Today's date
-                startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 364))); // Date 365 days ago
-            } else if (dateRange === "730") {
-                endDate = formatDate(new Date()); // Today's date
-                startDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 729))); // Date 730 days ago
-            } else if (dateRange === "ytd") {
-                endDate = formatDate(new Date()); // Today's date
-                startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year
-                startDate = formatDate(startDate);
-            }
+    // FILTER FUNCTIONALITY
+    function resetForm() {
+      window.location.href = "{% url 'dashboard' %}";
+    }
+    function updateDateRange() {
+      var dateRange = document.getElementById("date-range-select").value;
+      var startDateInput = document.getElementById("id_start_date");
+      var endDateInput = document.getElementById("id_end_date");
 
-            startDateInput.value = startDate;
-            endDateInput.value = endDate;
-        }
+      var startDate = "";
+      var endDate = "";
 
-        // Helper function to format date as "YYYY-MM-DD"
-        function formatDate(date) {
-            var d = new Date(date),
-                month = '' + (d.getMonth() + 1),
-                day = '' + d.getDate(),
-                year = d.getFullYear();
+      if (dateRange === "today") {
+        startDate = formatDate(new Date());
+        endDate = startDate;
+      } else if (dateRange === "yesterday") {
+        var yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        startDate = formatDate(yesterday);
+        endDate = startDate;
+      } else if (dateRange === "1-10") {
+        startDate = formatDate(
+          new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+        );
+        endDate = formatDate(
+          new Date(new Date().getFullYear(), new Date().getMonth(), 10)
+        );
+      } else if (dateRange === "11-20") {
+        startDate = formatDate(
+          new Date(new Date().getFullYear(), new Date().getMonth(), 11)
+        );
+        endDate = formatDate(
+          new Date(new Date().getFullYear(), new Date().getMonth(), 20)
+        );
+      } else if (dateRange === "21-eom") {
+        startDate = formatDate(
+          new Date(new Date().getFullYear(), new Date().getMonth(), 21)
+        );
+        endDate = formatDate(
+          new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+        );
+      } else if (dateRange === "7") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = formatDate(
+          new Date(new Date().setDate(new Date().getDate() - 6))
+        ); // Date 7 days ago
+      } else if (dateRange === "30") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = formatDate(
+          new Date(new Date().setDate(new Date().getDate() - 29))
+        ); // Date 30 days ago
+      } else if (dateRange === "60") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = formatDate(
+          new Date(new Date().setDate(new Date().getDate() - 59))
+        ); // Date 60 days ago
+      } else if (dateRange === "90") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = formatDate(
+          new Date(new Date().setDate(new Date().getDate() - 89))
+        ); // Date 90 days ago
+      } else if (dateRange === "365") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = formatDate(
+          new Date(new Date().setDate(new Date().getDate() - 364))
+        ); // Date 365 days ago
+      } else if (dateRange === "730") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = formatDate(
+          new Date(new Date().setDate(new Date().getDate() - 729))
+        ); // Date 730 days ago
+      } else if (dateRange === "ytd") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year
+        startDate = formatDate(startDate);
+      }
 
-            if (month.length < 2) 
-                month = '0' + month;
-            if (day.length < 2) 
-                day = '0' + day;
+      startDateInput.value = startDate;
+      endDateInput.value = endDate;
+    }
 
-            return [year, month, day].join('-');
-        }
-    </script>
-    {% endblock %}
+    // Helper function to format date as "YYYY-MM-DD"
+    function formatDate(date) {
+      var d = new Date(date),
+        month = "" + (d.getMonth() + 1),
+        day = "" + d.getDate(),
+        year = d.getFullYear();
+
+      if (month.length < 2) month = "0" + month;
+      if (day.length < 2) day = "0" + day;
+
+      return [year, month, day].join("-");
+    }
+  </script>
+  {% endblock %}
 </body>
-</html>
