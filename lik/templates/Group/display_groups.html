@@ -2,11 +2,11 @@
 
 <html>
   <head>
-    {% block title %}Report Data Table{% endblock %}
+    {% block title %}Edit Permissions{% endblock %}
   </head>
   <body>
     {% block content %}
-    <h1>Report List</h1>
+    <h1>Edit Group Permissions</h1>
     {% csrf_token %}
     <div>
       <table
@@ -312,7 +312,6 @@
         });
     });
     </script>
-    <a href="/add_report">Add Report</a>
     {% endblock %}
   </body>
 </html>

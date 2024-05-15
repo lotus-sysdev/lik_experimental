@@ -21,6 +21,7 @@ class ReportForm(forms.ModelForm):
         exclude = ['id']
         widgets = {
             'sender': Select2Widget(attrs={'class': 'form-control'}),
+            'tiketId': forms.TextInput(attrs={'class': 'form-control', 'disabled' : 'disabled'}),
             'plat' : forms.TextInput(attrs={'class':'form-control', 'placeholder': 'BG 123 XY'}),
             'driver' : forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nama Driver'}),
             'PO' : forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'YY/MM/XXXX'}),
@@ -36,6 +37,7 @@ class ReportForm(forms.ModelForm):
             'og_foto' : forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
         }
         labels = {
+            'tiketId' : 'ID Tiket',
             'PO' : 'Nomor PO',
             'DO' : 'Nomor DO',
             'lokasi' : 'Lokasi Pemotongan',

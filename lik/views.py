@@ -198,7 +198,7 @@ def delete_selected_rows_report(request):
     return delete_selected_rows(request, Report, 'id')
 
 def process_image(image, is_original):
-    upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    upload_date = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     img = Image.open(image)
 
     # Generate a unique identifier
@@ -268,11 +268,31 @@ def delete_report(request, id):
 @login_required
 def edit_report(request, id):
     entity = get_object_or_404(Report,id = id)
-    # entity_approved = entity.is_approved
-
+    
+    # Fetch the latest tiketId for the given report object
+    latest_tiketId = entity.tiketId
+    
+    # Check if the latest tiketId already contains an index
+    if 'R' in latest_tiketId:
+        # Extract the index from the latest tiketId
+        base_tiketId, current_index = latest_tiketId.rsplit('R', 1)
+        try:
+            index = int(current_index)
+            index += 1
+        except ValueError:
+            # If the index is not an integer, start from 1
+            index = 1
+        new_tiketId = f"{base_tiketId}R{index}"
+    else:
+        new_tiketId = f"{latest_tiketId}R1"
+    
     if request.method == 'POST':
         form = ReportForm(request.POST, request.FILES, instance=entity)
+        
         if form.is_valid():
+            # Set the new tiketId before saving the form
+            form.instance.tiketId = new_tiketId
+
             # Check if a new image file is provided
             foto = request.FILES.get('foto')
             og_foto = request.FILES.get('og_foto')
@@ -285,14 +305,14 @@ def edit_report(request, id):
                 form.instance.og_foto = resized_og_foto_path
 
             form.save()
-
+            
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'success': False, 'errors': form.errors})
     else:
         form = ReportForm(instance=entity)
 
-    return render(request, "/api/edit_report.html",{'form': form})
+    return render(request, "/api/edit_report.html", {'form': form})
 
 # Set maximum image quality
 ImageFile.MAXBLOCK = 2**20
