@@ -123,6 +123,11 @@
               <li><a class="sidebar-a" href="/api/display_report">Report</a></li>
               {% endif %}
           </ul>
+          <ul class="collapse list-unstyled show" id="reportSubmenu">
+              {% if request.user|has_group:'GA' or request.user|has_group:'Admin' %}
+              <li><a class="sidebar-a" href="/api/display_group">Edit Permissions</a></li>
+              {% endif %}
+          </ul>
         </li>
       </ul>
 
