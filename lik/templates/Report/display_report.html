@@ -13,47 +13,134 @@
         id="likTable"
         class="table table-bordered table-striped w-100 table-lg table-responsive-lg"
       >
-      <div class="form-inline mb-2">
-        <select id="columnFilter" class="form-control btn-info">
-          <option value="0">ID</option>
-          <option value="1">Plat Nomor</option>
-          <option value="2">Driver</option>
-          <option value="2">No. PO</option>
-          <option value="2">No. DO</option>
-          <option value="3">No. Tiket Timbang</option>
-          <option value="4">Berat (Tonnase)</option>
-          <option value="6">Tanggal Keluar</option>
-          <option value="6">Catatan (Reject)</option>
-          <!-- Add more options for additional columns -->
-        </select>
-        <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
-      </div>
+        <div class="form-inline mb-2">
+          <select id="columnFilter" class="form-control btn-info">
+            <option value="0">Timestamp</option>
+            <option value="1">ID</option>
+            <option value="2">Sender</option>
+            <option value="3">Plat Nomor</option>
+            <option value="4">Driver</option>
+            <option value="5">No. PO</option>
+            <option value="6">No. DO</option>
+            <option value="7">No. Tiket Timbang</option>
+            <option value="8">Jenis Kayu</option>
+            <option value="9">Berat</option>
+            <option value="10">Reject</option>
+            <option value="11">Lokasi Potong</option>
+            <option value="12">Pabrik Tujuan</option>
+            <option value="13">Tanggal Keluar</option>
+            <!-- Add more options for additional columns -->
+          </select>
+          <input
+            type="text"
+            id="columnSearch"
+            placeholder="Search in selected column"
+            class="form-control w-25"
+          />
+          <button id="searchButton" class="btn btn-primary mr-2">Search</button>
+          <button id="resetButtonCol" class="btn btn-secondary mr-2">
+            Reset
+          </button>
+          <button id="filterDuplicatesButton" class="btn btn-warning">
+            Check for Duplicates
+          </button>
+          <button id="resetFilterDuplicatesBtn" class="btn btn-secondary ml-2">
+            Reset
+          </button>
+        </div>
+
+        <div class="form-inline mb-2">
+          <label class="mr-2" for="startDate">Start Date:</label>
+          <input type="date" id="startDate" class="form-control mr-2" />
+          <label class="mr-2" for="endDate">End Date:</label>
+          <input type="date" id="endDate" class="form-control mr-2" />
+
+          <button id="filterButton" class="btn btn-primary">
+            Apply Filter
+          </button>
+
+          <select id="dateRange" class="form-control ml-2 btn-info">
+            <option value="">Select Date Range</option>
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="1-10">1-10 of This Month</option>
+            <option value="11-20">11-20 of This Month</option>
+            <option value="21-eom">21 to End of This Month</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="60">Last 60 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="ytd">Current year to date</option>
+            <option value="365">Last 1 year (365 days)</option>
+            <option value="730">Last 2 years (730 days)</option>
+          </select>
+
+          <button id="resetButton" class="btn btn-secondary ml-2">Reset</button>
+        </div>
+
+          <div class="custom-container container">
+            <p>Total Berat: <span class="font-weight-bold" id="totalBerat"></span> Kg</p>
+            <p>Total Reject: <span class="font-weight-bold" id="totalReject"></span> Kg</p>
+            <p>Jumlah Kendaraan: <span class="font-weight-bold" id="uniquePlatCount"></span></p>
+          </div>
+
         <thead class="thead-light">
           <tr>
+            <th>Timestamp</th>
             <th>ID</th>
+            <th>Sender</th>
             <th>Plat Nomor</th>
             <th>Driver</th>
             <th>No. PO</th>
             <th>No. DO</th>
             <th>No. Tiket Timbang</th>
-            <th>Berat (Tonnase)</th>
+            <th>Jenis Kayu</th>
+            <th>Berat Netto (Kg)</th>
+            <th>Reject (Kg)</th>
+            <th>Lokasi Potong</th>
+            <th>Tujuan Pabrik</th>
             <th>Tanggal Keluar</th>
-            <th>Catatan (Reject)</th>
+            <th>Foto</th>
             <th>Ubah</th>
           </tr>
         </thead>
         <tbody class="tbody">
           {% for report in entities %}
           <tr>
+            {% if report.date_time %}
+            <td>{{ report.date_time|date:"Y/m/d H:i:s" }}</td>
+            {% else %}
+            <td>None</td>
+            {% endif %}
             <td>{{ report.id }}</td>
-            <td>{{ report.plat }}</td>
+            {% if report.sender.first_name %}
+            <td>{{ report.sender.first_name }}</td>
+            {% elif report.sender %}
+            <td>{{report.sender}}</td>
+            {% else %}
+            <td>None</td>
+            {% endif %}
+            <td>{{ report.plat|upper }}</td>
             <td>{{ report.driver }}</td>
             <td>{{ report.PO }}</td>
             <td>{{ report.DO }}</td>
             <td>{{ report.no_tiket }}</td>
+            <td>{{ report.kayu }}</td>
             <td>{{ report.berat }} kg</td>
-            <td>{{ report.tanggal }}</td>
             <td>{{ report.reject }} kg</td>
+            <td>{{ report.lokasi }}</td>
+            <td>{{ report.tujuan }}</td>
+            <td>{{ report.tanggal|date:"Y/m/d" }}</td>
+            <td>
+              {% if report.foto and report.og_foto %}
+              <a href="{{ report.og_foto.url }}"
+                ><img src="{{ report.foto.url }}" alt="{{ report.id }}"
+              /></a>
+              {% elif report.foto %}
+              <!-- Display resized image if og_foto is empty but foto exists -->
+              <img src="{{ report.foto.url }}" alt="{{ report.id }}" />
+              {% endif %}
+            </td>
             <td>
               <a href="{% url 'report_detail' report.id %}">View</a>
             </td>
@@ -67,9 +154,9 @@
       function initializeDataTable() {
         table = new DataTable("#likTable", {
           select: {
-          style: "multi",
-        },
-        
+            style: "multi",
+          },
+
           lengthMenu: [
             [10, 25, 50, 100, -1],
             [10, 25, 50, 100, "All"],
@@ -78,11 +165,13 @@
             top2Start: {
               buttons: {
                 buttons: [
-                  { extend: "pdf", 
-                    className: "btn-primary",  
+                  {
+                    extend: "excel",
+                    className: "btn-primary",
                     exportOptions: {
-                      columns: ':visible'
-                    } 
+                      columns: ":visible",
+                      stripHtml: false,
+                    },
                   },
                   {
                     text: "Delete Rows",
@@ -102,63 +191,306 @@
           },
         });
       }
-      function deleteSelectedRows(){
-    if (!table) {
-        console.error("Table is not initialized.");
-        return;
-    }
-        var selectedIDs = table.rows('.selected').data().toArray().map(row => row[0]); // Get SKUs of selected rows using DataTables API
-        selectedIDs.forEach(function(value) {
-        console.log('selected_ids[]:', value);
+      function deleteSelectedRows() {
+        if (!table) {
+          console.error("Table is not initialized.");
+          return;
+        }
+        var selectedIDs = table
+          .rows(".selected")
+          .data()
+          .toArray()
+          .map((row) => row[1]); // Get SKUs of selected rows using DataTables API
+        selectedIDs.forEach(function (value) {
+          console.log("selected_ids[]:", value);
         });
         if (selectedIDs.length === 0) {
-            alert('Please select at least one row to delete.');
-            return;
+          alert("Please select at least one row to delete.");
+          return;
         }
 
-        if (confirm('Are you sure you want to delete the selected rows?')) {
-            const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
-            $.ajax({
-                url: '{% url "delete_selected_rows_report" %}',
-                type: 'POST',
-                data: {selected_ids: selectedIDs, csrfmiddlewaretoken: csrfToken },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        // Reload or update the table after successful deletion
-                        location.reload(); // Assuming you're using AJAX to populate the table
-                        // Optionally, provide feedback to the user
-                        alert('Selected rows deleted successfully.');
-                    } else {
-                        alert('Error deleting selected rows: ' + response.error);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    alert('Error deleting selected rows: ' + error);
-                },
-            });
+        if (confirm("Are you sure you want to delete the selected rows?")) {
+          const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0]
+            .value;
+          $.ajax({
+            url: '{% url "delete_selected_rows_report" %}',
+            type: "POST",
+            data: { selected_ids: selectedIDs, csrfmiddlewaretoken: csrfToken },
+            dataType: "json",
+            success: function (response) {
+              if (response.success) {
+                // Reload or update the table after successful deletion
+                location.reload(); // Assuming you're using AJAX to populate the table
+                // Optionally, provide feedback to the user
+                alert("Selected rows deleted successfully.");
+              } else {
+                alert("Error deleting selected rows: " + response.error);
+              }
+            },
+            error: function (xhr, status, error) {
+              alert("Error deleting selected rows: " + error);
+            },
+          });
         }
-    }
-      $(document).ready(function() {
+      }
+
+      $(document).ready(function () {
         initializeDataTable();
-        $("#columnSearch").on("keyup", function() {
-          columnSearch(); // Call the columnSearch function when the user types in the input field
+        calculateStats()
+
+        var searchTimeout;
+
+        $('.dt-search input')
+          .off()
+          .on('keyup', function () {
+            clearTimeout(searchTimeout)
+
+            searchTimeout = setTimeout(updateStatsAfterSearch, 500)
+        });
+
+        $("#filterDuplicatesButton").on("click", function () {
+          filterDuplicates();
+          calculateStats()
+        });
+
+        function filterDuplicates() {
+          var rows = table.rows().nodes(); // Get all rows in the DataTable
+
+          var uniqueRows = {}; // Object to store unique rows
+          var allDuplicateRows = []; // Array to store all occurrences of duplicate row nodes
+
+          // Iterate through each row
+          rows.each(function (index, row) {
+            var rowData = table.row(row).data(); // Get data for the current row
+            var rowDataStr = JSON.stringify(excludeColumns(rowData)); // Convert row data to a string for comparison
+
+            // Check if the row data already exists in the uniqueRows object
+            if (uniqueRows[rowDataStr]) {
+              // Duplicate row found, add both the current row index and the original reference row index to allDuplicateRows array
+              allDuplicateRows.push(index);
+              allDuplicateRows.push(uniqueRows[rowDataStr]);
+              // Include the current row index as well
+              allDuplicateRows.push(index);
+            } else {
+              // Unique row, add it to the uniqueRows object
+              uniqueRows[rowDataStr] = index;
+            }
+          });
+
+          // Hide all rows
+          table.rows().nodes().to$().hide();
+
+          // Show all occurrences of duplicate rows and their corresponding original reference rows
+          table.rows(allDuplicateRows).nodes().to$().show();
+
+          table.draw();
+        }
+
+        // Function to exclude multiple columns from row data
+        function excludeColumns(rowData) {
+          var excludedColumns = [0, 1, 2, 14, 15]; // Specify the indices of columns to be excluded (e.g., column index 3 and 5)
+          var rowDataCopy = rowData.slice(); // Create a copy of the row data array
+
+          // Set excluded column values to null
+          for (var i = 0; i < excludedColumns.length; i++) {
+            var columnIndex = excludedColumns[i];
+            rowDataCopy[columnIndex] = null;
+          }
+
+          return rowDataCopy;
+        }
+
+        $("#resetFilterDuplicatesBtn").on("click", function () {
+          resetFilterDuplicates();
+          calculateStats()
+        });
+
+        // Function to reset check duplicates button
+        function resetFilterDuplicates() {
+          // Show all rows
+          table.rows().nodes().to$().show();
+
+          table.draw();
+        }
+
+        $("#searchButton").on("click", function () {
+          columnSearch();
+          updateStatsAfterSearch()
+        });
+
+        $("#resetButtonCol").on("click", function () {
+          resetSearch();
+          calculateStats()
         });
 
         // Function to perform column-specific search
         function columnSearch() {
           var columnIndex = $("#columnFilter").val(); // Get the index of the selected column
-          var searchValue = $("#columnSearch")
-            .val()
-            .trim(); // Get the value of the search input and remove leading/trailing whitespace
-          table
-            .column(columnIndex)
-            .search(searchValue)
-            .draw(); // Apply search to the selected column
+          var searchValue = $("#columnSearch").val().trim(); // Get the value of the search input and remove leading/trailing whitespace
+          table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
+          updateStatsAfterSearch()
+        }
+
+        function calculateStats() {
+          var totalBerat = 0;
+          var totalReject = 0;
+          var uniquePlat = new Set();
+
+          // Iterate through each row in the DataTable
+          table.rows().every(function() {
+              var data = this.data();
+
+              // Accumulate berat and reject values
+              totalBerat += parseFloat(data[9]); // Assuming berat is at index 9
+              totalReject += parseFloat(data[10]); // Assuming reject is at index 10
+
+              // Collect unique plat values
+              uniquePlat.add(data[3]); // Assuming plat is at index 3
+
+              $("#totalBerat").text(totalBerat.toFixed(2)); // Assuming you want to display with two decimal places
+              $("#totalReject").text(totalReject.toFixed(2)); // Assuming you want to display with two decimal places
+              $("#uniquePlatCount").text(uniquePlat.size);
+          });
+        }
+
+        function updateStatsAfterSearch() {
+            var totalBerat = 0;
+            var totalReject = 0;
+            var uniquePlat = new Set();
+
+            // Iterate through each visible row in the DataTable
+            table.rows({ search: 'applied' }).every(function() {
+                var data = this.data();
+
+                // Accumulate berat and reject values
+                totalBerat += parseFloat(data[9]); // Assuming berat is at index 9
+                totalReject += parseFloat(data[10]); // Assuming reject is at index 10
+
+                // Collect unique plat values
+                uniquePlat.add(data[3]); // Assuming plat is at index 3
+            });
+
+            $("#totalBerat").text(totalBerat.toFixed(2)); // Assuming you want to display with two decimal places
+            $("#totalReject").text(totalReject.toFixed(2)); // Assuming you want to display with two decimal places
+            $("#uniquePlatCount").text(uniquePlat.size);
+
+            // Output or use the calculated statistics as needed
+            console.log("Total Berat after search:", totalBerat);
+            console.log("Total Reject after search:", totalReject);
+        }
+
+        // Function to reset search
+        function resetSearch() {
+          $("#columnSearch").val(""); // Clear the search input
+          table.search("").columns().search("").draw(); // Clear all column-specific searches and redraw the table
+          calculateStats()
+        }
+
+        $("#filterButton").click(function () {
+          var startDate = $("#startDate").val();
+          var endDate = $("#endDate").val();
+          filterByDateRange(startDate, endDate);
+        });
+
+        $("#resetButton").click(function () {
+          $("#startDate").val("");
+          $("#endDate").val("");
+          $("#dateRange").val("");
+          filterByDateRange("", "");
+        });
+
+        $("#dateRange").change(function () {
+          var dateRange = $(this).val();
+          var startDate = "";
+          var endDate = "";
+
+          // Calculate start and end dates based on selected range
+          if (dateRange === "today") {
+            startDate = formatDate(new Date());
+            endDate = startDate;
+          } else if (dateRange === "yesterday") {
+            var yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            startDate = formatDate(yesterday);
+            endDate = startDate;
+          } else if (dateRange === "1-10") {
+            startDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+            endDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 10));
+          } else if (dateRange === "11-20") {
+            startDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 11));
+            endDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 20));
+          } else if (dateRange === "21-eom") {
+            startDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 21));
+            endDate = formatDate(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0));
+          } else if (dateRange === "7") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 6))
+            ); // Date 7 days ago
+          } else if (dateRange === "30") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 29))
+            ); // Date 30 days ago
+          } else if (dateRange === "60") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 59))
+            ); // Date 30 days ago
+          } else if (dateRange === "90") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 89))
+            ); // Date 30 days ago
+          } else if (dateRange === "365") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 364))
+            ); // Date 365 days ago
+          } else if (dateRange === "730") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 729))
+            ); // Date 365 days ago
+          } else if (dateRange === "ytd") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year
+            startDate = formatDate(startDate);
+          }
+          filterByDateRange(startDate, endDate);
+        });
+        function formatDate(date) {
+          var year = date.getFullYear();
+          var month = ("0" + (date.getMonth() + 1)).slice(-2); // Months are zero-based
+          var day = ("0" + date.getDate()).slice(-2);
+          return year + "-" + month + "-" + day;
+        }
+
+        function filterByDateRange(startDate, endDate) {
+          $.ajax({
+            url: '{% url "display_report" %}',
+            type: "GET",
+            data: {
+              start_date: startDate,
+              end_date: endDate,
+            },
+            success: function (response) {
+              console.log("Success");
+              $("#likTable").html($(response).find("#likTable").html());
+              if (table) {
+                table.destroy();
+              }
+              initializeDataTable();
+              calculateStats()
+            },
+            error: function (xhr, status, error) {
+              console.error("Error filtering data:", error);
+            },
+          });
         }
       });
     </script>
-    <a href="/add_report">Add Report</a>
+    <a href="/api/add_report">Add Report</a>
     {% endblock %}
   </body>
 </html>

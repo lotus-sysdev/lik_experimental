@@ -15,11 +15,22 @@
         <div class="row">
             <div class="col-md-6">
                 <form id="editForm" method="post" enctype="multipart/form-data"
-                    action="{% url 'edit_item' entity.SKU %}" data-redirectUrl="{% url 'item_detail' entity.SKU %}">
+                    action="{% url 'edit_item' entity.SKU %}" data-redirectUrl="{% url 'display_item' %}">
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="{{ form.customer.id_for_label }}">Customer</label>
-                        {{ form.customer }}
+                        <!-- Manually add class="form-control" to the customer field -->
+                        <select name="{{ form.customer.name }}" id="{{ form.customer.id_for_label }}" class="form-control">
+                            {% for choice_value, choice_label in form.customer.field.choices %}
+                                <option value="{{ choice_value }}" {% if form.customer.value == choice_value %}selected{% endif %}>
+                                    {{ choice_label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.pic.id_for_label }}">PIC</label>
+                        {{ form.pic }}
                     </div>
                     <div class="form-group">
                         <label for="{{ form.Tanggal.id_for_label }}">Tanggal Input</label>
@@ -85,7 +96,7 @@
                                         <p class="mb-1">{{ i.jenis_sumber }}</p>
                                         <p class="mb-1">Number: {{ i.telp }}</p>
                                         <p class="mb-1">Email: {{ i.email }}</p>
-                                        <p>Link: {{ i.url }}</p>
+                                        <p>Link: <a href="{{ i.url }}">{{ i.url }}</a></p>
                                     </div>
                                     <div>
                                         <a href="{% url 'edit_sumber' i.id %}" class="btn btn-sm btn-primary"><i class="fa fa-pen"></i></a>
@@ -102,35 +113,82 @@
                 {% endif %}
                 <div class="mt-4">
                     <h2>Changes:</h2>
-                    <div class="card">
-                        <div class="card-body">
-                            <table class="table table-bordered table-responsive-lg">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>User</th>
-                                        <th>Field</th>
-                                        <th>Before</th>
-                                        <th>After</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for log in change_logs %}
-                                    <tr>
-                                        <td>{{ log.date_time }}</td>
-                                        <td>{{ log.user }}</td>
-                                        <td>{{ log.field_changed }}</td>
-                                        <td>{{ log.old_value }}</td>
-                                        <td>{{ log.new_value }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <table class="table table-bordered table-responsive-lg">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Field</th>
+                                <th>Before</th>
+                                <th>After</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in change_logs %}
+                            <tr>
+                                <td>{{ log.date_time }}</td>
+                                <td>{{ log.user }}</td>
+                                <td>{{ log.field_changed }}</td>
+                                <td>{{ log.old_value }}</td>
+                                <td>{{ log.new_value }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
+        
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                console.log("Script Loaded");
+        
+                $("#id_customer").change(function () {
+                    console.log("Customer changed");
+                    var customerId = $(this).val();
+                    console.log("Customer ID:", customerId);
+                    
+                    if (customerId !== "") {
+                        $.ajax({
+                            url: "{% url 'get_customer_pics' %}",
+                            data: {
+                                customer_id: customerId,
+                            },
+                            dataType: "json",
+                            success: function (data) {
+                                console.log("AJAX Success:", data);
+                                $("#id_pic").empty(); // Clear pic dropdown
+                                $.each(data, function (index, pic) {
+                                    $("#id_pic").append(
+                                        '<option value="' + pic.id + '">' + pic.nama + "</option>"
+                                    );
+                                });
+                            },
+                            error: function(xhr, status, error) {
+                                console.log("AJAX Error:", error);
+                            }
+                        });
+                    }
+                });
+
+                $('#id_pic').change(function() {
+                    var picId = $(this).val();
+                    $.ajax({
+                        url:"{% url 'get_customer_by_pic' %}",
+                        data: {
+                            'pic_id': picId
+                        },
+                        dataType: 'json',
+                        success: function(data) {
+                            if (data && data.customer_id) {
+                                $('#id_customer').val(data.customer_id);
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
 
         <script>
             function confirmDeletion(){

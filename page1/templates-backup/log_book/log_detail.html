@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+<html>
+  <head>
+    {% block title %}Log Book Detail{% endblock %}
+  </head>
+  <body>
+    {% block content %}
+    <div>
+      <h1>Log Book Detail</h1>
+      <a href="/log_book">Back</a>
+      <form
+        class="mt-3"
+        id="editForm"
+        method="post"
+        action="{% url 'edit_log' entity.id %}"
+        data-redirectUrl="{% url 'log_detail' entity.id %}"
+      >
+        {% csrf_token %}
+        <div class="form-row">
+          <div class="col-md-5 mr-5">
+            <div class="form-group">
+                {{ form.nama.label_tag }} {{ form.nama }}
+            </div>
+            <div class="form-group">
+                {{ form.instansi_asal.label_tag }} {{ form.instansi_asal }}
+            </div>
+            <div class="form-group">
+                {{ form.email.label_tag }} {{ form.email }}
+            </div>
+            <div class="form-group">
+                {{ form.telp.label_tag }} {{ form.telp }}
+            </div>
+            <div class="form-group">
+                {{ form.tipe.label_tag }} {{ form.tipe }}
+            </div>
+            <div class="form-group">
+                {{ form.tujuan.label_tag }} {{ form.tujuan }}
+            </div>
+            <div class="form-group">
+                {{ form.tujuan_lainnya.label_tag }} {{ form.tujuan_lainnya }}
+            </div>
+            <div class="form-group">
+                {{ form.nama_dikunjungi.label_tag }} {{ form.nama_dikunjungi }}
+            </div>
+          </div>
+          <div class="col-md-5 mr-5">
+            <div class="form-group">
+              {{ form.start.label_tag }} {{ form.start }} 
+            </div>
+            <div class="form-group">
+              {{form.end.label_tag }} {{ form.end }}
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Update</button>
+      </form>
+      <form
+        id="deleteForm"
+        method="post"
+        action="{% url 'delete_log' entity.id %}"
+        onclick="return confirmDelete('/log_book');"
+        class="mt-2"
+      >
+        {% csrf_token %}
+        <button type="button" class="btn btn-danger">Delete</button>
+      </form>
+    </div>
+    {% endblock %}
+  </body>
+</html>

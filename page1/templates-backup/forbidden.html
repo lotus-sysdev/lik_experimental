@@ -1,0 +1,85 @@
+<head>
+  <title>403: Access Denied</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css?family=Hind+Madurai|Montserrat");
+
+    h1 {
+      font-family: "Montserrat", sans-serif;
+      font-size: xx-large;
+    }
+
+    p {
+      font-family: "Hind Madurai", sans-serif;
+    }
+
+    a {
+      font-family: "Hind Madurai", sans-serif;
+    }
+
+    #container {
+      display: flex;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    #item {
+      text-align: center;
+      align-self: center;
+      min-width: 300px;
+    }
+
+    .btn-primary {
+      text-decoration: none;
+      color: #fff;
+      background-color: #007bff;
+      border-color: #007bff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
+    /* Hover effect */
+    .btn-primary:hover {
+      color: #fff;
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+
+    /* Active state */
+    .btn-primary:active,
+    .btn-primary.active {
+      color: #fff;
+      background-color: #004080;
+      border-color: #003366;
+    }
+
+    /* Disabled state */
+    .btn-primary:disabled,
+    .btn-primary.disabled {
+      color: #fff;
+      background-color: #007bff;
+      border-color: #007bff;
+      opacity: 0.65;
+    }
+
+    /* Focus state */
+    .btn-primary:focus {
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="item">
+      <img
+        src="https://img.freepik.com/free-vector/403-error-forbidden-with-police-concept-illustration_114360-1884.jpg?w=740&t=st=1709695720~exp=1709696320~hmac=772827cc94ec22c708d5eda88548dc1c7bed0cc89bd943c45b462f0ac5182e16"
+        alt="403"
+        width="500"
+      />
+      <p>Access Denied</p>
+      <p>The page you're trying to access has restricted access.</p>
+      <p>Please refer to your system administrator.</p>
+      <a class="btn-primary" href="/">Return to Dashboard</a>
+    </div>
+  </div>
+</body>

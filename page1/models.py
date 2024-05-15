@@ -5,6 +5,7 @@ from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 from djmoney.models.fields import MoneyField
 from djmoney.models.validators import MinMoneyValidator
+from django.core.validators import MaxValueValidator
 from django_measurement.models import MeasurementField
 from measurement.measures import Mass
 
@@ -77,6 +78,9 @@ class CustomerPIC(models.Model):
     telp = PhoneNumberField()
     Role = models.CharField(max_length=50)
 
+    def __str__(self):
+        return f"{self.customer_id.nama_pt}-{self.nama}"
+    
 class SupplierPIC(models.Model):
     class Meta:
         verbose_name = "Supplier PIC"
@@ -88,6 +92,9 @@ class SupplierPIC(models.Model):
     telp = PhoneNumberField()
     Role = models.CharField(max_length=50)
 
+    def __str__(self):
+        return f"{self.customer_id.nama_pt}-{self.nama}"
+    
 class Category(models.Model):
     class Meta:
         verbose_name = "Category"
@@ -108,8 +115,9 @@ class Items(models.Model):
     Tanggal = models.DateField(default=timezone.now)
     tanggal_pemesanan = models.DateField(default=timezone.now, null=True)
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
+    pic = models.ForeignKey(CustomerPIC, on_delete= models.SET_NULL, null=True)
     nama = models.CharField(max_length=255)
-    catatan = models.CharField(max_length = 500, null = True)
+    catatan = models.CharField(max_length = 1000, null = True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     unit = models.CharField(max_length=10)
@@ -195,7 +203,7 @@ class Kecamatan(models.Model):
     class Meta:
         verbose_name = "Kecamatan"
         verbose_name_plural = "Kecamatan"
-    id = models.IntegerField(primary_key=True)
+    id = models.BigAutoField(primary_key=True)
     kota_id = models.ForeignKey(Kota, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     def __str__(self):
@@ -205,11 +213,20 @@ class Kelurahan(models.Model):
     class Meta:
         verbose_name = "Kelurahan/Desa"
         verbose_name_plural = "Kelurahan/Desa"
-    id = models.IntegerField(primary_key=True)
+    id = models.BigAutoField(primary_key=True)
     kecamatan_id = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     def __str__(self):
         return self.name
+    
+class KodePos(models.Model):
+    class Meta:
+        verbose_name = "Kode Pos"
+        verbose_name_plural = "Kode Pos"
+    kode_pos = models.IntegerField()
+    kelurahan_id = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    def __str__(self):
+        return str(self.kode_pos)
 
 class CustomerAlamat(models.Model):
     class Meta:
@@ -226,6 +243,7 @@ class CustomerAlamat(models.Model):
     kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
     kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
     kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     detail = models.CharField(max_length=500)
 
     def __str__ (self):
@@ -246,6 +264,7 @@ class SupplierAlamat(models.Model):
     kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
     kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
     kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     detail = models.CharField(max_length=500)
 
 def default_date():
@@ -300,10 +319,10 @@ class WorkOrder(models.Model):
         verbose_name_plural = "Work Orders"
 
     customer= models.ForeignKey(Customer, on_delete=models.CASCADE)
-    item = models.ForeignKey(Items, on_delete=models.CASCADE)
+    # item = models.ForeignKey(Items, on_delete=models.CASCADE)
     revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, validators=[MinMoneyValidator(0)])
     nomor_PO = models.IntegerField(blank=True, null=True)
-    tanggal_PO = models.DateField(blank=True, null=True)
+    tanggal_WO = models.DateField(blank=True, null=True)
     tanggal_process = models.DateField(blank=True, null=True)
     tanggal_input_accurate = models.DateField(blank=True, null=True)
     tanggal_pengiriman_barang = models.DateField(blank=True, null=True)
@@ -337,6 +356,15 @@ class WorkOrder(models.Model):
                 break
 
         super(WorkOrder, self).save(*args, **kwargs)
+
+class WorkOrderItems(models.Model):
+    work_order = models.ForeignKey(WorkOrder, on_delete=models.CASCADE)
+    item = models.ForeignKey(Items, on_delete=models.CASCADE)
+    price = models.IntegerField()
+    quantity = models.CharField(max_length=15)
+
+    def __str__(self):
+        return f"{self.item}"
 
 class UserActionLog(models.Model):
     class Meta:
@@ -384,6 +412,7 @@ class DeliveryAddresses(models.Model):
     kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
     kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
     kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     detail = models.CharField(max_length=500)
     
     def __str__(self):
@@ -400,8 +429,8 @@ class Events(models.Model):
     end = models.DateTimeField(null = True, blank = True)
     messenger = models.ForeignKey(Messenger,on_delete=models.SET_NULL, null=True)
     keterangan = models.CharField(max_length = 500, null=True)
-    start_location = models.ForeignKey(DeliveryAddresses, related_name= "delivery_start_location", on_delete=models.CASCADE, null =True)
-    destination = models.ForeignKey(DeliveryAddresses, related_name="delivery_destination",on_delete=models.CASCADE, null =True)
+    start_location = models.ForeignKey(DeliveryAddresses, related_name= "delivery_start_location", on_delete=models.SET_NULL, null =True)
+    destination = models.ForeignKey(DeliveryAddresses, related_name="delivery_destination",on_delete=models.SET_NULL, null =True)
     vehicle = models.ForeignKey(Vehicle,on_delete=models.SET_NULL, null=True)
     package_name = models.CharField(max_length=100, null=True)
     package_dimensions = models.CharField(max_length=100, null=True)
@@ -418,7 +447,7 @@ class LogBook(models.Model):
     id = models.AutoField(primary_key=True)
     instansi_asal = models.CharField(max_length = 255, null = True)
     nama = models.CharField(max_length=50, null = True)
-    email = models.EmailField(max_length = 100)
+    email = models.EmailField(max_length = 100, null=True, blank= True)
     TUJUAN_CHOICES = (
         ("meeting", "Meeting"),
         ("survey", "Survey"),
@@ -440,6 +469,71 @@ class LogBook(models.Model):
     def __str__(self):
         return f"{self.title} ({self.start.strftime('%Y-%m-%d') if self.start else 'No start date'})"
 
+class Prospect(models.Model):
+    prospect_id = models.AutoField(primary_key=True)
+    tanggal = models.DateField(default=timezone.now)
+    nama = models.CharField(max_length=255)
+    email = models.EmailField(unique=True, null=True, blank=True)
+    telp = PhoneNumberField() 
+    in_charge = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_customer = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.nama} (Prospect)"
+    
+class ProspectTicket(models.Model):
+    class Meta:
+        verbose_name = 'Prospect Ticket'
+        verbose_name_plural = 'Prospect Tickets'
+
+    prospect_id = models.ForeignKey(Prospect, on_delete=models.CASCADE)
+    date = models.DateTimeField(default = timezone.now)
+    type = models.CharField(max_length=100) 
+    activity = models.CharField(max_length=500)
+    open = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.prospect_id.nama} - {self.type}"
+
+class TicketLog(models.Model):
+    class Meta:
+        verbose_name = "Ticket Log"
+        verbose_name_plural = "Ticket Logs"
+    
+    ticket_id = models.ForeignKey(ProspectTicket, on_delete=models.CASCADE)
+    date = models.DateTimeField(default=timezone.now)
+    detail = models.CharField(max_length=500)
+
+    def __str__(self):
+        return f"{self.ticket_id.prospect_id.nama} - {self.date}"
+
+class ProspectPIC(models.Model):
+    class Meta:
+        verbose_name = 'Prospect PIC'
+        verbose_name_plural = 'Prospect PICs'
+
+    prospect_id = models.ForeignKey(Prospect, on_delete=models.CASCADE)
+    nama = models.CharField(max_length=255)
+    email = models.EmailField(unique=True, null=True, blank=True)
+    telp = PhoneNumberField()
+    Role  = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.nama}"
+
+class ProspectAddress(models.Model):
+    class Meta:
+        verbose_name = 'Prospect Address'
+        verbose_name_plural = 'Prospect Addresses'
+
+    prospect_id = models.ForeignKey(Prospect, on_delete=models.CASCADE)
+    provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
+    kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
+    kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
+    kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
+    detail = models.CharField(max_length=500)
+
 class User(AbstractUser):
     email = models.EmailField(max_length = 100, unique=True)
 
@@ -448,3 +542,6 @@ class User(AbstractUser):
 
     groups = models.ManyToManyField('auth.Group', related_name='custom_user_set', blank=True)
     user_permissions = models.ManyToManyField('auth.Permission', related_name='custom_user_set', blank=True)
+
+    def __str__(self):
+        return f"{self.username} ({self.first_name})"
