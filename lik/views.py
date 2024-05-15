@@ -16,7 +16,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import Count, F
+from django.db.models import Count, Sum
 from django.db.models.functions import Upper, ExtractDay, ExtractMonth, ExtractYear
 import json
 
@@ -51,12 +51,19 @@ def dashboard(request):
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
         ).values('day', 'month', 'year', 'kayu').annotate(count=Count('id'))
+        tonnase_counts = reports.values(
+            'kayu',
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).annotate(berat=Sum('berat'))
 
         # Serialize the counts data
         kayu_counts_serialized = json.dumps(list(kayu_counts))
         sender_counts_serialized = json.dumps(list(sender_counts))
         plat_counts_serialized = json.dumps(list(plat_counts))
         kayu_counts_monthly_serialized = json.dumps(list(kayu_counts_monthly))
+        tonnase_counts_serialized = json.dumps(list(tonnase_counts))
     else: 
         reports = Report.objects.all()
         kayu_counts = Report.objects.values('kayu').annotate(count=Count('id'))
@@ -67,11 +74,19 @@ def dashboard(request):
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
         ).values('day', 'month', 'year', 'kayu').annotate(count=Count('id'))
-        
+        tonnase_counts = Report.objects.annotate(
+            'kayu',
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).annotate(berat=Sum('berat'))
+
+
         kayu_counts_serialized = json.dumps(list(kayu_counts))
         sender_counts_serialized = json.dumps(list(sender_counts))
         plat_counts_serialized = json.dumps(list(plat_counts))
         kayu_counts_monthly_serialized = json.dumps(list(kayu_counts_monthly))
+        tonnase_counts_serialized = json.dumps(list(tonnase_counts))
 
     context = {
         'form' : form,
@@ -82,6 +97,7 @@ def dashboard(request):
         'sender_counts': sender_counts_serialized,
         'plat_counts': plat_counts_serialized,
         'kayu_counts_monthly': kayu_counts_monthly_serialized,
+        'tonnase_counts': tonnase_counts_serialized,
     }
 
     return render(request, 'dashboard.html', context)
