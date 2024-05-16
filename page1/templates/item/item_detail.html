@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load auth_extras %}
+
+<html>
+
+<head>
+    {% block title %}Item Detail{% endblock %}
+</head>
+
+<body>
+    {% block content %}
+    <div class="container mt-4 custom-container">
+        <h1>Item Detail</h1>
+        <a href="/display_item">Back</a>
+        <div class="row">
+            <div class="col-md-6">
+                <form id="editForm" method="post" enctype="multipart/form-data"
+                    action="{% url 'edit_item' entity.SKU %}" data-redirectUrl="{% url 'display_item' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="{{ form.customer.id_for_label }}">Customer</label>
+                        <!-- Manually add class="form-control" to the customer field -->
+                        <select name="{{ form.customer.name }}" id="{{ form.customer.id_for_label }}" class="form-control">
+                            {% for choice_value, choice_label in form.customer.field.choices %}
+                                <option value="{{ choice_value }}" {% if form.customer.value == choice_value %}selected{% endif %}>
+                                    {{ choice_label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.pic.id_for_label }}">PIC</label>
+                        {{ form.pic }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.Tanggal.id_for_label }}">Tanggal Input</label>
+                        {{ form.Tanggal }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.tanggal_pemesanan.id_for_label }}">Tanggal Pemesanan</label>
+                        {{ form.tanggal_pemesanan }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.nama.id_for_label }}">Nama Barang</label>
+                        {{ form.nama }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.catatan.id_for_label }}">Catatan</label>
+                        {{ form.catatan }}
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori</label>
+                        <input type="text" class="form-control" disabled value="{{entity.category.name}}"></input>
+                        <input type="hidden" name="category" value="{{ entity.category.pk }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.quantity.id_for_label }}">Kuantitas</label>
+                        {{ form.quantity }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.quantity.id_for_label }}">Satuan</label>
+                        {{ form.unit }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.price.id_for_label }}">Harga</label>
+                        {{ form.price }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.gambar.id_for_label }}">Gambar</label>
+                        {{ form.gambar }}
+                    </div>
+                    {% if request.user|has_group:'Admin' %}
+                    <div class="form-group">
+                        <label for="{{ form.is_approved.id_for_label }}">Approved</label>
+                        {{ form.is_approved }}
+                    </div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+                <div class="d-flex">
+                    <form  id="delete-form" method="post" action="{% url 'delete_item' SKU=entity.SKU %}" class="mt-2">
+                        {% csrf_token %}
+                        <button type="submit"  onclick="return confirmDeletion()" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h2>Sumber:</h2>
+                {% if item_sumber %}
+                    <div class="card">
+                        <div class="card-body">
+                            {% for i in item_sumber %}
+                                <div class="">
+                                    <div>
+                                        <h5 class="mb-1">{{ i.nama_perusahaan }}</h5>
+                                        <p class="mb-1">{{ i.jenis_sumber }}</p>
+                                        <p class="mb-1">Number: {{ i.telp }}</p>
+                                        <p class="mb-1">Email: {{ i.email }}</p>
+                                        <p>Link: <a href="{{ i.url }}">{{ i.url }}</a></p>
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'edit_sumber' i.id %}" class="btn btn-sm btn-primary"><i class="fa fa-pen"></i></a>
+                                        <button class="btn btn-sm btn-danger delete-sumber-btn" data-sumber-id="{{ i.id }}"><i class="fa fa-times"></i></button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <a href="{% url 'add_sumber' SKU=entity.SKU %}" class="mt-2 btn btn-success disabled">Add Sumber</a>
+                {% else %}
+                    <p>No Sumber Yet</p>
+                    <a href="{% url 'add_sumber' SKU=entity.SKU %}" class="mt-2 btn btn-success">Add Sumber</a>
+                {% endif %}
+                <div class="mt-4">
+                    <h2>Changes:</h2>
+                    <table class="table table-bordered table-responsive-lg">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Field</th>
+                                <th>Before</th>
+                                <th>After</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in change_logs %}
+                            <tr>
+                                <td>{{ log.date_time }}</td>
+                                <td>{{ log.user }}</td>
+                                <td>{{ log.field_changed }}</td>
+                                <td>{{ log.old_value }}</td>
+                                <td>{{ log.new_value }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                console.log("Script Loaded");
+        
+                $("#id_customer").change(function () {
+                    console.log("Customer changed");
+                    var customerId = $(this).val();
+                    console.log("Customer ID:", customerId);
+                    
+                    if (customerId !== "") {
+                        $.ajax({
+                            url: "{% url 'get_customer_pics' %}",
+                            data: {
+                                customer_id: customerId,
+                            },
+                            dataType: "json",
+                            success: function (data) {
+                                console.log("AJAX Success:", data);
+                                $("#id_pic").empty(); // Clear pic dropdown
+                                $.each(data, function (index, pic) {
+                                    $("#id_pic").append(
+                                        '<option value="' + pic.id + '">' + pic.nama + "</option>"
+                                    );
+                                });
+                            },
+                            error: function(xhr, status, error) {
+                                console.log("AJAX Error:", error);
+                            }
+                        });
+                    }
+                });
+
+                $('#id_pic').change(function() {
+                    var picId = $(this).val();
+                    $.ajax({
+                        url:"{% url 'get_customer_by_pic' %}",
+                        data: {
+                            'pic_id': picId
+                        },
+                        dataType: 'json',
+                        success: function(data) {
+                            if (data && data.customer_id) {
+                                $('#id_customer').val(data.customer_id);
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
+
+        <script>
+            function confirmDeletion(){
+                return confirm("Are you sure you want to delete this item?");
+            }
+            document.addEventListener("DOMContentLoaded", function () {
+                // Add a click event listener to all delete buttons
+                document.querySelectorAll('.delete-sumber-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        // Display a confirmation dialog
+                        const isConfirmed = confirm("Are you sure you want to delete this entry ?");
+
+                        if (isConfirmed) {
+                            // If confirmed, make an Ajax request to delete the pic
+                            const sumberId = btn.getAttribute('data-sumber-id');
+                            fetch("{% url 'delete_sumber' 0 %}".replace('0', sumberId), {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': "{{ csrf_token }}",
+                                },
+                            }).then(response => response.json()).then(data => {
+                                if (data.success) {
+                                    // Reload the page or update the DOM as needed
+                                    location.reload();
+                                } else {
+                                    alert("Failed to delete sumber.");
+                                }
+                            }).catch(error => {
+                                console.error('Error:', error);
+                                alert("An error occurred while deleting sumber.");
+                            });
+                        }
+                    });
+                });
+            });
+        </script>
+        {% endblock %}
+</body>
+
+</html>

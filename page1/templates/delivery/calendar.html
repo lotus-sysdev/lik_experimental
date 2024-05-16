@@ -1,0 +1,175 @@
+{% extends "delivery_base.html" %}
+
+<head>
+  <title>
+    {% block title %}Delivery Order Calendar{% endblock title %}
+  </title>
+</head>
+
+<body>
+  {% block content %}
+  <h1 class="items-center h1 container">Delivery Order</h1>
+  <style>
+    @media screen and (max-width:767px) { #myCustomButton {font-size: 40%}}
+  </style>
+  <div class="container col-md-12 mt-5">
+    <button id="myCustomButton" class="fc-btn btn-sm btn-primary dropdown-toggle float-right ml-3 " type="button"
+      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Filter Deliveries
+    </button>
+    <div class="dropdown-menu" aria-labelledby="myCustomButton">
+      <a id="all" class="dropdown-item" href="#">All Messengers</a>
+      {% for messenger in messengers %}
+        <a id="{{ messenger.id }}" class="dropdown-item" href="#">{{ messenger.name }}</a>
+      {% endfor %}
+    </div>
+    <div id="calendar"></div>
+  </div>
+  {% endblock content %}
+
+  {% block script %}
+  <script>
+    $(document).ready(function () {
+      let currentMessengerId = null; // Update 'var' to 'let' or 'const'
+      let calendar = $("#calendar").fullCalendar({
+        header: {
+          left: "prev,next today",
+          center: "title",
+          right: "month,agendaWeek,agendaDay", // Add the custom button to the header
+        },
+        eventLongPressDelay: 300,
+        timeFormat: 'H(:mm)',
+        slotLabelFormat:"HH:mm",
+        events: function (start, end, timezone, callback) {
+          // console.log(currentMessengerId);
+          $.ajax({
+            url: '/all_events',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+              let events = [];
+              // Process the response data to set eventColor based on messengerid
+              response.forEach(function (event) {
+                // console.log(currentMessengerId);
+                let color = event.messenger_color; // Adjust colors as needed
+                let messengerId = event.messenger_id;
+                // Check if the event's messengerId matches the filter criteria
+                if (!currentMessengerId || messengerId.toString() === currentMessengerId) {
+                  events.push({
+                    id: event.id,
+                    title: event.title,
+                    start: event.start,
+                    end: event.end,
+                    allDay: event.allDay,
+                    color: color,
+                    messengerId: messengerId // use messengerId instead of messenger_id
+                  });
+                }
+              });
+              // console.log('Filtered Events:', events);
+              callback(events);
+            }
+          });
+        },
+        selectable: true,
+        selectHelper: true,
+        editable: true,
+        eventLimit: true,
+        select: function (start, end, allDay) {
+          window.location.href =
+            "/delivery_form?start=" + start.format() + "&end=" + end.format();
+        },
+        eventResize: function (event) {
+          var start = $.fullCalendar.formatDate(
+            event.start,
+            "Y-MM-DD HH:mm:ss"
+          );
+          var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm:ss");
+          var title = event.title;
+          var id = event.id;
+          $.ajax({
+            type: "GET",
+            url: "/update",
+            data: { title: title, start: start, end: end, id: id },
+            dataType: "json",
+            success: function (data) {
+              calendar.fullCalendar("refetchEvents");
+              alert("Event Update");
+            },
+            error: function (data) {
+              alert("There is a problem!!!");
+            },
+          });
+        },
+
+        eventDrop: function (event) {
+          var start = $.fullCalendar.formatDate(
+            event.start,
+            "Y-MM-DD HH:mm:ss"
+          );
+          var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm:ss");
+          var title = event.title;
+          var id = event.id;
+          $.ajax({
+            type: "GET",
+            url: "/update",
+            data: { title: title, start: start, end: end, id: id },
+            dataType: "json",
+            success: function (data) {
+              calendar.fullCalendar("refetchEvents");
+              alert("Event Update");
+            },
+            error: function (data) {
+              alert("There is a problem!!!");
+            },
+          });
+        },
+
+        eventClick: function (event) {
+          // if (confirm("Are you sure you want to remove it?")) {
+          //   var id = event.id;
+          //   $.ajax({
+          //     type: "GET",
+          //     url: "/remove",
+          //     data: { id: id },
+          //     dataType: "json",
+          //     success: function (data) {
+          //       calendar.fullCalendar("refetchEvents");
+          //       alert("Event Removed");
+          //     },
+          //     error: function (data) {
+          //       alert("There is a problem!!!");
+          //     },
+          //   });
+          // }
+          window.location.href = "/delivery_detail/" + event.id;
+        },
+        
+        themeSystem: "bootstrap4",
+        timeZone: "Asia/Jakarta",
+      });
+      $('.dropdown-item').on('click', function () {
+        // Get the messenger ID from the clicked item
+        let messengerId = $(this).attr('id'); // Update 'var' to 'let' or 'const'
+        // Update the current messenger ID
+        currentMessengerId = messengerId;
+
+        // console.log('Current Messenger ID:', currentMessengerId);
+        if (currentMessengerId.toString() === 'all') {
+          // Reset the currentMessengerId to null or any other appropriate value
+          currentMessengerId = null;
+          $('#myCustomButton').text($(this).text());
+          calendar.fullCalendar('refetchEvents');
+        } else {
+          // Update the button text to show the selected messenger
+          $('#myCustomButton').text($(this).text());
+          
+          // Refetch events with the new messenger ID
+          calendar.fullCalendar('refetchEvents');
+        }
+
+      });
+    });
+  </script>
+  {% endblock %}
+</body>

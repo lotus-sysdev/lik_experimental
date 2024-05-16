@@ -1,0 +1,115 @@
+{% extends "delivery_base.html" %}
+
+<head>
+  <title>
+    {% block title %}Log Book{% endblock title %}
+  </title>
+</head>
+
+<body>
+  {% block content %}
+  <h1 class="items-center h1 container">Log Book</h1>
+  <div class="container col-md-12 mt-5">
+    <div id="calendar"></div>
+  </div>
+  {% endblock content %}
+
+  {% block script %}
+  <script>
+    $(document).ready(function () {
+      let calendar = $("#calendar").fullCalendar({
+        header: {
+          left: "prev,next today",
+          center: "title",
+          right: "month,agendaWeek,agendaDay", // Add the custom button to the header
+        },
+        eventLongPressDelay: 300,
+        timeFormat: 'H(:mm)',
+        slotLabelFormat:"HH:mm",
+        events: function (start, end, timezone, callback) {
+          $.ajax({
+            url: '/lb_all_events',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+              let events = [];
+              response.forEach(function (event) {
+                events.push({
+                  id: event.id,
+                  nama: event.nama,
+                  start: event.start,
+                  end: event.end,
+                  allDay: event.allDay,
+                });
+              });
+              callback(events);
+            }
+          });
+        },
+        selectable: true,
+        selectHelper: true,
+        editable: true,
+        eventLimit: true,
+        select: function (start, end, allDay) {
+          window.location.href =
+            "/add_log?start=" + start.format() + "&end=" + end.format();
+        },
+        eventResize: function (event) {
+          var start = $.fullCalendar.formatDate(
+            event.start,
+            "Y-MM-DD HH:mm:ss"
+          );
+          var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm:ss");
+          var nama = event.nama;
+          var id = event.id;
+          $.ajax({
+            type: "GET",
+            url: "/lb_update",
+            data: { nama: nama, start: start, end: end, id: id },
+            dataType: "json",
+            success: function (data) {
+              calendar.fullCalendar("refetchEvents");
+              alert("Event Update");
+            },
+            error: function (data) {
+              alert("There is a problem!!!");
+            },
+          });
+        },
+        eventRender: function(event, element) {
+        element.find('.fc-title').html(event.nama);
+        },
+        eventDrop: function (event) {
+          var start = $.fullCalendar.formatDate(
+            event.start,
+            "Y-MM-DD HH:mm:ss"
+          );
+          var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm:ss");
+          var nama = event.nama;
+          var id = event.id;
+          $.ajax({
+            type: "GET",
+            url: "/lb_update",
+            data: { nama: nama, start: start, end: end, id: id },
+            dataType: "json",
+            success: function (data) {
+              calendar.fullCalendar("refetchEvents");
+              alert("Event Update");
+            },
+            error: function (data) {
+              alert("There is a problem!!!");
+            },
+          });
+        },
+
+        eventClick: function (event) {
+          window.location.href = "/log_detail/" + event.id;
+        },
+        
+        themeSystem: "bootstrap4",
+        timeZone: "Asia/Jakarta",
+      });
+    });
+  </script>
+  {% endblock %}
+</body>

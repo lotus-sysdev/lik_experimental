@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    {% block title %}Add Supplier{% endblock %}
+</head>
+
+<body>
+    {% block content %}
+    <h2>Add Supplier</h2>
+    <div class="form-group w-50">
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <!-- Other form fields -->
+          {{ entity_form.nama_pt.label_tag }}
+          {{ entity_form.nama_pt }}
+        </div>
+        <div class="mb-3">
+          <!-- Other form fields -->
+          {{ entity_form.telp.label_tag }}
+          {{ entity_form.telp }}
+        </div>
+        <div class="mb-3">
+          <!-- Other form fields -->
+          {{ entity_form.terms_of_payment.label_tag }}
+          {{ entity_form.terms_of_payment }}
+        </div>
+        <div class="mb-3 d-flex flex-column">
+          <label class="form-label">{{ entity_form.pengiriman.label }}</label>
+          <div class="form-check form-check-inline">
+            {% for radio in entity_form.pengiriman %}
+              <div class="form-check form-check-inline">
+                {{ radio }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="mb-3">
+          <!-- Other form fields -->
+          {{ entity_form.npwp.label_tag }}
+          {{ entity_form.npwp }}
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+    {% endblock %}
+</body>
+
+</html>
