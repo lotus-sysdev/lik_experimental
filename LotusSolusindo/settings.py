@@ -183,7 +183,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': 'logs/user_actions.log',  # Update with your desired path
+            'filename': 'logs',
             'formatter': 'verbose'
         },
     },
