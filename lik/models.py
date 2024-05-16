@@ -50,6 +50,9 @@ class Report(models.Model):
 
 
 class Lokasi(models.Model):
+    class Meta:
+        verbose_name = "Lokasi Potong"
+        verbose_name_plural = "Lokasi Potong"
     nama = models.CharField(max_length=100)
     detail = models.SlugField(unique=True)
 
@@ -57,6 +60,9 @@ class Lokasi(models.Model):
         return self.nama
 
 class Group_Lokasi(models.Model):
+    class Meta:
+        verbose_name = "Lokasi Group Access"
+        verbose_name_plural = "Lokasi Group Access"
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     lokasi = models.ManyToManyField(Lokasi)
 
@@ -64,6 +70,9 @@ class Group_Lokasi(models.Model):
         return str(self.group)
     
 class Tujuan(models.Model):
+    class Meta:
+        verbose_name = "Pabrik Tujuan"
+        verbose_name_plural = "Pabrik Tujuan"
     nama = models.CharField(max_length=100)
     detail = models.SlugField(unique=True)
 
@@ -71,6 +80,9 @@ class Tujuan(models.Model):
         return self.nama
 
 class Group_Tujuan(models.Model):
+    class Meta:
+        verbose_name = "Tujuan Group Access"
+        verbose_name_plural = "Tujuan Group Access"
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     tujuan = models.ManyToManyField(Tujuan)
 
@@ -78,6 +90,9 @@ class Group_Tujuan(models.Model):
         return str(self.group)
 
 class Kayu(models.Model):
+    class Meta:
+        verbose_name = "Kayu"
+        verbose_name_plural = "Jenis Kayu"
     nama = models.CharField(max_length=100)
     detail = models.SlugField(unique=True)
 
@@ -85,6 +100,9 @@ class Kayu(models.Model):
         return self.nama
 
 class Group_Kayu(models.Model):
+    class Meta:
+        verbose_name = "Kayu Group Access"
+        verbose_name_plural = "Kayu Group Access"
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     kayu = models.ManyToManyField(Kayu)
 
