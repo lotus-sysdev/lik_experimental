@@ -64,3 +64,4 @@ class Command(BaseCommand):
                 village_name = row[2]
                 village, _ = Kelurahan.objects.get_or_create(id = village_id, kecamatan_id=kecamatan_id, name=village_name)
                 self.stdout.write(f"Imported Village: {village}")
+

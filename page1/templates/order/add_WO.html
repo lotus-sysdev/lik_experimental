@@ -67,8 +67,8 @@
           </div>
         </div>
         <div class="form-group">
-            {{entity_form.revenue_WO.label_tag}} {{entity_form.revenue_WO}} 
-            {% for error in entity_form.revenue_WO.errors %}
+            {{entity_form.revenue_PO.label_tag}} {{entity_form.revenue_PO}} 
+            {% for error in entity_form.revenue_PO.errors %}
             <p class="text-danger">{{error}}</p>
             {% endfor %}
         </div>
@@ -223,7 +223,7 @@
             }
           });
 
-          $('#id_revenue_WO_0').val(totalPrice);
+          $('#id_revenue_PO_0').val(totalPrice);
         }
       });
     </script>

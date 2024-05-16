@@ -266,7 +266,6 @@ Table{% endblock %} {% block content %}
       alert("Please select at least one row to delete.");
       return;
     }
-
     if (confirm("Are you sure you want to delete the selected rows?")) {
       const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0]
         .value;

@@ -9,9 +9,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.parsers import MultiPartParser, FormParser
+import uuid
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -227,6 +229,7 @@ def process_image(image, is_original):
     
     return relative_path
 
+@login_required
 def add_report(request, initial=None):
     entity_form_instance = ReportForm(request.POST or None, request.FILES or None)
     if request.method == 'POST':
@@ -292,7 +295,6 @@ def edit_report(request, id):
         if form.is_valid():
             # Set the new tiketId before saving the form
             form.instance.tiketId = new_tiketId
-
             # Check if a new image file is provided
             foto = request.FILES.get('foto')
             og_foto = request.FILES.get('og_foto')
@@ -305,14 +307,45 @@ def edit_report(request, id):
                 form.instance.og_foto = resized_og_foto_path
 
             form.save()
-            
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'success': False, 'errors': form.errors})
     else:
         form = ReportForm(instance=entity)
+    
+return render(request, "/api/edit_report.html", {'form': form})
 
-    return render(request, "/api/edit_report.html", {'form': form})
+
+def process_image(image, is_original):
+    upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    img = Image.open(image)
+
+    # Generate a unique identifier
+    unique_id = str(uuid.uuid4())[:8]  # Use the first 8 characters of a UUID
+    
+    # Strip file extension from the image filename
+    image_name_without_extension, extension = os.path.splitext(image.name)
+    
+    # Resize the image
+    if is_original:
+        resized_img = img.resize((500, 500))
+    else:
+        resized_img = img.resize((100, 100))
+    
+    # Construct the resized image name
+    if is_original:
+        resized_image_name = f"original-{upload_date}-{unique_id}-{extension}"
+    else:
+        resized_image_name = f"resized-{upload_date}-{unique_id}-{extension}"
+    
+    # Save the resized image
+    resized_image_path = os.path.join(settings.MEDIA_ROOT, 'report_photos', resized_image_name)
+    resized_img.save(resized_image_path)
+
+    relative_path = os.path.relpath(resized_image_path, settings.MEDIA_ROOT )
+    
+    return relative_path
+            
 
 # Set maximum image quality
 ImageFile.MAXBLOCK = 2**20
@@ -350,6 +383,7 @@ class add_report_mobile(generics.CreateAPIView):
         # Call the serializer's save method to create the Report instance
         serializer.save()
 
+
 @api_view(['POST'])
 def register_user(request):
     serializer = UserSerializer(data=request.data)
@@ -361,7 +395,7 @@ def register_user(request):
 @api_view(['POST'])
 def login_user(request):
     username = request.data.get('username')
-    password = request.data.get('password')
+    password = request.data.get('password') 
     user = authenticate(username=username, password=password)
     if user is not None:
         token, created = Token.objects.get_or_create(user=user)
@@ -370,6 +404,7 @@ def login_user(request):
         print(groups)
         return Response({'token': token.key, 'groups': groups, 'user' : serializedUser.data}, status=status.HTTP_200_OK)
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)  
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -397,11 +432,14 @@ class GroupTujuanListAPIView(generics.ListAPIView):
         group_tujuans = Group_Tujuan.objects.filter(group_id=group_id)
         tujuan_ids = [tujuan.id for group_tujuan in group_tujuans for tujuan in group_tujuan.tujuan.all()]
         return Tujuan.objects.filter(id__in=tujuan_ids)
-
+    
 # @permission_classes([IsAuthenticated])
 class GroupKayuListAPIView(generics.ListAPIView):
     serializer_class = KayuSerializer
 
+# @permission_classes([IsAuthenticated])
+class GroupKayuListAPIView(generics.ListAPIView):
+    serializer_class = KayuSerializer
     def get_queryset(self):
         group_id = self.kwargs['group_id']
         group_kayus = Group_Kayu.objects.filter(group_id=group_id)
@@ -495,3 +533,4 @@ def display_foto(request, url):
 
     # Render the display_image.html template with the image_url context variable
     return render(request, 'Report/display_foto.html', {'url': url})
+

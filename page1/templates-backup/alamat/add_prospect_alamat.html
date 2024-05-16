@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    {% block title %}Add Prospect Alamat{% endblock %}
+  </head>
+
+  <body>
+    {% block content %}
+    <h2>Add Alamat</h2>
+    <div class="form-group w-50">
+      <form method="post" class="mt-3">
+        {% csrf_token %} {{ form.as_p }}
+        <div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+          <a
+            href="{% url 'prospect_detail' prospect_id=entity.prospect_id %}"
+            class="btn btn-secondary ml-2"
+            >Back</a
+          >
+        </div>
+      </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+
+        $("#id_kelurahan, #id_kecamatan, #id_kota").change(function () {
+          var regionId = $(this).val();
+          $.ajax({
+            url: "{% url 'get_region_details' %}",
+            data: {
+              region_id: regionId,
+            },
+            dataType: "json",
+            success: function (data) {
+              // Fill the fields with data returned from the server
+              if ("kecamatan_id" in data) {
+                $("#id_kecamatan").val(data.kecamatan_id);
+              }
+              if ("kota_id" in data) {
+                $("#id_kota").val(data.kota_id);
+              }
+              if ("provinsi_id" in data) {
+                $("#id_provinsi").val(data.provinsi_id);
+              }
+            },
+          });
+        });
+
+        $("#id_provinsi").change(function () {
+          var provinceId = $(this).val();
+          if (provinceId !== "") {
+            $.ajax({
+              url: "{% url 'get_kota' %}",
+              data: {
+                province_id: provinceId,
+              },
+              dataType: "json",
+              success: function (data) {
+                $("#id_kota").empty();
+                $("#id_kecamatan").empty();
+                $("#id_kelurahan").empty(); // Clear kelurahan dropdown
+                $.each(data, function (index, city) {
+                  $("#id_kota").append(
+                    '<option value="' + city.id + '">' + city.name + "</option>"
+                  );
+                });
+                updateKota();
+              },
+            });
+          }
+        });
+
+        $("#id_kota").change(function () {
+          var cityId = $(this).val();
+          if (cityId !== "") {
+            $.ajax({
+              url: "{% url 'get_kecamatan' %}",
+              data: {
+                city_id: cityId,
+              },
+              dataType: "json",
+              success: function (data) {
+                $("#id_kecamatan").empty();
+                $("#id_kelurahan").empty(); // Clear kelurahan dropdown
+                $.each(data, function (index, district) {
+                  $("#id_kecamatan").append(
+                    '<option value="' +
+                      district.id +
+                      '">' +
+                      district.name +
+                      "</option>"
+                  );
+                });
+                updateKecamatan(); // Update kecamatan dropdown
+              },
+            });
+          }
+        });
+
+        $("#id_kecamatan").change(function () {
+          var districtId = $(this).val();
+          if (districtId !== "") {
+            $.ajax({
+              url: "{% url 'get_kelurahan' %}",
+              data: {
+                district_id: districtId,
+              },
+              dataType: "json",
+              success: function (data) {
+                $("#id_kelurahan").empty();
+                $.each(data, function (index, village) {
+                  $("#id_kelurahan").append(
+                    '<option value="' +
+                      village.id +
+                      '">' +
+                      village.name +
+                      "</option>"
+                  );
+                });
+                updateKelurahan(); // Update kelurahan dropdown
+              },
+            });
+          }
+        });
+
+        $("#id_kelurahan").change(function () {
+          var kelurahanId = $(this).val();
+          console.log("Kelurahan ID: " + kelurahanId)
+          if (kelurahanId !== ""){
+            $.ajax({
+              url: "{% url 'get_kode_pos' %}",
+              data: {
+                kelurahan_id : kelurahanId
+              },
+              dataType: "json",
+              success: function (data) {
+                var kodePos = data.kode_pos;
+                $("#id_kode_pos").val(kodePos);
+              },
+            })
+          }
+        })
+
+        function updateKota() {
+          var cityId = $("#id_kota").val();
+          if (cityId !== "") {
+            $.ajax({
+              url: "{% url 'get_kecamatan' %}",
+              data: {
+                city_id: cityId,
+              },
+              dataType: "json",
+              success: function (data) {
+                $("#id_kecamatan").empty();
+                $("#id_kelurahan").empty(); // Clear kelurahan dropdown
+                $.each(data, function (index, district) {
+                  $("#id_kecamatan").append(
+                    '<option value="' +
+                      district.id +
+                      '">' +
+                      district.name +
+                      "</option>"
+                  );
+                });
+                updateKecamatan(); // Call function to update kecamatan dropdown
+              },
+            });
+          }
+        }
+
+        function updateKecamatan() {
+          var districtId = $("#id_kecamatan").val();
+          if (districtId !== "") {
+            $.ajax({
+              url: "{% url 'get_kelurahan' %}",
+              data: {
+                district_id: districtId,
+              },
+              dataType: "json",
+              success: function (data) {
+                $("#id_kelurahan").empty();
+                $.each(data, function (index, village) {
+                  $("#id_kelurahan").append(
+                    '<option value="' +
+                      village.id +
+                      '">' +
+                      village.name +
+                      "</option>"
+                  );
+                });
+                updateKelurahan(); // Call function to update kelurahan dropdown
+              },
+            });
+          }
+        }
+
+        function updateKelurahan() {
+          var kelurahanId = $("#id_kelurahan").val();
+          updateDetailWithKodePos(kelurahanId)
+        }
+
+        function updateDetailWithKodePos(regionId) {
+          if (regionId !== "") {
+            $.ajax({
+                url: "{% url 'get_kode_pos' %}",
+                data: {
+                    kelurahan_id: regionId  // Use regionId as kelurahan_id for simplicity
+                },
+                dataType: "json",
+                success: function (data) {
+                    var kodePos = parseInt(data.kode_pos)
+                    console.log(kodePos)
+                    $("#id_kode_pos").val(kodePos)
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", error);  // Log AJAX error to console for debugging
+                }
+            });
+          }
+        }
+      });
+    </script>
+
+    {% endblock %}
+  </body>
+</html>

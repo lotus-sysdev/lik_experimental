@@ -70,11 +70,6 @@ MIDDLEWARE = [
     'admin_reorder.middleware.ModelAdminReorder',
     'corsheaders.middleware.CorsMiddleware',
 ]
-
-SERIALIZATION_MODULES = {
-    "json": "djmoney.serializers.json"
-}
-
 # CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
@@ -109,10 +104,21 @@ WSGI_APPLICATION = 'LotusSolusindo.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'lotussolusindo',
+#         'USER': 'justin',
+#         'PASSWORD': 'Shibe534',
+#         'HOST': 'localhost',
+#         'PORT': '',
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    'default':{
+        'ENGINE' :'django.db.backends.sqlite3',
+        'NAME' : BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -183,7 +189,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': 'logs/user_actions.log',  # Update with your desired path
+	    'filename': 'logs/',
             'formatter': 'verbose'
         },
     },
@@ -370,11 +376,7 @@ EMAIL_HOST = 'smtp.office365.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-# Email account credentials (make sure to use app-specific password for security)
-# EMAIL_HOST_USER = 'pandya.limawan@gmail.com'
-# EMAIL_HOST_PASSWORD = 'igie iaqh tnwo ivsk'
 EMAIL_HOST_USER = 'sysdev@lotusgroup.co.id'
 EMAIL_HOST_PASSWORD = 'tahunNAGA2024!'
 
 DEFAULT_FROM_EMAIL = 'Lotus Universe <sysdev@lotusgroup.co.id>'
-

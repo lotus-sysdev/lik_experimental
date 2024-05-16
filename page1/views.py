@@ -154,11 +154,11 @@ def add_supplier_pic(request, supp_id):
     redirect_url  = reverse('supplier_detail', args=(supp_id,))
     return add_entity(request, supp_id, Supplier, SuppPICForms, 'pic/add_supp_pic.html', 'supp_id', 'supplier_id', {'supplier_id': supp_id}, redirect_url=redirect_url)
 
+
 @login_required
 def add_prospect_pic(request, prospect_id):
     redirect_url  = reverse('prospect_detail', args=(prospect_id,))
     return add_entity(request, prospect_id, Prospect, ProspectPICForms, 'pic/add_prospect_pic.html', 'prospect_id', 'prospect_id', {'prospect_id': prospect_id}, redirect_url=redirect_url)
-
 
 @login_required
 @GA_required
@@ -285,7 +285,6 @@ def delete_prospect_alamat(request, alamat_id):
 @login_required
 @GA_required
 def add_item(request):
-    form_instance = ItemForm(request.POST or None)
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES)
         if form.is_valid():
@@ -306,7 +305,8 @@ def add_item(request):
                 # image_path = os.path.join(settings.MEDIA_ROOT, image_name)
                 resized_image_name = f"media_{nama_cleaned}_{curr_datetime}.{image.name.split('.')[-1]}"  # Rename the file to avoid overwriting the original
                 resized_image_path = os.path.join(settings.MEDIA_ROOT, resized_image_name)
-                img.save(resized_image_path)                
+                img.save(resized_image_path)
+                
 
                 # os.remove(image_path)
 
@@ -317,8 +317,8 @@ def add_item(request):
 
     else:
         form = ItemForm()
-
-    return render(request, 'item/add_item.html', {'item_form': form_instance})
+    
+    return render(request, 'item/add_item.html', {'item_form': form})
 
 
 # -------------------- Display Tables -------------------- #
@@ -427,7 +427,6 @@ def edit_item(request, SKU):
         if form.is_valid():
             # Check if a new image file is provided
             new_image = request.FILES.get('gambar')
-            
             if new_image:
                 # Process the new image file (similar to the logic in your add_item view)
                 img = Image.open(new_image)
@@ -448,8 +447,6 @@ def edit_item(request, SKU):
             else:
                 entity.is_approved = entity_approved
 
-            # entity.is_approved = entity_approved
-
             form.save()
 
             return JsonResponse({'success': True})
@@ -459,6 +456,12 @@ def edit_item(request, SKU):
         form = ItemForm(instance=entity)
 
     return render(request, 'edit_item.html', {'form': form})
+
+def get_pic_options(request):
+    customer_id = request.GET.get('cust_id')
+    pics = CustomerPIC.objects.filter(customer_id=customer_id)
+    data = [{'id': pic.id, 'name': pic.name} for pic in pics]
+    return JsonResponse(data, safe=False)
 
 @login_required
 @GA_required
@@ -744,7 +747,7 @@ def get_item_details(request):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-  
+
 # -------------------- Login, Register, Logout Functions -------------------- #
 # Login, Register, and Logout
 def login_view(request):
@@ -936,6 +939,7 @@ def add_messenger(request):
 def add_vehicle(request):
     return add_entity_view(request, VehicleForm, 'delivery/add_vehicle.html', 'calendar')
 
+@login_required
 def get_messenger(request):
     vehicle_id = request.GET.get('vehicle')
     print(vehicle_id)
@@ -1054,7 +1058,7 @@ def upload_excel(request):
                 email_sumber_index = column_titles.index('email_sumber') if 'email_sumber' in column_titles else None
                 nama_sumber_index = column_titles.index('nama_sumber') if 'nama_sumber' in column_titles else None
                 pic_index = column_titles.index('pic') if 'pic' in column_titles else None
-
+                
                 # Find the row containing the 'Gambar' column title
                 gambar_row_index = None
                 for row_index, row in enumerate(worksheet.iter_rows(values_only=True)):
@@ -1065,7 +1069,6 @@ def upload_excel(request):
                 if gambar_row_index is not None:
                     # Load image from the 'Gambar' column for each row
                     image_loader = SheetImageLoader(worksheet)
-
                     for row_index, row in enumerate(worksheet.iter_rows(min_row=gambar_row_index + 2, values_only=True)):
                         if all(index is not None for index in [nama_index, category_index, customer_index, quantity_index, unit_index, price_index]):
                             try: 
@@ -1092,7 +1095,7 @@ def upload_excel(request):
                                 # Generate filename including item name, upload date, and row index
                                 item_name = row[nama_index] if nama_index is not None else ''
                                 item_name_cleaned = re.sub(regex_pattern, replacement_string, item_name)
-                                upload_date = datetime.date.today().strftime('%Y-%m-%d')
+                                upload_date = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
                                 filename = f"media_bulk_{item_name_cleaned}_{upload_date}_{row_index}.png"
                                 
                                 # Specify the full path including the media directory
@@ -1111,6 +1114,7 @@ def upload_excel(request):
                                     catatan=row[catatan_index] if catatan_index is not None else '',
                                     category=category_instance,
                                     customer=customer_instance,
+                                    pic = pic_instance,
                                     quantity=row[quantity_index] if quantity_index is not None else 0,
                                     unit=row[unit_index] if unit_index is not None else '',
                                     price=row[price_index] if price_index is not None else 0,
@@ -1212,9 +1216,6 @@ def delete_selected_rows_delivery(request):
 
 def delete_selected_rows_logbook(request):
     return delete_selected_rows(request, LogBook, 'id')
-
-def delete_selected_rows_employee(request):
-    return delete_selected_rows(request, Employee, 'id')
 
 def delete_selected_rows_prospect(request):
     return delete_selected_rows(request, Prospect, 'prospect_id')
@@ -1413,42 +1414,6 @@ def get_kode_pos(request):
     return JsonResponse({'error': 'Invalid Kelurahan ID'}, status=400)
 
 
-# -------------------- Employee -------------------- #
-def add_employee(request):
-    return add_entity_view(request, EmployeeForm, 'employee/add_employee.html', 'display_employee')
-
-def display_employee(request):
-    return display_entities(request, Employee, 'employee/display_employee.html')
-
-def employee_detail(request, id):
-    employee_alamat = EmployeeAlamat.objects.filter(employee_id=id)
-    extra_context = {'employee_alamat':employee_alamat}
-    return entity_detail(request, Employee, EmployeeForm, 'id', id, 'employee/employee_detail.html', extra_context)
-
-def edit_employee(request, id):
-    return edit_entity(request, Employee, EmployeeForm, 'id', id)
-
-def delete_employee(request, id):
-    return delete_entity(request, Employee, 'id', id)
-
-def add_employee_alamat(request, id):
-    redirect_url  = reverse('employee_detail', args=(id,))
-    return add_entity(request, id, Employee, EmployeeAlamatForm, 'employee/add_employee_alamat.html', 'id', 'employee_id', {'employee_id': id}, redirect_url=redirect_url)
-
-def edit_employee_alamat(request, alamat_id):
-    alamat = get_object_or_404(EmployeeAlamat, id=alamat_id)
-    form = EmployeeAlamatForm(request.POST or None, instance=alamat)
-
-    if request.method == 'POST':
-        if form.is_valid():
-            form.save()
-            return redirect('employee_detail', id=alamat.employee_id.pk)
-    return render(request, 'employee/edit_employee_alamat.html', {'form': form, 'alamat': alamat})
-
-def delete_employee_alamat(request, alamat_id):
-    return delete_entity(request, EmployeeAlamat, 'id', alamat_id)
-
-
 # -------------------- Prospect -------------------- #
 @login_required
 def display_prospect(request):
@@ -1510,6 +1475,7 @@ def prospect_ticket(request, prospect_id):
     context = {'prospect': prospect, 'prospect_id': prospect_id, 'prospect_tickets': sorted_tickets, 'ticket_log_form': ticket_log_form,}
 
     return render(request, 'prospect/prospect_ticket.html', context)
+
 
 @login_required
 def add_prospect_ticket(request, prospect_id):

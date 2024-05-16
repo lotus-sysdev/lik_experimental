@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
+
 import datetime
+
 
 # Create your models here.
 class Report(models.Model):
@@ -49,7 +51,6 @@ class Report(models.Model):
 
         super().save(*args, **kwargs)
 
-
 class Lokasi(models.Model):
     nama = models.CharField(max_length=100)
     detail = models.SlugField(unique=True)
@@ -91,3 +92,4 @@ class Group_Kayu(models.Model):
 
     def __str__(self):
         return str(self.group)
+

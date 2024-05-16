@@ -1,0 +1,61 @@
+{% extends 'account.html' %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block title %}Register{% endblock %}
+</head>
+
+<body>
+    {% block content %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {% for error in form.username.errors %}
+            <p class="text-danger">{{ error }}</p>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {% for error in form.email.errors %}
+            <p class="text-danger">{{ error }}</p>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.password1.label_tag }}
+            {{ form.password1 }}
+            {% for error in form.password1.errors %}
+            <p class="text-danger">{{ error }}</p>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.password2.label_tag }}
+            {{ form.password2 }}
+            {% for error in form.password2.errors %}
+            <p class="text-danger">{{ error }}</p>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.role.label_tag }}
+            {{ form.role }}
+            {% for error in form.role.errors %}
+            <p class="text-danger">{{ error }}</p>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3">Register</button>
+
+      <div class="d-flex align-items-center justify-content-center pb-4">
+        <p class="mb-0 me-2">Already have an account?</p>
+        <a href="/login" class="btn btn-outline-primary ml-2">Login</a>
+      </div>
+    </form>
+    {% endblock %}
+</body>
+
+</html>

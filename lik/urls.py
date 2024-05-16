@@ -20,5 +20,6 @@ urlpatterns = [
     path('display_group/', display_group, name='display_group'),
     path('save_group_changes/', save_group_changes, name='save_group_changes'),
     path('display_foto/<path:url>', display_foto, name="display_foto")
+
 ]
 

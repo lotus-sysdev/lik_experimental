@@ -55,7 +55,6 @@ urlpatterns = [
     path('delete_selected_rows_WO/', delete_selected_rows_WO, name='delete_selected_rows_WO'),
     path('delete_selected_rows_delivery/', delete_selected_rows_delivery, name='delete_selected_rows_delivery'),
     path('delete_selected_rows_logbook/', delete_selected_rows_logbook, name='delete_selected_rows_logbook'),
-    path('delete_selected_rows_employee/', delete_selected_rows_employee, name='delete_selected_rows_employee'),
     path('delete_selected_rows_prospect/', delete_selected_rows_prospect, name='delete_selected_rows_prospect'),
 
     # Item approval
@@ -79,7 +78,7 @@ urlpatterns = [
     path('add_pic_prospect/<int:prospect_id>',add_prospect_pic,name='add_pic_prospect'),
     path('edit_prospect_pic/<int:pic_id>/', edit_prospect_pic, name='edit_prospect_pic'),
     path('delete_prospect_pic/<int:pic_id>/', delete_prospect_pic, name='delete_prospect_pic'),
-    
+
     # Alamat urls
     path('add_customer_alamat/<int:cust_id>/', add_customer_alamat, name='add_customer_alamat'),
     path('edit_customer_alamat/<int:alamat_id>/', edit_customer_alamat, name='edit_customer_alamat'),
@@ -139,18 +138,6 @@ urlpatterns = [
     path('get_region_details/', get_region_details, name='get_region_details'),
     path('get_kode_pos/', get_kode_pos, name='get_kode_pos'),
 
-    #Employee 
-    path('add_employee/', add_employee, name='add_employee'),
-    path('display_employee/', display_employee, name='display_employee'),
-    path('employee_detail/<int:id>', employee_detail, name='employee_detail'),
-    path('edit_employee/<int:id>', edit_employee, name='edit_employee' ),
-    path('delete_employee/<int:id>', delete_employee, name='delete_employee'),
-
-    # Employee Alamat
-    path('add_employee_alamat/<int:id>/', add_employee_alamat, name='add_employee_alamat'),
-    path('edit_employee_alamat/<int:alamat_id>/', edit_employee_alamat, name='edit_employee_alamat'),
-    path('delete_employee_alamat/<int:alamat_id>/', delete_employee_alamat, name='delete_employee_alamat'),
-
     # Prospect
     path('display_prospect/', display_prospect, name='display_prospect'),
     path('add_prospect/', add_prospect, name='add_prospect'),
@@ -174,7 +161,7 @@ urlpatterns = [
     # Get PICs
     path('get_customer_pics/', get_customer_pics, name='get_customer_pics'),
     path('get_customer_by_pic/', get_customer_by_pic, name='get_customer_by_pic'),
-
+    
     # Get Items
     path('get_customer_item/', get_customer_item, name='get_customer_item'),
     path('get_item_details/', get_item_details, name='get_item_details'),   

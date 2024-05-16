@@ -37,7 +37,9 @@
           center: "title",
           right: "month,agendaWeek,agendaDay", // Add the custom button to the header
         },
-        eventLongPressDelay: 700,
+        eventLongPressDelay: 300,
+        timeFormat: 'H(:mm)',
+        slotLabelFormat:"HH:mm",
         events: function (start, end, timezone, callback) {
           // console.log(currentMessengerId);
           $.ajax({
