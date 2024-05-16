@@ -54,10 +54,15 @@
     class="mt-2 mb-2"
   >
     <div class="row">
-      <div class="form-group col-md-3">
+      <div class="form-group col-md-6">
+        {{ form.kayu.label_tag }}{{ form.kayu }}
+      </div>
+      <div class="form-group col-md-6">
         {{ form.sender.label_tag }} {{ form.sender }}
       </div>
-      <div class="form-group col-md-3">
+    </div>
+    <div class="row">
+      <div class="form-group col-md-4">
         <label>Date Range:</label>
         <select
           id="date-range-select"
@@ -79,10 +84,10 @@
           <option value="ytd">Year to Date</option>
         </select>
       </div>
-      <div class="form-group col-md-3">
+      <div class="form-group col-md-4">
         {{ form.start_date.label_tag }} {{ form.start_date }}
       </div>
-      <div class="form-group col-md-3">
+      <div class="form-group col-md-4">
         {{ form.end_date.label_tag }} {{ form.end_date }}
       </div>
     </div>
@@ -102,19 +107,21 @@
       </div>
     </div>
     <div class="card">
-      <h4 class="text-center card-header">One More Chart</h4>
+      <h4 class="text-center card-header">Jumlah Kendaraan Berdasarkan Jenis Kayu</h4>
       <div class="card-body">
-        <canvas id="chart2"></canvas>
+        <canvas id="vehicleKayuChart"></canvas>
       </div>
     </div>
     <div class="card">
-      <h4 class="text-center card-header">Distribusi Kayu / Bulan</h4>
+      <h4 class="text-center card-header">
+        Jumlah Kendaraan berdasarkan Tujuan
+      </h4>
       <div class="card-body">
-        <canvas id="kayuMonthlyColumnChart"></canvas>
+        <canvas id="uniqueVehicleChart"></canvas>
       </div>
     </div>
     <div class="card">
-      <h4 class="text-center card-header">Jumlah Kendaraan</h4>
+      <h4 class="text-center card-header">Distribusi Kendaraan</h4>
       <div class="card-body">
         <canvas id="platBarChart"></canvas>
       </div>
@@ -179,19 +186,21 @@
       // Generate dynamic labels based on the date range
       var labels = generateLabels(startDate, endDate);
 
-      var kayuMonthlyCounts = JSON.parse(
-        "{{ kayu_counts_monthly | escapejs }}"
+      var uniqueVehicleCounts = JSON.parse(
+        "{{ unique_vehicle_counts | escapejs }}"
       );
 
       renderColumnChart(
-        "kayuMonthlyColumnChart",
-        kayuMonthlyCounts,
+        "uniqueVehicleChart",
+        uniqueVehicleCounts,
         labels,
         startDate,
-        endDate
+        endDate,
+        "uniquevehicle"
       );
 
       var tonnaseCounts = JSON.parse("{{ tonnase_counts | escapejs }}");
+      var vehicleKayuCounts = JSON.parse("{{ vehicle_kayu_counts | escapejs }}")
 
       renderMixedChart(
         "tonnaseMonthlyChart",
@@ -199,7 +208,16 @@
         labels,
         startDate,
         endDate,
-        "Total Tonnase"
+        "Total Tonnase",
+        true
+      );
+      renderMixedChart(
+        "vehicleKayuChart",
+        vehicleKayuCounts,
+        labels,
+        startDate,
+        endDate,
+        "Total Kendaraan"
       );
     });
 
@@ -372,35 +390,61 @@
       return labels;
     }
 
-    function renderColumnChart(canvasId, data, labels, startDate, endDate) {
-      console.log("Start Date:", startDate);
-      console.log("End Date:", endDate);
+    function renderColumnChart(
+      canvasId,
+      data,
+      labels,
+      startDate,
+      endDate,
+      dataType
+    ) {
+      // console.log("Start Date:", startDate);
+      // console.log("End Date:", endDate);
 
-      var kayuLabels = [];
-      var kayuColors = {};
+      var uniqueLabels = [];
+      var uniqueColors = {};
 
-      // Extract unique kayu types and assign colors
+      // Extract unique labels and assign colors
       data.forEach(function (item, index) {
-        if (!kayuLabels.includes(item.kayu)) {
-          kayuLabels.push(item.kayu);
-          kayuColors[item.kayu] = getRandomColor(index); // Generate consistent colors for kayu types
+        var label;
+        var count;
+
+        // Extract label and count based on data type
+        if (dataType === "kayu") {
+          label = item.kayu;
+        } else if (dataType === "uniquevehicle") {
+          label = item.tujuan;
+        }
+        count = item.count;
+        console.log(item)
+
+        if (!uniqueLabels.includes(label)) {
+          uniqueLabels.push(label);
+          uniqueColors[label] = getRandomColor(index);
         }
       });
 
-      var totalMonths =
-        (endDate.getFullYear() - startDate.getFullYear()) * 12 +
-        (endDate.getMonth() - startDate.getMonth()) +
-        1;
-      console.log("Total Months:", totalMonths);
-      // Initialize data array for each kayu type
-      var kayuData = Array.from({ length: kayuLabels.length }, () =>
+      // Initialize data array for each label
+      var dataCounts = Array.from({ length: uniqueLabels.length }, () =>
         new Array(labels.length).fill(0)
       );
 
       // Fill data array with counts
       data.forEach(function (item) {
+        var label;
+        var count;
+
+        // Extract label and count based on data type
+        if (dataType === "kayu") {
+          label = item.kayu;
+        } else if (dataType === "uniquevehicle") {
+          label = item.tujuan;
+        }
+        count = item.count;
+
         var itemDate = new Date(item.year, item.month - 1, item.day);
-        console.log("Item Date:", itemDate);
+        // console.log("Item Date:", itemDate);
+        console.log(item.unique_vehicles)
 
         if (
           !isNaN(itemDate.getTime()) &&
@@ -411,30 +455,30 @@
           var monthIndex =
             (itemDate.getFullYear() - startDate.getFullYear()) * 12 +
             (itemDate.getMonth() - startDate.getMonth());
-          console.log("Month Index:", monthIndex);
+          // console.log("Month Index:", monthIndex);
 
-          var kayuIndex = kayuLabels.indexOf(item.kayu);
-          console.log("Kayu Index:", kayuIndex);
+          var labelIndex = uniqueLabels.indexOf(label);
+          // console.log("Label Index:", labelIndex);
 
-          if (kayuIndex >= 0 && monthIndex >= 0 && monthIndex < totalMonths) {
-            kayuData[kayuIndex][monthIndex] += item.count; // Note the use of += to accumulate counts
-            console.log("Updated kayuData:", kayuData);
+          if (labelIndex >= 0 && monthIndex >= 0) {
+            dataCounts[labelIndex][monthIndex] += count;
+            // console.log("Updated dataCounts:", dataCounts);
           }
         }
       });
 
       // Render column chart
       var ctx = document.getElementById(canvasId).getContext("2d");
-      var kayuMonthlyColumnChart = new Chart(ctx, {
+      var columnChart = new Chart(ctx, {
         type: "bar",
         data: {
           labels: labels,
-          datasets: kayuLabels.map(function (label, index) {
+          datasets: uniqueLabels.map(function (label, index) {
             return {
               label: label,
-              data: kayuData[index],
-              backgroundColor: kayuColors[label],
-              borderColor: "rgba(0, 0, 0, 1)", // Border color for consistency
+              data: dataCounts[index],
+              backgroundColor: uniqueColors[label],
+              borderColor: "rgba(0, 0, 0, 1)",
               borderWidth: 1,
             };
           }),
@@ -443,18 +487,11 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            xAxes: [
-              {
-                stacked: true,
-              },
-            ],
+            xAxes: [{ stacked: true }],
             yAxes: [
               {
                 stacked: true,
-                ticks: {
-                  beginAtZero: true,
-                  stepSize: 1,
-                },
+                ticks: { beginAtZero: true, stepSize: 1 },
               },
             ],
           },
@@ -463,9 +500,7 @@
               anchor: "center",
               align: "end",
               color: "black",
-              font: {
-                weight: "bold",
-              },
+              font: { weight: "bold" },
               formatter: function (value, context) {
                 return value !== 0 ? value : "";
               },
@@ -474,6 +509,8 @@
         },
         plugins: [ChartDataLabels],
       });
+
+      return columnChart;
     }
 
     function renderMixedChart(
@@ -482,7 +519,8 @@
       labels,
       startDate,
       endDate,
-      chartLabel
+      chartLabel,
+      isTonnage = false
     ) {
       var kayuLabels = [];
       var kayuColors = {};
@@ -519,8 +557,14 @@
           var kayuIndex = kayuLabels.indexOf(item.kayu);
 
           if (kayuIndex >= 0 && monthIndex >= 0 && monthIndex < totalMonths) {
-            kayuData[kayuIndex][monthIndex] += item.berat; // Use item.berat for tonnage
-            tonnageData[monthIndex] += item.berat; // Sum of tonnage
+            if (isTonnage) {
+              kayuData[kayuIndex][monthIndex] += item.berat; // Use item.berat for tonnage
+              tonnageData[monthIndex] += item.berat; // Sum of tonnage
+            } else {
+              kayuData[kayuIndex][monthIndex] += item.count; // Use item.berat for tonnage
+              tonnageData[monthIndex] += item.count; // Sum of tonnage
+
+            }
           }
         }
       });

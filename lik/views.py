@@ -33,16 +33,17 @@ from django.db.models.functions import ExtractDay, ExtractMonth, ExtractYear, Up
 # -------------------- Dashboard --------------------#
 def dashboard(request):
     form = ReportFilterForm(request.GET)
-    total_reports = Report.objects.count()
-    reports_by_sender = Report.objects.values('sender__username').annotate(count=models.Count('id'))
 
     if form.is_valid():
+        kayu = form.cleaned_data.get('kayu')
         sender = form.cleaned_data.get('sender')
         start_date = form.cleaned_data.get('start_date')
         end_date = form.cleaned_data.get('end_date')
 
         reports = Report.objects.all()
 
+        if kayu:
+            reports = reports.filter(kayu=kayu)
         if sender:
             reports = reports.filter(sender__username=sender)
         if start_date and end_date:
@@ -51,59 +52,78 @@ def dashboard(request):
         kayu_counts = reports.values('kayu').annotate(count=Count('id'))
         sender_counts = reports.values('sender__username').annotate(count=Count('id'))
         plat_counts = reports.annotate(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
-        kayu_counts_monthly = reports.values(
-            day=ExtractDay('tanggal'),
-            month=ExtractMonth('tanggal'),
-            year=ExtractYear('tanggal')
-        ).values('day', 'month', 'year', 'kayu').annotate(count=Count('id'))
         tonnase_counts = reports.values(
             'kayu',
             day=ExtractDay('tanggal'),
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
         ).annotate(berat=Sum('berat'))
+        unique_vehicle_counts = reports.values(
+            upper_plat=Upper('plat'),
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).values('day', 'month', 'year', 'tujuan').annotate(count=Count('upper_plat', distinct=True))
+        vehicle_kayu_counts = reports.values(
+            'kayu',
+            upper_plat=Upper('plat'),
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).annotate(count=Count('upper_plat', distinct=True))
 
         # Serialize the counts data
         kayu_counts_serialized = json.dumps(list(kayu_counts))
         sender_counts_serialized = json.dumps(list(sender_counts))
         plat_counts_serialized = json.dumps(list(plat_counts))
-        kayu_counts_monthly_serialized = json.dumps(list(kayu_counts_monthly))
         tonnase_counts_serialized = json.dumps(list(tonnase_counts))
+        unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
+        vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
     else: 
         reports = Report.objects.all()
         kayu_counts = Report.objects.values('kayu').annotate(count=Count('id'))
         sender_counts = Report.objects.values('sender__username').annotate(count=Count('id'))
         plat_counts = Report.objects(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
-        kayu_counts_monthly = Report.objects.annotate(
-            day=ExtractDay('tanggal'),
-            month=ExtractMonth('tanggal'),
-            year=ExtractYear('tanggal')
-        ).values('day', 'month', 'year', 'kayu').annotate(count=Count('id'))
         tonnase_counts = Report.objects.annotate(
             'kayu',
             day=ExtractDay('tanggal'),
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
         ).annotate(berat=Sum('berat'))
+        unique_vehicle_counts = Report.objects.annotate(
+            upper_plat=Upper('plat'),
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).values('day', 'month', 'year', 'tujuan').annotate(count=Count('upper_plat', distinct=True))
+        vehicle_kayu_counts = Report.objects.annotate(
+            'kayu',
+            upper_plat=Upper('plat'),
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).annotate(count=Count('upper_plat', distinct=True))
 
 
         kayu_counts_serialized = json.dumps(list(kayu_counts))
         sender_counts_serialized = json.dumps(list(sender_counts))
         plat_counts_serialized = json.dumps(list(plat_counts))
-        kayu_counts_monthly_serialized = json.dumps(list(kayu_counts_monthly))
         tonnase_counts_serialized = json.dumps(list(tonnase_counts))
+        unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
+        vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
 
     context = {
         'form' : form,
         'reports' : reports,
-        'total_reports': total_reports,
-        'reports_by_sender': reports_by_sender,
         'kayu_counts': kayu_counts_serialized,
         'sender_counts': sender_counts_serialized,
         'plat_counts': plat_counts_serialized,
-        'kayu_counts_monthly': kayu_counts_monthly_serialized,
         'tonnase_counts': tonnase_counts_serialized,
+        'unique_vehicle_counts': unique_vehicle_serialized,
+        'vehicle_kayu_counts': vehicle_kayu_serialized,
     }
+    print("Vehicle Kayu Counts", vehicle_kayu_serialized)
+    print("Tonnase Counts", tonnase_counts_serialized)
 
     return render(request, 'dashboard.html', context)
 
@@ -206,7 +226,7 @@ def delete_selected_rows_report(request):
     return delete_selected_rows(request, Report, 'id')
 
 def process_image(image, is_original):
-    upload_date = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     img = Image.open(image)
 
     # Generate a unique identifier

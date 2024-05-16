@@ -62,6 +62,11 @@ class ReportFilterForm(forms.Form):
         required=False, 
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+    kayu = forms.ChoiceField(
+        choices=[],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
     start_date = forms.DateField(
         label='Start Date', 
         required=False, 
@@ -76,7 +81,12 @@ class ReportFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['sender'].choices = self.get_sender_choices()
+        self.fields['kayu'].choices = self.get_kayu_choices()
 
     def get_sender_choices(self):
         sender_choices = [(sender["sender__username"], f"{sender['sender__first_name']}") for sender in Report.objects.values('sender__username', 'sender__first_name').distinct()]
         return [('', 'Select a Sender')] + sender_choices
+    
+    def get_kayu_choices(self):
+        kayu_choices = [(kayu["kayu"], kayu["kayu"]) for kayu in Report.objects.values('kayu').distinct()]
+        return [('', 'Select Jenis Kayu')] + kayu_choices
