@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
-import datetime
 
 # Create your models here.
 class Report(models.Model):

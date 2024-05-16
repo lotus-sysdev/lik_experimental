@@ -1,13 +1,11 @@
 import re
 from django import forms
-from django.forms import BaseInlineFormSet, inlineformset_factory, widgets
+from django.forms import inlineformset_factory, widgets
 from django_select2.forms import Select2Widget
 from .models import *
 
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
-from django.contrib.auth.models import Group
-from django.contrib.auth.decorators import user_passes_test
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import authenticate
 # from django_measurement.forms import MeasurementField, MeasurementWidget

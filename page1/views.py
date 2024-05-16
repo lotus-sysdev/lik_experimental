@@ -1,33 +1,34 @@
-import json
-import os
+# Standard Library Imports
 import csv
-from PIL import Image
-import pandas as pd
-import requests
-from datetime import datetime, timedelta
+import os
 import re
+from datetime import datetime, timedelta
 
-from django.db.models import Q, Prefetch
-from django.core import serializers
-from django.core.files.base import ContentFile
-from django.core import serializers
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import redirect, render, get_object_or_404
+# Third-Party Imports
+import requests
+import openpyxl
+from PIL import Image
+from openpyxl_image_loader import SheetImageLoader
+
+# Local Imports
+from .models import *
+from .forms import *
+from .decorators import *
+
+# Django Imports
+from django.urls import reverse
 from django.conf import settings
 from django.utils import timezone
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.core import serializers
+from django.http import JsonResponse
+from django.db.models import Prefetch
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
-from django.utils import timezone
-from django.urls import reverse
+from django.contrib.auth import authenticate, login, logout
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.shortcuts import redirect, render, get_object_or_404
 
-from .decorators import *
-from .forms import *
-from .models import *
-import openpyxl
-from openpyxl_image_loader import SheetImageLoader
 
 
 # -------------------- Placeholder for homepage --------------------#

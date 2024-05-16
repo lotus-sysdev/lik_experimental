@@ -27,6 +27,7 @@ local_settings.py
 
 # Media Folder
 media/*
+!media/.gitkeep
 
 # Migrations
 # Ignore migration .py files

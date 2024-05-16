@@ -1,31 +1,36 @@
-from datetime import datetime, timedelta
-from io import BytesIO
+# Standard library imports
 import os
-import uuid
-from django.conf import settings
-from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import generics, status
-from rest_framework.parsers import MultiPartParser, FormParser
-
-from django.shortcuts import get_object_or_404, redirect, render
-from django.http import JsonResponse
-from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
-from django.db import transaction
-from django.db.models import Count, Sum
-from django.db.models.functions import Upper, ExtractDay, ExtractMonth, ExtractYear
 import json
+import uuid
+from datetime import datetime, timedelta
 
+# Third-party imports
 from PIL import Image, ImageFile
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.decorators import api_view, permission_classes
 
-from .serializers import *
-from .models import *
+# Local application imports
 from .forms import *
+from .models import *
+from .serializers import *
 
+# Django imports
+from django.conf import settings
+from django.db import transaction
+from django.http import JsonResponse
+from django.db.models import Count, Sum
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+from django.db.models.functions import ExtractDay, ExtractMonth, ExtractYear, Upper
+
+
+# -------------------- Dashboard --------------------#
 def dashboard(request):
     form = ReportFilterForm(request.GET)
     total_reports = Report.objects.count()
@@ -102,7 +107,8 @@ def dashboard(request):
 
     return render(request, 'dashboard.html', context)
 
-# Create your views here.
+
+# -------------------- Common Functions --------------------#
 def delete_selected_rows(request, model, key):
     if request.method == 'POST':
         selected_ids = request.POST.getlist('selected_ids[]')  # Assuming you're sending an array of selected IDs
@@ -179,6 +185,8 @@ def edit_entity(request, entity_model, entity_form, entity_id_field, entity_id):
 
     return render(request, 'edit_entity.html', {'form': form})
 
+
+# -------------------- Report Functions --------------------#
 @login_required
 def display_report(request):
     start_date_str = request.GET.get('start_date')
@@ -314,6 +322,16 @@ def edit_report(request, id):
 
     return render(request, "/api/edit_report.html", {'form': form})
 
+@login_required
+def display_foto(request, url):
+    # Get the URL parameter 'url' from the request
+
+    # Render the display_image.html template with the image_url context variable
+    return render(request, 'Report/display_foto.html', {'url': url})
+
+
+
+# -------------------- Functions for mobile app --------------------#
 # Set maximum image quality
 ImageFile.MAXBLOCK = 2**20
 class add_report_mobile(generics.CreateAPIView):
@@ -377,7 +395,6 @@ def logout_user(request):
     request.user.auth_token.delete()
     return Response(status=status.HTTP_200_OK)
 
-
 # @permission_classes([IsAuthenticated])
 class GroupLokasiListAPIView(generics.ListAPIView):
     serializer_class = LokasiSerializer
@@ -420,6 +437,8 @@ def check_token(request, user_id):
     except User.DoesNotExist:
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
     
+
+# -------------------- Admin Change Groups --------------------#
 @login_required
 def display_group(request):
     group_lokasi = Group_Lokasi.objects.all()
@@ -488,10 +507,3 @@ def save_group_changes(request):
             return JsonResponse({'success': False, 'error': str(e)})
         
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
-
-@login_required
-def display_foto(request, url):
-    # Get the URL parameter 'url' from the request
-
-    # Render the display_image.html template with the image_url context variable
-    return render(request, 'Report/display_foto.html', {'url': url})
