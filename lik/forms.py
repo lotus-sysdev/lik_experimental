@@ -57,8 +57,26 @@ class ReportForm(forms.ModelForm):
     )
 
 class ReportFilterForm(forms.Form):
-    sender_choices = [(sender["sender__username"], f"{sender['sender__first_name']}") for sender in Report.objects.values('sender__username', 'sender__first_name').distinct()]
+    sender = forms.ChoiceField(
+        choices=[], 
+        required=False, 
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    start_date = forms.DateField(
+        label='Start Date', 
+        required=False, 
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
+    end_date = forms.DateField(
+        label='End Date', 
+        required=False, 
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
 
-    sender = forms.ChoiceField(choices=[('', 'Select a Sender')] + sender_choices, required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
-    start_date = forms.DateField(label='Start Date', required=False, widget=forms.DateInput(attrs={'type': 'date', 'class' : 'form-control'}))
-    end_date = forms.DateField(label='End Date', required=False, widget=forms.DateInput(attrs={'type': 'date', 'class' : 'form-control'}))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['sender'].choices = self.get_sender_choices()
+
+    def get_sender_choices(self):
+        sender_choices = [(sender["sender__username"], f"{sender['sender__first_name']}") for sender in Report.objects.values('sender__username', 'sender__first_name').distinct()]
+        return [('', 'Select a Sender')] + sender_choices

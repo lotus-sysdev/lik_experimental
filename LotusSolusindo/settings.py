@@ -371,8 +371,6 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 # Email account credentials (make sure to use app-specific password for security)
-# EMAIL_HOST_USER = 'pandya.limawan@gmail.com'
-# EMAIL_HOST_PASSWORD = 'igie iaqh tnwo ivsk'
 EMAIL_HOST_USER = 'sysdev@lotusgroup.co.id'
 EMAIL_HOST_PASSWORD = 'tahunNAGA2024!'
 
