@@ -313,11 +313,11 @@ def edit_report(request, id):
     else:
         form = ReportForm(instance=entity)
     
-return render(request, "/api/edit_report.html", {'form': form})
+    return render(request, "/api/edit_report.html", {'form': form})
 
 
 def process_image(image, is_original):
-    upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    upload_date = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     img = Image.open(image)
 
     # Generate a unique identifier
