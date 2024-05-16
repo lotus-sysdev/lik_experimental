@@ -7,6 +7,8 @@ __pycache__/
 .env
 .env.*
 /env/
+venv/
+/venv/
 # Django settings file
 *.pyc
 *.pyo
@@ -29,7 +31,10 @@ media/*
 # Migrations
 # Ignore migration .py files
 migrations/
-
+page1/migrations/*
+!page1/migrations/__init__.py
+lik/migrations/*
+!lik/migrations/__init__.py
 !migrations/.gitkeep
 
 # Optionally, ignore migration .pyc files (byte-compiled Python files)
@@ -38,4 +43,3 @@ migrations/
 # If you are using Windows, you might also want to ignore .pyo files
 **/migrations/*.pyo
 
-venv/
