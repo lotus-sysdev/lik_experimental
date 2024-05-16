@@ -110,14 +110,21 @@ WSGI_APPLICATION = 'LotusSolusindo.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'lotussolusindo',
+#         'USER': 'justin',
+#         'PASSWORD': 'Shibe534',
+#         'HOST': 'localhost',
+#         'PORT': '',
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'lotussolusindo',
-        'USER': 'justin',
-        'PASSWORD': 'Shibe534',
-        'HOST': 'localhost',
-        'PORT': '',
+    'default':{
+        'ENGINE' :'django.db.backends.sqlite3',
+        'NAME' : BASE_DIR / 'db.sqlite3',
     }
 }
 
