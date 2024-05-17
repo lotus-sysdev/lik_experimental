@@ -327,7 +327,7 @@ class SumberForm(forms.ModelForm):
             'nama_perusahaan' : forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'PT. Lotus Lestari Raya'}),
             'telp' : RegionalPhoneNumberWidget(attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
             'email' : forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'username@lotuslestari.co.id'}),
-            'url' : forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://beezywork.id'}),
+            'url' : forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'https://beezywork.id'}),
         }
         labels = {
             'jenis_sumber' : 'Jenis Sumber*',

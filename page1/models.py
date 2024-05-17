@@ -170,7 +170,7 @@ class ItemSumber(models.Model):
     nama_perusahaan = models.CharField(max_length=255)
     telp = PhoneNumberField(blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
-    url = models.URLField(blank=True, null=True)
+    url = models.URLField(blank=True, null=True, max_length=1000)
     
 class ItemChangeLog(models.Model):
     class Meta:
