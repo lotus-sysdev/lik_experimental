@@ -118,7 +118,7 @@ class Items(models.Model):
     pic = models.ForeignKey(CustomerPIC, on_delete= models.SET_NULL, null=True)
     nama = models.CharField(max_length=255)
     catatan = models.CharField(max_length = 1000, null = True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null = True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     unit = models.CharField(max_length=10)
     price = MoneyField(max_digits=15, decimal_places=2, default_currency='IDR', blank= False, null= False, validators=[MinMoneyValidator(0)])
@@ -544,4 +544,4 @@ class User(AbstractUser):
     user_permissions = models.ManyToManyField('auth.Permission', related_name='custom_user_set', blank=True)
 
     def __str__(self):
-        return self.first_name
+        return f"{self.username} ({self.first_name})"

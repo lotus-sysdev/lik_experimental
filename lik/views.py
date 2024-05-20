@@ -199,36 +199,6 @@ def display_report(request):
 def delete_selected_rows_report(request):
     return delete_selected_rows(request, Report, 'id')
 
-def process_image(image, is_original):
-    upload_date = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    img = Image.open(image)
-
-    # Generate a unique identifier
-    unique_id = str(uuid.uuid4())[:8]  # Use the first 8 characters of a UUID
-    
-    # Strip file extension from the image filename
-    image_name_without_extension, extension = os.path.splitext(image.name)
-    
-    # Resize the image
-    if is_original:
-        resized_img = img.resize((500, 500))
-    else:
-        resized_img = img.resize((100, 100))
-    
-    # Construct the resized image name
-    if is_original:
-        resized_image_name = f"original-{upload_date}-{unique_id}-{extension}"
-    else:
-        resized_image_name = f"resized-{upload_date}-{unique_id}-{extension}"
-    
-    # Save the resized image
-    resized_image_path = os.path.join(settings.MEDIA_ROOT, 'report_photos', resized_image_name)
-    resized_img.save(resized_image_path)
-
-    relative_path = os.path.relpath(resized_image_path, settings.MEDIA_ROOT )
-    
-    return relative_path
-
 @login_required
 def add_report(request, initial=None):
     entity_form_instance = ReportForm(request.POST or None, request.FILES or None)
