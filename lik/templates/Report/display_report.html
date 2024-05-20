@@ -88,7 +88,7 @@
             <span class="font-weight-bold" id="totalReject"></span> Kg
           </p>
           <p>
-            Jumlah Kendaraan:
+            Jumlah Pengiriman:
             <span class="font-weight-bold" id="uniquePlatCount"></span>
           </p>
         </div>
@@ -366,7 +366,7 @@
         function calculateStats() {
           var totalBerat = 0;
           var totalReject = 0;
-          var uniquePlat = new Set();
+          var uniquePlat = 0;
 
           // Iterate through each row in the DataTable
           table.rows().every(function () {
@@ -377,18 +377,18 @@
             totalReject += parseFloat(data[11]);
 
             // Collect unique plat values
-            uniquePlat.add(data[4]);
+            uniquePlat += 1;
 
             $("#totalBerat").text(totalBerat.toFixed(2));
             $("#totalReject").text(totalReject.toFixed(2));
-            $("#uniquePlatCount").text(uniquePlat.size);
+            $("#uniquePlatCount").text(uniquePlat);
           });
         }
 
         function updateStatsAfterSearch() {
           var totalBerat = 0;
           var totalReject = 0;
-          var uniquePlat = new Set();
+          var uniquePlat = 0;
 
           // Iterate through each visible row in the DataTable
           table.rows({ search: "applied" }).every(function () {
@@ -399,12 +399,12 @@
             totalReject += parseFloat(data[11]);
 
             // Collect unique plat values
-            uniquePlat.add(data[3]);
+            uniquePlat += 1;
           });
 
           $("#totalBerat").text(totalBerat.toFixed(2));
           $("#totalReject").text(totalReject.toFixed(2));
-          $("#uniquePlatCount").text(uniquePlat.size);
+          $("#uniquePlatCount").text(uniquePlat);
         }
 
         // Function to reset search
