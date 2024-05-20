@@ -52,7 +52,7 @@ def dashboard(request):
         kayu_counts = reports.values('kayu').annotate(count=Count('id'))
         sender_counts = reports.values('sender__username').annotate(count=Count('id'))
         plat_counts = reports.annotate(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
-        tonnase_counts = reports.values(
+        tonase_counts = reports.values(
             'kayu',
             day=ExtractDay('tanggal'),
             month=ExtractMonth('tanggal'),
@@ -76,13 +76,13 @@ def dashboard(request):
         kayu_counts_serialized = json.dumps(list(kayu_counts))
         sender_counts_serialized = json.dumps(list(sender_counts))
         plat_counts_serialized = json.dumps(list(plat_counts))
-        tonnase_counts_serialized = json.dumps(list(tonnase_counts))
+        tonase_counts_serialized = json.dumps(list(tonase_counts))
         unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
         vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
 
         total_reports = reports.count()
         total_revised_reports = reports.filter(tiketId__icontains="R").count()
-        total_tonnase = reports.aggregate(total=Sum('berat'))['total'] or 0
+        total_tonase = reports.aggregate(total=Sum('berat'))['total'] or 0
         total_rejects = reports.aggregate(total=Sum('reject'))['total'] or 0
         total_unique_vehicles = reports.values('plat').distinct().count()
 
@@ -91,7 +91,7 @@ def dashboard(request):
         kayu_counts = Report.objects.values('kayu').annotate(count=Count('id'))
         sender_counts = Report.objects.values('sender__username').annotate(count=Count('id'))
         plat_counts = Report.objects(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
-        tonnase_counts = Report.objects.annotate(
+        tonase_counts = Report.objects.annotate(
             'kayu',
             day=ExtractDay('tanggal'),
             month=ExtractMonth('tanggal'),
@@ -115,13 +115,13 @@ def dashboard(request):
         kayu_counts_serialized = json.dumps(list(kayu_counts))
         sender_counts_serialized = json.dumps(list(sender_counts))
         plat_counts_serialized = json.dumps(list(plat_counts))
-        tonnase_counts_serialized = json.dumps(list(tonnase_counts))
+        tonase_counts_serialized = json.dumps(list(tonase_counts))
         unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
         vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
         
         total_reports = Report.objects.count()
         total_revised_reports = reports.filter(tiketId__icontains="R").count()
-        total_tonnase = Report.objects.aggregate(total=Sum('berat'))['total'] or 0
+        total_tonase = Report.objects.aggregate(total=Sum('berat'))['total'] or 0
         total_rejects = Report.objects.aggregate(total=Sum('reject'))['total'] or 0
         total_unique_vehicles = Report.objects.values('plat').distinct().count()
 
@@ -131,12 +131,12 @@ def dashboard(request):
         'kayu_counts': kayu_counts_serialized,
         'sender_counts': sender_counts_serialized,
         'plat_counts': plat_counts_serialized,
-        'tonnase_counts': tonnase_counts_serialized,
+        'tonase_counts': tonase_counts_serialized,
         'unique_vehicle_counts': unique_vehicle_serialized,
         'vehicle_kayu_counts': vehicle_kayu_serialized,
         'total_revised_reports': total_revised_reports,
         'total_reports': total_reports,
-        'total_tonnase': total_tonnase,
+        'total_tonase': total_tonase,
         'total_rejects': total_rejects,
         'total_unique_vehicles': total_unique_vehicles,
     }

@@ -8,15 +8,16 @@
   <style>
     .dashboard-container {
       display: grid;
-      grid-template-columns: 1fr 3fr; /* 1fr for totals, 3fr for the card grid */
+      grid-template-columns: 1fr 5fr; /* 1fr for totals, 3fr for the card grid */
       grid-gap: 20px;
     }
 
     .totals-container {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: 20px; /* Space between total cards */
     }
+
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -41,7 +42,7 @@
       justify-content: center;
       align-items: center;
       padding: 20px;
-      font-size: 3rem; /* Increased font size for better readability */
+      font-size: 1.5rem; /* Increased font size for better readability */
     }
 
     canvas {
@@ -62,23 +63,21 @@
     }
   </style>
 
-  <h1>Dashboard</h1>
+  <h1>Overview</h1>
   <form
     method="GET"
     action="{% url 'dashboard' %}"
     id="filterForm"
     class="mt-2 mb-2"
   >
-    <div class="row">
-      <div class="form-group col-md-6">
+    <div class="row align-items-end">
+      <div class="form-group col-md-2">
         {{ form.kayu.label_tag }}{{ form.kayu }}
       </div>
-      <div class="form-group col-md-6">
+      <div class="form-group col-md-2">
         {{ form.sender.label_tag }} {{ form.sender }}
       </div>
-    </div>
-    <div class="row">
-      <div class="form-group col-md-4">
+      <div class="form-group col-md-2">
         <label>Date Range:</label>
         <select
           id="date-range-select"
@@ -100,83 +99,99 @@
           <option value="ytd">Year to Date</option>
         </select>
       </div>
-      <div class="form-group col-md-4">
+      <div class="form-group col-md-2">
         {{ form.start_date.label_tag }} {{ form.start_date }}
       </div>
-      <div class="form-group col-md-4">
+      <div class="form-group col-md-2">
         {{ form.end_date.label_tag }} {{ form.end_date }}
       </div>
-    </div>
-    <div class="mt-2">
-      <button class="btn btn-primary" type="submit">Apply Filters</button>
-      <button class="btn btn-secondary" type="button" onclick="resetForm()">
-        Reset
-      </button>
+      <div class="form-group col-md-2 d-flex">
+        <button class="btn btn-primary mr-2" style="width: 50%" type="submit">
+          View
+        </button>
+        <button
+          class="btn btn-secondary"
+          style="width: 50%"
+          type="button"
+          onclick="resetForm()"
+        >
+          Reset
+        </button>
+      </div>
     </div>
   </form>
 
-  <div class="dashboard-container">
-    <div class="totals-container">
-      <div class="card">
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div
+        class="card"
+        data-toggle="tooltip"
+        data-placement="top"
+        title="Total Reports: {{ total_reports }}, Total Revised Reports: {{ total_revised_reports }}"
+      >
         <h4 class="text-center card-header">Reports</h4>
         <div class="card-body">{{ total_reports }}</div>
       </div>
-      <div class="card">
-        <h4 class="text-center card-header">Revised Reports</h4>
-        <div class="card-body">{{ total_revised_reports }}</div>
-      </div>
+    </div>
+    <div class="col-md-3">
       <div class="card">
         <h4 class="text-center card-header">Total Berat</h4>
-        <div class="card-body">{{ total_tonnase }} Kg</div>
+        <div class="card-body">{{ total_tonase }} Kg</div>
       </div>
+    </div>
+    <div class="col-md-3">
       <div class="card">
         <h4 class="text-center card-header">Total Reject</h4>
         <div class="card-body">{{ total_rejects }} Kg</div>
       </div>
+    </div>
+    <div class="col-md-3">
       <div class="card">
         <h4 class="text-center card-header">Jumlah Kendaraan</h4>
         <div class="card-body">{{ total_unique_vehicles }}</div>
       </div>
     </div>
+  </div>
 
-    <div class="dashboard-grid">
-      <div class="card">
-        <h4 class="text-center card-header">Tonnase / Bulan</h4>
-        <div class="card-body">
-          <canvas id="tonnaseMonthlyChart"></canvas>
-        </div>
+  <div class="dashboard-grid">
+    <div class="card">
+      <h4 class="text-center card-header">Tonase / Bulan</h4>
+      <div class="card-body">
+        <canvas id="tonaseMonthlyChart"></canvas>
       </div>
-      <div class="card">
-        <h4 class="text-center card-header">Jumlah Kendaraan Berdasarkan Jenis Kayu</h4>
-        <div class="card-body">
-          <canvas id="vehicleKayuChart"></canvas>
-        </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">
+        Jumlah Kendaraan Berdasarkan Jenis Kayu
+      </h4>
+      <div class="card-body">
+        <canvas id="vehicleKayuChart"></canvas>
       </div>
-      <div class="card">
-        <h4 class="text-center card-header">
-          Jumlah Kendaraan berdasarkan Tujuan
-        </h4>
-        <div class="card-body">
-          <canvas id="uniqueVehicleChart"></canvas>
-        </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">
+        Jumlah Kendaraan berdasarkan Tujuan
+      </h4>
+      <div class="card-body">
+        <canvas id="uniqueVehicleChart"></canvas>
       </div>
-      <div class="card">
-        <h4 class="text-center card-header">Distribusi Kendaraan</h4>
-        <div class="card-body">
-          <canvas id="platBarChart"></canvas>
-        </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">Distribusi Kendaraan</h4>
+      <div class="card-body">
+        <canvas id="platBarChart"></canvas>
       </div>
-      <div class="card">
-        <h4 class="text-center card-header">Distribusi Sender</h4>
-        <div class="card-body">
-          <canvas id="senderPieChart"></canvas>
-        </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">Distribusi Sender</h4>
+      <div class="card-body">
+        <canvas id="senderPieChart"></canvas>
       </div>
-      <div class="card">
-        <h4 class="text-center card-header">Distribusi Jenis Kayu</h4>
-        <div class="card-body">
-          <canvas id="kayuPieChart"></canvas>
-        </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">Distribusi Jenis Kayu</h4>
+      <div class="card-body">
+        <canvas id="kayuPieChart"></canvas>
       </div>
     </div>
   </div>
@@ -240,16 +255,18 @@
         "uniquevehicle"
       );
 
-      var tonnaseCounts = JSON.parse("{{ tonnase_counts | escapejs }}");
-      var vehicleKayuCounts = JSON.parse("{{ vehicle_kayu_counts | escapejs }}")
+      var tonaseCounts = JSON.parse("{{ tonase_counts | escapejs }}");
+      var vehicleKayuCounts = JSON.parse(
+        "{{ vehicle_kayu_counts | escapejs }}"
+      );
 
       renderMixedChart(
-        "tonnaseMonthlyChart",
-        tonnaseCounts,
+        "tonaseMonthlyChart",
+        tonaseCounts,
         labels,
         startDate,
         endDate,
-        "Total Tonnase",
+        "Total Tonase",
         true
       );
       renderMixedChart(
@@ -260,6 +277,10 @@
         endDate,
         "Total Kendaraan"
       );
+    });
+
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip();
     });
 
     function renderPieChart(canvasId, data, labelKey, chartLabel) {
@@ -457,7 +478,7 @@
           label = item.tujuan;
         }
         count = item.count;
-        console.log(item)
+        console.log(item);
 
         if (!uniqueLabels.includes(label)) {
           uniqueLabels.push(label);
@@ -485,7 +506,7 @@
 
         var itemDate = new Date(item.year, item.month - 1, item.day);
         // console.log("Item Date:", itemDate);
-        console.log(item.unique_vehicles)
+        console.log(item.unique_vehicles);
 
         if (
           !isNaN(itemDate.getTime()) &&
@@ -604,7 +625,6 @@
             } else {
               kayuData[kayuIndex][monthIndex] += item.count; // Use item.berat for tonnage
               tonnageData[monthIndex] += item.count; // Sum of tonnage
-
             }
           }
         }
@@ -634,7 +654,7 @@
               borderColor: "rgba(255, 99, 132, 1)",
               borderWidth: 2,
               fill: false,
-              yAxisID: "y1",
+              yAxisID: "y",
             },
           ],
         },
@@ -643,21 +663,22 @@
           maintainAspectRatio: false,
           scales: {
             x: {
-              stacked: true,
+              stacked: false,
             },
             y: {
-              stacked: true,
+              stacked: false,
               beginAtZero: true,
               ticks: {
                 stepSize: 1,
               },
             },
             y1: {
-              position: "right",
+              display: false,
+              // position: "right",
               beginAtZero: true,
-              ticks: {
-                stepSize: 1,
-              },
+              // ticks: {
+              //   stepSize: 1,
+              // },
             },
           },
           plugins: {
