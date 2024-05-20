@@ -10,21 +10,27 @@
             justify-content: center;
             align-items: center;
             height: 100vh; /* Adjust as needed */
+            flex-direction: column;
         }
 
         #image-container img {
             max-width: 100%;
             max-height: 100%;
+            /* transition: transform 0.5s ease-in-out; */
         }
 
-        #image-container.rotated {
-            transform: rotate(90deg); /* Default rotation angle */
+        #rotate-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div id="image-container">
         <img id="image" src="" alt="Image">
+        <button id="rotate-button">Rotate</button>
     </div>
 
     <script>
@@ -36,15 +42,12 @@
         var imageElement = document.getElementById('image');
         imageElement.src = imageUrl;
 
-        // Zoom functionality
         // Rotation functionality
         var rotationAngle = 0; // Initial rotation angle
 
-        imageElement.addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent default right-click menu
-
+        document.getElementById('rotate-button').addEventListener('click', function() {
             rotationAngle += 90; // Rotate by 90 degrees clockwise
-            this.parentNode.style.transform = 'rotate(' + rotationAngle + 'deg)';
+            imageElement.style.transform = 'rotate(' + rotationAngle + 'deg)';
         });
     </script>
 </body>
