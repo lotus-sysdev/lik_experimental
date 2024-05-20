@@ -275,15 +275,18 @@ class ItemForm(forms.ModelForm):
             ('Roll', 'Roll'),
             ('Set', 'Set'),
             ('Lembar', 'Lembar'),
+            ('Karton', 'Karton'),
+            ('Renceng', 'Renceng'),
             ('Galon', 'Galon'),
             ('Lainnya', 'Lainnya')
         )
     
         model = Items
-        fields = "__all__"
+        fields = '__all__'
         exclude = ['SKU', 'gambar_resized', 'upload_type']
         widgets = {
-            'customer' : Select2Widget(attrs={'class':'form-control'}),
+            # 'customer' : Select2Widget(attrs={'class':'form-control'}),
+            'pic' : Select2Widget(attrs={'class':'form-control'}),
             'nama': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Baterai AA'}),
             'quantity': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '1, 2, 3, ...'}),
             'price': MoneyWidget(attrs={'class': 'form-control', 'placeholder': '100000'}),
@@ -295,7 +298,8 @@ class ItemForm(forms.ModelForm):
             'is_approved': forms.CheckboxInput(attrs={'class': 'form-control'}),
         }
         labels = {
-            'customer':'Customer',
+            # 'customer':'Customer',
+            'pic':'PIC',
             'nama': 'Nama Barang',
             'quantity': 'Kuantitas',
             'unit': 'Satuan',

@@ -286,7 +286,7 @@ def delete_prospect_alamat(request, alamat_id):
 @login_required
 @GA_required
 def add_item(request):
-    form_instance = ItemForm(request.POST or None)
+    # form_instance = ItemForm(request.POST or None)
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES)
         if form.is_valid():
@@ -319,7 +319,7 @@ def add_item(request):
     else:
         form = ItemForm()
 
-    return render(request, 'item/add_item.html', {'item_form': form_instance})
+    return render(request, 'item/add_item.html', {'item_form': form})
 
 
 # -------------------- Display Tables -------------------- #
