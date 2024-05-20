@@ -323,7 +323,7 @@ class WorkOrder(models.Model):
 
     customer= models.ForeignKey(Customer, on_delete=models.CASCADE)
     # item = models.ForeignKey(Items, on_delete=models.CASCADE)
-    revenue_WO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, validators=[MinMoneyValidator(0)])
+    revenue_PO = MoneyField(max_digits=15, default_currency='IDR', blank=True, null=True, validators=[MinMoneyValidator(0)])
     nomor_PO = models.IntegerField(blank=True, null=True)
     tanggal_WO = models.DateField(blank=True, null=True)
     tanggal_process = models.DateField(blank=True, null=True)
@@ -342,12 +342,12 @@ class WorkOrder(models.Model):
     status = models.CharField(max_length=30,choices = STATUS_CHOICES) 
 
     STATUS_CONDITIONS = {
-        'complete': lambda self: self.tanggal_pengiriman_invoice and self.tanggal_pengiriman_barang and self.tanggal_input_accurate and self.tanggal_process and self.tanggal_WO and self.revenue_WO and self.nomor_WO,
+        'complete': lambda self: self.tanggal_pengiriman_invoice and self.tanggal_pengiriman_barang and self.tanggal_input_accurate and self.tanggal_process and self.tanggal_WO and self.revenue_PO and self.nomor_WO,
         'invoice': lambda self: self.tanggal_pengiriman_invoice,
         'pengiriman': lambda self: self.tanggal_pengiriman_barang,
         'accurate': lambda self: self.tanggal_input_accurate,
         'process': lambda self: self.tanggal_process,
-        'order': lambda self: self.revenue_WO or self.nomor_WO or self.tanggal_WO,
+        'order': lambda self: self.revenue_PO or self.nomor_WO or self.tanggal_WO,
         'pending': lambda self: True,
     }
 

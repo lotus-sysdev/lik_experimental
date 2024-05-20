@@ -393,7 +393,7 @@ class WorkForm(forms.ModelForm):
         widgets = {
             'customer': Select2Widget(attrs={'class': 'form-control'}),
             # 'item': Select2Widget(attrs={'class': 'form-control'}),
-            'revenue_WO': MoneyWidget(attrs={'class': 'form-control', 'placeholder': '100000'}),
+            'revenue_PO': MoneyWidget(attrs={'class': 'form-control', 'placeholder': '100000'}),
             'nomor_PO': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '012345'}),
             'tanggal_WO': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'tanggal_process': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
@@ -402,7 +402,7 @@ class WorkForm(forms.ModelForm):
             'tanggal_pengiriman_invoice': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         }
         labels = {
-            'revenue_WO': 'Revenue',
+            'revenue_PO': 'Revenue',
             'nomor_PO': 'Nomor PO',
             'tanggal_WO': 'Tanggal PO',
             'tanggal_process': 'Tanggal Proses',
