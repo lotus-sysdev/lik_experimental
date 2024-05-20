@@ -6,11 +6,22 @@
   {% block content %}
 
   <style>
+    .dashboard-container {
+      display: grid;
+      grid-template-columns: 1fr 3fr; /* 1fr for totals, 3fr for the card grid */
+      grid-gap: 20px;
+    }
+
+    .totals-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px; /* Space between total cards */
+    }
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(3, auto);
-      grid-gap: 30px;
+      grid-gap: 20px;
     }
 
     .card {
@@ -30,6 +41,7 @@
       justify-content: center;
       align-items: center;
       padding: 20px;
+      font-size: 3rem; /* Increased font size for better readability */
     }
 
     canvas {
@@ -39,6 +51,10 @@
 
     /* Responsive adjustments */
     @media (max-width: 1200px) {
+      .dashboard-container {
+        grid-template-columns: 1fr; /* Stack columns on smaller screens */
+        grid-template-rows: auto; /* Auto rows for responsive stacking */
+      }
       .dashboard-grid {
         grid-template-columns: 1fr; /* Stack columns on smaller screens */
         grid-template-rows: auto; /* Auto rows for responsive stacking */
@@ -99,43 +115,64 @@
     </div>
   </form>
 
-  <div class="container dashboard-grid mt-4">
-    <div class="card">
-      <h4 class="text-center card-header">Tonnase / Bulan</h4>
-      <div class="card-body">
-        <canvas id="tonnaseMonthlyChart"></canvas>
+  <div class="dashboard-container">
+    <div class="totals-container">
+      <div class="card">
+        <h4 class="text-center card-header">Total Report</h4>
+        <div class="card-body">{{ total_reports }}</div>
+      </div>
+      <div class="card">
+        <h4 class="text-center card-header">Total Berat</h4>
+        <div class="card-body">{{ total_tonnase }} Kg</div>
+      </div>
+      <div class="card">
+        <h4 class="text-center card-header">Total Reject</h4>
+        <div class="card-body">{{ total_rejects }} Kg</div>
+      </div>
+      <div class="card">
+        <h4 class="text-center card-header">Jumlah Kendaraan</h4>
+        <div class="card-body">{{ total_unique_vehicles }}</div>
       </div>
     </div>
-    <div class="card">
-      <h4 class="text-center card-header">Jumlah Kendaraan Berdasarkan Jenis Kayu</h4>
-      <div class="card-body">
-        <canvas id="vehicleKayuChart"></canvas>
+
+    <div class="dashboard-grid">
+      <div class="card">
+        <h4 class="text-center card-header">Tonnase / Bulan</h4>
+        <div class="card-body">
+          <canvas id="tonnaseMonthlyChart"></canvas>
+        </div>
       </div>
-    </div>
-    <div class="card">
-      <h4 class="text-center card-header">
-        Jumlah Kendaraan berdasarkan Tujuan
-      </h4>
-      <div class="card-body">
-        <canvas id="uniqueVehicleChart"></canvas>
+      <div class="card">
+        <h4 class="text-center card-header">Jumlah Kendaraan Berdasarkan Jenis Kayu</h4>
+        <div class="card-body">
+          <canvas id="vehicleKayuChart"></canvas>
+        </div>
       </div>
-    </div>
-    <div class="card">
-      <h4 class="text-center card-header">Distribusi Kendaraan</h4>
-      <div class="card-body">
-        <canvas id="platBarChart"></canvas>
+      <div class="card">
+        <h4 class="text-center card-header">
+          Jumlah Kendaraan berdasarkan Tujuan
+        </h4>
+        <div class="card-body">
+          <canvas id="uniqueVehicleChart"></canvas>
+        </div>
       </div>
-    </div>
-    <div class="card">
-      <h4 class="text-center card-header">Distribusi Sender</h4>
-      <div class="card-body">
-        <canvas id="senderPieChart"></canvas>
+      <div class="card">
+        <h4 class="text-center card-header">Distribusi Kendaraan</h4>
+        <div class="card-body">
+          <canvas id="platBarChart"></canvas>
+        </div>
       </div>
-    </div>
-    <div class="card">
-      <h4 class="text-center card-header">Distribusi Jenis Kayu</h4>
-      <div class="card-body">
-        <canvas id="kayuPieChart"></canvas>
+      <div class="card">
+        <h4 class="text-center card-header">Distribusi Sender</h4>
+        <div class="card-body">
+          <canvas id="senderPieChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h4 class="text-center card-header">Distribusi Jenis Kayu</h4>
+        <div class="card-body">
+          <canvas id="kayuPieChart"></canvas>
+        </div>
       </div>
     </div>
   </div>

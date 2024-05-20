@@ -78,7 +78,7 @@
           <button id="resetButton" class="btn btn-secondary ml-2">Reset</button>
         </div>
 
-        <div class="custom-container container">
+        <div class="custom-container container mb-3">
           <p>
             Total Berat:
             <span class="font-weight-bold" id="totalBerat"></span> Kg
@@ -223,6 +223,7 @@
           },
         });
       }
+      
       function deleteSelectedRows() {
         if (!table) {
           console.error("Table is not initialized.");
@@ -252,8 +253,7 @@
             success: function (response) {
               if (response.success) {
                 // Reload or update the table after successful deletion
-                location.reload(); // Assuming you're using AJAX to populate the table
-                // Optionally, provide feedback to the user
+                location.reload();
                 alert("Selected rows deleted successfully.");
               } else {
                 alert("Error deleting selected rows: " + response.error);
@@ -277,7 +277,7 @@
           .on("keyup", function () {
             clearTimeout(searchTimeout);
 
-            searchTimeout = setTimeout(updateStatsAfterSearch, 500);
+            searchTimeout = setTimeout(updateStatsAfterSearch, 1000);
           });
 
         $("#filterDuplicatesButton").on("click", function () {
@@ -373,14 +373,14 @@
             var data = this.data();
 
             // Accumulate berat and reject values
-            totalBerat += parseFloat(data[10]); // Assuming berat is at index 9
-            totalReject += parseFloat(data[11]); // Assuming reject is at index 10
+            totalBerat += parseFloat(data[10]);
+            totalReject += parseFloat(data[11]);
 
             // Collect unique plat values
-            uniquePlat.add(data[4]); // Assuming plat is at index 3
+            uniquePlat.add(data[4]);
 
-            $("#totalBerat").text(totalBerat.toFixed(2)); // Assuming you want to display with two decimal places
-            $("#totalReject").text(totalReject.toFixed(2)); // Assuming you want to display with two decimal places
+            $("#totalBerat").text(totalBerat.toFixed(2));
+            $("#totalReject").text(totalReject.toFixed(2));
             $("#uniquePlatCount").text(uniquePlat.size);
           });
         }
@@ -395,20 +395,16 @@
             var data = this.data();
 
             // Accumulate berat and reject values
-            totalBerat += parseFloat(data[9]); // Assuming berat is at index 9
-            totalReject += parseFloat(data[10]); // Assuming reject is at index 10
+            totalBerat += parseFloat(data[10]);
+            totalReject += parseFloat(data[11]);
 
             // Collect unique plat values
-            uniquePlat.add(data[3]); // Assuming plat is at index 3
+            uniquePlat.add(data[3]);
           });
 
-          $("#totalBerat").text(totalBerat.toFixed(2)); // Assuming you want to display with two decimal places
-          $("#totalReject").text(totalReject.toFixed(2)); // Assuming you want to display with two decimal places
+          $("#totalBerat").text(totalBerat.toFixed(2));
+          $("#totalReject").text(totalReject.toFixed(2));
           $("#uniquePlatCount").text(uniquePlat.size);
-
-          // Output or use the calculated statistics as needed
-          console.log("Total Berat after search:", totalBerat);
-          console.log("Total Reject after search:", totalReject);
         }
 
         // Function to reset search
@@ -503,6 +499,7 @@
           }
           filterByDateRange(startDate, endDate);
         });
+
         function formatDate(date) {
           var year = date.getFullYear();
           var month = ("0" + (date.getMonth() + 1)).slice(-2); // Months are zero-based

@@ -79,6 +79,12 @@ def dashboard(request):
         tonnase_counts_serialized = json.dumps(list(tonnase_counts))
         unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
         vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
+
+        total_reports = reports.count()
+        total_tonnase = reports.aggregate(total=Sum('berat'))['total'] or 0
+        total_rejects = reports.aggregate(total=Sum('reject'))['total'] or 0
+        total_unique_vehicles = reports.values('plat').distinct().count()
+
     else: 
         reports = Report.objects.all()
         kayu_counts = Report.objects.values('kayu').annotate(count=Count('id'))
@@ -111,6 +117,11 @@ def dashboard(request):
         tonnase_counts_serialized = json.dumps(list(tonnase_counts))
         unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
         vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
+        
+        total_reports = Report.objects.count()
+        total_tonnase = Report.objects.aggregate(total=Sum('berat'))['total'] or 0
+        total_rejects = Report.objects.aggregate(total=Sum('reject'))['total'] or 0
+        total_unique_vehicles = Report.objects.values('plat').distinct().count()
 
     context = {
         'form' : form,
@@ -121,9 +132,11 @@ def dashboard(request):
         'tonnase_counts': tonnase_counts_serialized,
         'unique_vehicle_counts': unique_vehicle_serialized,
         'vehicle_kayu_counts': vehicle_kayu_serialized,
+        'total_reports': total_reports,
+        'total_tonnase': total_tonnase,
+        'total_rejects': total_rejects,
+        'total_unique_vehicles': total_unique_vehicles,
     }
-    print("Vehicle Kayu Counts", vehicle_kayu_serialized)
-    print("Tonnase Counts", tonnase_counts_serialized)
 
     return render(request, 'dashboard.html', context)
 
