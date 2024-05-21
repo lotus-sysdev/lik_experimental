@@ -50,8 +50,9 @@ def dashboard(request):
             reports = reports.filter(tanggal__range=[start_date, end_date])
 
         kayu_counts = reports.values('kayu').annotate(count=Count('id'))
-        sender_counts = reports.values('sender__username').annotate(count=Count('id'))
-        plat_counts = reports.annotate(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
+        sender_counts = reports.values('sender__first_name').annotate(count=Count('id'))
+        plat_counts = reports.annotate(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id')).order_by('-count')
+
         tonase_counts = reports.values(
             'kayu',
             day=ExtractDay('tanggal'),
@@ -89,8 +90,9 @@ def dashboard(request):
     else: 
         reports = Report.objects.all()
         kayu_counts = Report.objects.values('kayu').annotate(count=Count('id'))
-        sender_counts = Report.objects.values('sender__username').annotate(count=Count('id'))
-        plat_counts = Report.objects(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
+        sender_counts = Report.objects.values('sender__first_name').annotate(count=Count('id'))
+        plat_counts = Report.objects(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id')).order_by('-count')
+
         tonase_counts = Report.objects.annotate(
             'kayu',
             day=ExtractDay('tanggal'),
@@ -130,7 +132,7 @@ def dashboard(request):
         'reports' : reports,
         'kayu_counts': kayu_counts_serialized,
         'sender_counts': sender_counts_serialized,
-        'plat_counts': plat_counts_serialized,
+        'plat_counts': list(plat_counts),
         'tonase_counts': tonase_counts_serialized,
         'unique_vehicle_counts': unique_vehicle_serialized,
         'vehicle_kayu_counts': vehicle_kayu_serialized,

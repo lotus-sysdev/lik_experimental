@@ -36,7 +36,7 @@
       flex: 0 1 auto;
     }
 
-    .card-body {
+    .top-card-body {
       flex: 1 1 auto;
       display: flex;
       justify-content: center;
@@ -50,6 +50,27 @@
       height: 100% !important;
     }
 
+    .scrollable-body {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .list-group-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .upper-plat {
+      flex: 1;
+      padding-right: 5px; /* Adjust spacing between upper_plat and count */
+    }
+
+    .count {
+      flex: 1;
+      text-align: right;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 1200px) {
       .dashboard-container {
@@ -59,6 +80,10 @@
       .dashboard-grid {
         grid-template-columns: 1fr; /* Stack columns on smaller screens */
         grid-template-rows: auto; /* Auto rows for responsive stacking */
+      }
+      .scrollable-body {
+        max-height: 300px;
+        overflow-y: auto;
       }
     }
   </style>
@@ -130,25 +155,25 @@
         title="Total Reports: {{ total_reports }}, Total Revised Reports: {{ total_revised_reports }}"
       >
         <h4 class="text-center card-header">Reports</h4>
-        <div class="card-body">{{ total_reports }}</div>
+        <div class="top-card-body">{{ total_reports }}</div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card">
         <h4 class="text-center card-header">Total Berat</h4>
-        <div class="card-body">{{ total_tonase }} Kg</div>
+        <div class="top-card-body">{{ total_tonase }} Kg</div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card">
         <h4 class="text-center card-header">Total Reject</h4>
-        <div class="card-body">{{ total_rejects }} Kg</div>
+        <div class="top-card-body">{{ total_rejects }} Kg</div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card">
         <h4 class="text-center card-header">Jumlah Kendaraan</h4>
-        <div class="card-body">{{ total_unique_vehicles }}</div>
+        <div class="top-card-body">{{ total_unique_vehicles }}</div>
       </div>
     </div>
   </div>
@@ -178,8 +203,18 @@
     </div>
     <div class="card">
       <h4 class="text-center card-header">Distribusi Kendaraan</h4>
-      <div class="card-body">
-        <canvas id="platBarChart"></canvas>
+      <div class="card-body scrollable-body">
+        <!-- <canvas id="platBarChart"></canvas> -->
+        {% for plat in plat_counts %}
+        <ul class="list-group">
+          <li class="list-group-item">
+            <div class="upper-plat font-weight-bold">
+              {{ plat.upper_plat }}
+            </div>
+            <div class="count">{{ plat.count }} Pengiriman</div>
+          </li>
+        </ul>
+        {% endfor %}
       </div>
     </div>
     <div class="card">
@@ -209,18 +244,18 @@
       renderPieChart(
         "senderPieChart",
         senderCounts,
-        "sender__username",
+        "sender__first_name",
         "Sender"
       );
 
-      var platCounts = JSON.parse("{{ plat_counts | escapejs }}");
+      // var platCounts = JSON.parse("{{ plat_counts | escapejs }}");
 
-      renderBarChart(
-        "platBarChart",
-        platCounts,
-        "upper_plat",
-        "License Plates"
-      );
+      // renderBarChart(
+      //   "platBarChart",
+      //   platCounts,
+      //   "upper_plat",
+      //   "License Plates"
+      // );
 
       var startDateInput = document.getElementById("id_start_date");
       var endDateInput = document.getElementById("id_end_date");
