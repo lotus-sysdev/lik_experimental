@@ -88,23 +88,4 @@ class Group_Tujuan(models.Model):
 
     def __str__(self):
         return str(self.group)
-
-class Kayu(models.Model):
-    class Meta:
-        verbose_name = "Kayu"
-        verbose_name_plural = "Jenis Kayu"
-    nama = models.CharField(max_length=100)
-    detail = models.SlugField(unique=True)
-
-    def __str__(self):
-        return self.nama
-
-class Group_Kayu(models.Model):
-    class Meta:
-        verbose_name = "Kayu Group Access"
-        verbose_name_plural = "Kayu Group Access"
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    kayu = models.ManyToManyField(Kayu)
-
-    def __str__(self):
         return str(self.group)

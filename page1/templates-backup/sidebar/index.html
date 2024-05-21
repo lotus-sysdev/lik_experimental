@@ -1,0 +1,140 @@
+{% load static %} {% load auth_extras %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'sidebar/style.css' %}" />
+
+    <title>Sidebar</title>
+  </head>
+
+  <body>
+    <nav id="sidebar">
+      <div class="sidebar-header">
+        <h3><a href="/" class="sidebar-a">Lotus Solusindo</a></h3>
+      </div>
+
+      <ul class="list-unstyled components">
+        <p class="font-weight-bold">Navigation</p>
+        <li><a class="sidebar-a" href="/">Dashboard</a></li>
+
+        {% if request.user|has_group:'GA' or request.user|has_group:'Accounting' or request.user|has_group:'Admin' %}
+        <li class="active">
+          <a
+            href="#salesSubmenu"
+            data-toggle="collapse"
+            aria-expanded="true"
+            class="dropdown-toggle sidebar-a"
+            >Sales</a
+          >
+          <ul class="collapse list-unstyled show" id="salesSubmenu">
+            {% if request.user|has_group:'Accounting' or request.user|has_group:'Admin' %}
+            <li><a class="sidebar-a" href="">Prospects</a></li>
+            {% endif %}
+
+
+            {% if request.user|has_group:'Accounting' or request.user|has_group:'Admin' %}
+            <li><a class="sidebar-a" href="/display_supplier">Supplier</a></li>
+            {% endif %}
+
+            {% if request.user|has_group:'GA' or request.user|has_group:'Admin' %}
+            <li><a class="sidebar-a" href="/display_item">Item</a></li>
+            {% endif %}
+
+            {% if request.user|has_group:'Accounting' or request.user|has_group:'Admin' %}
+            <li>
+              <a class="sidebar-a" href="/display_purchase">Purchase Order</a>
+            </li>
+            {% endif %}
+          </ul>
+        </li>
+        {% endif %}
+
+        {% if request.user|has_group:'GA' or request.user|has_group:'Admin' %}
+        <li class="active">
+          <a
+            href="#procurementSubmenu"
+            data-toggle="collapse"
+            aria-expanded="true"
+            class="dropdown-toggle sidebar-a"
+            >Procurement</a
+          >
+          <ul class="collapse list-unstyled show" id="procurementSubmenu">
+            {% if request.user|has_group:'GA' or request.user|has_group:'Accounting' or request.user|has_group:'Admin' %}
+            <li><a class="sidebar-a" href="/display_customer">Customer</a></li>
+            {% endif %}
+
+            {% if request.user|has_group:'GA' or request.user|has_group:'Admin' %}
+            <li><a class="sidebar-a" href="/display_item">Item</a></li>
+            {% endif %}
+
+            {% if request.user|has_group:'GA' or request.user|has_group:'Accounting' or request.user|has_group:'Admin' %}
+            <li><a class="sidebar-a" href="/display_work">Work Order</a></li>
+            {% endif %}
+          </ul>
+        </li>
+        {% endif %}
+
+        {% if request.user|has_group:'FO' or request.user|has_group:'Messenger' or request.user|has_group:'Admin' %}
+        <li class="active">
+          <a
+            href="#frontOfficeSubmenu"
+            data-toggle="collapse"
+            aria-expanded="true"
+            class="dropdown-toggle sidebar-a"
+            >Front Office</a
+          >
+          <ul class="collapse list-unstyled show" id="frontOfficeSubmenu">
+              {% if request.user|has_group:'FO' or request.user|has_group:'Messenger' or request.user|has_group:'Admin' %}
+              <li><a class="sidebar-a" href="/calendar">Delivery Order</a></li>
+              {% endif %}
+              
+              {% if request.user|has_group:'FO' or request.user|has_group:'Admin' %}
+              <li><a class="sidebar-a" href="/log_book">Log Book</a></li>
+              {% endif %}
+
+              {% if request.user|has_group:'FO' or request.user|has_group:'Admin' %}
+              <li><a class="sidebar-a" href="/display_delivery">Delivery Table</a></li>
+              {% endif %}
+
+              {% if request.user|has_group:'FO' or request.user|has_group:'Admin' %}
+              <li><a class="sidebar-a" href="/display_log">Log Book Table</a></li>
+              {% endif %}
+          </ul>
+        </li>
+        {% endif %}
+
+      </ul>
+
+      <div class="sidebar-header">
+        <h3><a href="/" class="sidebar-a">Lotus Logging</a></h3>
+      </div>
+
+      <ul class="list-unstyled components">
+        <li><a class="sidebar-a" href="/">Dashboard</a></li>
+        <li><a class="sidebar-a" href="/api/display_report">Report</a></li>
+      </ul>
+
+      <ul class="list-unstyled CTAs">
+        {% if request.user|has_group:"Admin" %}
+        <li>
+          <a class="sidebar-a" class="settings" href="/user_action_logs">
+            User Action Logs
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $("#sidebarCollapse").on("click", function () {
+          $("#sidebar").toggleClass("active");
+          $(this).toggleClass("active");
+        });
+      });
+    </script>
+  </body>
+</html>

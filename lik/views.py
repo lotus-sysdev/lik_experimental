@@ -404,6 +404,7 @@ class add_report_mobile(generics.CreateAPIView):
         # Call the serializer's save method to create the Report instance
         serializer.save()
 
+
 @api_view(['POST'])
 def register_user(request):
     serializer = UserSerializer(data=request.data)
@@ -415,7 +416,7 @@ def register_user(request):
 @api_view(['POST'])
 def login_user(request):
     username = request.data.get('username')
-    password = request.data.get('password')
+    password = request.data.get('password') 
     user = authenticate(username=username, password=password)
     if user is not None:
         token, created = Token.objects.get_or_create(user=user)

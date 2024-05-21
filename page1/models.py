@@ -79,8 +79,8 @@ class CustomerPIC(models.Model):
     Role = models.CharField(max_length=50)
 
     def __str__(self):
-        return f"{self.nama}"
-
+        return f"{self.customer_id.nama_pt}-{self.nama}"
+    
 class SupplierPIC(models.Model):
     class Meta:
         verbose_name = "Supplier PIC"
@@ -91,10 +91,10 @@ class SupplierPIC(models.Model):
     email = models.EmailField()
     telp = PhoneNumberField()
     Role = models.CharField(max_length=50)
-    
+
     def __str__(self):
         return f"{self.customer_id.nama_pt}-{self.nama}"
-
+    
 class Category(models.Model):
     class Meta:
         verbose_name = "Category"
@@ -117,7 +117,7 @@ class Items(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
     pic = models.ForeignKey(CustomerPIC, on_delete=models.SET_NULL, null=True)
     nama = models.CharField(max_length=255)
-    catatan = models.CharField(max_length = 500, null = True)
+    catatan = models.CharField(max_length = 1000, null = True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null = True)
     quantity = models.IntegerField()
     unit = models.CharField(max_length=10)
@@ -174,10 +174,6 @@ class ItemSumber(models.Model):
     url = models.URLField(blank=True, null=True, max_length=1000)
     
 class ItemChangeLog(models.Model):
-    class Meta:
-        verbose_name = "Item Change Log"
-        verbose_name_plural = "Item Change Logs"
-
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
     date_time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -207,7 +203,7 @@ class Kecamatan(models.Model):
     class Meta:
         verbose_name = "Kecamatan"
         verbose_name_plural = "Kecamatan"
-    id = models.IntegerField(primary_key=True)
+    id = models.BigAutoField(primary_key=True)
     kota_id = models.ForeignKey(Kota, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     def __str__(self):
@@ -217,7 +213,7 @@ class Kelurahan(models.Model):
     class Meta:
         verbose_name = "Kelurahan/Desa"
         verbose_name_plural = "Kelurahan/Desa"
-    id = models.IntegerField(primary_key=True)
+    id = models.BigAutoField(primary_key=True)
     kecamatan_id = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     def __str__(self):
@@ -231,7 +227,7 @@ class KodePos(models.Model):
     kelurahan_id = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
     def __str__(self):
         return str(self.kode_pos)
-    
+
 class CustomerAlamat(models.Model):
     class Meta:
         verbose_name = "Customer Address"
@@ -243,11 +239,11 @@ class CustomerAlamat(models.Model):
         ('pengiriman', 'Alamat Pengiriman'),
     )
     type = models.CharField(max_length=15, choices=TYPE_CHOICES)
-    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
     kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
     kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
     kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     detail = models.CharField(max_length=500)
 
     def __str__ (self):
@@ -264,11 +260,11 @@ class SupplierAlamat(models.Model):
         ('pengiriman', 'Alamat Pengiriman'),
     )
     type = models.CharField(max_length=15, choices=TYPE_CHOICES)
-    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
     kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
     kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
     kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
+    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     detail = models.CharField(max_length=500)
 
 def default_date():
@@ -343,12 +339,12 @@ class WorkOrder(models.Model):
     status = models.CharField(max_length=30,choices = STATUS_CHOICES) 
 
     STATUS_CONDITIONS = {
-        'complete': lambda self: self.tanggal_pengiriman_invoice and self.tanggal_pengiriman_barang and self.tanggal_input_accurate and self.tanggal_process and self.tanggal_WO and self.revenue_PO and self.nomor_WO,
+        'complete': lambda self: self.tanggal_pengiriman_invoice and self.tanggal_pengiriman_barang and self.tanggal_input_accurate and self.tanggal_process and self.tanggal_PO and self.revenue_PO and self.nomor_PO,
         'invoice': lambda self: self.tanggal_pengiriman_invoice,
         'pengiriman': lambda self: self.tanggal_pengiriman_barang,
         'accurate': lambda self: self.tanggal_input_accurate,
         'process': lambda self: self.tanggal_process,
-        'order': lambda self: self.revenue_PO or self.nomor_WO or self.tanggal_WO,
+        'order': lambda self: self.revenue_PO or self.nomor_PO or self.tanggal_WO,
         'pending': lambda self: True,
     }
 
@@ -451,7 +447,7 @@ class LogBook(models.Model):
     id = models.AutoField(primary_key=True)
     instansi_asal = models.CharField(max_length = 255, null = True)
     nama = models.CharField(max_length=50, null = True)
-    email = models.EmailField(max_length = 100)
+    email = models.EmailField(max_length = 100, null=True, blank= True)
     TUJUAN_CHOICES = (
         ("meeting", "Meeting"),
         ("survey", "Survey"),
@@ -472,37 +468,6 @@ class LogBook(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.start.strftime('%Y-%m-%d') if self.start else 'No start date'})"
-
-class Employee(models.Model):
-    id = models.AutoField(primary_key=True)
-    employeeId = models.CharField(max_length=10)
-    name = models.CharField(max_length=255)
-    position = models.CharField(max_length=255)
-    department = models.CharField(max_length=255)
-    join_date = models.DateField()
-    no_telp = PhoneNumberField()
-    gender = models.CharField(max_length=10)
-    status = models.CharField(max_length=100)
-    tempat_lahir = models.CharField(max_length = 255)
-    tanggal_lahir = models.DateField()
-    no_ktp = models.BigIntegerField()
-    no_rek = models.BigIntegerField()
-
-class EmployeeAlamat(models.Model):
-    class Meta:
-        verbose_name = "Employee Address"
-        verbose_name_plural = "Employee Addresses"
-    
-    employee_id = models.ForeignKey(Employee, on_delete=models.CASCADE, null=True)
-    provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
-    kota = models.ForeignKey(Kota, on_delete=models.CASCADE)
-    kecamatan = models.ForeignKey(Kecamatan, on_delete=models.CASCADE)
-    kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
-    kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
-    detail = models.CharField(max_length=500)
-
-    def __str__ (self):
-        return (f'{self.employee_id.name}') 
 
 class Prospect(models.Model):
     prospect_id = models.AutoField(primary_key=True)
@@ -549,7 +514,7 @@ class ProspectPIC(models.Model):
 
     prospect_id = models.ForeignKey(Prospect, on_delete=models.CASCADE)
     nama = models.CharField(max_length=255)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, null=True, blank=True)
     telp = PhoneNumberField()
     Role  = models.CharField(max_length=50)
 
@@ -568,7 +533,6 @@ class ProspectAddress(models.Model):
     kelurahan = models.ForeignKey(Kelurahan, on_delete=models.CASCADE)
     kode_pos = models.IntegerField (blank=True, null=True, validators=[MaxValueValidator(99999)])
     detail = models.CharField(max_length=500)
-
 
 class User(AbstractUser):
     email = models.EmailField(max_length = 100, unique=True)
