@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 
 <html>
   <head>
@@ -134,7 +135,7 @@
             <td>{{ report.plat|upper }}</td>
             <td>{{ report.driver }}</td>
             <td>{{ report.PO }}</td>
-            <td>{{ report.DO }}</td>
+            <td>{{ report.DO|strip_spaces }}</td>
             <td>{{ report.no_tiket }}</td>
             <td>{{ report.kayu }}</td>
             <td>{{ report.berat }} kg</td>
