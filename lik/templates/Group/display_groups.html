@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+
+<html>
+  <head>
+    {% block title %}Edit Permissions{% endblock %}
+  </head>
+  <body>
+    {% block content %}
+    <h1>Edit Group Permissions</h1>
+    {% csrf_token %}
+    <div>
+      <table
+        id="likTable"
+        class="table table-bordered table-striped w-100 table-lg table-responsive-lg"
+      >
+        <thead class="thead thead-light">
+          <tr>
+            <th>Group</th>
+            <th>Kayu</th>
+            <th>Lokasi</th>
+            <th>Tujuan</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for data in group_data %}
+          <tr>
+            <td>{{ data.group }}</td>
+            <td>
+              {% for kayu in all_kayu %}
+              <input
+                type="checkbox"
+                name="kayu_{{ data.group.id }}"
+                value="{{ kayu.id }}"
+                {% if kayu in data.kayu %}
+                checked
+                {% endif %}
+              />
+              {{ kayu }} {% endfor %}
+            </td>
+            <td>
+              {% for lokasi in all_lokasi %}
+              <input
+                type="checkbox"
+                name="lokasi_{{ data.group.id }}"
+                value="{{ lokasi.id }}"
+                {% if lokasi in data.lokasi %}
+                checked
+                {% endif %}
+              />
+              {{ lokasi }} {% endfor %}
+            </td>
+            <td>
+              {% for tujuan in all_tujuan %}
+              <input
+                type="checkbox"
+                name="tujuan_{{ data.group.id }}"
+                value="{{ tujuan.id }}"
+                {% if tujuan in data.tujuan %}
+                checked
+                {% endif %}
+              />
+              {{ tujuan }} {% endfor %}
+            </td>
+            <td>
+              <button class="btn btn-primary" id="save-button" disabled>Save</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <script>
+      var table;
+      function initializeDataTable() {
+        table = new DataTable("#likTable", {
+          lengthMenu: [
+            [10, 25, 50, 100, -1],
+            [10, 25, 50, 100, "All"],
+          ],
+          responsive: true,
+        });
+      }
+      function deleteSelectedRows() {
+        if (!table) {
+          console.error("Table is not initialized.");
+          return;
+        }
+        var selectedIDs = table
+          .rows(".selected")
+          .data()
+          .toArray()
+          .map((row) => row[1]); // Get SKUs of selected rows using DataTables API
+        selectedIDs.forEach(function (value) {
+          console.log("selected_ids[]:", value);
+        });
+        if (selectedIDs.length === 0) {
+          alert("Please select at least one row to delete.");
+          return;
+        }
+
+        if (confirm("Are you sure you want to delete the selected rows?")) {
+          const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0]
+            .value;
+          $.ajax({
+            url: '{% url "delete_selected_rows_report" %}',
+            type: "POST",
+            data: { selected_ids: selectedIDs, csrfmiddlewaretoken: csrfToken },
+            dataType: "json",
+            success: function (response) {
+              if (response.success) {
+                // Reload or update the table after successful deletion
+                location.reload();
+                // Optionally, provide feedback to the user
+                alert("Selected rows deleted successfully.");
+              } else {
+                alert("Error deleting selected rows: " + response.error);
+              }
+            },
+            error: function (xhr, status, error) {
+              alert("Error deleting selected rows: " + error);
+            },
+          });
+        }
+      }
+      $(document).ready(function () {
+        initializeDataTable();
+
+        $("#filterDuplicatesButton").on("click", function () {
+          filterDuplicates();
+        });
+
+        function filterDuplicates() {
+          var rows = table.rows().nodes(); // Get all rows in the DataTable
+
+          var uniqueRows = {}; // Object to store unique rows
+          var allDuplicateRows = []; // Array to store all occurrences of duplicate row nodes
+
+          // Iterate through each row
+          rows.each(function (index, row) {
+            var rowData = table.row(row).data(); // Get data for the current row
+            var rowDataStr = JSON.stringify(excludeColumns(rowData)); // Convert row data to a string for comparison
+
+            // Check if the row data already exists in the uniqueRows object
+            if (uniqueRows[rowDataStr]) {
+              // Duplicate row found, add both the current row index and the original reference row index to allDuplicateRows array
+              allDuplicateRows.push(index);
+              allDuplicateRows.push(uniqueRows[rowDataStr]);
+              // Include the current row index as well
+              allDuplicateRows.push(index);
+            } else {
+              // Unique row, add it to the uniqueRows object
+              uniqueRows[rowDataStr] = index;
+            }
+          });
+
+          // Hide all rows
+          table.rows().nodes().to$().hide();
+
+          // Show all occurrences of duplicate rows and their corresponding original reference rows
+          table.rows(allDuplicateRows).nodes().to$().show();
+
+          table.draw();
+        }
+
+        // Function to exclude multiple columns from row data
+        function excludeColumns(rowData) {
+          var excludedColumns = [0, 1, 2, 14, 15]; // Specify the indices of columns to be excluded (e.g., column index 3 and 5)
+          var rowDataCopy = rowData.slice(); // Create a copy of the row data array
+
+          // Set excluded column values to null
+          for (var i = 0; i < excludedColumns.length; i++) {
+            var columnIndex = excludedColumns[i];
+            rowDataCopy[columnIndex] = null;
+          }
+
+          return rowDataCopy;
+        }
+
+        $("#resetFilterDuplicatesBtn").on("click", function () {
+          resetFilterDuplicates();
+        });
+
+        // Function to reset check duplicates button
+        function resetFilterDuplicates() {
+          // Show all rows
+          table.rows().nodes().to$().show();
+
+          table.draw();
+        }
+
+        $("#searchButton").on("click", function () {
+          columnSearch();
+        });
+
+        $("#resetButtonCol").on("click", function () {
+          resetSearch();
+        });
+
+        // Function to perform column-specific search
+        function columnSearch() {
+          var columnIndex = $("#columnFilter").val(); // Get the index of the selected column
+          var searchValue = $("#columnSearch").val().trim(); // Get the value of the search input and remove leading/trailing whitespace
+          table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
+        }
+
+        // Function to reset search
+        function resetSearch() {
+          $("#columnSearch").val(""); // Clear the search input
+          table.search("").columns().search("").draw(); // Clear all column-specific searches and redraw the table
+        }
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(function (checkbox) {
+          checkbox.addEventListener("change", function () {
+            const row = this.closest("tr");
+            const saveButton = row.querySelector("#save-button");
+            saveButton.disabled = false;
+          });
+        });
+      });
+      $(document).ready(function () {
+        // Function to handle saving changes
+        function saveChanges(groupId, kayuIds, lokasiIds, tujuanIds) {
+          const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0]
+            .value;
+          console.log(kayuIds, lokasiIds, tujuanIds);
+          $.ajax({
+            url: '{% url "save_group_changes" %}', // Replace with the URL of your server endpoint
+            type: "POST",
+            data: {
+              group_id: groupId,
+              kayu_ids: kayuIds,
+              lokasi_ids: lokasiIds,
+              tujuan_ids: tujuanIds,
+              csrfmiddlewaretoken: csrfToken,
+            },
+            dataType: "json",
+            success: function (response) {
+              if (response.success) {
+                alert("Changes saved successfully.");
+                location.reload()
+              } else {
+                alert("Failed to save changes.");
+              }
+            },
+            error: function (xhr, status, error) {
+              console.error("Error:", error);
+              alert("Failed to save changes.");
+            },
+          });
+        }
+
+        // Event listener for checkbox change
+        $('input[type="checkbox"]').on("change", function () {
+          const row = $(this).closest("tr");
+          const saveButton = row.find("#save-button");
+          saveButton.prop("disabled", false); // Enable the save button
+        });
+
+        // Event listener for save button click
+        $("#save-button").on("click", function () {
+          const row = $(this).closest("tr");
+          const groupId = row.find("td:first").text(); // Get group ID from the first cell in the row
+
+          // Get checked checkbox values for Kayu, Lokasi, and Tujuan
+          const kayuIds = row
+            .find('input[name^="kayu_"]:checked')
+            .map(function () {
+              return $(this).val();
+            })
+            .get();
+          const lokasiIds = row
+            .find('input[name^="lokasi_"]:checked')
+            .map(function () {
+              return $(this).val();
+            })
+            .get();
+          const tujuanIds = row
+            .find('input[name^="tujuan_"]:checked')
+            .map(function () {
+              return $(this).val();
+            })
+            .get();
+          // Call saveChanges function to send data to the server
+          console.log("Group ID:", groupId);
+          console.log("Kayu IDs:", kayuIds);
+          console.log("Lokasi IDs:", lokasiIds);
+          console.log("Tujuan IDs:", tujuanIds);
+
+          // Call saveChanges function to send data to the server
+          saveChanges(groupId, kayuIds, lokasiIds, tujuanIds);
+        });
+      });
+    </script>
+    {% endblock %}
+  </body>
+</html>

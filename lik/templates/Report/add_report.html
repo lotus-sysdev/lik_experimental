@@ -8,25 +8,171 @@
 </head>
 
 <body>
-    {% block content %}
-    <h2>Add Report</h2>
-    <div class="form-group w-50">
-      <form method="post">
-        {% csrf_token %}
-        {% for field in entity_form %}
-        {{ field.label_tag }}
+  {% block content %}
+  <h2>Add Report</h2>
+  <div class="form-group w-50">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row">
+          <div class="col-md-6">
+              <div class="form-group">
+                {{ entity_form.date_time.label_tag }}
+                {{ entity_form.date_time }}
+                {% for error in entity_form.date_time.errors %}
+                <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+              </div>
+          </div>
+          <div class="col-md-6">
+              <div class="form-group">
+                {{ entity_form.sender.label_tag }}
+                {{ entity_form.sender }}
+                {% for error in entity_form.sender.errors %}
+                <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+              </div>
+          </div>
+      </div>
+
+      <div class="row">
+          <div class="col-md-6">
+              <div class="form-group">
+                {{ entity_form.driver.label_tag }}
+                {{ entity_form.driver }}
+                {% for error in entity_form.driver.errors %}
+                <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+              </div>
+          </div>
+          <div class="col-md-6">
+              <div class="form-group">
+                {{ entity_form.plat.label_tag }}
+                {{ entity_form.plat }}
+                {% for error in entity_form.plat.errors %}
+                <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+              </div>
+          </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            {{ entity_form.PO.label_tag }}
+            {{ entity_form.PO }}
+            {% for error in entity_form.PO.errors %}
+            <span class="text-danger">{{ error }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
-              {{ field }}
-              {% for error in field.errors %}
+              {{ entity_form.DO.label_tag }}
+              {{ entity_form.DO }}
+              {% for error in entity_form.DO.errors %}
               <span class="text-danger">{{ error }}</span>
               {% endfor %}
             </div>
+        </div>
+      </div>
+
+      <div class="row">
+          <div class="col-md-6">
+              <div class="form-group">
+                {{ entity_form.no_tiket.label_tag }}
+                {{ entity_form.no_tiket }}
+                {% for error in entity_form.no_tiket.errors %}
+                <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+              </div>
+          </div>
+          <div class="col-md-6">
+              <div class="form-group">
+                {{ entity_form.tanggal.label_tag }}
+                {{ entity_form.tanggal }}
+                {% for error in entity_form.tanggal.errors %}
+                <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+              </div>
+          </div>
+      </div>
+
+      
+      <div class="form-group">
+        {{ entity_form.kayu.label_tag }}
+        {{ entity_form.kayu }}
+        {% for error in entity_form.kayu.errors %}
+        <span class="text-danger">{{ error }}</span>
         {% endfor %}
-        <!-- {{entity_form.as_p}}     -->
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </form>
-    </div>
-    {% endblock %}
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+              {{ entity_form.berat.label_tag }}
+              {{ entity_form.berat }}
+              {% for error in entity_form.berat.errors %}
+              <span class="text-danger">{{ error }}</span>
+              {% endfor %}
+            </div>
+        </div>
+          <div class="col-md-6">
+              <div class="form-group">
+                {{ entity_form.reject.label_tag }}
+                {{ entity_form.reject }}
+                {% for error in entity_form.reject.errors %}
+                <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+              </div>
+          </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+              {{ entity_form.lokasi.label_tag }}
+              {{ entity_form.lokasi }}
+              {% for error in entity_form.lokasi.errors %}
+              <span class="text-danger">{{ error }}</span>
+              {% endfor %}
+            </div>
+        </div>
+          <div class="col-md-6">
+              <div class="form-group">
+                {{ entity_form.tujuan.label_tag }}
+                {{ entity_form.tujuan }}
+                {% for error in entity_form.tujuan.errors %}
+                <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+              </div>
+          </div>
+      </div>
+
+      <div class="row">
+          <div class="col-md-6">
+              <div class="form-group">
+                {{ entity_form.foto.label_tag }}
+                {{ entity_form.foto }}
+                {% for error in entity_form.foto.errors %}
+                <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+              </div>
+          </div>
+          <div class="col-md-6">
+              <div class="form-group">
+                {{ entity_form.og_foto.label_tag }}
+                {{ entity_form.og_foto }}
+                {% for error in entity_form.og_foto.errors %}
+                <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+              </div>
+          </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+  {% endblock %}
 </body>
 
 </html>

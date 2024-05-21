@@ -1,0 +1,810 @@
+{% extends 'base.html' %}
+<head>
+  {% block title %}LIK Dashboard{% endblock %}
+</head>
+<body>
+  {% block content %}
+
+  <style>
+    .dashboard-container {
+      display: grid;
+      grid-template-columns: 1fr 5fr; /* 1fr for totals, 3fr for the card grid */
+      grid-gap: 20px;
+    }
+
+    .totals-container {
+      display: flex;
+      flex-direction: row;
+      gap: 20px; /* Space between total cards */
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(3, auto);
+      grid-gap: 20px;
+    }
+
+    .card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      /* padding: 20px; */
+    }
+
+    .card-header {
+      flex: 0 1 auto;
+    }
+
+    .card-body {
+      flex: 1 1 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      font-size: 1.5rem; /* Increased font size for better readability */
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+      .dashboard-container {
+        grid-template-columns: 1fr; /* Stack columns on smaller screens */
+        grid-template-rows: auto; /* Auto rows for responsive stacking */
+      }
+      .dashboard-grid {
+        grid-template-columns: 1fr; /* Stack columns on smaller screens */
+        grid-template-rows: auto; /* Auto rows for responsive stacking */
+      }
+    }
+  </style>
+
+  <h1>Overview</h1>
+  <form
+    method="GET"
+    action="{% url 'dashboard' %}"
+    id="filterForm"
+    class="mt-2 mb-2"
+  >
+    <div class="row align-items-end">
+      <div class="form-group col-md-2">
+        {{ form.kayu.label_tag }}{{ form.kayu }}
+      </div>
+      <div class="form-group col-md-2">
+        {{ form.sender.label_tag }} {{ form.sender }}
+      </div>
+      <div class="form-group col-md-2">
+        <label>Date Range:</label>
+        <select
+          id="date-range-select"
+          onchange="updateDateRange()"
+          class="form-control"
+        >
+          <option value="">Select Date Range</option>
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="1-10">1-10 of this month</option>
+          <option value="11-20">11-20 of this month</option>
+          <option value="21-eom">21- End of this month</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="60">Last 60 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="365">Last 365 days</option>
+          <option value="730">Last 730 days</option>
+          <option value="ytd">Year to Date</option>
+        </select>
+      </div>
+      <div class="form-group col-md-2">
+        {{ form.start_date.label_tag }} {{ form.start_date }}
+      </div>
+      <div class="form-group col-md-2">
+        {{ form.end_date.label_tag }} {{ form.end_date }}
+      </div>
+      <div class="form-group col-md-2 d-flex">
+        <button class="btn btn-primary mr-2" style="width: 50%" type="submit">
+          View
+        </button>
+        <button
+          class="btn btn-secondary"
+          style="width: 50%"
+          type="button"
+          onclick="resetForm()"
+        >
+          Reset
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div
+        class="card"
+        data-toggle="tooltip"
+        data-placement="top"
+        title="Total Reports: {{ total_reports }}, Total Revised Reports: {{ total_revised_reports }}"
+      >
+        <h4 class="text-center card-header">Reports</h4>
+        <div class="card-body">{{ total_reports }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card">
+        <h4 class="text-center card-header">Total Berat</h4>
+        <div class="card-body">{{ total_tonase }} Kg</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card">
+        <h4 class="text-center card-header">Total Reject</h4>
+        <div class="card-body">{{ total_rejects }} Kg</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card">
+        <h4 class="text-center card-header">Jumlah Kendaraan</h4>
+        <div class="card-body">{{ total_unique_vehicles }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="card">
+      <h4 class="text-center card-header">Tonase / Bulan</h4>
+      <div class="card-body">
+        <canvas id="tonaseMonthlyChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">
+        Jumlah Kendaraan Berdasarkan Jenis Kayu
+      </h4>
+      <div class="card-body">
+        <canvas id="vehicleKayuChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">
+        Jumlah Kendaraan berdasarkan Tujuan
+      </h4>
+      <div class="card-body">
+        <canvas id="uniqueVehicleChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">Distribusi Kendaraan</h4>
+      <div class="card-body">
+        <canvas id="platBarChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">Distribusi Sender</h4>
+      <div class="card-body">
+        <canvas id="senderPieChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h4 class="text-center card-header">Distribusi Jenis Kayu</h4>
+      <div class="card-body">
+        <canvas id="kayuPieChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <script>
+    // LOAD PIE CHART
+    document.addEventListener("DOMContentLoaded", function () {
+      // Get the serialized kayu counts data passed from the view
+      var kayuCounts = JSON.parse("{{ kayu_counts | escapejs }}");
+      var senderCounts = JSON.parse("{{ sender_counts | escapejs }}");
+
+      renderPieChart("kayuPieChart", kayuCounts, "kayu", "Jenis Kayu");
+      renderPieChart(
+        "senderPieChart",
+        senderCounts,
+        "sender__username",
+        "Sender"
+      );
+
+      var platCounts = JSON.parse("{{ plat_counts | escapejs }}");
+
+      renderBarChart(
+        "platBarChart",
+        platCounts,
+        "upper_plat",
+        "License Plates"
+      );
+
+      var startDateInput = document.getElementById("id_start_date");
+      var endDateInput = document.getElementById("id_end_date");
+      var startDate = new Date(startDateInput.value);
+      var endDate = new Date(endDateInput.value);
+
+      // Check if the dates are valid, otherwise default to the current year
+      if (isNaN(startDate.getTime())) {
+        startDate = new Date(new Date().getFullYear(), 0, 1); // Default to January 1st of the current year
+      } else {
+        startDate.setHours(0, 0, 0, 0);
+      }
+      if (isNaN(endDate.getTime())) {
+        endDate = new Date(); // Default to today
+      } else {
+        endDate.setHours(23, 59, 59, 999);
+      }
+
+      // Generate dynamic labels based on the date range
+      var labels = generateLabels(startDate, endDate);
+
+      var uniqueVehicleCounts = JSON.parse(
+        "{{ unique_vehicle_counts | escapejs }}"
+      );
+
+      renderColumnChart(
+        "uniqueVehicleChart",
+        uniqueVehicleCounts,
+        labels,
+        startDate,
+        endDate,
+        "uniquevehicle"
+      );
+
+      var tonaseCounts = JSON.parse("{{ tonase_counts | escapejs }}");
+      var vehicleKayuCounts = JSON.parse(
+        "{{ vehicle_kayu_counts | escapejs }}"
+      );
+
+      renderMixedChart(
+        "tonaseMonthlyChart",
+        tonaseCounts,
+        labels,
+        startDate,
+        endDate,
+        "Total Tonase",
+        true
+      );
+      renderMixedChart(
+        "vehicleKayuChart",
+        vehicleKayuCounts,
+        labels,
+        startDate,
+        endDate,
+        "Total Kendaraan"
+      );
+    });
+
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+
+    function renderPieChart(canvasId, data, labelKey, chartLabel) {
+      var labels = [];
+      var dataValues = [];
+
+      data.forEach(function (item) {
+        if (item.hasOwnProperty(labelKey)) {
+          labels.push(item[labelKey]);
+        } else {
+          // Fallback to a default label key if the specified key doesn't exist
+          labels.push(item.defaultLabelKey);
+        }
+        dataValues.push(item.count);
+      });
+
+      var ctx = document.getElementById(canvasId).getContext("2d");
+      new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              data: dataValues,
+              backgroundColor: [
+                "rgba(28, 22, 120, 0.8)", // Dark Blue
+                "rgba(133, 118, 255, 0.8)", // Light Purple
+                "rgba(0, 128, 0, 0.8)", // Dark Green
+                "rgba(1, 123, 148, 0.8)", // Dark Teal
+                "rgba(255, 99, 71, 0.8)", // Dark Orange-Red
+                "rgba(245, 55, 12, 0.8)", // Bright Red
+              ],
+              borderColor: [
+                "rgba(28, 22, 120, 1)",
+                "rgba(133, 118, 255, 1)",
+                "rgba(0, 128, 0, 1)",
+                "rgba(1, 123, 148, 1)",
+                "rgba(255, 99, 71, 1)",
+                "rgba(245, 55, 12, 1)",
+              ],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true, // Enable the legend
+            },
+            title: {
+              display: true,
+              text: chartLabel,
+            },
+            datalabels: {
+              formatter: (value, ctx) => {
+                let sum = 0;
+                let dataArr = ctx.chart.data.datasets[0].data;
+                dataArr.forEach((data) => {
+                  sum += data;
+                });
+                let percentage = ((value / sum) * 100).toFixed(2) + "%";
+                return percentage;
+              },
+              color: "white",
+              font: {
+                weight: "bold",
+              },
+              backgroundColor: function (context) {
+                return context.dataset.backgroundColor[context.dataIndex];
+              },
+              borderRadius: 4,
+              padding: 6,
+            },
+          },
+        },
+        plugins: [ChartDataLabels],
+      });
+    }
+
+    function renderBarChart(canvasId, data, labelKey, chartLabel) {
+      var labels = [];
+      var dataValues = [];
+
+      data.forEach(function (item) {
+        labels.push(item[labelKey]);
+        dataValues.push(item.count);
+      });
+
+      var ctx = document.getElementById(canvasId).getContext("2d");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: chartLabel,
+              data: dataValues,
+              backgroundColor: [
+                "rgba(28, 22, 120, 0.6)",
+                "rgba(133, 118, 255, 0.6)",
+                "rgba(0, 128, 0, 0.6)",
+                "rgba(1, 123, 148, 0.6)",
+                "rgba(255, 99, 71, 0.6)",
+                "rgba(245, 55, 12, 0.6)",
+              ],
+              borderColor: [
+                "rgba(28, 22, 120, 1)",
+                "rgba(133, 118, 255, 1)",
+                "rgba(0, 128, 0, 1)",
+                "rgba(1, 123, 148, 1)",
+                "rgba(255, 99, 71, 1)",
+                "rgba(245, 55, 12, 1)",
+              ],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            xAxes: [
+              {
+                ticks: {
+                  beginAtZero: true,
+                },
+              },
+            ],
+          },
+          indexAxis: "y",
+          plugins: {
+            legend: {
+              display: false, // Disable the legend
+            },
+            title: {
+              display: false, // Disable the chart title
+            },
+            datalabels: {
+              anchor: "center",
+              align: "center",
+              color: "white",
+              font: {
+                weight: "bold",
+              },
+            },
+          },
+        },
+        plugins: [ChartDataLabels],
+      });
+    }
+
+    function generateLabels(startDate, endDate) {
+      var labels = [];
+      var currentDate = new Date(
+        startDate.getFullYear(),
+        startDate.getMonth(),
+        1
+      );
+      while (currentDate <= endDate) {
+        labels.push(
+          currentDate.toLocaleString("default", { month: "short" }) +
+            " " +
+            currentDate.getFullYear().toString().slice(-2)
+        );
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      }
+      return labels;
+    }
+
+    function renderColumnChart(
+      canvasId,
+      data,
+      labels,
+      startDate,
+      endDate,
+      dataType
+    ) {
+      // console.log("Start Date:", startDate);
+      // console.log("End Date:", endDate);
+
+      var uniqueLabels = [];
+      var uniqueColors = {};
+
+      // Extract unique labels and assign colors
+      data.forEach(function (item, index) {
+        var label;
+        var count;
+
+        // Extract label and count based on data type
+        if (dataType === "kayu") {
+          label = item.kayu;
+        } else if (dataType === "uniquevehicle") {
+          label = item.tujuan;
+        }
+        count = item.count;
+        console.log(item);
+
+        if (!uniqueLabels.includes(label)) {
+          uniqueLabels.push(label);
+          uniqueColors[label] = getRandomColor(index);
+        }
+      });
+
+      // Initialize data array for each label
+      var dataCounts = Array.from({ length: uniqueLabels.length }, () =>
+        new Array(labels.length).fill(0)
+      );
+
+      // Fill data array with counts
+      data.forEach(function (item) {
+        var label;
+        var count;
+
+        // Extract label and count based on data type
+        if (dataType === "kayu") {
+          label = item.kayu;
+        } else if (dataType === "uniquevehicle") {
+          label = item.tujuan;
+        }
+        count = item.count;
+
+        var itemDate = new Date(item.year, item.month - 1, item.day);
+        // console.log("Item Date:", itemDate);
+        console.log(item.unique_vehicles);
+
+        if (
+          !isNaN(itemDate.getTime()) &&
+          itemDate >= startDate &&
+          itemDate <= endDate
+        ) {
+          // Calculate the correct month index
+          var monthIndex =
+            (itemDate.getFullYear() - startDate.getFullYear()) * 12 +
+            (itemDate.getMonth() - startDate.getMonth());
+          // console.log("Month Index:", monthIndex);
+
+          var labelIndex = uniqueLabels.indexOf(label);
+          // console.log("Label Index:", labelIndex);
+
+          if (labelIndex >= 0 && monthIndex >= 0) {
+            dataCounts[labelIndex][monthIndex] += count;
+            // console.log("Updated dataCounts:", dataCounts);
+          }
+        }
+      });
+
+      // Render column chart
+      var ctx = document.getElementById(canvasId).getContext("2d");
+      var columnChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: uniqueLabels.map(function (label, index) {
+            return {
+              label: label,
+              data: dataCounts[index],
+              backgroundColor: uniqueColors[label],
+              borderColor: "rgba(0, 0, 0, 1)",
+              borderWidth: 1,
+            };
+          }),
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            xAxes: [{ stacked: true }],
+            yAxes: [
+              {
+                stacked: true,
+                ticks: { beginAtZero: true, stepSize: 1 },
+              },
+            ],
+          },
+          plugins: {
+            datalabels: {
+              anchor: "center",
+              align: "end",
+              color: "black",
+              font: { weight: "bold" },
+              formatter: function (value, context) {
+                return value !== 0 ? value : "";
+              },
+            },
+          },
+        },
+        plugins: [ChartDataLabels],
+      });
+
+      return columnChart;
+    }
+
+    function renderMixedChart(
+      canvasId,
+      data,
+      labels,
+      startDate,
+      endDate,
+      chartLabel,
+      isTonnage = false
+    ) {
+      var kayuLabels = [];
+      var kayuColors = {};
+
+      data.forEach(function (item, index) {
+        if (!kayuLabels.includes(item.kayu)) {
+          kayuLabels.push(item.kayu);
+          kayuColors[item.kayu] = getRandomColor(index);
+        }
+      });
+
+      var totalMonths =
+        (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+        (endDate.getMonth() - startDate.getMonth()) +
+        1;
+
+      var kayuData = Array.from({ length: kayuLabels.length }, () =>
+        new Array(labels.length).fill(0)
+      );
+      var tonnageData = new Array(labels.length).fill(0);
+
+      data.forEach(function (item) {
+        var itemDate = new Date(item.year, item.month - 1, item.day);
+
+        if (
+          !isNaN(itemDate.getTime()) &&
+          itemDate >= startDate &&
+          itemDate <= endDate
+        ) {
+          var monthIndex =
+            (itemDate.getFullYear() - startDate.getFullYear()) * 12 +
+            (itemDate.getMonth() - startDate.getMonth());
+
+          var kayuIndex = kayuLabels.indexOf(item.kayu);
+
+          if (kayuIndex >= 0 && monthIndex >= 0 && monthIndex < totalMonths) {
+            if (isTonnage) {
+              kayuData[kayuIndex][monthIndex] += item.berat; // Use item.berat for tonnage
+              tonnageData[monthIndex] += item.berat; // Sum of tonnage
+            } else {
+              kayuData[kayuIndex][monthIndex] += item.count; // Use item.berat for tonnage
+              tonnageData[monthIndex] += item.count; // Sum of tonnage
+            }
+          }
+        }
+      });
+
+      var ctx = document.getElementById(canvasId).getContext("2d");
+      var mixedChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            ...kayuLabels.map(function (label, index) {
+              return {
+                type: "bar",
+                label: label,
+                data: kayuData[index],
+                backgroundColor: kayuColors[label],
+                borderColor: "rgba(0, 0, 0, 1)",
+                borderWidth: 1,
+              };
+            }),
+            {
+              type: "line",
+              label: chartLabel,
+              data: tonnageData,
+              backgroundColor: "rgba(255, 99, 132, 0.2)",
+              borderColor: "rgba(255, 99, 132, 1)",
+              borderWidth: 2,
+              fill: false,
+              yAxisID: "y",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              stacked: false,
+            },
+            y: {
+              stacked: false,
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1,
+              },
+            },
+            y1: {
+              display: false,
+              // position: "right",
+              beginAtZero: true,
+              // ticks: {
+              //   stepSize: 1,
+              // },
+            },
+          },
+          plugins: {
+            datalabels: {
+              anchor: "center",
+              align: "start",
+              color: "black",
+              font: {
+                weight: "bold",
+              },
+              formatter: function (value, context) {
+                return value !== 0 ? value : "";
+              },
+            },
+          },
+        },
+        plugins: [ChartDataLabels],
+      });
+    }
+
+    // Function to generate consistent colors for kayu types
+    function getRandomColor(index) {
+      var colors = [
+        "rgba(28, 22, 120, 0.6)", // Dark Blue
+        "rgba(133, 118, 255, 0.6)", // Light Purple
+        "rgba(0, 128, 0, 0.6)", // Dark Green
+        "rgba(1, 123, 148, 0.6)", // Dark Teal
+        "rgba(255, 99, 71, 0.6)", // Dark Orange-Red
+        "rgba(245, 55, 12, 0.6)", // Bright Red
+      ];
+      return colors[index % colors.length];
+    }
+
+    // FILTER FUNCTIONALITY
+    function resetForm() {
+      window.location.href = "{% url 'dashboard' %}";
+    }
+    function updateDateRange() {
+      var dateRange = document.getElementById("date-range-select").value;
+      var startDateInput = document.getElementById("id_start_date");
+      var endDateInput = document.getElementById("id_end_date");
+
+      var startDate = "";
+      var endDate = "";
+
+      if (dateRange === "today") {
+        startDate = formatDate(new Date());
+        endDate = startDate;
+      } else if (dateRange === "yesterday") {
+        var yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        startDate = formatDate(yesterday);
+        endDate = startDate;
+      } else if (dateRange === "1-10") {
+        startDate = formatDate(
+          new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+        );
+        endDate = formatDate(
+          new Date(new Date().getFullYear(), new Date().getMonth(), 10)
+        );
+      } else if (dateRange === "11-20") {
+        startDate = formatDate(
+          new Date(new Date().getFullYear(), new Date().getMonth(), 11)
+        );
+        endDate = formatDate(
+          new Date(new Date().getFullYear(), new Date().getMonth(), 20)
+        );
+      } else if (dateRange === "21-eom") {
+        startDate = formatDate(
+          new Date(new Date().getFullYear(), new Date().getMonth(), 21)
+        );
+        endDate = formatDate(
+          new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+        );
+      } else if (dateRange === "7") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = formatDate(
+          new Date(new Date().setDate(new Date().getDate() - 6))
+        ); // Date 7 days ago
+      } else if (dateRange === "30") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = formatDate(
+          new Date(new Date().setDate(new Date().getDate() - 29))
+        ); // Date 30 days ago
+      } else if (dateRange === "60") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = formatDate(
+          new Date(new Date().setDate(new Date().getDate() - 59))
+        ); // Date 60 days ago
+      } else if (dateRange === "90") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = formatDate(
+          new Date(new Date().setDate(new Date().getDate() - 89))
+        ); // Date 90 days ago
+      } else if (dateRange === "365") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = formatDate(
+          new Date(new Date().setDate(new Date().getDate() - 364))
+        ); // Date 365 days ago
+      } else if (dateRange === "730") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = formatDate(
+          new Date(new Date().setDate(new Date().getDate() - 729))
+        ); // Date 730 days ago
+      } else if (dateRange === "ytd") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year
+        startDate = formatDate(startDate);
+      }
+
+      startDateInput.value = startDate;
+      endDateInput.value = endDate;
+    }
+
+    // Helper function to format date as "YYYY-MM-DD"
+    function formatDate(date) {
+      var d = new Date(date),
+        month = "" + (d.getMonth() + 1),
+        day = "" + d.getDate(),
+        year = d.getFullYear();
+
+      if (month.length < 2) month = "0" + month;
+      if (day.length < 2) day = "0" + day;
+
+      return [year, month, day].join("-");
+    }
+  </script>
+  {% endblock %}
+</body>

@@ -115,10 +115,10 @@ class Items(models.Model):
     Tanggal = models.DateField(default=timezone.now)
     tanggal_pemesanan = models.DateField(default=timezone.now, null=True)
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
-    pic = models.ForeignKey(CustomerPIC, on_delete= models.SET_NULL, null=True)
+    pic = models.ForeignKey(CustomerPIC, on_delete=models.SET_NULL, null=True)
     nama = models.CharField(max_length=255)
     catatan = models.CharField(max_length = 1000, null = True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null = True)
     quantity = models.IntegerField()
     unit = models.CharField(max_length=10)
     price = MoneyField(max_digits=15, decimal_places=2, default_currency='IDR', blank= False, null= False, validators=[MinMoneyValidator(0)])
@@ -171,7 +171,7 @@ class ItemSumber(models.Model):
     nama_perusahaan = models.CharField(max_length=255)
     telp = PhoneNumberField(blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
-    url = models.URLField(blank=True, null=True)
+    url = models.URLField(blank=True, null=True, max_length=1000)
     
 class ItemChangeLog(models.Model):
     item = models.ForeignKey(Items, on_delete=models.CASCADE)
@@ -344,7 +344,7 @@ class WorkOrder(models.Model):
         'pengiriman': lambda self: self.tanggal_pengiriman_barang,
         'accurate': lambda self: self.tanggal_input_accurate,
         'process': lambda self: self.tanggal_process,
-        'order': lambda self: self.revenue_PO or self.nomor_PO or self.tanggal_PO,
+        'order': lambda self: self.revenue_PO or self.nomor_PO or self.tanggal_WO,
         'pending': lambda self: True,
     }
 
@@ -544,4 +544,5 @@ class User(AbstractUser):
     user_permissions = models.ManyToManyField('auth.Permission', related_name='custom_user_set', blank=True)
 
     def __str__(self):
-        return f"{self.username} ({self.first_name})"
+        return self.first_name
+    

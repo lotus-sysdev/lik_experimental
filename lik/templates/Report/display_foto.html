@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Image</title>
+    <style>
+        #image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Adjust as needed */
+        }
+
+        #image-container img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #image-container.rotated {
+            transform: rotate(90deg); /* Default rotation angle */
+        }
+    </style>
+</head>
+<body>
+    <div id="image-container">
+        <img id="image" src="" alt="Image">
+    </div>
+
+    <script>
+        // Retrieve the image URL from the URL path
+        var imageUrl = window.location.pathname.split('/').pop();
+        imageUrl = "/media/" + "report_photos/" + imageUrl;
+
+        // Display the image in the image container
+        var imageElement = document.getElementById('image');
+        imageElement.src = imageUrl;
+
+        // Zoom functionality
+        // Rotation functionality
+        var rotationAngle = 0; // Initial rotation angle
+
+        imageElement.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default right-click menu
+
+            rotationAngle += 90; // Rotate by 90 degrees clockwise
+            this.parentNode.style.transform = 'rotate(' + rotationAngle + 'deg)';
+        });
+    </script>
+</body>
+</html>

@@ -1,33 +1,34 @@
-import json
-import os
+# Standard Library Imports
 import csv
-from PIL import Image
-import pandas as pd
-import requests
-from datetime import datetime, timedelta
+import os
 import re
+from datetime import datetime, timedelta
 
-from django.db.models import Q, Prefetch
-from django.core import serializers
-from django.core.files.base import ContentFile
-from django.core import serializers
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import redirect, render, get_object_or_404
+# Third-Party Imports
+import requests
+import openpyxl
+from PIL import Image
+from openpyxl_image_loader import SheetImageLoader
+
+# Local Imports
+from .models import *
+from .forms import *
+from .decorators import *
+
+# Django Imports
+from django.urls import reverse
 from django.conf import settings
 from django.utils import timezone
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.core import serializers
+from django.http import JsonResponse
+from django.db.models import Prefetch
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
-from django.utils import timezone
-from django.urls import reverse
+from django.contrib.auth import authenticate, login, logout
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.shortcuts import redirect, render, get_object_or_404
 
-from .decorators import *
-from .forms import *
-from .models import *
-import openpyxl
-from openpyxl_image_loader import SheetImageLoader
 
 
 # -------------------- Placeholder for homepage --------------------#
@@ -285,6 +286,7 @@ def delete_prospect_alamat(request, alamat_id):
 @login_required
 @GA_required
 def add_item(request):
+    # form_instance = ItemForm(request.POST or None)
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES)
         if form.is_valid():
@@ -317,7 +319,7 @@ def add_item(request):
 
     else:
         form = ItemForm()
-    
+
     return render(request, 'item/add_item.html', {'item_form': form})
 
 
@@ -437,7 +439,7 @@ def edit_item(request, SKU):
                 
                 # Update the item's image field with the new image path
                 form.instance.gambar = resized_image_name
-            
+
             if request.user.groups.filter(name='Admin').exists():
                 new_approved_raw = request.POST.get('is_approved', 'off')
                 new_approved = new_approved_raw == "on"
@@ -446,6 +448,8 @@ def edit_item(request, SKU):
                     entity.is_approved = new_approved
             else:
                 entity.is_approved = entity_approved
+
+            # entity.is_approved = entity_approved
 
             form.save()
 
@@ -1058,6 +1062,7 @@ def upload_excel(request):
                 email_sumber_index = column_titles.index('email_sumber') if 'email_sumber' in column_titles else None
                 nama_sumber_index = column_titles.index('nama_sumber') if 'nama_sumber' in column_titles else None
                 pic_index = column_titles.index('pic') if 'pic' in column_titles else None
+
                 # Find the row containing the 'Gambar' column title
                 gambar_row_index = None
                 for row_index, row in enumerate(worksheet.iter_rows(values_only=True)):
@@ -1455,7 +1460,9 @@ def prospect_ticket(request, prospect_id):
     prospect = get_object_or_404(Prospect, prospect_id=prospect_id)
     prospect_tickets = ProspectTicket.objects.filter(prospect_id=prospect).order_by('-date')
 
-    for prospect_ticket in prospect_tickets:
+    sorted_tickets = sorted(prospect_tickets, key=lambda x:(not x.open))
+
+    for prospect_ticket in sorted_tickets:
         prospect_ticket.sorted_logs = prospect_ticket.ticketlog_set.order_by('-date')
     
     ticket_log_form = TicketLogForm()
@@ -1469,7 +1476,7 @@ def prospect_ticket(request, prospect_id):
             ticket_log_form.save()
             return redirect(request.path)
 
-    context = {'prospect': prospect, 'prospect_id': prospect_id, 'prospect_tickets': prospect_tickets, 'ticket_log_form': ticket_log_form,}
+    context = {'prospect': prospect, 'prospect_id': prospect_id, 'prospect_tickets': sorted_tickets, 'ticket_log_form': ticket_log_form,}
 
     return render(request, 'prospect/prospect_ticket.html', context)
 

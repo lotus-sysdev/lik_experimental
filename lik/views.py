@@ -1,27 +1,150 @@
-from datetime import datetime, timedelta
-from io import BytesIO
+# Standard library imports
 import os
-from django.conf import settings
-from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import generics, status
-from rest_framework.parsers import MultiPartParser, FormParser
+import json
 import uuid
+from datetime import datetime, timedelta
 
-from django.shortcuts import get_object_or_404, redirect, render
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate
-from django.core.files.base import ContentFile
-
+# Third-party imports
 from PIL import Image, ImageFile
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.decorators import api_view, permission_classes
 
-from .serializers import *
-from .models import *
+# Local application imports
 from .forms import *
-# Create your views here.
+from .models import *
+from .serializers import *
+
+# Django imports
+from django.conf import settings
+from django.db import transaction
+from django.http import JsonResponse
+from django.db.models import Count, Sum
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+from django.db.models.functions import ExtractDay, ExtractMonth, ExtractYear, Upper
+
+
+# -------------------- Dashboard --------------------#
+def dashboard(request):
+    form = ReportFilterForm(request.GET)
+
+    if form.is_valid():
+        kayu = form.cleaned_data.get('kayu')
+        sender = form.cleaned_data.get('sender')
+        start_date = form.cleaned_data.get('start_date')
+        end_date = form.cleaned_data.get('end_date')
+
+        reports = Report.objects.all()
+
+        if kayu:
+            reports = reports.filter(kayu=kayu)
+        if sender:
+            reports = reports.filter(sender__username=sender)
+        if start_date and end_date:
+            reports = reports.filter(tanggal__range=[start_date, end_date])
+
+        kayu_counts = reports.values('kayu').annotate(count=Count('id'))
+        sender_counts = reports.values('sender__username').annotate(count=Count('id'))
+        plat_counts = reports.annotate(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
+        tonase_counts = reports.values(
+            'kayu',
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).annotate(berat=Sum('berat'))
+        unique_vehicle_counts = reports.values(
+            upper_plat=Upper('plat'),
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).values('day', 'month', 'year', 'tujuan').annotate(count=Count('upper_plat', distinct=True))
+        vehicle_kayu_counts = reports.values(
+            'kayu',
+            upper_plat=Upper('plat'),
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).annotate(count=Count('upper_plat', distinct=True))
+
+        # Serialize the counts data
+        kayu_counts_serialized = json.dumps(list(kayu_counts))
+        sender_counts_serialized = json.dumps(list(sender_counts))
+        plat_counts_serialized = json.dumps(list(plat_counts))
+        tonase_counts_serialized = json.dumps(list(tonase_counts))
+        unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
+        vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
+
+        total_reports = reports.count()
+        total_revised_reports = reports.filter(tiketId__icontains="R").count()
+        total_tonase = reports.aggregate(total=Sum('berat'))['total'] or 0
+        total_rejects = reports.aggregate(total=Sum('reject'))['total'] or 0
+        total_unique_vehicles = reports.values('plat').distinct().count()
+
+    else: 
+        reports = Report.objects.all()
+        kayu_counts = Report.objects.values('kayu').annotate(count=Count('id'))
+        sender_counts = Report.objects.values('sender__username').annotate(count=Count('id'))
+        plat_counts = Report.objects(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
+        tonase_counts = Report.objects.annotate(
+            'kayu',
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).annotate(berat=Sum('berat'))
+        unique_vehicle_counts = Report.objects.annotate(
+            upper_plat=Upper('plat'),
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).values('day', 'month', 'year', 'tujuan').annotate(count=Count('upper_plat', distinct=True))
+        vehicle_kayu_counts = Report.objects.annotate(
+            'kayu',
+            upper_plat=Upper('plat'),
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).annotate(count=Count('upper_plat', distinct=True))
+
+
+        kayu_counts_serialized = json.dumps(list(kayu_counts))
+        sender_counts_serialized = json.dumps(list(sender_counts))
+        plat_counts_serialized = json.dumps(list(plat_counts))
+        tonase_counts_serialized = json.dumps(list(tonase_counts))
+        unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
+        vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
+        
+        total_reports = Report.objects.count()
+        total_revised_reports = reports.filter(tiketId__icontains="R").count()
+        total_tonase = Report.objects.aggregate(total=Sum('berat'))['total'] or 0
+        total_rejects = Report.objects.aggregate(total=Sum('reject'))['total'] or 0
+        total_unique_vehicles = Report.objects.values('plat').distinct().count()
+
+    context = {
+        'form' : form,
+        'reports' : reports,
+        'kayu_counts': kayu_counts_serialized,
+        'sender_counts': sender_counts_serialized,
+        'plat_counts': plat_counts_serialized,
+        'tonase_counts': tonase_counts_serialized,
+        'unique_vehicle_counts': unique_vehicle_serialized,
+        'vehicle_kayu_counts': vehicle_kayu_serialized,
+        'total_revised_reports': total_revised_reports,
+        'total_reports': total_reports,
+        'total_tonase': total_tonase,
+        'total_rejects': total_rejects,
+        'total_unique_vehicles': total_unique_vehicles,
+    }
+
+    return render(request, 'dashboard.html', context)
+
+
+# -------------------- Common Functions --------------------#
 def delete_selected_rows(request, model, key):
     if request.method == 'POST':
         selected_ids = request.POST.getlist('selected_ids[]')  # Assuming you're sending an array of selected IDs
@@ -98,6 +221,8 @@ def edit_entity(request, entity_model, entity_form, entity_id_field, entity_id):
 
     return render(request, 'edit_entity.html', {'form': form})
 
+
+# -------------------- Report Functions --------------------#
 @login_required
 def display_report(request):
     start_date_str = request.GET.get('start_date')
@@ -115,32 +240,6 @@ def display_report(request):
 @login_required
 def delete_selected_rows_report(request):
     return delete_selected_rows(request, Report, 'id')
-
-@login_required
-def add_report(request, initial=None):
-    entity_form_instance = ReportForm(request.POST or None)
-    if request.method == 'POST':
-        form = ReportForm(request.POST)
-        if form.is_valid():
-            form.save()
-            # return redirect(redirect_template)
-    else:
-        print(initial)
-        if (initial):
-            form = (ReportForm(initial=initial))
-            entity_form_instance = form
-        else: 
-            form = ReportForm()
-
-    return render(request, 'Report/add_report.html', {'entity_form': entity_form_instance})
-
-@login_required
-def report_detail(request, id):
-    return entity_detail(request, Report, ReportForm, 'id', id, 'Report/report_detail.html')
-
-@login_required
-def delete_report(request, id):
-    return delete_entity(request, Report, 'id', id)
 
 def process_image(image, is_original):
     upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
@@ -172,14 +271,72 @@ def process_image(image, is_original):
     
     return relative_path
 
+def add_report(request, initial=None):
+    entity_form_instance = ReportForm(request.POST or None, request.FILES or None)
+    if request.method == 'POST':
+        form = ReportForm(request.POST, request.FILES)
+        if form.is_valid():
+            report = form.save(commit=False)
+            foto = request.FILES.get('foto')
+            og_foto = request.FILES.get('og_foto')
+
+            if foto:
+                resized_foto_path = process_image(foto, False)
+                form.instance.foto = resized_foto_path
+                report.save()
+            if og_foto:
+                resized_og_foto_path = process_image(og_foto, True)
+                form.instance.og_foto = resized_og_foto_path
+                report.save()
+
+            report.save()
+            return redirect('display_report')
+    else:
+        print(initial)
+        if (initial):
+            form = (ReportForm(initial=initial))
+            entity_form_instance = form
+        else: 
+            form = ReportForm()
+
+    return render(request, 'Report/add_report.html', {'entity_form': entity_form_instance})
+
+@login_required
+def report_detail(request, id):
+    return entity_detail(request, Report, ReportForm, 'id', id, 'Report/report_detail.html')
+
+@login_required
+def delete_report(request, id):
+    return delete_entity(request, Report, 'id', id)
+
 @login_required
 def edit_report(request, id):
     entity = get_object_or_404(Report,id = id)
-    # entity_approved = entity.is_approved
-
+    
+    # Fetch the latest tiketId for the given report object
+    latest_tiketId = entity.tiketId
+    
+    # Check if the latest tiketId already contains an index
+    if 'R' in latest_tiketId:
+        # Extract the index from the latest tiketId
+        base_tiketId, current_index = latest_tiketId.rsplit('R', 1)
+        try:
+            index = int(current_index)
+            index += 1
+        except ValueError:
+            # If the index is not an integer, start from 1
+            index = 1
+        new_tiketId = f"{base_tiketId}R{index}"
+    else:
+        new_tiketId = f"{latest_tiketId}R1"
+    
     if request.method == 'POST':
         form = ReportForm(request.POST, request.FILES, instance=entity)
+        
         if form.is_valid():
+            # Set the new tiketId before saving the form
+            form.instance.tiketId = new_tiketId
+
             # Check if a new image file is provided
             foto = request.FILES.get('foto')
             og_foto = request.FILES.get('og_foto')
@@ -192,15 +349,26 @@ def edit_report(request, id):
                 form.instance.og_foto = resized_og_foto_path
 
             form.save()
-
+            
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'success': False, 'errors': form.errors})
     else:
         form = ReportForm(instance=entity)
 
-    return render(request, "/api/edit_report.html",{'form': form})
+    return render(request, "/api/edit_report.html", {'form': form})
 
+@login_required
+def display_foto(request, url):
+    # Get the URL parameter 'url' from the request
+
+    # Render the display_image.html template with the image_url context variable
+    return render(request, 'Report/display_foto.html', {'url': url})
+
+
+
+# -------------------- Functions for mobile app --------------------#
+# Set maximum image quality
 ImageFile.MAXBLOCK = 2**20
 class add_report_mobile(generics.CreateAPIView):
     queryset = Report.objects.all()
@@ -217,7 +385,7 @@ class add_report_mobile(generics.CreateAPIView):
             image_name = str(image_data)
             
             og_image = image.resize((500, 500), Image.Resampling.LANCZOS)
-            upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+            upload_date = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
             og_image_name = f'original-{upload_date}-{image_name}'
             og_image_path = os.path.join(settings.MEDIA_ROOT,'report_photos', og_image_name)
             
@@ -256,32 +424,13 @@ def login_user(request):
         serializedUser = UserSerializer(user)
         print(groups)
         return Response({'token': token.key, 'groups': groups, 'user' : serializedUser.data}, status=status.HTTP_200_OK)
-    return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+    return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)  
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout_user(request):
     request.user.auth_token.delete()
     return Response(status=status.HTTP_200_OK)
-
-@permission_classes([IsAuthenticated])
-def tujuan_options_list(request):
-    # Sample dictionary data
-    options = [
-        {'label': 'Sumatra Prima Fiberboard', 'value': 'spf'},
-        {'label': 'Cipta Mandala', 'value': 'cipta-mandala'},
-    ]
-    return JsonResponse(options, safe=False)
-
-@permission_classes([IsAuthenticated])
-def lokasi_options_list(request):
-    # Sample dictionary data
-    lokasi_options = [
-        {'label': 'Muara Enim', 'value': 'muara-enim'},
-        {'label': 'Perkebunan Rakyat', 'value': 'perkebunan-rakyat'},
-        {'label': 'Gunung Rajo', 'value': 'gunung-rajo'},
-    ]
-    return JsonResponse(lokasi_options, safe=False)
 
 # @permission_classes([IsAuthenticated])
 class GroupLokasiListAPIView(generics.ListAPIView):
@@ -302,7 +451,7 @@ class GroupTujuanListAPIView(generics.ListAPIView):
         group_tujuans = Group_Tujuan.objects.filter(group_id=group_id)
         tujuan_ids = [tujuan.id for group_tujuan in group_tujuans for tujuan in group_tujuan.tujuan.all()]
         return Tujuan.objects.filter(id__in=tujuan_ids)
-    
+
 # @permission_classes([IsAuthenticated])
 class GroupKayuListAPIView(generics.ListAPIView):
     serializer_class = KayuSerializer
@@ -312,7 +461,6 @@ class GroupKayuListAPIView(generics.ListAPIView):
         group_kayus = Group_Kayu.objects.filter(group_id=group_id)
         kayu_ids = [kayu.id for group_kayu in group_kayus for kayu in group_kayu.kayu.all()]
         return Kayu.objects.filter(id__in=kayu_ids)
-
 
 @api_view(['GET'])
 def check_token(request, user_id):
@@ -325,3 +473,74 @@ def check_token(request, user_id):
             return Response({"token": ""}, status=status.HTTP_200_OK)
     except User.DoesNotExist:
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+
+# -------------------- Admin Change Groups --------------------#
+@login_required
+def display_group(request):
+    group_lokasi = Group_Lokasi.objects.all()
+    group_tujuan = Group_Tujuan.objects.all()
+    group_kayu = Group_Kayu.objects.all()
+
+    group_data = {}
+
+    for gl in group_lokasi:
+        group_id = gl.group.id
+        group_data.setdefault(group_id, {'group': gl.group, 'lokasi': set(), 'tujuan': set(), 'kayu': set()})
+        group_data[group_id]['lokasi'] |= set(gl.lokasi.all())
+
+    for gt in group_tujuan:
+        group_id = gt.group.id
+        group_data.setdefault(group_id, {'group': gt.group, 'lokasi': set(), 'tujuan': set(), 'kayu': set()})
+        group_data[group_id]['tujuan'] |= set(gt.tujuan.all())
+
+    for gk in group_kayu:
+        group_id = gk.group.id
+        group_data.setdefault(group_id, {'group': gk.group, 'lokasi': set(), 'tujuan': set(), 'kayu': set()})
+        group_data[group_id]['kayu'] |= set(gk.kayu.all())
+
+    group_data_list = list(group_data.values())
+
+    # Retrieve all Kayu, Lokasi, and Tujuan objects
+    all_kayu = Kayu.objects.all()
+    all_lokasi = Lokasi.objects.all()
+    all_tujuan = Tujuan.objects.all()
+
+    return render(request, 'Group/display_groups.html', {'group_data': group_data_list, 'all_kayu': all_kayu, 'all_lokasi': all_lokasi, 'all_tujuan': all_tujuan})
+
+@login_required
+@transaction.atomic
+def save_group_changes(request):
+    if request.method == 'POST':
+        group_id = request.POST.get('group_id')
+        kayu_ids = request.POST.getlist('kayu_ids[]')
+        lokasi_ids = request.POST.getlist('lokasi_ids[]')
+        tujuan_ids = request.POST.getlist('tujuan_ids[]')
+
+        try:
+            # Retrieve the group object using name
+            group = Group.objects.get(name=group_id)
+
+            # Delete existing object
+            Group_Kayu.objects.filter(group=group).delete()
+            Group_Tujuan.objects.filter(group=group).delete()
+            Group_Lokasi.objects.filter(group=group).delete()
+
+            # Create a single Group_Kayu instance and add all kayu_ids to it
+            group_kayu_instance = Group_Kayu.objects.create(group=group)
+            group_kayu_instance.kayu.add(*kayu_ids)
+
+            # Similar process for Group_Lokasi and Group_Tujuan
+            group_lokasi_instance = Group_Lokasi.objects.create(group=group)
+            group_lokasi_instance.lokasi.add(*lokasi_ids)
+
+            group_tujuan_instance = Group_Tujuan.objects.create(group=group)
+            group_tujuan_instance.tujuan.add(*tujuan_ids)
+            
+            return JsonResponse({'success': True})
+        except Group.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Group not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+        
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
