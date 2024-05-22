@@ -123,14 +123,11 @@
 
   <div class="row mb-4">
     <div class="col-md-3">
-      <div
-        class="card"
-        data-toggle="tooltip"
-        data-placement="top"
-        title="Total Reports: {{ total_reports }}, Total Revised Reports: {{ total_revised_reports }}"
-      >
-        <h4 class="text-center card-header">Reports</h4>
-        <div class="card-body">{{ total_reports }}</div>
+      <div class="card">
+        <span class="tt" data-bs-placement="top" title="Revised Reports : {{ total_revised_reports }}">
+          <h4 class="text-center card-header">Reports</h4>
+          <div class="top-card-body">{{ total_reports }}</div>
+        </span>
       </div>
     </div>
     <div class="col-md-3">
@@ -178,8 +175,20 @@
     </div>
     <div class="card">
       <h4 class="text-center card-header">Distribusi Kendaraan</h4>
-      <div class="card-body">
-        <canvas id="platBarChart"></canvas>
+      <div class="card-body scrollable-body">
+        <!-- <canvas id="platBarChart"></canvas> -->
+        {% for plat in plat_counts %}
+        <ul class="list-group">
+          <span class="tt" data-bs-placement="top" title='Senders: {{ plat.senders|join:", " }} | Drivers: {{ plat.drivers|join:", " }}'>
+            <li class="list-group-item">
+              <div class="upper-plat font-weight-bold">
+                {{ plat.upper_plat }}
+              </div>
+              <div class="count">{{ plat.count }} Pengiriman</div>
+            </li>
+          </span>
+        </ul>
+        {% endfor %}
       </div>
     </div>
     <div class="card">
@@ -198,6 +207,13 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const tooltips = document.querySelectorAll('.tt')
+    tooltips.forEach(t => {
+      new bootstrap.Tooltip(t)
+    })
+  </script>
   <script>
     // LOAD PIE CHART
     document.addEventListener("DOMContentLoaded", function () {
@@ -277,10 +293,6 @@
         endDate,
         "Total Kendaraan"
       );
-    });
-
-    $(function () {
-      $('[data-toggle="tooltip"]').tooltip();
     });
 
     function renderPieChart(canvasId, data, labelKey, chartLabel) {
@@ -559,8 +571,8 @@
           },
           plugins: {
             datalabels: {
-              anchor: "center",
-              align: "end",
+              anchor: "end",
+              align: "start",
               color: "black",
               font: { weight: "bold" },
               formatter: function (value, context) {
@@ -683,7 +695,7 @@
           },
           plugins: {
             datalabels: {
-              anchor: "center",
+              anchor: "end",
               align: "start",
               color: "black",
               font: {

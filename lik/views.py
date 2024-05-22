@@ -5,6 +5,8 @@ import uuid
 from datetime import datetime, timedelta
 
 # Third-party imports
+from itertools import groupby
+from operator import itemgetter
 from PIL import Image, ImageFile
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -50,8 +52,26 @@ def dashboard(request):
             reports = reports.filter(tanggal__range=[start_date, end_date])
 
         kayu_counts = reports.values('kayu').annotate(count=Count('id'))
-        sender_counts = reports.values('sender__username').annotate(count=Count('id'))
-        plat_counts = reports.annotate(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
+        sender_counts = reports.values('sender__first_name').annotate(count=Count('id'))
+
+        plat_data = reports.annotate(
+            upper_plat=Upper('plat')
+        ).values(
+            'upper_plat', 'sender__first_name', 'driver'
+        ).annotate(count=Count('id')).order_by('upper_plat')
+
+        grouped_plat_data = []
+        for key, group in groupby(plat_data, key=itemgetter('upper_plat')):
+            group_list = list(group)
+            grouped_plat_data.append({
+                'upper_plat': key,
+                'senders': list(set(item['sender__first_name'] for item in group_list)),
+                'drivers': list(set(item['driver'] for item in group_list)),
+                'count': sum(item['count'] for item in group_list)
+            })
+
+        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
+
         tonase_counts = reports.values(
             'kayu',
             day=ExtractDay('tanggal'),
@@ -75,7 +95,7 @@ def dashboard(request):
         # Serialize the counts data
         kayu_counts_serialized = json.dumps(list(kayu_counts))
         sender_counts_serialized = json.dumps(list(sender_counts))
-        plat_counts_serialized = json.dumps(list(plat_counts))
+        plat_counts_serialized = json.dumps(grouped_plat_data)
         tonase_counts_serialized = json.dumps(list(tonase_counts))
         unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
         vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
@@ -84,13 +104,31 @@ def dashboard(request):
         total_revised_reports = reports.filter(tiketId__icontains="R").count()
         total_tonase = reports.aggregate(total=Sum('berat'))['total'] or 0
         total_rejects = reports.aggregate(total=Sum('reject'))['total'] or 0
-        total_unique_vehicles = reports.values('plat').distinct().count()
+        total_unique_vehicles = reports.annotate(upper_plat=Upper('plat')).values('plat').distinct().count()
 
     else: 
         reports = Report.objects.all()
         kayu_counts = Report.objects.values('kayu').annotate(count=Count('id'))
-        sender_counts = Report.objects.values('sender__username').annotate(count=Count('id'))
-        plat_counts = Report.objects(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
+        sender_counts = Report.objects.values('sender__first_name').annotate(count=Count('id'))
+
+        plat_data = reports.annotate(
+            upper_plat=Upper('plat')
+        ).values(
+            'upper_plat', 'sender__first_name', 'driver'
+        ).annotate(count=Count('id')).order_by('upper_plat')
+
+        grouped_plat_data = []
+        for key, group in groupby(plat_data, key=itemgetter('upper_plat')):
+            group_list = list(group)
+            grouped_plat_data.append({
+                'upper_plat': key,
+                'senders': list(set(item['sender__first_name'] for item in group_list)),
+                'drivers': list(set(item['driver'] for item in group_list)),
+                'count': sum(item['count'] for item in group_list)
+            })
+
+        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
+
         tonase_counts = Report.objects.annotate(
             'kayu',
             day=ExtractDay('tanggal'),
@@ -114,7 +152,7 @@ def dashboard(request):
 
         kayu_counts_serialized = json.dumps(list(kayu_counts))
         sender_counts_serialized = json.dumps(list(sender_counts))
-        plat_counts_serialized = json.dumps(list(plat_counts))
+        plat_counts_serialized = json.dumps(grouped_plat_data)
         tonase_counts_serialized = json.dumps(list(tonase_counts))
         unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
         vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
@@ -130,7 +168,7 @@ def dashboard(request):
         'reports' : reports,
         'kayu_counts': kayu_counts_serialized,
         'sender_counts': sender_counts_serialized,
-        'plat_counts': plat_counts_serialized,
+        'plat_counts': grouped_plat_data,
         'tonase_counts': tonase_counts_serialized,
         'unique_vehicle_counts': unique_vehicle_serialized,
         'vehicle_kayu_counts': vehicle_kayu_serialized,
