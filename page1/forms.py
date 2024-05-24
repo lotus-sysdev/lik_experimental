@@ -1,13 +1,11 @@
 import re
 from django import forms
-from django.forms import BaseInlineFormSet, inlineformset_factory, widgets
+from django.forms import inlineformset_factory, widgets
 from django_select2.forms import Select2Widget
 from .models import *
 
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
-from django.contrib.auth.models import Group
-from django.contrib.auth.decorators import user_passes_test
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import authenticate
 # from django_measurement.forms import MeasurementField, MeasurementWidget
@@ -282,13 +280,15 @@ class ItemForm(forms.ModelForm):
             ('Lembar', 'Lembar'),
             ('Karton', 'Karton'),
             ('Renceng', 'Renceng'),
-            ('Lainnya', 'Lainnya'),
+            ('Galon', 'Galon'),
+            ('Lainnya', 'Lainnya')
         )
     
         model = Items
         fields = '__all__'
         exclude = ['SKU', 'gambar_resized', 'upload_type']
         widgets = {
+            # 'customer' : Select2Widget(attrs={'class':'form-control'}),
             'pic' : Select2Widget(attrs={'class':'form-control'}),
             'nama': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Baterai AA'}),
             'quantity': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '1, 2, 3, ...'}),
@@ -301,6 +301,7 @@ class ItemForm(forms.ModelForm):
             'is_approved': forms.CheckboxInput(attrs={'class': 'form-control'}),
         }
         labels = {
+            # 'customer':'Customer',
             'pic':'PIC',
             'nama': 'Nama Barang',
             'quantity': 'Kuantitas',
@@ -333,7 +334,7 @@ class SumberForm(forms.ModelForm):
             'nama_perusahaan' : forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'PT. Lotus Lestari Raya'}),
             'telp' : RegionalPhoneNumberWidget(attrs={'class': 'form-control', 'placeholder': '081-234-567-890'}),
             'email' : forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'username@lotuslestari.co.id'}),
-            'url' : forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://beezywork.id'}),
+            'url' : forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'https://beezywork.id'}),
         }
         labels = {
             'jenis_sumber' : 'Jenis Sumber*',
@@ -408,7 +409,7 @@ class WorkForm(forms.ModelForm):
             'tanggal_pengiriman_invoice': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         }
         labels = {
-            'revenue_PO': 'Revenue PO',
+            'revenue_PO': 'Revenue',
             'nomor_PO': 'Nomor PO',
             'tanggal_WO': 'Tanggal PO',
             'tanggal_process': 'Tanggal Proses',

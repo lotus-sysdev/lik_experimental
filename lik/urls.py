@@ -1,4 +1,4 @@
-from django.urls import path, re_path
+from django.urls import path
 from .views import *
 
 urlpatterns = [    
@@ -22,6 +22,5 @@ urlpatterns = [
     path('display_foto/<path:url>', display_foto, name="display_foto"),
     path('report-summary/<int:sender_id>/', ReportSummaryView.as_view(), name='report-summary'),
     path('report-summary/<int:sender_id>/<str:start_date>/<str:end_date>/', ReportSummaryView.as_view(), name='report-summary-date-range'),
-
 ]
 

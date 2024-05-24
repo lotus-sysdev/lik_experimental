@@ -1,110 +1,188 @@
-from datetime import datetime, timedelta
-from io import BytesIO
+# Standard library imports
 import os
-import uuid
-from django.conf import settings
-from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import generics, status
-from rest_framework.parsers import MultiPartParser, FormParser
-import uuid
 
-from django.shortcuts import get_object_or_404, redirect, render
-from django.http import JsonResponse
-
-from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
-from django.db import transaction
-from django.db.models import Count, Sum
-from django.db.models.functions import Upper, ExtractDay, ExtractMonth, ExtractYear
 import json
+import uuid
+from datetime import datetime, timedelta
 
+# Third-party imports
+from itertools import groupby
+from operator import itemgetter
 from PIL import Image, ImageFile
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.decorators import api_view, permission_classes
 
-from .serializers import *
-from .models import *
+# Local application imports
 from .forms import *
+from .models import *
+from .serializers import *
 
+# Django imports
+from django.conf import settings
+from django.db import transaction
+from django.http import JsonResponse
+from django.db.models import Count, Sum
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+from django.db.models.functions import ExtractDay, ExtractMonth, ExtractYear, Upper
+
+
+# -------------------- Dashboard --------------------#
 def dashboard(request):
     form = ReportFilterForm(request.GET)
-    total_reports = Report.objects.count()
-    reports_by_sender = Report.objects.values('sender__username').annotate(count=models.Count('id'))
 
     if form.is_valid():
+        kayu = form.cleaned_data.get('kayu')
         sender = form.cleaned_data.get('sender')
         start_date = form.cleaned_data.get('start_date')
         end_date = form.cleaned_data.get('end_date')
 
         reports = Report.objects.all()
-
+        if kayu:
+            reports = reports.filter(kayu=kayu)
         if sender:
             reports = reports.filter(sender__username=sender)
         if start_date and end_date:
             reports = reports.filter(tanggal__range=[start_date, end_date])
 
         kayu_counts = reports.values('kayu').annotate(count=Count('id'))
-        sender_counts = reports.values('sender__username').annotate(count=Count('id'))
-        plat_counts = reports.annotate(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
-        kayu_counts_monthly = reports.values(
-            day=ExtractDay('tanggal'),
-            month=ExtractMonth('tanggal'),
-            year=ExtractYear('tanggal')
-        ).values('day', 'month', 'year', 'kayu').annotate(count=Count('id'))
-        tonnase_counts = reports.values(
+        sender_counts = reports.values('sender__first_name').annotate(count=Count('id'))
+
+        plat_data = reports.annotate(
+            upper_plat=Upper('plat')
+        ).values(
+            'upper_plat', 'sender__first_name', 'driver'
+        ).annotate(count=Count('id')).order_by('upper_plat')
+
+        grouped_plat_data = []
+        for key, group in groupby(plat_data, key=itemgetter('upper_plat')):
+            group_list = list(group)
+            grouped_plat_data.append({
+                'upper_plat': key,
+                'senders': list(set(item['sender__first_name'] for item in group_list)),
+                'drivers': list(set(item['driver'] for item in group_list)),
+                'count': sum(item['count'] for item in group_list)
+            })
+
+        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
+
+        tonase_counts = reports.values(
             'kayu',
             day=ExtractDay('tanggal'),
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
         ).annotate(berat=Sum('berat'))
+        unique_vehicle_counts = reports.values(
+            upper_plat=Upper('plat'),
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).values('day', 'month', 'year', 'tujuan').annotate(count=Count('upper_plat', distinct=True))
+        vehicle_kayu_counts = reports.values(
+            'kayu',
+            upper_plat=Upper('plat'),
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).annotate(count=Count('upper_plat', distinct=True))
 
         # Serialize the counts data
         kayu_counts_serialized = json.dumps(list(kayu_counts))
         sender_counts_serialized = json.dumps(list(sender_counts))
-        plat_counts_serialized = json.dumps(list(plat_counts))
-        kayu_counts_monthly_serialized = json.dumps(list(kayu_counts_monthly))
-        tonnase_counts_serialized = json.dumps(list(tonnase_counts))
+        plat_counts_serialized = json.dumps(grouped_plat_data)
+        tonase_counts_serialized = json.dumps(list(tonase_counts))
+        unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
+        vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
+
+        total_reports = reports.count()
+        total_revised_reports = reports.filter(tiketId__icontains="R").count()
+        total_tonase = reports.aggregate(total=Sum('berat'))['total'] or 0
+        total_rejects = reports.aggregate(total=Sum('reject'))['total'] or 0
+        total_unique_vehicles = reports.annotate(upper_plat=Upper('plat')).values('plat').distinct().count()
+
     else: 
         reports = Report.objects.all()
         kayu_counts = Report.objects.values('kayu').annotate(count=Count('id'))
-        sender_counts = Report.objects.values('sender__username').annotate(count=Count('id'))
-        plat_counts = Report.objects(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id'))
-        kayu_counts_monthly = Report.objects.annotate(
-            day=ExtractDay('tanggal'),
-            month=ExtractMonth('tanggal'),
-            year=ExtractYear('tanggal')
-        ).values('day', 'month', 'year', 'kayu').annotate(count=Count('id'))
-        tonnase_counts = Report.objects.annotate(
+        sender_counts = Report.objects.values('sender__first_name').annotate(count=Count('id'))
+
+        plat_data = reports.annotate(
+            upper_plat=Upper('plat')
+        ).values(
+            'upper_plat', 'sender__first_name', 'driver'
+        ).annotate(count=Count('id')).order_by('upper_plat')
+
+        grouped_plat_data = []
+        for key, group in groupby(plat_data, key=itemgetter('upper_plat')):
+            group_list = list(group)
+            grouped_plat_data.append({
+                'upper_plat': key,
+                'senders': list(set(item['sender__first_name'] for item in group_list)),
+                'drivers': list(set(item['driver'] for item in group_list)),
+                'count': sum(item['count'] for item in group_list)
+            })
+
+        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
+
+        tonase_counts = Report.objects.annotate(
             'kayu',
             day=ExtractDay('tanggal'),
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
         ).annotate(berat=Sum('berat'))
+        unique_vehicle_counts = Report.objects.annotate(
+            upper_plat=Upper('plat'),
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).values('day', 'month', 'year', 'tujuan').annotate(count=Count('upper_plat', distinct=True))
+        vehicle_kayu_counts = Report.objects.annotate(
+            'kayu',
+            upper_plat=Upper('plat'),
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).annotate(count=Count('upper_plat', distinct=True))
 
 
         kayu_counts_serialized = json.dumps(list(kayu_counts))
         sender_counts_serialized = json.dumps(list(sender_counts))
-        plat_counts_serialized = json.dumps(list(plat_counts))
-        kayu_counts_monthly_serialized = json.dumps(list(kayu_counts_monthly))
-        tonnase_counts_serialized = json.dumps(list(tonnase_counts))
+        plat_counts_serialized = json.dumps(grouped_plat_data)
+        tonase_counts_serialized = json.dumps(list(tonase_counts))
+        unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
+        vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
+        
+        total_reports = Report.objects.count()
+        total_revised_reports = reports.filter(tiketId__icontains="R").count()
+        total_tonase = Report.objects.aggregate(total=Sum('berat'))['total'] or 0
+        total_rejects = Report.objects.aggregate(total=Sum('reject'))['total'] or 0
+        total_unique_vehicles = Report.objects.values('plat').distinct().count()
 
     context = {
         'form' : form,
         'reports' : reports,
-        'total_reports': total_reports,
-        'reports_by_sender': reports_by_sender,
         'kayu_counts': kayu_counts_serialized,
         'sender_counts': sender_counts_serialized,
-        'plat_counts': plat_counts_serialized,
-        'kayu_counts_monthly': kayu_counts_monthly_serialized,
-        'tonnase_counts': tonnase_counts_serialized,
+        'plat_counts': grouped_plat_data,
+        'tonase_counts': tonase_counts_serialized,
+        'unique_vehicle_counts': unique_vehicle_serialized,
+        'vehicle_kayu_counts': vehicle_kayu_serialized,
+        'total_revised_reports': total_revised_reports,
+        'total_reports': total_reports,
+        'total_tonase': total_tonase,
+        'total_rejects': total_rejects,
+        'total_unique_vehicles': total_unique_vehicles,
     }
 
     return render(request, 'dashboard.html', context)
 
-# Create your views here.
+
+# -------------------- Common Functions --------------------#
 def delete_selected_rows(request, model, key):
     if request.method == 'POST':
         selected_ids = request.POST.getlist('selected_ids[]')  # Assuming you're sending an array of selected IDs
@@ -181,6 +259,8 @@ def edit_entity(request, entity_model, entity_form, entity_id_field, entity_id):
 
     return render(request, 'edit_entity.html', {'form': form})
 
+
+# -------------------- Report Functions --------------------#
 @login_required
 def display_report(request):
     start_date_str = request.GET.get('start_date')
@@ -285,7 +365,6 @@ def edit_report(request, id):
     
     return render(request, "/api/edit_report.html", {'form': form})
 
-
 def process_image(image, is_original):
     upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     img = Image.open(image)
@@ -317,6 +396,7 @@ def process_image(image, is_original):
     return relative_path
             
 
+# -------------------- Functions for mobile app --------------------#
 # Set maximum image quality
 ImageFile.MAXBLOCK = 2**20
 class add_report_mobile(generics.CreateAPIView):
@@ -334,7 +414,7 @@ class add_report_mobile(generics.CreateAPIView):
             image_name = str(image_data)
             
             og_image = image.resize((500, 500), Image.Resampling.LANCZOS)
-            upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+            upload_date = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
             og_image_name = f'original-{upload_date}-{image_name}'
             og_image_path = os.path.join(settings.MEDIA_ROOT,'report_photos', og_image_name)
             
@@ -375,13 +455,11 @@ def login_user(request):
         return Response({'token': token.key, 'groups': groups, 'user' : serializedUser.data}, status=status.HTTP_200_OK)
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)  
 
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout_user(request):
     request.user.auth_token.delete()
     return Response(status=status.HTTP_200_OK)
-
 
 # @permission_classes([IsAuthenticated])
 class GroupLokasiListAPIView(generics.ListAPIView):
@@ -402,7 +480,7 @@ class GroupTujuanListAPIView(generics.ListAPIView):
         group_tujuans = Group_Tujuan.objects.filter(group_id=group_id)
         tujuan_ids = [tujuan.id for group_tujuan in group_tujuans for tujuan in group_tujuan.tujuan.all()]
         return Tujuan.objects.filter(id__in=tujuan_ids)
-    
+
 # @permission_classes([IsAuthenticated])
 class GroupKayuListAPIView(generics.ListAPIView):
     serializer_class = KayuSerializer
@@ -428,6 +506,8 @@ def check_token(request, user_id):
     except User.DoesNotExist:
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
     
+
+# -------------------- Admin Change Groups --------------------#
 @login_required
 def display_group(request):
     group_lokasi = Group_Lokasi.objects.all()
@@ -496,7 +576,7 @@ def save_group_changes(request):
             return JsonResponse({'success': False, 'error': str(e)})
         
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
-
+  
 @login_required
 def display_foto(request, url):
     # Get the URL parameter 'url' from the request

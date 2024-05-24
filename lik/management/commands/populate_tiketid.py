@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from lik.models import Report
 from django.utils import timezone
+
 import datetime
 
 class Command(BaseCommand):
@@ -11,7 +12,7 @@ class Command(BaseCommand):
 
         for report in reports_without_tiketId:
             sender_id_str = str(report.sender.pk).zfill(3)  # Use the sender ID, padded with leading zeros if needed
-
+            
             current_date = report.date_time.strftime('%y%m')
 
             # Find the last tiketId for the current month and sender
@@ -31,6 +32,7 @@ class Command(BaseCommand):
             new_last_num = last_number + 1
             new_last_num = str(new_last_num).zfill(4)
             new_tiketId = f"LIK{sender_id_str}{current_date}{new_last_num}"
+
             report.tiketId = new_tiketId
             report.save()
 

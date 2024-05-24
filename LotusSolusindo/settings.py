@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
-import phonenumber_field
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -122,7 +121,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -189,7 +187,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-	    'filename': 'logs/',
+            'filename': 'logs',
             'formatter': 'verbose'
         },
     },
@@ -281,7 +279,7 @@ JAZZMIN_SETTINGS = {
     "hide_models": [],
 
     # List of apps (and/or models) to base side menu ordering off of (does not need to contain all apps/models)
-    "order_with_respect_to": ["auth", "page1.customer", "page1.supplier", 'page1.employee', 'page1.prospect', 'page1.prospectticket', 'page1.ticketlog', "page1.items", "page1.itemsumber", "page1.category", "page1.customeralamat", "page1.supplieralamat", 'page1.employeealamat', "page1.deliveryaddresses", "page1.prospectaddress", 'page1.provinsi', 'page1.kota', 'page1.kecamatan', 'page1.kelurahan', 'page1.kodepos', "page1.customerpic", "page1.supplierpic", 'page1.prospectpic', "page1.events", "page1.purchaseorder", "page1.workorder", "page1.messenger", "page1.vehicle", "page1.logbook", 'page1.itemchangelog', "page1.useractionlog"],
+    "order_with_respect_to": ["auth", "lik.report", "lik.kayu", "lik.lokasi", "lik.tujuan", "lik.group_kayu", "lik.group_lokasi", "lik.group_tujuan", "page1.customer", "page1.supplier", 'page1.employee', 'page1.prospect', 'page1.prospectticket', 'page1.ticketlog', "page1.items", "page1.itemsumber", "page1.category", "page1.customeralamat", "page1.supplieralamat", 'page1.employeealamat', "page1.deliveryaddresses", "page1.prospectaddress", 'page1.provinsi', 'page1.kota', 'page1.kecamatan', 'page1.kelurahan', 'page1.kodepos', "page1.customerpic", "page1.supplierpic", 'page1.prospectpic', "page1.events", "page1.purchaseorder", "page1.workorder", "page1.messenger", "page1.vehicle", "page1.logbook", 'page1.itemchangelog', "page1.useractionlog"],
 
 
     # Custom icons for side menu apps/models See https://fontawesome.com/icons?d=gallery&m=free&v=5.0.0,5.0.1,5.0.10,5.0.11,5.0.12,5.0.13,5.0.2,5.0.3,5.0.4,5.0.5,5.0.6,5.0.7,5.0.8,5.0.9,5.1.0,5.1.1,5.2.0,5.3.0,5.3.1,5.4.0,5.4.1,5.4.2,5.13.0,5.12.0,5.11.2,5.11.1,5.10.0,5.9.0,5.8.2,5.8.1,5.7.2,5.7.1,5.7.0,5.6.3,5.5.0,5.4.2
@@ -376,6 +374,7 @@ EMAIL_HOST = 'smtp.office365.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
+# Email account credentials (make sure to use app-specific password for security)
 EMAIL_HOST_USER = 'sysdev@lotusgroup.co.id'
 EMAIL_HOST_PASSWORD = 'tahunNAGA2024!'
 
