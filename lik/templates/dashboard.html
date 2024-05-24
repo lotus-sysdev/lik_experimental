@@ -36,7 +36,7 @@
       flex: 0 1 auto;
     }
 
-    .card-body {
+    .top-card-body {
       flex: 1 1 auto;
       display: flex;
       justify-content: center;
@@ -50,6 +50,12 @@
       height: 100% !important;
     }
 
+    .scrollable-body {
+      max-height: 400px;
+      overflow-y: auto;
+      position: relative; /* Add position relative to contain absolute positioned elements */
+    }
+
     /* Responsive adjustments */
     @media (max-width: 1200px) {
       .dashboard-container {
@@ -59,6 +65,10 @@
       .dashboard-grid {
         grid-template-columns: 1fr; /* Stack columns on smaller screens */
         grid-template-rows: auto; /* Auto rows for responsive stacking */
+      }
+      .scrollable-body {
+        max-height: 300px;
+        overflow-y: auto;
       }
     }
   </style>
@@ -124,7 +134,11 @@
   <div class="row mb-4">
     <div class="col-md-3">
       <div class="card">
-        <span class="tt" data-bs-placement="top" title="Revised Reports : {{ total_revised_reports }}">
+        <span
+          class="tt"
+          data-bs-placement="top"
+          title="Revised Reports : {{ total_revised_reports }}"
+        >
           <h4 class="text-center card-header">Reports</h4>
           <div class="top-card-body">{{ total_reports }}</div>
         </span>
@@ -133,19 +147,19 @@
     <div class="col-md-3">
       <div class="card">
         <h4 class="text-center card-header">Total Berat</h4>
-        <div class="card-body">{{ total_tonase }} Kg</div>
+        <div class="top-card-body">{{ total_tonase }} Kg</div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card">
         <h4 class="text-center card-header">Total Reject</h4>
-        <div class="card-body">{{ total_rejects }} Kg</div>
+        <div class="top-card-body">{{ total_rejects }} Kg</div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card">
         <h4 class="text-center card-header">Jumlah Kendaraan</h4>
-        <div class="card-body">{{ total_unique_vehicles }}</div>
+        <div class="top-card-body">{{ total_unique_vehicles }}</div>
       </div>
     </div>
   </div>
@@ -179,7 +193,11 @@
         <!-- <canvas id="platBarChart"></canvas> -->
         {% for plat in plat_counts %}
         <ul class="list-group">
-          <span class="tt" data-bs-placement="top" title='Senders: {{ plat.senders|join:", " }} | Drivers: {{ plat.drivers|join:", " }}'>
+          <span
+            class="tt"
+            data-bs-placement="top"
+            title='Senders: {{ plat.senders|join:", " }} | Drivers: {{ plat.drivers|join:", " }}'
+          >
             <li class="list-group-item">
               <div class="upper-plat font-weight-bold">
                 {{ plat.upper_plat }}
@@ -209,12 +227,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    const tooltips = document.querySelectorAll('.tt')
-    tooltips.forEach(t => {
-      new bootstrap.Tooltip(t)
-    })
-  </script>
-  <script>
+    const tooltips = document.querySelectorAll(".tt");
+    tooltips.forEach((t) => {
+      new bootstrap.Tooltip(t);
+    });
     // LOAD PIE CHART
     document.addEventListener("DOMContentLoaded", function () {
       // Get the serialized kayu counts data passed from the view
@@ -225,18 +241,18 @@
       renderPieChart(
         "senderPieChart",
         senderCounts,
-        "sender__username",
+        "sender__first_name",
         "Sender"
       );
 
-      var platCounts = JSON.parse("{{ plat_counts | escapejs }}");
+      // var platCounts = JSON.parse("{{ plat_counts | escapejs }}");
 
-      renderBarChart(
-        "platBarChart",
-        platCounts,
-        "upper_plat",
-        "License Plates"
-      );
+      // renderBarChart(
+      //   "platBarChart",
+      //   platCounts,
+      //   "upper_plat",
+      //   "License Plates"
+      // );
 
       var startDateInput = document.getElementById("id_start_date");
       var endDateInput = document.getElementById("id_end_date");
