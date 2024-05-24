@@ -504,3 +504,30 @@ def display_foto(request, url):
     # Render the display_image.html template with the image_url context variable
     return render(request, 'Report/display_foto.html', {'url': url})
 
+
+class ReportSummaryView(generics.GenericAPIView):
+    serializer_class = ReportSummarySerializer
+
+    def get(self, request, sender_id):
+        # Get start and end date from request parameters
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+
+        # Set default values to the first and last day of the current month if not provided
+        if not start_date_str:
+            start_date = datetime.now().replace(day=1).date()
+        else:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+
+        if not end_date_str:
+            next_month = datetime.now().replace(day=28) + timedelta(days=4)
+            end_date = (next_month - timedelta(days=next_month.day)).date()
+        else:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+
+        reports = Report.objects.filter(sender_id=sender_id, tanggal__range=(start_date, end_date))
+        summary = reports.values('kayu').annotate(
+            total_plat=Count('plat', distinct=True),
+        )
+
+        return Response(summary)

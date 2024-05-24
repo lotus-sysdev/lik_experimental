@@ -34,3 +34,8 @@ class KayuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Kayu
         fields = '__all__'
+
+class ReportSummarySerializer(serializers.Serializer):
+    total_plat = serializers.IntegerField()
+    total_tonnage = serializers.IntegerField()
+    total_rejects = serializers.IntegerField()

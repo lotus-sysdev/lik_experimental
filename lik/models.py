@@ -26,32 +26,32 @@ class Report(models.Model):
     def __str__ (self):
         return str(self.no_tiket)
 
-    # def save(self, *args, **kwargs):
-    #     if not self.tiketId:
-    #         # Generate tiketId based on sender and a unique number
-    #         if self.sender:
-    #             sender_id_str = str(self.sender.pk).zfill(3)  # Use the sender ID, padded with leading zeros if needed
+    def save(self, *args, **kwargs):
+        if not self.tiketId:
+            # Generate tiketId based on sender and a unique number
+            if self.sender:
+                sender_id_str = str(self.sender.pk).zfill(3)  # Use the sender ID, padded with leading zeros if needed
 
-    #             current_date = self.date_time.strftime('%y%m')
+                current_date = self.date_time.strftime('%y%m')
 
-    #             # Find the last tiketId for the current month and sender
-    #             last_report = Report.objects.filter(
-    #                 sender=self.sender,
-    #                 tiketId__startswith=f"LIK{sender_id_str}{current_date}"
-    #             ).order_by('-date_time').first()
+                # Find the last tiketId for the current month and sender
+                last_report = Report.objects.filter(
+                    sender=self.sender,
+                    tiketId__startswith=f"LIK{sender_id_str}{current_date}"
+                ).order_by('-date_time').first()
 
-    #             last_number = 0
-    #             if last_report:
-    #                 # Extract the base tiketId before any revisions (R[index])
-    #                 base_tiketId = last_report.tiketId.split('R', 1)[0]
-    #                 last_number = int(base_tiketId[-4:])
+                last_number = 0
+                if last_report:
+                    # Extract the base tiketId before any revisions (R[index])
+                    base_tiketId = last_report.tiketId.split('R', 1)[0]
+                    last_number = int(base_tiketId[-4:])
                 
-    #             new_last_num = last_number + 1
-    #             new_last_num = str(new_last_num).zfill(4)
-    #             new_tiketId = f"LIK{sender_id_str}{current_date}{new_last_num}"
-    #             self.tiketId = new_tiketId
+                new_last_num = last_number + 1
+                new_last_num = str(new_last_num).zfill(4)
+                new_tiketId = f"LIK{sender_id_str}{current_date}{new_last_num}"
+                self.tiketId = new_tiketId
 
-    #     super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 class Lokasi(models.Model):
     nama = models.CharField(max_length=100)
