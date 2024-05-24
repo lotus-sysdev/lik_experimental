@@ -62,11 +62,13 @@ class ReportFilterForm(forms.Form):
         required=False, 
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+
     kayu = forms.ChoiceField(
         choices=[],
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+
     start_date = forms.DateField(
         label='Start Date', 
         required=False, 
@@ -90,3 +92,4 @@ class ReportFilterForm(forms.Form):
     def get_kayu_choices(self):
         kayu_choices = [(kayu["kayu"], kayu["kayu"]) for kayu in Report.objects.values('kayu').distinct()]
         return [('', 'Select Jenis Kayu')] + kayu_choices
+

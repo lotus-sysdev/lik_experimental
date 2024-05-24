@@ -1,5 +1,6 @@
 # Standard library imports
 import os
+
 import json
 import uuid
 from datetime import datetime, timedelta
@@ -43,7 +44,6 @@ def dashboard(request):
         end_date = form.cleaned_data.get('end_date')
 
         reports = Report.objects.all()
-
         if kayu:
             reports = reports.filter(kayu=kayu)
         if sender:
@@ -279,36 +279,7 @@ def display_report(request):
 def delete_selected_rows_report(request):
     return delete_selected_rows(request, Report, 'id')
 
-def process_image(image, is_original):
-    upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    img = Image.open(image)
-
-    # Generate a unique identifier
-    unique_id = str(uuid.uuid4())[:8]  # Use the first 8 characters of a UUID
-    
-    # Strip file extension from the image filename
-    image_name_without_extension, extension = os.path.splitext(image.name)
-    
-    # Resize the image
-    if is_original:
-        resized_img = img.resize((500, 500))
-    else:
-        resized_img = img.resize((100, 100))
-    
-    # Construct the resized image name
-    if is_original:
-        resized_image_name = f"original-{upload_date}-{unique_id}-{extension}"
-    else:
-        resized_image_name = f"resized-{upload_date}-{unique_id}-{extension}"
-    
-    # Save the resized image
-    resized_image_path = os.path.join(settings.MEDIA_ROOT, 'report_photos', resized_image_name)
-    resized_img.save(resized_image_path)
-
-    relative_path = os.path.relpath(resized_image_path, settings.MEDIA_ROOT )
-    
-    return relative_path
-
+@login_required
 def add_report(request, initial=None):
     entity_form_instance = ReportForm(request.POST or None, request.FILES or None)
     if request.method == 'POST':
@@ -374,7 +345,6 @@ def edit_report(request, id):
         if form.is_valid():
             # Set the new tiketId before saving the form
             form.instance.tiketId = new_tiketId
-
             # Check if a new image file is provided
             foto = request.FILES.get('foto')
             og_foto = request.FILES.get('og_foto')
@@ -387,23 +357,44 @@ def edit_report(request, id):
                 form.instance.og_foto = resized_og_foto_path
 
             form.save()
-            
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'success': False, 'errors': form.errors})
     else:
         form = ReportForm(instance=entity)
-
+    
     return render(request, "/api/edit_report.html", {'form': form})
 
-@login_required
-def display_foto(request, url):
-    # Get the URL parameter 'url' from the request
+def process_image(image, is_original):
+    upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    img = Image.open(image)
 
-    # Render the display_image.html template with the image_url context variable
-    return render(request, 'Report/display_foto.html', {'url': url})
+    # Generate a unique identifier
+    unique_id = str(uuid.uuid4())[:8]  # Use the first 8 characters of a UUID
+    
+    # Strip file extension from the image filename
+    image_name_without_extension, extension = os.path.splitext(image.name)
+    
+    # Resize the image
+    if is_original:
+        resized_img = img.resize((500, 500))
+    else:
+        resized_img = img.resize((100, 100))
+    
+    # Construct the resized image name
+    if is_original:
+        resized_image_name = f"original-{upload_date}-{unique_id}-{extension}"
+    else:
+        resized_image_name = f"resized-{upload_date}-{unique_id}-{extension}"
+    
+    # Save the resized image
+    resized_image_path = os.path.join(settings.MEDIA_ROOT, 'report_photos', resized_image_name)
+    resized_img.save(resized_image_path)
 
-
+    relative_path = os.path.relpath(resized_image_path, settings.MEDIA_ROOT )
+    
+    return relative_path
+            
 
 # -------------------- Functions for mobile app --------------------#
 # Set maximum image quality
@@ -494,6 +485,9 @@ class GroupTujuanListAPIView(generics.ListAPIView):
 class GroupKayuListAPIView(generics.ListAPIView):
     serializer_class = KayuSerializer
 
+# @permission_classes([IsAuthenticated])
+class GroupKayuListAPIView(generics.ListAPIView):
+    serializer_class = KayuSerializer
     def get_queryset(self):
         group_id = self.kwargs['group_id']
         group_kayus = Group_Kayu.objects.filter(group_id=group_id)
@@ -582,3 +576,38 @@ def save_group_changes(request):
             return JsonResponse({'success': False, 'error': str(e)})
         
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
+  
+@login_required
+def display_foto(request, url):
+    # Get the URL parameter 'url' from the request
+
+    # Render the display_image.html template with the image_url context variable
+    return render(request, 'Report/display_foto.html', {'url': url})
+
+
+class ReportSummaryView(generics.GenericAPIView):
+    serializer_class = ReportSummarySerializer
+
+    def get(self, request, sender_id):
+        # Get start and end date from request parameters
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+
+        # Set default values to the first and last day of the current month if not provided
+        if not start_date_str:
+            start_date = datetime.now().replace(day=1).date()
+        else:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+
+        if not end_date_str:
+            next_month = datetime.now().replace(day=28) + timedelta(days=4)
+            end_date = (next_month - timedelta(days=next_month.day)).date()
+        else:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+
+        reports = Report.objects.filter(sender_id=sender_id, tanggal__range=(start_date, end_date))
+        summary = reports.values('kayu').annotate(
+            total_plat=Count('plat', distinct=True),
+        )
+
+        return Response(summary)

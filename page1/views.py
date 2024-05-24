@@ -1062,7 +1062,6 @@ def upload_excel(request):
                 email_sumber_index = column_titles.index('email_sumber') if 'email_sumber' in column_titles else None
                 nama_sumber_index = column_titles.index('nama_sumber') if 'nama_sumber' in column_titles else None
                 pic_index = column_titles.index('pic') if 'pic' in column_titles else None
-
                 # Find the row containing the 'Gambar' column title
                 gambar_row_index = None
                 for row_index, row in enumerate(worksheet.iter_rows(values_only=True)):

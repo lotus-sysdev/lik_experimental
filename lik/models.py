@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
 
+
 # Create your models here.
 class Report(models.Model):
     sender = models.ForeignKey(User, on_delete=models.SET_NULL, null = True)
@@ -30,20 +31,24 @@ class Report(models.Model):
             # Generate tiketId based on sender and a unique number
             if self.sender:
                 sender_id_str = str(self.sender.pk).zfill(3)  # Use the sender ID, padded with leading zeros if needed
-                # sender_code = self.sender.username[:3].upper()  # Take the first three letters of the sender's username
 
-                # Retrieve the last tiketId for the same sender
-                last_report = Report.objects.filter(sender=self.sender).order_by('-date_time').first()
+                current_date = self.date_time.strftime('%y%m')
+
+                # Find the last tiketId for the current month and sender
+                last_report = Report.objects.filter(
+                    sender=self.sender,
+                    tiketId__startswith=f"LIK{sender_id_str}{current_date}"
+                ).order_by('-date_time').first()
+
                 last_number = 0
-                if last_report and last_report.id:
-                    last_number = last_report.id
-                else:
-                    last_number = 0
-
-                current_date = self.date_time.strftime('%y%m%d')
+                if last_report:
+                    # Extract the base tiketId before any revisions (R[index])
+                    base_tiketId = last_report.tiketId.split('R', 1)[0]
+                    last_number = int(base_tiketId[-4:])
                 
                 new_last_num = last_number + 1
-                new_tiketId = f"{current_date}{sender_id_str}{new_last_num}"  # Combine date, sender ID, and a 3-digit number
+                new_last_num = str(new_last_num).zfill(4)
+                new_tiketId = f"LIK{sender_id_str}{current_date}{new_last_num}"
                 self.tiketId = new_tiketId
 
         super().save(*args, **kwargs)

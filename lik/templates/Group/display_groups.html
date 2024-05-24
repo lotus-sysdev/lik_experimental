@@ -13,6 +13,7 @@
         id="likTable"
         class="table table-bordered table-striped w-100 table-lg table-responsive-lg"
       >
+
         <thead class="thead thead-light">
           <tr>
             <th>Group</th>
@@ -105,6 +106,7 @@
           .data()
           .toArray()
           .map((row) => row[1]); // Get SKUs of selected rows using DataTables API
+
         selectedIDs.forEach(function (value) {
           console.log("selected_ids[]:", value);
         });
@@ -137,6 +139,7 @@
           });
         }
       }
+
       $(document).ready(function () {
         initializeDataTable();
 
@@ -166,17 +169,24 @@
               // Unique row, add it to the uniqueRows object
               uniqueRows[rowDataStr] = index;
             }
-          });
-
+          });  
           // Hide all rows
-          table.rows().nodes().to$().hide();
-
+          table
+          .rows()
+          .nodes()
+          .to$()
+          .hide();
+          
           // Show all occurrences of duplicate rows and their corresponding original reference rows
-          table.rows(allDuplicateRows).nodes().to$().show();
-
+          table
+          .rows(allDuplicateRows)
+          .nodes()
+          .to$()
+          .show();
+          
           table.draw();
         }
-
+        
         // Function to exclude multiple columns from row data
         function excludeColumns(rowData) {
           var excludedColumns = [0, 1, 2, 14, 15]; // Specify the indices of columns to be excluded (e.g., column index 3 and 5)
@@ -187,39 +197,50 @@
             var columnIndex = excludedColumns[i];
             rowDataCopy[columnIndex] = null;
           }
-
+          
           return rowDataCopy;
         }
-
-        $("#resetFilterDuplicatesBtn").on("click", function () {
+        
+        $("#resetFilterDuplicatesBtn").on("click", function() {
           resetFilterDuplicates();
         });
-
+        
         // Function to reset check duplicates button
         function resetFilterDuplicates() {
           // Show all rows
-          table.rows().nodes().to$().show();
+          table
+          .rows()
+          .nodes()
+          .to$()
+          .show();
+
 
           table.draw();
         }
 
-        $("#searchButton").on("click", function () {
+        $('#searchButton').on('click', function() {
           columnSearch();
         });
 
-        $("#resetButtonCol").on("click", function () {
+        $('#resetButtonCol').on('click', function() {
           resetSearch();
         });
 
         // Function to perform column-specific search
         function columnSearch() {
           var columnIndex = $("#columnFilter").val(); // Get the index of the selected column
-          var searchValue = $("#columnSearch").val().trim(); // Get the value of the search input and remove leading/trailing whitespace
-          table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
+          var searchValue = $("#columnSearch")
+            .val()
+            .trim(); // Get the value of the search input and remove leading/trailing whitespace
+          table
+            .column(columnIndex)
+            .search(searchValue)
+            .draw(); // Apply search to the selected column
         }
 
         // Function to reset search
         function resetSearch() {
+
           $("#columnSearch").val(""); // Clear the search input
           table.search("").columns().search("").draw(); // Clear all column-specific searches and redraw the table
         }

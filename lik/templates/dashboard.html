@@ -6,6 +6,7 @@
   {% block content %}
 
   <style>
+
     .dashboard-container {
       display: grid;
       grid-template-columns: 1fr 5fr; /* 1fr for totals, 3fr for the card grid */
@@ -35,7 +36,6 @@
     .card-header {
       flex: 0 1 auto;
     }
-
     .top-card-body {
       flex: 1 1 auto;
       display: flex;
@@ -109,6 +109,7 @@
           <option value="ytd">Year to Date</option>
         </select>
       </div>
+
       <div class="form-group col-md-2">
         {{ form.start_date.label_tag }} {{ form.start_date }}
       </div>
@@ -225,6 +226,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const tooltips = document.querySelectorAll(".tt");
@@ -274,6 +276,7 @@
       // Generate dynamic labels based on the date range
       var labels = generateLabels(startDate, endDate);
 
+
       var uniqueVehicleCounts = JSON.parse(
         "{{ unique_vehicle_counts | escapejs }}"
       );
@@ -308,6 +311,7 @@
         startDate,
         endDate,
         "Total Kendaraan"
+
       );
     });
 
@@ -480,6 +484,7 @@
       return labels;
     }
 
+
     function renderColumnChart(
       canvasId,
       data,
@@ -545,6 +550,7 @@
           var monthIndex =
             (itemDate.getFullYear() - startDate.getFullYear()) * 12 +
             (itemDate.getMonth() - startDate.getMonth());
+
           // console.log("Month Index:", monthIndex);
 
           var labelIndex = uniqueLabels.indexOf(label);
@@ -553,12 +559,14 @@
           if (labelIndex >= 0 && monthIndex >= 0) {
             dataCounts[labelIndex][monthIndex] += count;
             // console.log("Updated dataCounts:", dataCounts);
+
           }
         }
       });
 
       // Render column chart
       var ctx = document.getElementById(canvasId).getContext("2d");
+
       var columnChart = new Chart(ctx, {
         type: "bar",
         data: {
@@ -599,7 +607,6 @@
         },
         plugins: [ChartDataLabels],
       });
-
       return columnChart;
     }
 
