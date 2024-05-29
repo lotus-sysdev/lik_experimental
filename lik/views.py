@@ -1,6 +1,5 @@
 # Standard library imports
 import os
-
 import json
 import uuid
 from datetime import datetime, timedelta
@@ -9,6 +8,7 @@ from datetime import datetime, timedelta
 from itertools import groupby
 from operator import itemgetter
 from PIL import Image, ImageFile
+from collections import defaultdict
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -57,17 +57,24 @@ def dashboard(request):
         plat_data = reports.annotate(
             upper_plat=Upper('plat')
         ).values(
-            'upper_plat', 'sender__first_name', 'driver'
+            'upper_plat', 'sender__first_name', 'driver', 'tujuan'
         ).annotate(count=Count('id')).order_by('upper_plat')
 
         grouped_plat_data = []
         for key, group in groupby(plat_data, key=itemgetter('upper_plat')):
             group_list = list(group)
+            tujuan_counter = defaultdict(int)
+
+            for item in group_list:
+                tujuan_counter[item['tujuan']] += item['count']
+
             grouped_plat_data.append({
                 'upper_plat': key,
                 'senders': list(set(item['sender__first_name'] for item in group_list)),
                 'drivers': list(set(item['driver'] for item in group_list)),
-                'count': sum(item['count'] for item in group_list)
+                'count': sum(item['count'] for item in group_list),
+                'tujuan': list(tujuan_counter.keys()),
+                'tujuan_count': dict(tujuan_counter),
             })
 
         grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
@@ -114,17 +121,24 @@ def dashboard(request):
         plat_data = reports.annotate(
             upper_plat=Upper('plat')
         ).values(
-            'upper_plat', 'sender__first_name', 'driver'
+            'upper_plat', 'sender__first_name', 'driver', 'tujuan'
         ).annotate(count=Count('id')).order_by('upper_plat')
 
         grouped_plat_data = []
         for key, group in groupby(plat_data, key=itemgetter('upper_plat')):
             group_list = list(group)
+            tujuan_counter = defaultdict(int)
+
+            for item in group_list:
+                tujuan_counter[item['tujuan']] += item['count']
+
             grouped_plat_data.append({
                 'upper_plat': key,
                 'senders': list(set(item['sender__first_name'] for item in group_list)),
                 'drivers': list(set(item['driver'] for item in group_list)),
-                'count': sum(item['count'] for item in group_list)
+                'count': sum(item['count'] for item in group_list),
+                'tujuan': list(tujuan_counter.keys()),
+                'tujuan_count': dict(tujuan_counter),
             })
 
         grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
@@ -162,6 +176,8 @@ def dashboard(request):
         total_tonase = Report.objects.aggregate(total=Sum('berat'))['total'] or 0
         total_rejects = Report.objects.aggregate(total=Sum('reject'))['total'] or 0
         total_unique_vehicles = Report.objects.values('plat').distinct().count()
+
+        print(grouped_plat_data)
 
     context = {
         'form' : form,
