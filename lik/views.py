@@ -414,7 +414,7 @@ class add_report_mobile(generics.CreateAPIView):
             image_name = str(image_data)
             
             og_image = image.resize((500, 500), Image.Resampling.LANCZOS)
-            upload_date = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+            upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
             og_image_name = f'original-{upload_date}-{image_name}'
             og_image_path = os.path.join(settings.MEDIA_ROOT,'report_photos', og_image_name)
             
