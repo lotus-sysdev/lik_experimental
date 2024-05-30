@@ -19,18 +19,22 @@ class Command(BaseCommand):
             # Subquery to get the newest ticket date for each prospect
             newest_ticket_subquery = ProspectTicket.objects.filter(
                 prospect_id=OuterRef('pk')
-            ).order_by('-date').values('date')[:1]
+            ).order_by('-date').values('date', 'open')[:1]
 
             # Filter prospects by the newest ticket date within the time period
             stale_prospects = Prospect.objects.annotate(
-                newest_ticket_date=Subquery(newest_ticket_subquery)
+                newest_ticket_date=Subquery(newest_ticket_subquery.values('date')[:1]),
+                newest_ticket_open=Subquery(newest_ticket_subquery.values('open')[:1])
             ).filter(
-                newest_ticket_date__date=reminder_date
+                newest_ticket_date__date=reminder_date,
+                newest_ticket_open=True
             )
 
             for prospect in stale_prospects:
                 # Get the in_charge for the prospect
                 in_charge_email = prospect.in_charge.email
+                # print(in_charge_email)
+                # print(settings.EMAIL_HOST_USER)
 
                 # Send reminder email
                 send_mail(

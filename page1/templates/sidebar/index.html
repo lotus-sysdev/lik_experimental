@@ -107,10 +107,13 @@
 
       </ul>
 
+      {% if request.user|has_group:'GA' or request.user|has_group:'Admin' %}
       <div class="sidebar-header">
         <h3><a href="/api/dashboard" class="sidebar-a">Lotus Logging</a></h3>
       </div>
+      {% endif %}
 
+      {% if request.user|has_group:'GA' or request.user|has_group:'Accounting' or request.user|has_group:'Admin' %}
       <ul class="list-unstyled components">
         <li><a class="sidebar-a" href="/api/dashboard">Dashboard</a></li>
         <li class="active">
@@ -133,6 +136,7 @@
           </ul>
         </li>
       </ul>
+      {% endif %}
 
       <ul class="list-unstyled CTAs">
         {% if request.user|has_group:"Admin" %}
