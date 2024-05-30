@@ -31,6 +31,7 @@ DEBUG = True
 # DEBUG = False
 
 
+
 ALLOWED_HOSTS = ["159.223.33.190", "127.0.0.1", "localhost", "192.168.1.62", "192.168.1.56", "192.168.140.200"]
 
 from django.urls import reverse_lazy

@@ -9,7 +9,7 @@ class Report(models.Model):
     plat = models.CharField(max_length=20, null=True)
     driver = models.CharField(max_length=30, null=True)
     PO = models.CharField(max_length=40,  null=True)
-    DO = models.CharField(max_length=7, null=True)
+    DO = models.CharField(max_length=20, null=True)
     lokasi = models.CharField(max_length=255, null = True)
     tujuan = models.CharField(max_length=255, null = True)
     kayu = models.CharField(max_length=255, null = True)
