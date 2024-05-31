@@ -14,7 +14,7 @@ class ReportForm(forms.ModelForm):
     def clean_no_tiket(self):
         no_tiket = str(self.cleaned_data['no_tiket']).replace(" ", "")
         # Add spaces in the appropriate positions
-        return ' '.join([no_tiket[:4], no_tiket[4:7], no_tiket[7:]])
+        return ' '.join([no_tiket[:5], no_tiket[5:8], no_tiket[8:]])
     class Meta:
         model = Report
         fields = '__all__'

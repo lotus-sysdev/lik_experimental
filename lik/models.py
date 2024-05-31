@@ -19,7 +19,7 @@ class Report(models.Model):
     tanggal = models.DateField( null=True)
     reject = models.PositiveIntegerField( null=True)
     foto = models.ImageField(upload_to = 'report_photos/', null=True)
-    og_foto = models.ImageField(upload_to = 'report_photos/', null=True)
+    og_foto = models.ImageField(upload_to = 'report_photos/', null=True, blank=True)
     #Timestamp
     date_time = models.DateTimeField(null = True)
 
