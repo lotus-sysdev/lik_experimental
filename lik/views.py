@@ -289,11 +289,11 @@ def display_report(request):
     if start_date_str_ts and end_date_str_ts:
         # Parse the date strings into naive datetime objects
         start_date_naive = datetime.strptime(start_date_str_ts, '%Y-%m-%d')
-        end_date_naive = datetime.strptime(end_date_str_ts, '%Y-%m-%d')
-
+        end_date_naive = datetime.strptime(end_date_str_ts, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
         # Make the naive datetime objects timezone-aware
         start_date = timezone.make_aware(start_date_naive, timezone.get_current_timezone())
         end_date = timezone.make_aware(end_date_naive, timezone.get_current_timezone())
+        print(start_date, end_date)
 
         # Filter reports based on the timezone-aware datetime range
         entities = Report.objects.filter(date_time__range=(start_date, end_date))
