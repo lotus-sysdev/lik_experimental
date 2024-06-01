@@ -151,7 +151,7 @@
     </div>
     <div class="col-md-3">
       <div class="card">
-        <h4 class="text-center card-header">Jumlah Kendaraan</h4>
+        <h4 class="text-center card-header">Jumlah Kendaraan (unique)</h4>
         <div class="top-card-body">{{ total_unique_vehicles }}</div>
       </div>
     </div>
@@ -522,7 +522,7 @@
           label = item.tujuan;
         }
         count = item.count;
-        // console.log(item);
+        console.log(item);
 
         if (!uniqueLabels.includes(label)) {
           uniqueLabels.push(label);

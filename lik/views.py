@@ -23,6 +23,7 @@ from .serializers import *
 
 # Django imports
 from django.conf import settings
+from django.utils import timezone
 from django.db import transaction
 from django.http import JsonResponse
 from django.db.models import Count, Sum
@@ -90,7 +91,7 @@ def dashboard(request):
             day=ExtractDay('tanggal'),
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
-        ).values('day', 'month', 'year', 'tujuan').annotate(count=Count('upper_plat', distinct=True))
+        ).values('day', 'month', 'year', 'tujuan').annotate(count=Count('id', distinct=True))
         vehicle_kayu_counts = reports.values(
             'kayu',
             upper_plat=Upper('plat'),
@@ -282,7 +283,21 @@ def display_report(request):
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
 
-    if start_date_str and end_date_str:
+    start_date_str_ts = request.GET.get('start_date_ts')
+    end_date_str_ts = request.GET.get('end_date_ts')
+
+    if start_date_str_ts and end_date_str_ts:
+        # Parse the date strings into naive datetime objects
+        start_date_naive = datetime.strptime(start_date_str_ts, '%Y-%m-%d')
+        end_date_naive = datetime.strptime(end_date_str_ts, '%Y-%m-%d')
+
+        # Make the naive datetime objects timezone-aware
+        start_date = timezone.make_aware(start_date_naive, timezone.get_current_timezone())
+        end_date = timezone.make_aware(end_date_naive, timezone.get_current_timezone())
+
+        # Filter reports based on the timezone-aware datetime range
+        entities = Report.objects.filter(date_time__range=(start_date, end_date))
+    elif start_date_str and end_date_str:
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
         end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
         entities = Report.objects.filter(tanggal__range=[start_date, end_date])
