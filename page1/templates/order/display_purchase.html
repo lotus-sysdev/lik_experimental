@@ -14,23 +14,33 @@
         id="purchaseTable"
         class="table table-bordered table-striped w-100 table-responsive-lg"
       >
-      <div class="form-inline mb-2">
-        <select id="columnFilter" class="form-control btn-info">
-          <option value="0">ID</option>
-          <option value="1">Supplier</option>
-          <option value="2">Item</option>
-          <option value="3">Revenue PO</option>
-          <option value="4">Nomor PO</option>
-          <option value="5">Tanggal PO</option>
-          <option value="6">Tanggal Proses</option>
-          <option value="7">Tanggal Input Accurate</option>
-          <option value="8">Tanggal Pengiriman Barang</option>
-          <option value="9">Tanggal Pengiriman Invoice</option>
-          <option value="10">Status</option>
-          <!-- Add more options for additional columns -->
-        </select>
-        <input type="text" id="columnSearch" placeholder="Search in selected column" class="form-control w-25">
-      </div>
+        <div class="form-inline mb-2">
+          <select id="columnFilter" class="form-control btn-info">
+            <option value="0">ID</option>
+            <option value="1">Supplier</option>
+            <option value="2">Item</option>
+            <option value="3">Revenue PO</option>
+            <option value="4">Nomor PO</option>
+            <option value="5">Tanggal PO</option>
+            <option value="6">Tanggal Proses</option>
+            <option value="7">Tanggal Input Accurate</option>
+            <option value="8">Tanggal Pengiriman Barang</option>
+            <option value="9">Tanggal Pengiriman Invoice</option>
+            <option value="10">Status</option>
+            <!-- Add more options for additional columns -->
+          </select>
+          <input
+            type="text"
+            id="columnSearch"
+            placeholder="Search in selected column"
+            class="form-control m-1"
+            style="width: 15%;"
+          />
+          <button id="searchButton" class="btn btn-primary mr-1">Search</button>
+          <button id="resetButtonCol" class="btn btn-secondary mr-2">
+            Reset
+          </button>
+        </div>
         <thead class="thead-light">
           <tr>
             <th>ID</th>
@@ -71,129 +81,148 @@
     </div>
     <script>
       var table;
-      function initializeDataTable(){
-      table = new DataTable("#purchaseTable", {
-        select: {
-          style: "multi",
-        },
-        columnDefs: [
-          {
-            targets: 3, // Target the first column (adjust the index as needed)
-            render: function (data, type, row) {
-              if (type === "display") {
-                if (data.startsWith("IDR")) {
-                  // Replace commas with periods and periods with commas
-                  data = data.replace(/,/g, '#').replace(/\./g, ',').replace(/#/g, '.');
-                  data = data.substr(0, data.indexOf(',')); // Get substring until the first comma
-                  data = data.substr(0, 3) + ' ' + data.substr(3);
-                  return data
-                } else if (data.startsWith("$")) {
-                  data = data.replace("$", "USD");
-                  data = data.substr(0, 3) + " " + data.substr(3);
-                  return data;
-                } else {
-                  // Add a space after the first three characters
-                  return data.substr(0, 3) + " " + data.substr(3);
-                }
-              }
-              return data;
-            },
+      function initializeDataTable() {
+        table = new DataTable("#purchaseTable", {
+          select: {
+            style: "multi",
           },
-          {
-            targets: 4, // Target the third column
-            render: function (data, type, row) {
-              if (type === "display" && !isNaN(data)) { // Check if data is a number
-                return "PO" + data;
-              }
-              return data;
+          columnDefs: [
+            {
+              targets: 3, // Target the first column (adjust the index as needed)
+              render: function (data, type, row) {
+                if (type === "display") {
+                  if (data.startsWith("IDR")) {
+                    // Replace commas with periods and periods with commas
+                    data = data
+                      .replace(/,/g, "#")
+                      .replace(/\./g, ",")
+                      .replace(/#/g, ".");
+                    data = data.substr(0, data.indexOf(",")); // Get substring until the first comma
+                    data = data.substr(0, 3) + " " + data.substr(3);
+                    return data;
+                  } else if (data.startsWith("$")) {
+                    data = data.replace("$", "USD");
+                    data = data.substr(0, 3) + " " + data.substr(3);
+                    return data;
+                  } else {
+                    // Add a space after the first three characters
+                    return data.substr(0, 3) + " " + data.substr(3);
+                  }
+                }
+                return data;
+              },
             },
-          }
-        ],
-        lengthMenu: [
-          [10, 25, 50, 100, -1],
-          [10, 25, 50, 100, "All"],
-        ],
-        layout: {
-          top2Start: {
-            buttons: {
-              buttons: [
-                { extend: "pdf", 
-                  className: "btn-primary",
-                  exportOptions: {
-                    columns: ':visible'
-                  }  
-                },
-                {
+            {
+              targets: 4, // Target the third column
+              render: function (data, type, row) {
+                if (type === "display" && !isNaN(data)) {
+                  // Check if data is a number
+                  return "PO" + data;
+                }
+                return data;
+              },
+            },
+          ],
+          lengthMenu: [
+            [10, 25, 50, 100, -1],
+            [10, 25, 50, 100, "All"],
+          ],
+          layout: {
+            top2Start: {
+              buttons: {
+                buttons: [
+                  {
+                    extend: "pdf",
+                    className: "btn-primary",
+                    exportOptions: {
+                      columns: ":visible",
+                    },
+                  },
+                  {
                     text: "Delete Rows",
                     className: "btn-danger",
                     action: deleteSelectedRows,
                   },
-                { extend: "colvis", className: "btn-info" },
-              ],
-              dom: {
-                button: {
-                  className: "btn",
+                  { extend: "colvis", className: "btn-info" },
+                ],
+                dom: {
+                  button: {
+                    className: "btn",
+                  },
                 },
               },
             },
+            // top2Start:'pageLength'
           },
-          // top2Start:'pageLength'
-        },
-      });
-    }
-    function deleteSelectedRows(){
-    if (!table) {
-        console.error("Table is not initialized.");
-        return;
-    }
-        var selectedIDs = table.rows('.selected').data().toArray().map(row => row[0]); // Get SKUs of selected rows using DataTables API
-        selectedIDs.forEach(function(value) {
-        console.log('selected_ids[]:', value);
+        });
+      }
+      function deleteSelectedRows() {
+        if (!table) {
+          console.error("Table is not initialized.");
+          return;
+        }
+        var selectedIDs = table
+          .rows(".selected")
+          .data()
+          .toArray()
+          .map((row) => row[0]); // Get SKUs of selected rows using DataTables API
+        selectedIDs.forEach(function (value) {
+          console.log("selected_ids[]:", value);
         });
         if (selectedIDs.length === 0) {
-            alert('Please select at least one row to delete.');
-            return;
+          alert("Please select at least one row to delete.");
+          return;
         }
 
-        if (confirm('Are you sure you want to delete the selected rows?')) {
-            const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
-            $.ajax({
-                url: '{% url "delete_selected_rows_PO" %}',
-                type: 'POST',
-                data: {selected_ids: selectedIDs, csrfmiddlewaretoken: csrfToken },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        // Reload or update the table after successful deletion
-                        location.reload(); // Assuming you're using AJAX to populate the table
-                        // Optionally, provide feedback to the user
-                        alert('Selected rows deleted successfully.');
-                    } else {
-                        alert('Error deleting selected rows: ' + response.error);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    alert('Error deleting selected rows: ' + error);
-                },
-            });
+        if (confirm("Are you sure you want to delete the selected rows?")) {
+          const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0]
+            .value;
+          $.ajax({
+            url: '{% url "delete_selected_rows_PO" %}',
+            type: "POST",
+            data: { selected_ids: selectedIDs, csrfmiddlewaretoken: csrfToken },
+            dataType: "json",
+            success: function (response) {
+              if (response.success) {
+                // Reload or update the table after successful deletion
+                location.reload(); // Assuming you're using AJAX to populate the table
+                // Optionally, provide feedback to the user
+                alert("Selected rows deleted successfully.");
+              } else {
+                alert("Error deleting selected rows: " + response.error);
+              }
+            },
+            error: function (xhr, status, error) {
+              alert("Error deleting selected rows: " + error);
+            },
+          });
         }
-    }
-    $(document).ready(function() {
+      }
+      $(document).ready(function () {
         initializeDataTable();
-        $("#columnSearch").on("keyup", function() {
+        $("#columnSearch").on("keyup", function () {
           columnSearch(); // Call the columnSearch function when the user types in the input field
+        });
+
+        $("#searchButton").on("click", function () {
+          columnSearch();
+        });
+
+        $("#resetButtonCol").on("click", function () {
+          resetSearch();
         });
 
         // Function to perform column-specific search
         function columnSearch() {
           var columnIndex = $("#columnFilter").val(); // Get the index of the selected column
-          var searchValue = $("#columnSearch")
-            .val()
-            .trim(); // Get the value of the search input and remove leading/trailing whitespace
-          table
-            .column(columnIndex)
-            .search(searchValue)
-            .draw(); // Apply search to the selected column
+          var searchValue = $("#columnSearch").val().trim(); // Get the value of the search input and remove leading/trailing whitespace
+          table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
+        }
+        
+        // Function to reset search
+        function resetSearch() {
+          $("#columnSearch").val(""); // Clear the search input
+          table.search("").columns().search("").draw(); // Clear all column-specific searches and redraw the table
         }
       });
     </script>
