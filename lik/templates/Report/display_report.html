@@ -19,31 +19,48 @@
             <option value="0">Timestamp</option>
             <option value="1">ID</option>
             <option value="2">Sender</option>
-            <option value="3">Plat Nomor</option>
-            <option value="4">Driver</option>
-            <option value="5">No. PO</option>
-            <option value="6">No. DO</option>
-            <option value="7">No. Tiket Timbang</option>
-            <option value="8">Jenis Kayu</option>
-            <option value="9">Berat</option>
-            <option value="10">Reject</option>
-            <option value="11">Lokasi Potong</option>
-            <option value="12">Pabrik Tujuan</option>
-            <option value="13">Tanggal Keluar</option>
+            <option value="3">ID Tiket</option>
+            <option value="4">Plat Nomor</option>
+            <option value="5">Driver</option>
+            <option value="6">No. PO</option>
+            <option value="7">No. DO</option>
+            <option value="8">No. Tiket Timbang</option>
+            <option value="9">Jenis Kayu</option>
+            <option value="10">Berat</option>
+            <option value="11">Reject</option>
+            <option value="12">Lokasi Potong</option>
+            <option value="13">Pabrik Tujuan</option>
+            <option value="14">Tanggal Keluar</option>
             <!-- Add more options for additional columns -->
           </select>
           <input
             type="text"
             id="columnSearch"
             placeholder="Search in selected column"
-            class="form-control w-25"
+            class="form-control m-1"
+            style="width: 15%;"
           />
-          <button id="searchButton" class="btn btn-primary mr-2">Search</button>
+          <button id="searchButton" class="btn btn-primary mr-1">Search</button>
           <button id="resetButtonCol" class="btn btn-secondary mr-2">
             Reset
           </button>
+            <select id="timestampRange" class="form-control btn-info mr-2">
+              <option value="">Select Timestamp</option>
+              <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
+              <option value="1-10">1-10 of This Month</option>
+              <option value="11-20">11-20 of This Month</option>
+              <option value="21-eom">21 to End of This Month</option>
+              <option value="7">Last 7 days</option>
+              <option value="30">Last 30 days</option>
+              <option value="60">Last 60 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="ytd">Current year to date</option>
+              <option value="365">Last 1 year (365 days)</option>
+              <option value="730">Last 2 years (730 days)</option>
+            </select>
           <button id="filterDuplicatesButton" class="btn btn-warning">
-            Check for Duplicates
+            Check Duplicates
           </button>
           <button id="resetFilterDuplicatesBtn" class="btn btn-secondary ml-2">
             Reset
@@ -52,15 +69,15 @@
 
         <div class="form-inline mb-2">
           <label class="mr-2" for="startDate">Start Date:</label>
-          <input type="date" id="startDate" class="form-control mr-2" />
+          <input type="date" id="startDate" class="form-control mr-2" style="width: 15%;" />
           <label class="mr-2" for="endDate">End Date:</label>
-          <input type="date" id="endDate" class="form-control mr-2" />
+          <input type="date" id="endDate" class="form-control mr-2" style="width: 15%;"/>
 
-          <button id="filterButton" class="btn btn-primary">
-            Apply Filter
+          <button id="filterButton" class="btn btn-primary mr-2">
+            Apply
           </button>
 
-          <select id="dateRange" class="form-control ml-2 btn-info">
+          <select id="dateRange" class="form-control btn-info">
             <option value="">Select Date Range</option>
             <option value="today">Today</option>
             <option value="yesterday">Yesterday</option>
@@ -79,16 +96,16 @@
           <button id="resetButton" class="btn btn-secondary ml-2">Reset</button>
         </div>
 
-        <div class="custom-container container mb-3">
-          <p>
+        <div class="custom-container container mb-2 d-flex">
+          <p class="mr-3">
             Total Berat:
             <span class="font-weight-bold" id="totalBerat"></span> Kg
           </p>
-          <p>
+          <p class="mr-3">
             Total Reject:
             <span class="font-weight-bold" id="totalReject"></span> Kg
           </p>
-          <p>
+          <p class="mr-3">
             Jumlah Pengiriman:
             <span class="font-weight-bold" id="uniquePlatCount"></span>
           </p>
@@ -277,7 +294,6 @@
           .off()
           .on("keyup", function () {
             clearTimeout(searchTimeout);
-
             searchTimeout = setTimeout(updateStatsAfterSearch, 1000);
           });
 
@@ -501,6 +517,80 @@
           filterByDateRange(startDate, endDate);
         });
 
+        $("#timestampRange").change(function () {
+          var dateRange = $(this).val();
+          var startDate = "";
+          var endDate = "";
+
+          // Calculate start and end dates based on selected range
+          if (dateRange === "today") {
+            startDate = formatDate(new Date());
+            endDate = startDate;
+          } else if (dateRange === "yesterday") {
+            var yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            startDate = formatDate(yesterday);
+            endDate = startDate;
+          } else if (dateRange === "1-10") {
+            startDate = formatDate(
+              new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+            );
+            endDate = formatDate(
+              new Date(new Date().getFullYear(), new Date().getMonth(), 10)
+            );
+          } else if (dateRange === "11-20") {
+            startDate = formatDate(
+              new Date(new Date().getFullYear(), new Date().getMonth(), 11)
+            );
+            endDate = formatDate(
+              new Date(new Date().getFullYear(), new Date().getMonth(), 20)
+            );
+          } else if (dateRange === "21-eom") {
+            startDate = formatDate(
+              new Date(new Date().getFullYear(), new Date().getMonth(), 21)
+            );
+            endDate = formatDate(
+              new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+            );
+          } else if (dateRange === "7") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 6))
+            ); // Date 7 days ago
+          } else if (dateRange === "30") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 29))
+            ); // Date 30 days ago
+          } else if (dateRange === "60") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 59))
+            ); // Date 30 days ago
+          } else if (dateRange === "90") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 89))
+            ); // Date 30 days ago
+          } else if (dateRange === "365") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 364))
+            ); // Date 365 days ago
+          } else if (dateRange === "730") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = formatDate(
+              new Date(new Date().setDate(new Date().getDate() - 729))
+            ); // Date 365 days ago
+          } else if (dateRange === "ytd") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year
+            startDate = formatDate(startDate);
+          }
+          filterByTimestamp(startDate, endDate);
+        });
+
+
         function formatDate(date) {
           var year = date.getFullYear();
           var month = ("0" + (date.getMonth() + 1)).slice(-2); // Months are zero-based
@@ -515,6 +605,29 @@
             data: {
               start_date: startDate,
               end_date: endDate,
+            },
+            success: function (response) {
+              console.log("Success");
+              $("#likTable").html($(response).find("#likTable").html());
+              if (table) {
+                table.destroy();
+              }
+              initializeDataTable();
+              calculateStats();
+            },
+            error: function (xhr, status, error) {
+              console.error("Error filtering data:", error);
+            },
+          });
+        }
+
+        function filterByTimestamp(startDate, endDate) {
+          $.ajax({
+            url: '{% url "display_report" %}',
+            type: "GET",
+            data: {
+              start_date_ts: startDate,
+              end_date_ts: endDate,
             },
             success: function (response) {
               console.log("Success");

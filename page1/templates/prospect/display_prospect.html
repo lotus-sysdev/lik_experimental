@@ -27,8 +27,11 @@
             type="text"
             id="columnSearch"
             placeholder="Search in selected column"
-            class="form-control w-25"
+            class="form-control m-1"
+            style="width: 15%"
           />
+          <button id="searchButton" class="btn btn-primary mr-1">Search</button>
+          <button id="resetButtonCol" class="btn btn-secondary mr-2">Reset</button>
         </div>
         <thead class="thead-light">
           <tr>
@@ -52,10 +55,14 @@
             <td>{{ prospect.telp }}</td>
             <td>{{ prospect.in_charge }}</td>
             <td>
-              <a href="{% url 'prospect_ticket' prospect.prospect_id%}">Ticket</a>
+              <a href="{% url 'prospect_ticket' prospect.prospect_id%}"
+                >Ticket</a
+              >
             </td>
             <td>
-              <a href="{% url 'prospect_detail' prospect.prospect_id %}">View</a>
+              <a href="{% url 'prospect_detail' prospect.prospect_id %}"
+                >View</a
+              >
             </td>
           </tr>
           {% endfor %}
@@ -150,11 +157,24 @@
           columnSearch(); // Call the columnSearch function when the user types in the input field
         });
 
+        $("#searchButton").on("click", function () {
+          columnSearch();
+        });
+
+        $("#resetButtonCol").on("click", function () {
+          resetSearch();
+        });
+
         // Function to perform column-specific search
         function columnSearch() {
           var columnIndex = $("#columnFilter").val(); // Get the index of the selected column
           var searchValue = $("#columnSearch").val().trim(); // Get the value of the search input and remove leading/trailing whitespace
           table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
+        }
+
+        function resetSearch() {
+          $("#columnSearch").val(""); // Clear the search input
+          table.search("").columns().search("").draw(); // Clear all column-specific searches and redraw the table
         }
       });
     </script>

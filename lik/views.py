@@ -5,7 +5,10 @@ import uuid
 from datetime import datetime, timedelta
 
 # Third-party imports
+from itertools import groupby
+from operator import itemgetter
 from PIL import Image, ImageFile
+from collections import defaultdict
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -20,6 +23,7 @@ from .serializers import *
 
 # Django imports
 from django.conf import settings
+from django.utils import timezone
 from django.db import transaction
 from django.http import JsonResponse
 from django.db.models import Count, Sum
@@ -41,7 +45,6 @@ def dashboard(request):
         end_date = form.cleaned_data.get('end_date')
 
         reports = Report.objects.all()
-
         if kayu:
             reports = reports.filter(kayu=kayu)
         if sender:
@@ -51,7 +54,31 @@ def dashboard(request):
 
         kayu_counts = reports.values('kayu').annotate(count=Count('id'))
         sender_counts = reports.values('sender__first_name').annotate(count=Count('id'))
-        plat_counts = reports.annotate(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id')).order_by('-count')
+
+        plat_data = reports.annotate(
+            upper_plat=Upper('plat')
+        ).values(
+            'upper_plat', 'sender__first_name', 'driver', 'tujuan'
+        ).annotate(count=Count('id')).order_by('upper_plat')
+
+        grouped_plat_data = []
+        for key, group in groupby(plat_data, key=itemgetter('upper_plat')):
+            group_list = list(group)
+            tujuan_counter = defaultdict(int)
+
+            for item in group_list:
+                tujuan_counter[item['tujuan']] += item['count']
+
+            grouped_plat_data.append({
+                'upper_plat': key,
+                'senders': list(set(item['sender__first_name'] for item in group_list)),
+                'drivers': list(set(item['driver'] for item in group_list)),
+                'count': sum(item['count'] for item in group_list),
+                'tujuan': list(tujuan_counter.keys()),
+                'tujuan_count': dict(tujuan_counter),
+            })
+
+        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
 
         tonase_counts = reports.values(
             'kayu',
@@ -64,7 +91,7 @@ def dashboard(request):
             day=ExtractDay('tanggal'),
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
-        ).values('day', 'month', 'year', 'tujuan').annotate(count=Count('upper_plat', distinct=True))
+        ).values('day', 'month', 'year', 'tujuan').annotate(count=Count('id', distinct=True))
         vehicle_kayu_counts = reports.values(
             'kayu',
             upper_plat=Upper('plat'),
@@ -76,7 +103,7 @@ def dashboard(request):
         # Serialize the counts data
         kayu_counts_serialized = json.dumps(list(kayu_counts))
         sender_counts_serialized = json.dumps(list(sender_counts))
-        plat_counts_serialized = json.dumps(list(plat_counts))
+        plat_counts_serialized = json.dumps(grouped_plat_data)
         tonase_counts_serialized = json.dumps(list(tonase_counts))
         unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
         vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
@@ -85,14 +112,37 @@ def dashboard(request):
         total_revised_reports = reports.filter(tiketId__icontains="R").count()
         total_tonase = reports.aggregate(total=Sum('berat'))['total'] or 0
         total_rejects = reports.aggregate(total=Sum('reject'))['total'] or 0
-        total_unique_vehicles = reports.values('plat').distinct().count()
+        total_unique_vehicles = reports.annotate(upper_plat=Upper('plat')).values('plat').distinct().count()
 
     else: 
         reports = Report.objects.all()
         kayu_counts = Report.objects.values('kayu').annotate(count=Count('id'))
         sender_counts = Report.objects.values('sender__first_name').annotate(count=Count('id'))
-        plat_counts = Report.objects(upper_plat=Upper('plat')).values('upper_plat').annotate(count=Count('id')).order_by('-count')
 
+        plat_data = reports.annotate(
+            upper_plat=Upper('plat')
+        ).values(
+            'upper_plat', 'sender__first_name', 'driver', 'tujuan'
+        ).annotate(count=Count('id')).order_by('upper_plat')
+
+        grouped_plat_data = []
+        for key, group in groupby(plat_data, key=itemgetter('upper_plat')):
+            group_list = list(group)
+            tujuan_counter = defaultdict(int)
+
+            for item in group_list:
+                tujuan_counter[item['tujuan']] += item['count']
+
+            grouped_plat_data.append({
+                'upper_plat': key,
+                'senders': list(set(item['sender__first_name'] for item in group_list)),
+                'drivers': list(set(item['driver'] for item in group_list)),
+                'count': sum(item['count'] for item in group_list),
+                'tujuan': list(tujuan_counter.keys()),
+                'tujuan_count': dict(tujuan_counter),
+            })
+
+        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
         tonase_counts = Report.objects.annotate(
             'kayu',
             day=ExtractDay('tanggal'),
@@ -116,7 +166,7 @@ def dashboard(request):
 
         kayu_counts_serialized = json.dumps(list(kayu_counts))
         sender_counts_serialized = json.dumps(list(sender_counts))
-        plat_counts_serialized = json.dumps(list(plat_counts))
+        plat_counts_serialized = json.dumps(grouped_plat_data)
         tonase_counts_serialized = json.dumps(list(tonase_counts))
         unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
         vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
@@ -127,12 +177,14 @@ def dashboard(request):
         total_rejects = Report.objects.aggregate(total=Sum('reject'))['total'] or 0
         total_unique_vehicles = Report.objects.values('plat').distinct().count()
 
+        print(grouped_plat_data)
+
     context = {
         'form' : form,
         'reports' : reports,
         'kayu_counts': kayu_counts_serialized,
         'sender_counts': sender_counts_serialized,
-        'plat_counts': list(plat_counts),
+        'plat_counts': grouped_plat_data,
         'tonase_counts': tonase_counts_serialized,
         'unique_vehicle_counts': unique_vehicle_serialized,
         'vehicle_kayu_counts': vehicle_kayu_serialized,
@@ -230,7 +282,21 @@ def display_report(request):
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
 
-    if start_date_str and end_date_str:
+    start_date_str_ts = request.GET.get('start_date_ts')
+    end_date_str_ts = request.GET.get('end_date_ts')
+
+    if start_date_str_ts and end_date_str_ts:
+        # Parse the date strings into naive datetime objects
+        start_date_naive = datetime.strptime(start_date_str_ts, '%Y-%m-%d')
+        end_date_naive = datetime.strptime(end_date_str_ts, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
+        # Make the naive datetime objects timezone-aware
+        start_date = timezone.make_aware(start_date_naive, timezone.get_current_timezone())
+        end_date = timezone.make_aware(end_date_naive, timezone.get_current_timezone())
+        print(start_date, end_date)
+
+        # Filter reports based on the timezone-aware datetime range
+        entities = Report.objects.filter(date_time__range=(start_date, end_date))
+    elif start_date_str and end_date_str:
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
         end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
         entities = Report.objects.filter(tanggal__range=[start_date, end_date])
@@ -243,36 +309,7 @@ def display_report(request):
 def delete_selected_rows_report(request):
     return delete_selected_rows(request, Report, 'id')
 
-def process_image(image, is_original):
-    upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    img = Image.open(image)
-
-    # Generate a unique identifier
-    unique_id = str(uuid.uuid4())[:8]  # Use the first 8 characters of a UUID
-    
-    # Strip file extension from the image filename
-    image_name_without_extension, extension = os.path.splitext(image.name)
-    
-    # Resize the image
-    if is_original:
-        resized_img = img.resize((500, 500))
-    else:
-        resized_img = img.resize((100, 100))
-    
-    # Construct the resized image name
-    if is_original:
-        resized_image_name = f"original-{upload_date}-{unique_id}-{extension}"
-    else:
-        resized_image_name = f"resized-{upload_date}-{unique_id}-{extension}"
-    
-    # Save the resized image
-    resized_image_path = os.path.join(settings.MEDIA_ROOT, 'report_photos', resized_image_name)
-    resized_img.save(resized_image_path)
-
-    relative_path = os.path.relpath(resized_image_path, settings.MEDIA_ROOT )
-    
-    return relative_path
-
+@login_required
 def add_report(request, initial=None):
     entity_form_instance = ReportForm(request.POST or None, request.FILES or None)
     if request.method == 'POST':
@@ -338,7 +375,6 @@ def edit_report(request, id):
         if form.is_valid():
             # Set the new tiketId before saving the form
             form.instance.tiketId = new_tiketId
-
             # Check if a new image file is provided
             foto = request.FILES.get('foto')
             og_foto = request.FILES.get('og_foto')
@@ -351,23 +387,44 @@ def edit_report(request, id):
                 form.instance.og_foto = resized_og_foto_path
 
             form.save()
-            
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'success': False, 'errors': form.errors})
     else:
         form = ReportForm(instance=entity)
-
+    
     return render(request, "/api/edit_report.html", {'form': form})
 
-@login_required
-def display_foto(request, url):
-    # Get the URL parameter 'url' from the request
+def process_image(image, is_original):
+    upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    img = Image.open(image)
 
-    # Render the display_image.html template with the image_url context variable
-    return render(request, 'Report/display_foto.html', {'url': url})
+    # Generate a unique identifier
+    unique_id = str(uuid.uuid4())[:8]  # Use the first 8 characters of a UUID
+    
+    # Strip file extension from the image filename
+    image_name_without_extension, extension = os.path.splitext(image.name)
+    
+    # Resize the image
+    if is_original:
+        resized_img = img.resize((500, 500))
+    else:
+        resized_img = img.resize((100, 100))
+    
+    # Construct the resized image name
+    if is_original:
+        resized_image_name = f"original-{upload_date}-{unique_id}-{extension}"
+    else:
+        resized_image_name = f"resized-{upload_date}-{unique_id}-{extension}"
+    
+    # Save the resized image
+    resized_image_path = os.path.join(settings.MEDIA_ROOT, 'report_photos', resized_image_name)
+    resized_img.save(resized_image_path)
 
-
+    relative_path = os.path.relpath(resized_image_path, settings.MEDIA_ROOT )
+    
+    return relative_path
+            
 
 # -------------------- Functions for mobile app --------------------#
 # Set maximum image quality
@@ -387,7 +444,7 @@ class add_report_mobile(generics.CreateAPIView):
             image_name = str(image_data)
             
             og_image = image.resize((500, 500), Image.Resampling.LANCZOS)
-            upload_date = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+            upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
             og_image_name = f'original-{upload_date}-{image_name}'
             og_image_path = os.path.join(settings.MEDIA_ROOT,'report_photos', og_image_name)
             
@@ -458,6 +515,9 @@ class GroupTujuanListAPIView(generics.ListAPIView):
 class GroupKayuListAPIView(generics.ListAPIView):
     serializer_class = KayuSerializer
 
+# @permission_classes([IsAuthenticated])
+class GroupKayuListAPIView(generics.ListAPIView):
+    serializer_class = KayuSerializer
     def get_queryset(self):
         group_id = self.kwargs['group_id']
         group_kayus = Group_Kayu.objects.filter(group_id=group_id)
@@ -546,3 +606,38 @@ def save_group_changes(request):
             return JsonResponse({'success': False, 'error': str(e)})
         
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
+  
+@login_required
+def display_foto(request, url):
+    # Get the URL parameter 'url' from the request
+
+    # Render the display_image.html template with the image_url context variable
+    return render(request, 'Report/display_foto.html', {'url': url})
+
+
+class ReportSummaryView(generics.GenericAPIView):
+    serializer_class = ReportSummarySerializer
+
+    def get(self, request, sender_id):
+        # Get start and end date from request parameters
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+
+        # Set default values to the first and last day of the current month if not provided
+        if not start_date_str:
+            start_date = datetime.now().replace(day=1).date()
+        else:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+
+        if not end_date_str:
+            next_month = datetime.now().replace(day=28) + timedelta(days=4)
+            end_date = (next_month - timedelta(days=next_month.day)).date()
+        else:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+
+        reports = Report.objects.filter(sender_id=sender_id, tanggal__range=(start_date, end_date))
+        summary = reports.values('kayu').annotate(
+            total_plat=Count('plat', distinct=True),
+        )
+
+        return Response(summary)

@@ -14,7 +14,7 @@ class ReportSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id','username', 'first_name', 'email', 'password']
+        fields = ['id','username', 'first_name','email', 'password']
 
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -36,3 +36,8 @@ class KayuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Kayu
         fields = '__all__'
+
+class ReportSummarySerializer(serializers.Serializer):
+    total_plat = serializers.IntegerField()
+    total_tonnage = serializers.IntegerField()
+    total_rejects = serializers.IntegerField()

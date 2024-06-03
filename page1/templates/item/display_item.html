@@ -1,5 +1,7 @@
-{% extends 'base.html' %} {% load auth_extras %} {% block title %}Item Data
-Table{% endblock %} {% block content %}
+{% extends 'base.html' %} {% load auth_extras %} 
+{% block title %}Item Data Table{% endblock %} 
+
+{% block content %}
 <style>
   .custom-dropdown {
     background-color: royalblue; /* Background color */
@@ -34,25 +36,26 @@ Table{% endblock %} {% block content %}
       type="text"
       id="columnSearch"
       placeholder="Search in selected column"
-      class="form-control w-25"
+      class="form-control m-1"
+      style="width: 30%"
     />
-    <button id="searchButton" class="btn btn-primary mr-2">Search</button>
+    <button id="searchButton" class="btn btn-primary mr-1">Search</button>
     <button id="resetButtonCol" class="btn btn-secondary mr-2">Reset</button>
     <button id="filterDuplicatesButton" class="btn btn-warning">
-      Check for Duplicates
+      Check Duplicates
     </button>
-    <button id="resetFilterDuplicatesBtn" class="btn btn-secondary ml-2">
+    <button id="resetFilterDuplicatesBtn" class="btn btn-secondary ml-1">
       Reset
     </button>
   </div>
 
   <div class="form-inline mb-2">
     <label class="mr-2" for="startDate">Start Date:</label>
-    <input type="date" id="startDate" class="form-control mr-2" />
+    <input type="date" id="startDate" class="form-control mr-1" style="width: 15%;" />
     <label class="mr-2" for="endDate">End Date:</label>
-    <input type="date" id="endDate" class="form-control mr-2" />
+    <input type="date" id="endDate" class="form-control mr-1" style="width: 15%;" />
 
-    <button id="filterButton" class="btn btn-primary">Apply Filter</button>
+    <button id="filterButton" class="btn btn-primary">Apply</button>
 
     <select id="dateRange" class="form-control ml-2 btn-info">
       <option value="">Select Date Range</option>
@@ -65,7 +68,7 @@ Table{% endblock %} {% block content %}
       <option value="730">Last 2 years (730 days)</option>
     </select>
 
-    <button id="resetButton" class="btn btn-secondary ml-2">Reset</button>
+    <button id="resetButton" class="btn btn-secondary ml-1">Reset</button>
   </div>
 
   <thead class="thead-light">
@@ -241,7 +244,6 @@ Table{% endblock %} {% block content %}
             dom: {
               button: {
                 className: "btn",
-
               },
             },
           },
@@ -266,7 +268,6 @@ Table{% endblock %} {% block content %}
       alert("Please select at least one row to delete.");
       return;
     }
-
     if (confirm("Are you sure you want to delete the selected rows?")) {
       const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0]
         .value;

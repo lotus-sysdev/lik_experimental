@@ -14,7 +14,7 @@ class ReportForm(forms.ModelForm):
     def clean_no_tiket(self):
         no_tiket = str(self.cleaned_data['no_tiket']).replace(" ", "")
         # Add spaces in the appropriate positions
-        return ' '.join([no_tiket[:4], no_tiket[4:7], no_tiket[7:]])
+        return ' '.join([no_tiket[:5], no_tiket[5:8], no_tiket[8:]])
     class Meta:
         model = Report
         fields = '__all__'
@@ -62,11 +62,13 @@ class ReportFilterForm(forms.Form):
         required=False, 
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+
     kayu = forms.ChoiceField(
         choices=[],
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+
     start_date = forms.DateField(
         label='Start Date', 
         required=False, 
@@ -90,3 +92,4 @@ class ReportFilterForm(forms.Form):
     def get_kayu_choices(self):
         kayu_choices = [(kayu["kayu"], kayu["kayu"]) for kayu in Report.objects.values('kayu').distinct()]
         return [('', 'Select Jenis Kayu')] + kayu_choices
+

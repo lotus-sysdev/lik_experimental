@@ -11,31 +11,26 @@
       grid-template-columns: 1fr 5fr; /* 1fr for totals, 3fr for the card grid */
       grid-gap: 20px;
     }
-
     .totals-container {
       display: flex;
       flex-direction: row;
       gap: 20px; /* Space between total cards */
     }
-
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(3, auto);
       grid-gap: 20px;
     }
-
     .card {
       height: 100%;
       display: flex;
       flex-direction: column;
       /* padding: 20px; */
     }
-
     .card-header {
       flex: 0 1 auto;
     }
-
     .top-card-body {
       flex: 1 1 auto;
       display: flex;
@@ -44,33 +39,15 @@
       padding: 20px;
       font-size: 1.5rem; /* Increased font size for better readability */
     }
-
     canvas {
       width: 100% !important;
       height: 100% !important;
     }
-
     .scrollable-body {
       max-height: 400px;
       overflow-y: auto;
+      position: relative; /* Add position relative to contain absolute positioned elements */
     }
-
-    .list-group-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .upper-plat {
-      flex: 1;
-      padding-right: 5px; /* Adjust spacing between upper_plat and count */
-    }
-
-    .count {
-      flex: 1;
-      text-align: right;
-    }
-
     /* Responsive adjustments */
     @media (max-width: 1200px) {
       .dashboard-container {
@@ -124,6 +101,7 @@
           <option value="ytd">Year to Date</option>
         </select>
       </div>
+
       <div class="form-group col-md-2">
         {{ form.start_date.label_tag }} {{ form.start_date }}
       </div>
@@ -148,14 +126,15 @@
 
   <div class="row mb-4">
     <div class="col-md-3">
-      <div
-        class="card"
-        data-toggle="tooltip"
-        data-placement="top"
-        title="Total Reports: {{ total_reports }}, Total Revised Reports: {{ total_revised_reports }}"
-      >
-        <h4 class="text-center card-header">Reports</h4>
-        <div class="top-card-body">{{ total_reports }}</div>
+      <div class="card">
+        <span
+          class="tt"
+          data-bs-placement="top"
+          title="Revised Reports : {{ total_revised_reports }}"
+        >
+          <h4 class="text-center card-header">Reports</h4>
+          <div class="top-card-body">{{ total_reports }}</div>
+        </span>
       </div>
     </div>
     <div class="col-md-3">
@@ -172,7 +151,7 @@
     </div>
     <div class="col-md-3">
       <div class="card">
-        <h4 class="text-center card-header">Jumlah Kendaraan</h4>
+        <h4 class="text-center card-header">Jumlah Kendaraan (unique)</h4>
         <div class="top-card-body">{{ total_unique_vehicles }}</div>
       </div>
     </div>
@@ -207,12 +186,41 @@
         <!-- <canvas id="platBarChart"></canvas> -->
         {% for plat in plat_counts %}
         <ul class="list-group">
-          <li class="list-group-item">
-            <div class="upper-plat font-weight-bold">
-              {{ plat.upper_plat }}
-            </div>
-            <div class="count">{{ plat.count }} Pengiriman</div>
-          </li>
+          <span
+            class="tt"
+            data-bs-placement="top"
+            title='Senders: {{ plat.senders|join:", " }} | Drivers: {{ plat.drivers|join:", " }}'
+          >
+            <li class="list-group-item">
+              <div class="row">
+                <!-- Left Section: upper_plat and count -->
+                <div class="col-md-3">
+                  <div class="font-weight-bold">{{ plat.upper_plat }}</div>
+                  <div>{{ plat.count }} Pengiriman</div>
+                </div>
+
+                <!-- Middle Section: senders and drivers -->
+                <div class="col-md-5">
+                  <div class="font-weight-bold">Senders:</div>
+                  <div>{{ plat.senders|join:", " }}</div>
+                  <div class="font-weight-bold">Drivers:</div>
+                  <div>{{ plat.drivers|join:", " }}</div>
+                </div>
+
+                <!-- Right Section: tujuan_count -->
+                <div class="col-md-4">
+                  <div class="font-weight-bold">Tujuan:</div>
+                  <div>
+                    <ul class="list-unstyled">
+                      {% for tujuan, count in plat.tujuan_count.items %}
+                      <li>{{ tujuan }}: {{ count }}</li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </span>
         </ul>
         {% endfor %}
       </div>
@@ -233,7 +241,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    const tooltips = document.querySelectorAll(".tt");
+    tooltips.forEach((t) => {
+      new bootstrap.Tooltip(t);
+    });
     // LOAD PIE CHART
     document.addEventListener("DOMContentLoaded", function () {
       // Get the serialized kayu counts data passed from the view
@@ -312,10 +325,6 @@
         endDate,
         "Total Kendaraan"
       );
-    });
-
-    $(function () {
-      $('[data-toggle="tooltip"]').tooltip();
     });
 
     function renderPieChart(canvasId, data, labelKey, chartLabel) {
@@ -541,7 +550,7 @@
 
         var itemDate = new Date(item.year, item.month - 1, item.day);
         // console.log("Item Date:", itemDate);
-        console.log(item.unique_vehicles);
+        // console.log(item.unique_vehicles);
 
         if (
           !isNaN(itemDate.getTime()) &&
@@ -552,6 +561,7 @@
           var monthIndex =
             (itemDate.getFullYear() - startDate.getFullYear()) * 12 +
             (itemDate.getMonth() - startDate.getMonth());
+
           // console.log("Month Index:", monthIndex);
 
           var labelIndex = uniqueLabels.indexOf(label);
@@ -566,6 +576,7 @@
 
       // Render column chart
       var ctx = document.getElementById(canvasId).getContext("2d");
+
       var columnChart = new Chart(ctx, {
         type: "bar",
         data: {
@@ -594,7 +605,7 @@
           },
           plugins: {
             datalabels: {
-              anchor: "center",
+              anchor: "end",
               align: "end",
               color: "black",
               font: { weight: "bold" },
@@ -606,7 +617,6 @@
         },
         plugins: [ChartDataLabels],
       });
-
       return columnChart;
     }
 
@@ -679,6 +689,17 @@
                 backgroundColor: kayuColors[label],
                 borderColor: "rgba(0, 0, 0, 1)",
                 borderWidth: 1,
+                datalabels: {
+                  anchor: "end",
+                  align: "end",
+                  color: "black",
+                  font: {
+                    weight: "bold",
+                  },
+                  formatter: function (value, context) {
+                    return value !== 0 ? value : "";
+                  },
+                },
               };
             }),
             {
@@ -690,6 +711,17 @@
               borderWidth: 2,
               fill: false,
               yAxisID: "y",
+              datalabels: {
+                anchor: "end",
+                align: "start",
+                color: "black",
+                font: {
+                  weight: "bold",
+                },
+                formatter: function (value, context) {
+                  return value !== 0 ? value : "";
+                },
+              },
             },
           ],
         },
@@ -709,24 +741,12 @@
             },
             y1: {
               display: false,
-              // position: "right",
               beginAtZero: true,
-              // ticks: {
-              //   stepSize: 1,
-              // },
             },
           },
           plugins: {
             datalabels: {
-              anchor: "center",
-              align: "start",
-              color: "black",
-              font: {
-                weight: "bold",
-              },
-              formatter: function (value, context) {
-                return value !== 0 ? value : "";
-              },
+              display: true,
             },
           },
         },

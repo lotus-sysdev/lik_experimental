@@ -1,7 +1,8 @@
 # Standard Library Imports
-import csv
 import os
 import re
+import csv
+import json
 from datetime import datetime, timedelta
 
 # Third-Party Imports
@@ -22,27 +23,67 @@ from django.utils import timezone
 from django.contrib import messages
 from django.core import serializers
 from django.http import JsonResponse
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count, Sum
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import redirect, render, get_object_or_404
-
+from django.db.models.functions import ExtractDay, ExtractMonth, ExtractYear, Upper
 
 
 # -------------------- Placeholder for homepage --------------------#
 @login_required
 def home(request):
-    return render(request, 'home.html')
+    form = DashboardFilterForm(request.GET)
+    
+    if form.is_valid():
+        start_date = form.cleaned_data.get('start_date')
+        end_date = form.cleaned_data.get('end_date')
+
+        items = Items.objects.all()
+        if start_date and end_date:
+            items = items.filter(tanggal_pemesanan__range=[start_date, end_date])
+
+        item_counts = items.count()
+        approved_item_counts = items.filter(is_approved=True).count()
+        grouped_counts = items.values('customer__nama_pt', 'pic__nama').annotate(count=Count('SKU')).order_by('-count', 'customer__nama_pt', 'pic__nama')
+        category_counts = items.values('category__name').annotate(count=Count('SKU')).order_by('-count', 'category__name')
+        sku_counts = items.values(
+            day=ExtractDay('tanggal_pemesanan'),
+            month=ExtractMonth('tanggal_pemesanan'),
+            year=ExtractYear('tanggal_pemesanan')
+        ).values('day', 'month', 'year').annotate(total_count=Count('SKU', distinct=True))
+    else: 
+        item_counts = Items.objects.count()
+        approved_item_counts = Items.objects.filter(is_approved=True).count()
+        grouped_counts = Items.objects.values('customer__nama_pt', 'pic__nama').annotate(count=Count('SKU')).order_by('-count', 'customer__nama_pt', 'pic__nama')
+        category_counts = Items.objects.values('category__name').annotate(count=Count('SKU')).order_by('-count', 'category__name')
+        sku_counts = Items.objects.annotate(
+            day=ExtractDay('tanggal_pemesanan'),
+            month=ExtractMonth('tanggal_pemesanan'),
+            year=ExtractYear('tanggal_pemesanan')
+        ).values('day', 'month', 'year').annotate(total_count=Count('SKU', distinct=True))
+
+    category_counts_serialized = json.dumps(list(category_counts))
+    sku_counts_serialized = json.dumps(list(sku_counts))
+
+    print(sku_counts_serialized)
+    
+    context = {
+        'form' : form,
+        'item_counts' : item_counts,
+        'approved_item_counts' : approved_item_counts,
+        'grouped_counts' : grouped_counts,
+        'category_counts' : category_counts_serialized,
+        'sku_counts' : sku_counts_serialized,
+    }
+
+    return render(request, 'dashboardLS.html', context)
 
 @login_required
 def success(request):
     return render(request, 'success.html')
-
-@login_required
-def home(request):
-    return render(request, 'home.html')
 
 
 # -------------------- Common Functions --------------------#
@@ -1062,7 +1103,6 @@ def upload_excel(request):
                 email_sumber_index = column_titles.index('email_sumber') if 'email_sumber' in column_titles else None
                 nama_sumber_index = column_titles.index('nama_sumber') if 'nama_sumber' in column_titles else None
                 pic_index = column_titles.index('pic') if 'pic' in column_titles else None
-
                 # Find the row containing the 'Gambar' column title
                 gambar_row_index = None
                 for row_index, row in enumerate(worksheet.iter_rows(values_only=True)):

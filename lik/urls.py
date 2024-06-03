@@ -19,6 +19,8 @@ urlpatterns = [
     path('check_token/<int:user_id>/', check_token, name='check_token'),
     path('display_group/', display_group, name='display_group'),
     path('save_group_changes/', save_group_changes, name='save_group_changes'),
-    path('display_foto/<path:url>', display_foto, name="display_foto")
+    path('display_foto/<path:url>', display_foto, name="display_foto"),
+    path('report-summary/<int:sender_id>/', ReportSummaryView.as_view(), name='report-summary'),
+    path('report-summary/<int:sender_id>/<str:start_date>/<str:end_date>/', ReportSummaryView.as_view(), name='report-summary-date-range'),
 ]
 
