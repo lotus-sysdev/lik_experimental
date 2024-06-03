@@ -143,7 +143,6 @@ def dashboard(request):
             })
 
         grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
-
         tonase_counts = Report.objects.annotate(
             'kayu',
             day=ExtractDay('tanggal'),
