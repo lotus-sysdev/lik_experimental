@@ -62,8 +62,7 @@
           <td>{{work.id}}</td>
           <td>{{ work.customer }}</td>
           <td>
-            {% for item in work.workorderitems_set.all %} {{ item.item }}, {%
-            endfor %}
+            {% for item in work.workorderitems_set.all %} {{ item.item }}, {% endfor %}
           </td>
           <td>{{ work.revenue_PO }}</td>
           <td>{{ work.nomor_PO }}</td>

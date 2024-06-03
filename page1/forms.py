@@ -186,7 +186,7 @@ class CustPICForms(forms.ModelForm):
             'telp': 'No. Telpon',
         }
         choices = {
-            'Role': (('Finance', 'Finance'), ('General Affairs', 'General Affairs (GA)'), ('Sales', 'Sales'), ('Procurement', 'Procurement'),('Board of Directors', 'Board of Directors (BOD)'),('Merchandiser', 'Merchandiser'),('Purchasing', 'Purchasing'),('GA & Procurement Analyst', 'General Affair & Procurement Analyst'), ('HR', 'HR'))
+            'Role': (('Finance', 'Finance'), ('General Affairs', 'General Affairs (GA)'), ('Sales', 'Sales'), ('Procurement', 'Procurement'),('Board of Directors', 'Board of Directors (BOD)'),('Merchandiser', 'Merchandiser'),('Purchasing', 'Purchasing'),('GA & Procurement Analyst', 'General Affair & Procurement Analyst'), ('HR', 'HR'), ('MarComm', 'Marketing & Communications'))
         }
     Role = forms.ChoiceField(choices=Meta.choices['Role'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jabatan')
 
@@ -206,7 +206,7 @@ class SuppPICForms(forms.ModelForm):
             'telp': 'No. Telpon',
         }
         choices = {
-            'Role': (('Finance', 'Finance'), ('General Affairs', 'General Affairs (GA)'), ('Sales', 'Sales'), ('Procurement', 'Procurement'),('Board of Directors', 'Board of Directors (BOD)'),('Merchandiser', 'Merchandiser'),('Purchasing', 'Purchasing'), ('GA & Procurement Analyst', 'General Affair & Procurement Analyst'), ('HR', 'HR'))
+            'Role': (('Finance', 'Finance'), ('General Affairs', 'General Affairs (GA)'), ('Sales', 'Sales'), ('Procurement', 'Procurement'),('Board of Directors', 'Board of Directors (BOD)'),('Merchandiser', 'Merchandiser'),('Purchasing', 'Purchasing'), ('GA & Procurement Analyst', 'General Affair & Procurement Analyst'), ('HR', 'HR'), ('MarComm', 'Marketing & Communications'))
         }
     Role = forms.ChoiceField(choices=Meta.choices['Role'], widget=forms.Select(attrs={'class': 'form-control'}), label='Jabatan')
 
@@ -226,7 +226,7 @@ class ProspectPICForms(forms.ModelForm):
             'telp': 'No. Telpon',
         }
         choices = {
-            'Role': (('Finance', 'Finance'), ('General Affairs', 'General Affairs (GA)'), ('Sales', 'Sales'), ('Procurement', 'Procurement'),('Board of Directors', 'Board of Directors (BOD)'), ('Merchandiser', 'Merchandiser'), ('Purchasing', 'Purchasing'), ('GA & Procurement Analyst', 'General Affair & Procurement Analyst'), ('HR', 'HR'))
+            'Role': (('Finance', 'Finance'), ('General Affairs', 'General Affairs (GA)'), ('Sales', 'Sales'), ('Procurement', 'Procurement'),('Board of Directors', 'Board of Directors (BOD)'), ('Merchandiser', 'Merchandiser'), ('Purchasing', 'Purchasing'), ('GA & Procurement Analyst', 'General Affair & Procurement Analyst'), ('HR', 'HR'), ('MarComm', 'Marketing & Communications'))
         }
         required = {
             'email' : False
