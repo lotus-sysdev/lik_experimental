@@ -7,7 +7,7 @@
   </head>
   <body>
     {% block content %}
-    <h1>Report List</h1>
+    <h1>Report List Tes</h1>
     {% csrf_token %}
     <div>
       <table
@@ -114,7 +114,7 @@
         <thead class="thead-light">
           <tr>
             <th>Timestamp</th>
-            <th>ID</th>
+            {% comment %} <th>ID</th> {% endcomment %}
             <th>Sender</th>
             <th>ID Tiket</th>
             <th>Plat Nomor</th>
@@ -128,55 +128,14 @@
             <th>Lokasi Potong</th>
             <th>Tujuan Pabrik</th>
             <th>Tanggal Keluar</th>
+            <th>Completed</th>
             <th>Foto</th>
             <th>Ubah</th>
           </tr>
         </thead>
         <tbody class="tbody">
-          {% for report in entities %}
-          <tr>
-            {% if report.date_time %}
-            <td>{{ report.date_time|date:"Y/m/d H:i:s" }}</td>
-            {% else %}
-            <td>None</td>
-            {% endif %}
-            <td>{{ report.id }}</td>
-            {% if report.sender.first_name %}
-            <td>{{ report.sender.first_name }}</td>
-            {% elif report.sender %}
-            <td>{{report.sender}}</td>
-            {% else %}
-            <td>None</td>
-            {% endif %}
-            <td>{{ report.tiketId }}</td>
-            <td>{{ report.plat|upper }}</td>
-            <td>{{ report.driver }}</td>
-            <td>{{ report.PO }}</td>
-            <td>{{ report.DO|strip_spaces }}</td>
-            <td>{{ report.no_tiket }}</td>
-            <td>{{ report.kayu }}</td>
-            <td>{{ report.berat }} kg</td>
-            <td>{{ report.reject }} kg</td>
-            <td>{{ report.lokasi }}</td>
-            <td>{{ report.tujuan }}</td>
-            <td>{{ report.tanggal|date:"Y/m/d" }}</td>
-            <td>
-              {% if report.og_foto and report.og_foto %}
-              <a
-                href="{% url 'display_foto' report.og_foto.url %}"
-                target="_blank"
-                ><img src="{{ report.foto.url }}" alt="{{ report.id }}"
-              /></a>
-              {% elif report.foto %}
-              <!-- Display resized image if og_foto is empty but foto exists -->
-              <img src="{{ report.foto.url }}" alt="{{ report.id }}" />
-              {% endif %}
-            </td>
-            <td>
-              <a href="{% url 'report_detail' report.id %}">View</a>
-            </td>
-          </tr>
-          {% endfor %}
+          {% comment %} loaded by ajax {% endcomment %}
+         
         </tbody>
       </table>
     </div>
@@ -184,29 +143,54 @@
       var table;
       function initializeDataTable() {
         table = new DataTable("#likTable", {
+          processing: true,
+          serverSide: true,
+          ajax: {
+            url: "{% url 'display_report_items' %}",  // URL to fetch data
+            data: function(d) {
+              d.start_date = $('#startDate').val();
+              d.end_date = $('#endDate').val();
+            },
+            dataSrc: function(json) {
+              // Update the totals using jQuery
+              $('#totalBerat').text(json.total_berat);
+              $('#totalReject').text(json.total_reject);
+              $('#uniquePlatCount').text(json.unique_plat_count);
+              return json.data;
+            }
+          },
+          columns: [
+            { data: "date_time", render: function(data) { return data ? new Date(data).toLocaleString() : 'None'; } },
+            { data: "sender__first_name", defaultContent: "None" },
+            { data: "tiketId" },
+            { data: "plat", render: function(data) { return data ? data.toUpperCase() : 'None'; } },
+            { data: "driver" },
+            { data: "PO" },
+            { data: "DO", render: function(data) { return data ? data.replace(/\s+/g, '') : 'None'; } },
+            { data: "no_tiket" },
+            { data: "kayu" },
+            { data: "berat", render: function(data) { return data + ' kg'; } },
+            { data: "reject", render: function(data) { return data + ' kg'; } },
+            { data: "lokasi" },
+            { data: "tujuan" },
+            { data: "tanggal", render: function(data) { return data ? new Date(data).toLocaleDateString() : 'None'; } },
+            // Masih Perlu Improvement
+            { data: "completed", render: function(data) { return data ? 'Yes' : 'No'; } },
+            { data: "foto", render: function(data, type, row) {
+                if (row.og_foto) {
+                  return '<a href="' + row.og_foto.url + '" target="_blank"><img src="' + row.foto.url + '" alt="' + row.id + '"/></a>';
+                } else if (row.foto) {
+                  return '<img src="' + row.foto.url + '" alt="' + row.id + '"/>';
+                } else {
+                  return 'None';
+                }
+              }
+            },
+            { data: "id", render: function(data) { return '<a href="/report_detail/' + data + '">View</a>'; } },
+          ],
           select: {
             style: "multi",
           },
-
-          columns: [
-            null,
-            { visible: false },
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-          ],
           lengthMenu: [
             [10, 25, 50, 100, -1],
             [10, 25, 50, 100, "All"],
@@ -237,7 +221,6 @@
                 },
               },
             },
-            // top2Start:'pageLength'
           },
         });
       }
@@ -599,49 +582,16 @@
         }
 
         function filterByDateRange(startDate, endDate) {
-          $.ajax({
-            url: '{% url "display_report" %}',
-            type: "GET",
-            data: {
-              start_date: startDate,
-              end_date: endDate,
-            },
-            success: function (response) {
-              console.log("Success");
-              $("#likTable").html($(response).find("#likTable").html());
-              if (table) {
-                table.destroy();
-              }
-              initializeDataTable();
-              calculateStats();
-            },
-            error: function (xhr, status, error) {
-              console.error("Error filtering data:", error);
-            },
-          });
+            
+          $('#startDate').val(startDate);
+          $('#endDate').val(endDate);
+          table.ajax.reload();
         }
 
         function filterByTimestamp(startDate, endDate) {
-          $.ajax({
-            url: '{% url "display_report" %}',
-            type: "GET",
-            data: {
-              start_date_ts: startDate,
-              end_date_ts: endDate,
-            },
-            success: function (response) {
-              console.log("Success");
-              $("#likTable").html($(response).find("#likTable").html());
-              if (table) {
-                table.destroy();
-              }
-              initializeDataTable();
-              calculateStats();
-            },
-            error: function (xhr, status, error) {
-              console.error("Error filtering data:", error);
-            },
-          });
+          $('#startDate').val(startDate);
+          $('#endDate').val(endDate);
+          table.ajax.reload();
         }
       });
     </script>

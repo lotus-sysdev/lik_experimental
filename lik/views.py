@@ -27,6 +27,8 @@ from django.utils import timezone
 from django.db import transaction
 from django.http import JsonResponse
 from django.db.models import Count, Sum
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
@@ -278,7 +280,7 @@ def edit_entity(request, entity_model, entity_form, entity_id_field, entity_id):
 
 # -------------------- Report Functions --------------------#
 @login_required
-def display_report(request):
+def display_report_items(request):
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
 
@@ -286,15 +288,10 @@ def display_report(request):
     end_date_str_ts = request.GET.get('end_date_ts')
 
     if start_date_str_ts and end_date_str_ts:
-        # Parse the date strings into naive datetime objects
         start_date_naive = datetime.strptime(start_date_str_ts, '%Y-%m-%d')
         end_date_naive = datetime.strptime(end_date_str_ts, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
-        # Make the naive datetime objects timezone-aware
         start_date = timezone.make_aware(start_date_naive, timezone.get_current_timezone())
         end_date = timezone.make_aware(end_date_naive, timezone.get_current_timezone())
-        print(start_date, end_date)
-
-        # Filter reports based on the timezone-aware datetime range
         entities = Report.objects.filter(date_time__range=(start_date, end_date))
     elif start_date_str and end_date_str:
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
@@ -303,7 +300,44 @@ def display_report(request):
     else:
         entities = Report.objects.all()
 
-    return render(request, 'Report/display_report.html', {'entities': entities})
+    # Add ordering to avoid UnorderedObjectListWarning
+    entities = entities.order_by('date_time')
+
+    # Calculate totals
+    total_berat = entities.aggregate(Sum('berat'))['berat__sum'] or 0
+    total_reject = entities.aggregate(Sum('reject'))['reject__sum'] or 0
+    # unique_plat_count = entities.values('plat').distinct().count()
+    unique_plat_count = entities.values('plat').count()
+
+    # Pagination
+    page = request.GET.get('page', 1)
+    paginator = Paginator(entities, 10)  # Show 10 reports per page
+
+    try:
+        entities_page = paginator.page(page)
+    except PageNotAnInteger:
+        entities_page = paginator.page(1)
+    except EmptyPage:
+        entities_page = paginator.page(paginator.num_pages)
+
+    data = list(entities_page.object_list.values(
+        'date_time', 'id', 'sender__first_name', 'tiketId', 'plat', 'driver', 'PO', 'DO', 'no_tiket', 'kayu', 'berat', 'reject', 'lokasi', 'tujuan', 'tanggal','completed' ,'foto', 'og_foto'
+    ))
+
+    response = {
+        'draw': int(request.GET.get('draw', 0)),
+        'recordsTotal': paginator.count,
+        'recordsFiltered': paginator.count,
+        'data': data,
+        'total_berat': total_berat,
+        'total_reject': total_reject,
+        'unique_plat_count': unique_plat_count,
+    }
+
+    return JsonResponse(response)
+
+def display_report(request):
+    return render(request, 'Report/display_report.html')
 
 @login_required
 def delete_selected_rows_report(request):

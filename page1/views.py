@@ -22,6 +22,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.contrib import messages
 from django.core import serializers
+from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.db.models import Prefetch, Count, Sum
 from django.core.exceptions import ObjectDoesNotExist
@@ -377,20 +378,63 @@ def display_supplier(request):
 
 @login_required
 @GA_required
-def display_item(request):
+
+
+def item_list(request):
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
-    item_sumber = ItemSumber.objects.all()
+
+    items = Items.objects.all()
 
     if start_date_str and end_date_str:
         start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
         end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
-        entities = Items.objects.filter(tanggal_pemesanan__range=[start_date, end_date])
-    else:
-        entities = Items.objects.all()
+        items = items.filter(tanggal_pemesanan__range=[start_date, end_date])
 
-    return render(request, 'item/display_item.html', {'entities': entities, 'item_sumber':item_sumber})
+    if search_value:
+        items = items.filter(nama__icontains=search_value)
 
+    paginator = Paginator(items, length)
+    page_number = (start // length) + 1
+    page = paginator.get_page(page_number)
+
+    data = []
+    for item in page:
+        
+        data.append([
+            item.upload_type,
+            item.Tanggal.strftime('%Y/%m/%d'),
+            item.tanggal_pemesanan.strftime('%Y/%m/%d'),
+            str(item.customer),  # Convert customer to string
+            str(item.pic),
+            item.SKU,
+            item.nama,
+            item.catatan,
+            item.category.name,
+            f"{item.quantity} {item.unit}",
+            str(item.price),
+            f'<img src="{item.gambar.url}" alt="{item.nama}" />',
+            ' '.join([f'<a href="{sumber.url}">{sumber.url[:20]}{"..." if len(sumber.url) > 20 else ""}</a>' for sumber in item.itemsumber_set.all() if sumber.url]) or 'None',
+            'Yes' if item.is_approved else 'No',
+            f'<a href="{{% url "item_detail" item.SKU %}}">View</a>'
+        ])
+
+    response = {
+        'draw': draw,
+        'recordsTotal': items.count(),
+        'recordsFiltered': items.count(),
+        'data': data,
+    }
+
+    return JsonResponse(response)
+
+def display_item(request):
+    return render(request, 'item/display_item.html')
 
 # -------------------- Customer Functions -------------------- #
 @login_required

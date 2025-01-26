@@ -18,6 +18,7 @@ class Report(models.Model):
     #Tanggal Kirim
     tanggal = models.DateField( null=True)
     reject = models.PositiveIntegerField( null=True)
+    completed = models.BooleanField(default=False, null=False)
     foto = models.ImageField(upload_to = 'report_photos/', null=True)
     og_foto = models.ImageField(upload_to = 'report_photos/', null=True, blank=True)
     #Timestamp

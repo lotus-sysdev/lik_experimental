@@ -121,136 +121,143 @@
 </table>
 <a href="/add_item">Add Item</a><br />
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   var table;
-  function initializeDataTable() {
+  var table;
+function initializeDataTable() {
     var isAdmin = "{{ request.user|has_group:'Admin' }}";
-    // console.log(isAdmin)
     table = new DataTable("#itemTable", {
-      select: {
-        style: "multi",
-      },
-      columnDefs: [
-        {
-          targets: 10,
-          render: function (data, type, row) {
-            if (type === "display") {
-              if (data.startsWith("IDR")) {
-                // Replace commas with periods and periods with commas
-                data = data
-                  .replace(/,/g, "#")
-                  .replace(/\./g, ",")
-                  .replace(/#/g, ".");
-                data = data.substr(0, data.indexOf(",")); // Get substring until the first comma
-                data = data.substr(0, 3) + " " + data.substr(3);
-                return data;
-              } else if (data.startsWith("$")) {
-                data = data.replace("$", "USD");
-                data = data.substr(0, 3) + " " + data.substr(3);
-                return data;
-              } else {
-                // Add a space after the first three characters
-                return data.substr(0, 3) + " " + data.substr(3);
-              }
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "{% url 'item_list' %}",
+            type: "GET",
+            data: function(d) {
+                // Add the extra filters from the frontend
+                d.search.value = $('#columnSearch').val();  // Search term
+                d.start_date = $('#startDate').val();        // Start date filter
+                d.end_date = $('#endDate').val();            // End date filter
+            },
+            dataSrc: function(json) {
+                // Log the JSON response to check if data is being received correctly
+                // console.log(json);
+                return json.data;
             }
-            return data;
-          },
         },
-        {
-          targets: [4],
-          render: function (data, type, row, meta) {
-            if (type === "display") {
-              if (data && data.includes("-")) {
-                var picName = data.split("-")[1]; // Extract "John" part
-                return picName.trim(); // Return the trimmed name
-              } else {
-                return data; // Return the original data if it's null or doesn't contain a hyphen
-              }
-            }
-            return data;
-          },
+        select: {
+            style: "multi",
         },
-      ],
-      columns: [
-        { visible: false },
-        { visible: false },
-        null,
-        null,
-        null,
-        { visible: false },
-        { visible: true, width: "15%" },
-        { visible: true, width: "20%" },
-        null,
-        null,
-        { visible: true, width: "9%" },
-        null,
-        null,
-        null,
-        null,
-      ],
-      lengthMenu: [
-        [10, 25, 50, 100, -1],
-        [10, 25, 50, 100, "All"],
-      ],
-      layout: {
-        top2Start: {
-          buttons: {
-            buttons: [
-              {
+        columnDefs: [
+            {
+                targets: 10,
+                render: function (data, type, row) {
+                    if (type === "display") {
+                        if (data.startsWith("IDR")) {
+                            // Replace commas with periods and periods with commas
+                            data = data
+                                .replace(/,/g, "#")
+                                .replace(/\./g, ",")
+                                .replace(/#/g, ".");
+                            data = data.substr(0, data.indexOf(",")); // Get substring until the first comma
+                            data = data.substr(0, 3) + " " + data.substr(3);
+                            return data;
+                        } else if (data.startsWith("$")) {
+                            data = data.replace("$", "USD");
+                            data = data.substr(0, 3) + " " + data.substr(3);
+                            return data;
+                        } else {
+                            // Add a space after the first three characters
+                            return data.substr(0, 3) + " " + data.substr(3);
+                        }
+                    }
+                    return data;
+                },
+            },
+            {
+                targets: [4],
+                render: function (data, type, row, meta) {
+                    if (type === "display") {
+                        if (data && data.includes("-")) {
+                            var picName = data.split("-")[1]; // Extract "John" part
+                            return picName.trim(); // Return the trimmed name
+                        } else {
+                            return data; // Return the original data if it's null or doesn't contain a hyphen
+                        }
+                    }
+                    return data;
+                },
+            },
+        ],
+        columns: [
+            { visible: false },
+            { visible: false },
+            null,
+            null,
+            null,
+            { visible: false },
+            { visible: true, width: "15%" },
+            { visible: true, width: "20%" },
+            null,
+            null,
+            { visible: true, width: "9%" },
+            null,
+            null,
+            null,
+            null,
+        ],
+        lengthMenu: [
+            [10, 25, 50, 100, -1],
+            [10, 25, 50, 100, "All"],
+        ],
+        dom: 'Bfrtip',
+        buttons: [
+            {
                 text: "PDF",
                 extend: "print",
                 className: "btn-primary",
                 exportOptions: {
-                  columns: ":visible",
-                  stripHtml: false,
+                    columns: ":visible",
+                    stripHtml: false,
                 },
-              },
-              {
+            },
+            {
                 text: "Upload Excel",
                 className: "btn-secondary",
                 action: function () {
-                  window.location.href = "/upload_excel";
+                    window.location.href = "/upload_excel";
                 },
-              },
-              {
+            },
+            {
                 text: "Delete Rows",
                 className: "btn-danger",
                 action: deleteSelectedRows,
-              },
-              {
+            },
+            {
                 extend: "copy",
                 text: "Copy",
                 className: "btn-warning",
                 header: false, // Disable export header tabla
                 exportOptions: {
-                  columns: [6, 10], // Select columns to be exported
+                    columns: [6, 10], // Select columns to be exported
                 },
                 title: null,
-              },
-              {
+            },
+            {
                 text: "{% if request.user|has_group:'Admin' %} Approve {% endif %}",
                 className: "btn-success",
                 action: approveRows,
                 init: function (api, node, config) {
-                  // Hide the button if the user is not in the Admin group
-                  if (isAdmin === "False") {
-                    $(node).addClass("d-none");
-                  }
+                    // Hide the button if the user is not in the Admin group
+                    if (isAdmin === "False") {
+                        $(node).addClass("d-none");
+                    }
                 },
-              },
-              { extend: "colvis", className: "btn-info" },
-            ],
-            dom: {
-              button: {
-                className: "btn",
-              },
             },
-          },
-        },
-      },
+            { extend: "colvis", className: "btn-info" },
+        ],
     });
-  }
+}
+
   function deleteSelectedRows() {
     if (!table) {
       console.error("Table is not initialized.");
