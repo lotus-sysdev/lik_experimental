@@ -92,171 +92,159 @@
     </tr>
   </thead>
   <tbody>
-    {% for i in entities %}
-    <tr {% if i.is_approved %} style="background-color: #ccffc7" {% endif %}>
-      <td>{{i.upload_type}}</td>
-      <td>{{ i.Tanggal|date:"Y/m/d" }}</td>
-      <td>{{ i.tanggal_pemesanan|date:"Y/m/d" }}</td>
-      <td>{{ i.customer }}</td>
-      <td>{{ i.pic }}</td>
-      <td>{{ i.SKU }}</td>
-      <td>{{ i.nama }}</td>
-      <td>{{ i.catatan }}</td>
-      <td>{{ i.category.name }}</td>
-      <td>{{ i.quantity }} {{ i.unit }}</td>
-      <td>{{ i.price }}</td>
-      <td><img src="{{ i.gambar.url }}" alt="{{ i.nama }}" /></td>
-      <td>
-        {% for sumber in i.itemsumber_set.all %} {% if sumber.url %}
-        <a href="{{ sumber.url }}"
-          >{{ sumber.url|slice:":20" }}{% if sumber.url|length > 20 %}...{% endif %}</a
-        >
-        {% else %} None {% endif %} {% endfor %}
-      </td>
-      <td>{% if i.is_approved %}Yes{% else %}No{% endif %}</td>
-      <td><a href="{% url 'item_detail' i.SKU %}">View</a></td>
-    </tr>
-    {% endfor %}
+    
   </tbody>
 </table>
 <a href="/add_item">Add Item</a><br />
 
 <script>
   var table;
-  var table;
-function initializeDataTable() {
+  function initializeDataTable() {
     var isAdmin = "{{ request.user|has_group:'Admin' }}";
     table = new DataTable("#itemTable", {
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: "{% url 'item_list' %}",
-            type: "GET",
-            data: function(d) {
-                // Add the extra filters from the frontend
-                d.search.value = $('#columnSearch').val();  // Search term
-                d.start_date = $('#startDate').val();        // Start date filter
-                d.end_date = $('#endDate').val();            // End date filter
-            },
-            dataSrc: function(json) {
-                // Log the JSON response to check if data is being received correctly
-                // console.log(json);
-                return json.data;
+      processing: true,
+      serverSide: true,
+      ajax: {
+        url: "{% url 'item_list' %}",
+        type: "GET",
+        data: function(d) {
+          // Add the extra filters from the frontend
+          d.start_date = $('#startDate').val();        // Start date filter
+          d.end_date = $('#endDate').val();            // End date filter
+        },
+        dataSrc: function(json) {
+          // Log the JSON response to check if data is being received correctly
+          // console.log(json);
+          return json.data;
+        }
+      },
+      select: {
+        style: "multi",
+      },
+      columnDefs: [
+        {
+          targets: 10,
+          render: function (data, type, row) {
+            if (type === "display") {
+              if (data.startsWith("IDR")) {
+                // Replace commas with periods and periods with commas
+                data = data
+                  .replace(/,/g, "#")
+                  .replace(/\./g, ",")
+                  .replace(/#/g, ".");
+                data = data.substr(0, data.indexOf(",")); // Get substring until the first comma
+                data = data.substr(0, 3) + " " + data.substr(3);
+                return data;
+              } else if (data.startsWith("$")) {
+                data = data.replace("$", "USD");
+                data = data.substr(0, 3) + " " + data.substr(3);
+                return data;
+              } else {
+                // Add a space after the first three characters
+                return data.substr(0, 3) + " " + data.substr(3);
+              }
             }
+            return data;
+          },
         },
-        select: {
-            style: "multi",
+        {
+          targets: [4],
+          render: function (data, type, row, meta) {
+            if (type === "display") {
+              if (data && data.includes("-")) {
+                var picName = data.split("-")[1]; // Extract "John" part
+                return picName.trim(); // Return the trimmed name
+              } else {
+                return data; // Return the original data if it's null or doesn't contain a hyphen
+              }
+            }
+            return data;
+          },
         },
-        columnDefs: [
-            {
-                targets: 10,
-                render: function (data, type, row) {
-                    if (type === "display") {
-                        if (data.startsWith("IDR")) {
-                            // Replace commas with periods and periods with commas
-                            data = data
-                                .replace(/,/g, "#")
-                                .replace(/\./g, ",")
-                                .replace(/#/g, ".");
-                            data = data.substr(0, data.indexOf(",")); // Get substring until the first comma
-                            data = data.substr(0, 3) + " " + data.substr(3);
-                            return data;
-                        } else if (data.startsWith("$")) {
-                            data = data.replace("$", "USD");
-                            data = data.substr(0, 3) + " " + data.substr(3);
-                            return data;
-                        } else {
-                            // Add a space after the first three characters
-                            return data.substr(0, 3) + " " + data.substr(3);
-                        }
-                    }
-                    return data;
-                },
-            },
-            {
-                targets: [4],
-                render: function (data, type, row, meta) {
-                    if (type === "display") {
-                        if (data && data.includes("-")) {
-                            var picName = data.split("-")[1]; // Extract "John" part
-                            return picName.trim(); // Return the trimmed name
-                        } else {
-                            return data; // Return the original data if it's null or doesn't contain a hyphen
-                        }
-                    }
-                    return data;
-                },
-            },
-        ],
-        columns: [
-            { visible: false },
-            { visible: false },
-            null,
-            null,
-            null,
-            { visible: false },
-            { visible: true, width: "15%" },
-            { visible: true, width: "20%" },
-            null,
-            null,
-            { visible: true, width: "9%" },
-            null,
-            null,
-            null,
-            null,
-        ],
-        lengthMenu: [
-            [10, 25, 50, 100, -1],
-            [10, 25, 50, 100, "All"],
-        ],
-        dom: 'Bfrtip',
-        buttons: [
-            {
-                text: "PDF",
-                extend: "print",
-                className: "btn-primary",
-                exportOptions: {
-                    columns: ":visible",
-                    stripHtml: false,
-                },
-            },
-            {
-                text: "Upload Excel",
-                className: "btn-secondary",
-                action: function () {
-                    window.location.href = "/upload_excel";
-                },
-            },
-            {
-                text: "Delete Rows",
-                className: "btn-danger",
-                action: deleteSelectedRows,
-            },
-            {
-                extend: "copy",
-                text: "Copy",
-                className: "btn-warning",
-                header: false, // Disable export header tabla
-                exportOptions: {
-                    columns: [6, 10], // Select columns to be exported
-                },
-                title: null,
-            },
-            {
-                text: "{% if request.user|has_group:'Admin' %} Approve {% endif %}",
-                className: "btn-success",
-                action: approveRows,
-                init: function (api, node, config) {
-                    // Hide the button if the user is not in the Admin group
-                    if (isAdmin === "False") {
-                        $(node).addClass("d-none");
-                    }
-                },
-            },
-            { extend: "colvis", className: "btn-info" },
-        ],
+        {
+          targets: 13,  // Assuming the "is_approved" column is at index 13
+          render: function (data, type, row) {
+            if (type === "display") {
+              return data === 'Yes' ? 'Yes' : 'No';
+            }
+            return data;
+          },
+        },
+      ],
+      columns: [
+        { visible: false },
+        { visible: false },
+        null,
+        null,
+        null,
+        { visible: false },
+        { visible: true, width: "15%" },
+        { visible: true, width: "20%" },
+        null,
+        null,
+        { visible: true, width: "9%" },
+        null,
+        null,
+        { visible: true, width: "9%" },  // Ensure the "is_approved" column is visible
+        null,
+      ],
+      createdRow: function(row, data, dataIndex) {
+        if (data[13] === 'Yes') {  // Assuming the "is_approved" column is at index 13
+          $(row).css('background-color', '#ccffc7');  // Apply green background color
+        }
+      },
+      lengthMenu: [
+        [10, 25, 50, 100, -1],
+        [10, 25, 50, 100, "All"],
+      ],
+      dom: 'Bfrtip',
+      buttons: [
+        {
+          text: "PDF",
+          extend: "print",
+          className: "btn-primary",
+          exportOptions: {
+            columns: ":visible",
+            stripHtml: false,
+          },
+        },
+        {
+          text: "Upload Excel",
+          className: "btn-secondary",
+          action: function () {
+            window.location.href = "/upload_excel";
+          },
+        },
+        {
+          text: "Delete Rows",
+          className: "btn-danger",
+          action: deleteSelectedRows,
+        },
+        {
+          extend: "copy",
+          text: "Copy",
+          className: "btn-warning",
+          header: false, // Disable export header tabla
+          exportOptions: {
+            columns: [6, 10], // Select columns to be exported
+          },
+          title: null,
+        },
+        {
+          text: "{% if request.user|has_group:'Admin' %} Approve {% endif %}",
+          className: "btn-success",
+          action: approveRows,
+          init: function (api, node, config) {
+            // Hide the button if the user is not in the Admin group
+            if (isAdmin === "False") {
+              $(node).addClass("d-none");
+            }
+          },
+        },
+        { extend: "colvis", className: "btn-info" },
+      ],
     });
-}
+  }
 
   function deleteSelectedRows() {
     if (!table) {
@@ -346,6 +334,17 @@ function initializeDataTable() {
 
   $(document).ready(function () {
     initializeDataTable();
+
+   // Set initial date range values
+    // var initialStartDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 29))); // Default to last 30 days
+    // var initialEndDate = formatDate(new Date()); // Today's date
+
+    // Set the date inputs to the initial values
+    $('#startDate').val('');
+    $('#endDate').val('');
+
+    // Trigger initial date range filtering
+    // filterByDateRange(initialStartDate, initialEndDate);
 
     $("#filterDuplicatesButton").on("click", function () {
       filterDuplicates();
@@ -462,12 +461,12 @@ function initializeDataTable() {
         endDate = formatDate(new Date()); // Today's date
         startDate = formatDate(
           new Date(new Date().setDate(new Date().getDate() - 59))
-        ); // Date 30 days ago
+        ); // Date 60 days ago
       } else if (dateRange === "90") {
         endDate = formatDate(new Date()); // Today's date
         startDate = formatDate(
           new Date(new Date().setDate(new Date().getDate() - 89))
-        ); // Date 30 days ago
+        ); // Date 90 days ago
       } else if (dateRange === "365") {
         endDate = formatDate(new Date()); // Today's date
         startDate = formatDate(
@@ -477,7 +476,7 @@ function initializeDataTable() {
         endDate = formatDate(new Date()); // Today's date
         startDate = formatDate(
           new Date(new Date().setDate(new Date().getDate() - 729))
-        ); // Date 365 days ago
+        ); // Date 730 days ago
       } else if (dateRange === "ytd") {
         endDate = formatDate(new Date()); // Today's date
         startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year
@@ -485,6 +484,7 @@ function initializeDataTable() {
       }
       filterByDateRange(startDate, endDate);
     });
+
     function formatDate(date) {
       var year = date.getFullYear();
       var month = ("0" + (date.getMonth() + 1)).slice(-2); // Months are zero-based
@@ -493,25 +493,9 @@ function initializeDataTable() {
     }
 
     function filterByDateRange(startDate, endDate) {
-      $.ajax({
-        url: '{% url "display_item" %}',
-        type: "GET",
-        data: {
-          start_date: startDate,
-          end_date: endDate,
-        },
-        success: function (response) {
-          console.log("Success");
-          $("#itemTable").html($(response).find("#itemTable").html());
-          if (table) {
-            table.destroy();
-          }
-          initializeDataTable();
-        },
-        error: function (xhr, status, error) {
-          console.error("Error filtering data:", error);
-        },
-      });
+      $('#startDate').val(startDate);
+      $('#endDate').val(endDate);
+      table.ajax.reload();
     }
   });
 </script>

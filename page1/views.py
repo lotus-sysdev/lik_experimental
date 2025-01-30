@@ -378,8 +378,6 @@ def display_supplier(request):
 
 @login_required
 @GA_required
-
-
 def item_list(request):
     draw = int(request.GET.get('draw', 1))
     start = int(request.GET.get('start', 0))
@@ -399,6 +397,7 @@ def item_list(request):
     if search_value:
         items = items.filter(nama__icontains=search_value)
 
+    items = items.order_by('-tanggal_pemesanan')
     paginator = Paginator(items, length)
     page_number = (start // length) + 1
     page = paginator.get_page(page_number)
@@ -408,8 +407,8 @@ def item_list(request):
         
         data.append([
             item.upload_type,
-            item.Tanggal.strftime('%Y/%m/%d'),
-            item.tanggal_pemesanan.strftime('%Y/%m/%d'),
+            item.Tanggal.strftime('%Y/%m/%d') if item.Tanggal else 'None',
+            item.tanggal_pemesanan.strftime('%Y/%m/%d') if item.tanggal_pemesanan else 'None',
             str(item.customer),  # Convert customer to string
             str(item.pic),
             item.SKU,
