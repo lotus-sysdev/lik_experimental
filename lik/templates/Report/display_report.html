@@ -150,12 +150,16 @@
             data: function(d) {
               d.start_date = $('#startDate').val();
               d.end_date = $('#endDate').val();
+              d.search_column = $('#columnFilter').val();  // Add search column
+              d.search_value = $('#columnSearch').val().trim();
             },
             dataSrc: function(json) {
               // Update the totals using jQuery
               $('#totalBerat').text(json.total_berat);
               $('#totalReject').text(json.total_reject);
               $('#uniquePlatCount').text(json.unique_plat_count);
+              // console.log(json);
+
               return json.data;
             }
           },
@@ -169,13 +173,19 @@
             { data: "DO", render: function(data) { return data ? data.replace(/\s+/g, '') : 'None'; } },
             { data: "no_tiket" },
             { data: "kayu" },
-            { data: "berat", render: function(data) { return data + ' kg'; } },
+            { data: "berat", render: function(data) { return (data / 10).toFixed(1) + ' kg'; } }, 
             { data: "reject", render: function(data) { return data + ' kg'; } },
             { data: "lokasi" },
             { data: "tujuan" },
             { data: "tanggal", render: function(data) { return data ? new Date(data).toLocaleDateString() : 'None'; } },
-            // Masih Perlu Improvement
-            { data: "completed", render: function(data) { return data ? 'Yes' : 'No'; } },
+            // { data: "completed", render: function(data) { return data ? 'Yes' : 'No'; } },
+            { 
+              data: "completed", 
+              render: function(data) {
+                return data; // Directly return 'Yes' or 'No' from the backend
+              } 
+            },
+            
             { data: "foto", render: function(data, type, row) {
                 if (row.og_foto) {
                   return '<a href="' + row.og_foto.url + '" target="_blank"><img src="' + row.foto.url + '" alt="' + row.id + '"/></a>';
@@ -186,8 +196,13 @@
                 }
               }
             },
-            { data: "id", render: function(data) { return '<a href="/report_detail/' + data + '">View</a>'; } },
+            { data: "id", render: function(data) { return '<a href="/api/report_detail/' + data + '">View</a>'; } },
           ],
+          createdRow: function(row, data, dataIndex) {
+            if (data.completed === 'Yes') {  // Check if the "completed" column is "Yes"
+              $(row).css('background-color', '#ccffc7');  // Apply green background color
+            }
+          },
           select: {
             style: "multi",
           },
@@ -195,6 +210,7 @@
             [10, 25, 50, 100, -1],
             [10, 25, 50, 100, "All"],
           ],
+          pageLength: 25,
           layout: {
             top2Start: {
               buttons: {
@@ -359,7 +375,7 @@
         function columnSearch() {
           var columnIndex = $("#columnFilter").val(); // Get the index of the selected column
           var searchValue = $("#columnSearch").val().trim(); // Get the value of the search input and remove leading/trailing whitespace
-          table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
+          table.ajax.reload(); // Reload the DataTable with the new search parameters
           updateStatsAfterSearch();
         }
 
