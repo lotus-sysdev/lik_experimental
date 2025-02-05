@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export PDF</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .letterhead { text-align: center; margin-bottom: 20px; }
+        .table-container { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    
+    <!-- Letterhead -->
+    <div class="letterhead">
+        <img src="{% static 'image/header.png' %}" alt="Letterhead" width="100%">
+    </div>
+
+    <h2>Data Export</h2>
+    
+    <div class="table-container">
+        <table id="exportTable">
+            <thead>
+                <tr id="tableHead"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+
+    </div>
+    <br>
+    <button id="downloadPdf">Download PDF</button>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+         $(document).ready(function () {
+            // Ambil data dari session melalui Django template
+            var tableData = {{ request.session.export_data|safe }};
+            var columnNames = {{ request.session.export_columns|safe }};
+
+            if (tableData.length === 0) {
+                $("body").append("<p><strong>Tidak ada data yang dipilih.</strong></p>");
+            } else {
+                // Buat header tabel berdasarkan kolom yang terlihat
+                columnNames.forEach(column => {
+                    $("#tableHead").append("<th>" + column + "</th>");
+                });
+
+                // Isi tabel dengan data
+                tableData.forEach(rowData => {
+                    let rowHtml = "<tr>";
+                    rowData.forEach(cellData => {
+                        rowHtml += "<td>" + cellData + "</td>";
+                    });
+                    rowHtml += "</tr>";
+                    $("#tableBody").append(rowHtml);
+                });
+            }
+
+
+
+              // Tombol Download PDF
+            $("#downloadPdf").on("click", function () {
+                window.print();  // Cetak halaman sebagai PDF
+            });
+
+            
+        });
+    </script>
+
+
+
+
+</body>
+</html>

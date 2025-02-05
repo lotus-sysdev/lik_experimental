@@ -2,6 +2,7 @@
 {% block title %}Item Data Table{% endblock %} 
 
 {% block content %}
+{% load static %}
 <style>
   .custom-dropdown {
     background-color: royalblue; /* Background color */
@@ -95,156 +96,323 @@
     
   </tbody>
 </table>
-<a href="/add_item">Add Item</a><br />
 
+<button id="exportPdfBtn" class="btn btn-primary">Export as PDF</button>
+
+<a href="/add_item">Add Item</a><br />
+<script src="https://cdn.datatables.net/select/3.0.0/js/dataTables.select.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.24/jspdf.plugin.autotable.min.js"></script>
 <script>
   var table;
   function initializeDataTable() {
     var isAdmin = "{{ request.user|has_group:'Admin' }}";
     table = new DataTable("#itemTable", {
-      processing: true,
-      serverSide: true,
-      ajax: {
-        url: "{% url 'item_list' %}",
-        type: "GET",
-        data: function(d) {
-          // Add the extra filters from the frontend
-          d.start_date = $('#startDate').val();        // Start date filter
-          d.end_date = $('#endDate').val();            // End date filter
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "{% url 'item_list' %}",
+            type: "GET",
+            data: function(d) {
+                // Add the extra filters from the frontend
+                d.start_date = $('#startDate').val();        // Start date filter
+                d.end_date = $('#endDate').val();            // End date filter
+                d.search_col = $('#columnFilter').val();  // Add search column
+                d.search_val = $('#columnSearch').val().trim();
+            },
+            dataSrc: function(json) {
+                // Log the JSON response to check if data is being received correctly
+                console.log(json);
+                return json.data;
+            }
         },
-        dataSrc: function(json) {
-          // Log the JSON response to check if data is being received correctly
-          // console.log(json);
-          return json.data;
-        }
-      },
-      select: {
-        style: "multi",
-      },
-      columnDefs: [
+        select: {
+            style: "multi",
+        },
+        columnDefs: [
         {
-          targets: 10,
-          render: function (data, type, row) {
-            if (type === "display") {
-              if (data.startsWith("IDR")) {
-                // Replace commas with periods and periods with commas
-                data = data
-                  .replace(/,/g, "#")
-                  .replace(/\./g, ",")
-                  .replace(/#/g, ".");
-                data = data.substr(0, data.indexOf(",")); // Get substring until the first comma
-                data = data.substr(0, 3) + " " + data.substr(3);
+            targets: 10,  // Price column
+            render: function (data, type, row) {
+                if (type === "display") {
+                    if (data.startsWith("IDR")) {
+                        data = data
+                            .replace(/,/g, "#")
+                            .replace(/\./g, ",")
+                            .replace(/#/g, ".");
+                        data = data.substr(0, data.indexOf(",")); // Get substring until the first comma
+                        data = data.substr(0, 3) + " " + data.substr(3);
+                        return data;
+                    } else if (data.startsWith("$")) {
+                        data = data.replace("$", "USD");
+                        data = data.substr(0, 3) + " " + data.substr(3);
+                        return data;
+                    } else {
+                        return data.substr(0, 3) + " " + data.substr(3);
+                    }
+                }
                 return data;
-              } else if (data.startsWith("$")) {
-                data = data.replace("$", "USD");
-                data = data.substr(0, 3) + " " + data.substr(3);
+            },
+        },
+        {
+            targets: [4],  // PIC column
+            render: function (data, type, row, meta) {
+                if (type === "display") {
+                    if (data && data.includes("-")) {
+                        var picName = data.split("-")[1]; // Extract "John" part
+                        return picName.trim(); // Return the trimmed name
+                    } else {
+                        return data; // Return the original data if it's null or doesn't contain a hyphen
+                    }
+                }
                 return data;
-              } else {
-                // Add a space after the first three characters
-                return data.substr(0, 3) + " " + data.substr(3);
-              }
+            },
+        },
+        {
+            targets: 13,  // "is_approved" column
+            render: function (data, type, row) {
+                if (type === "display") {
+                    return data === 'Yes' ? 'Yes' : 'No';
+                }
+                return data;
+            },
+        },
+    ],
+    columns: [
+        { visible: false },  // upload_type
+        { visible: false },  // Tanggal
+        null,  // tanggal_pemesanan
+        null,  // customer
+        null,  // pic
+        { visible: false },  // SKU
+        { visible: true, width: "15%" },  // nama
+        { visible: true, width: "20%" },  // catatan
+        null,  // category
+        null,  // quantity + unit
+        { visible: true, width: "9%" },  // price
+        null,  // gambar
+        null,  // sumber URLs
+        { visible: true, width: "9%" },  // is_approved
+        null,  // detail_link
+    ],
+        createdRow: function(row, data, dataIndex) {
+            if (data[13] === 'Yes') {  // Assuming the "is_approved" column is at index 13
+                $(row).css('background-color', '#ccffc7');  // Apply green background color
             }
-            return data;
+        },
+        lengthMenu: [
+            [10, 25, 50, 100, -1],
+            [10, 25, 50, 100, "All"],
+        ],
+        layout: {
+          top2Start: {
+            buttons: {
+              buttons: [
+                 {
+                    text: "PDF",
+                    extend: "print",
+                    className: "btn-primary",
+                    exportOptions: {
+                        columns: ":visible", // Export only visible columns
+                        stripHtml: false,
+                    },
+                    
+                },
+                {
+                    text: "Upload Excel",
+                    className: "btn-secondary",
+                    action: function () {
+                        window.location.href = "/upload_excel";
+                    },
+                },
+                {
+                    text: "Delete Rows",
+                    className: "btn-danger",
+                    action: deleteSelectedRows,
+                },
+                {
+                    extend: "copy",
+                    text: "Copy",
+                    className: "btn-warning",
+                    header: false, // Disable export header tabla
+                    exportOptions: {
+                        columns: [6, 10], // Select columns to be exported
+                    },
+                    title: null,
+                },
+                {
+                    text: "{% if request.user|has_group:'Admin' %} Approve {% endif %}",
+                    className: "btn-success",
+                    action: approveRows,
+                    init: function (api, node, config) {
+                        // Hide the button if the user is not in the Admin group
+                        if (isAdmin === "False") {
+                            $(node).addClass("d-none");
+                        }
+                    },
+                },
+                { extend: "colvis", className: "btn-info" },
+              ],
+              select: true,
+              dom: {
+                button: {
+                  className: "btn",
+                },
+              },
+            },
           },
         },
-        {
-          targets: [4],
-          render: function (data, type, row, meta) {
-            if (type === "display") {
-              if (data && data.includes("-")) {
-                var picName = data.split("-")[1]; // Extract "John" part
-                return picName.trim(); // Return the trimmed name
-              } else {
-                return data; // Return the original data if it's null or doesn't contain a hyphen
-              }
-            }
-            return data;
-          },
-        },
-        {
-          targets: 13,  // Assuming the "is_approved" column is at index 13
-          render: function (data, type, row) {
-            if (type === "display") {
-              return data === 'Yes' ? 'Yes' : 'No';
-            }
-            return data;
-          },
-        },
-      ],
-      columns: [
-        { visible: false },
-        { visible: false },
-        null,
-        null,
-        null,
-        { visible: false },
-        { visible: true, width: "15%" },
-        { visible: true, width: "20%" },
-        null,
-        null,
-        { visible: true, width: "9%" },
-        null,
-        null,
-        { visible: true, width: "9%" },  // Ensure the "is_approved" column is visible
-        null,
-      ],
-      createdRow: function(row, data, dataIndex) {
-        if (data[13] === 'Yes') {  // Assuming the "is_approved" column is at index 13
-          $(row).css('background-color', '#ccffc7');  // Apply green background color
-        }
-      },
-      lengthMenu: [
-        [10, 25, 50, 100, -1],
-        [10, 25, 50, 100, "All"],
-      ],
-      dom: 'Bfrtip',
-      buttons: [
-        {
-          text: "PDF",
-          extend: "print",
-          className: "btn-primary",
-          exportOptions: {
-            columns: ":visible",
-            stripHtml: false,
-          },
-        },
-        {
-          text: "Upload Excel",
-          className: "btn-secondary",
-          action: function () {
-            window.location.href = "/upload_excel";
-          },
-        },
-        {
-          text: "Delete Rows",
-          className: "btn-danger",
-          action: deleteSelectedRows,
-        },
-        {
-          extend: "copy",
-          text: "Copy",
-          className: "btn-warning",
-          header: false, // Disable export header tabla
-          exportOptions: {
-            columns: [6, 10], // Select columns to be exported
-          },
-          title: null,
-        },
-        {
-          text: "{% if request.user|has_group:'Admin' %} Approve {% endif %}",
-          className: "btn-success",
-          action: approveRows,
-          init: function (api, node, config) {
-            // Hide the button if the user is not in the Admin group
-            if (isAdmin === "False") {
-              $(node).addClass("d-none");
-            }
-          },
-        },
-        { extend: "colvis", className: "btn-info" },
-      ],
     });
+
+   $("#exportPdfBtn").on("click", function () {
+        var selectedData = table.rows({ selected: true }).data().toArray();
+        var visibleColumns = [];
+        var visibleColumnIndexes = [];
+
+        // Ambil hanya kolom yang terlihat
+        table.columns(":visible").every(function (index) {
+            visibleColumns.push($(this.header()).text().trim());
+            visibleColumnIndexes.push(index);
+        });
+
+        // Filter hanya kolom yang terlihat
+        var filteredData = selectedData.map(row =>
+            visibleColumnIndexes.map(index => row[index])
+        );
+
+        if (filteredData.length > 0 && visibleColumns.length > 0) {
+            var csrfToken = $("input[name='csrfmiddlewaretoken']").val(); // Ambil CSRF token dari halaman
+
+            $.ajax({
+                url: "/export-pdf/",
+                type: "POST",
+                headers: { "X-CSRFToken": csrfToken }, // Tambahkan CSRF token di header
+                data: JSON.stringify({
+                    data: filteredData,
+                    columns: visibleColumns,
+                }),
+                contentType: "application/json",
+                success: function (response) {
+                    window.location.href = response.pdf_url;  // Arahkan ke halaman PDF
+                },
+                error: function (xhr, status, error) {
+                    console.error("Export failed:", error);
+                    alert("Gagal mengekspor PDF.");
+                }
+            });
+        } else {
+            alert("Silakan pilih minimal satu baris untuk diekspor.");
+        }
+    });
+
+
+
+
+
+
   }
+
+  {% comment %} function exportPDFWithLogo(table) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Add logo
+    const logoUrl = "{% static 'image/header.png' %}";  // Replace with the URL or path to your logo
+    const logoWidth = 50;  // Width of the logo
+    const logoHeight = 20; // Height of the logo
+    const pageWidth = doc.internal.pageSize.width;  // Get the page width
+    const logoX = (pageWidth - logoWidth) / 2;  // Calculate center position
+
+
+
+    // Add the logo to the top-center of the page
+    doc.addImage(logoUrl, 'PNG', logoX, 10, logoWidth, logoHeight);
+
+    // Add title
+    doc.setFontSize(16);
+
+    // Get selected rows
+    const selectedRows = table.rows({ selected: true }).data();
+
+
+    const selectedRowData = [];
+    selectedRows.each(function(rowData) {
+        const row = [];
+        rowData.forEach(function(cellData) {
+            row.push(cellData); // Add each cell's data to the row
+        });
+        selectedRowData.push(row);
+    });
+
+    console.log(selectedRows);
+
+    // Get visible columns
+    const visibleColumns = [];
+    table.columns().every(function(index) {
+        if (this.visible()) {
+            visibleColumns.push(index);  // Store the index of visible columns
+        }
+    });
+
+    console.log(table)
+
+    // Get column headers dynamically from DataTable for visible columns
+    const headers = [];
+    visibleColumns.forEach(function(colIndex) {
+        const headerText = table.column(colIndex).header().textContent.trim();
+        headers.push(headerText); // Add the header text for visible columns
+    });
+
+    // Define column widths (adjust based on your specific needs)
+    const columnWidths = visibleColumns.map((colIndex) => {
+        if (colIndex === 6) {
+            return 30; // Example for name column
+        }
+        if (colIndex === 10) {
+            return 20; // Example for price column
+        }
+        return 30; // Default width for other columns
+    });
+
+    // Format data (for example, format price values or date)
+    const formattedRowData = selectedRowData.map(function(rowData) {
+        return visibleColumns.map(function(colIndex) {
+            let value = rowData[colIndex];
+            if (colIndex === 10) { // Assuming price is in column 10
+                // Format price values (e.g., add currency symbol and format)
+                if (typeof value === 'string' && value.startsWith("IDR")) {
+                    value = value.replace(/,/g, "#").replace(/\./g, ",").replace(/#/g, ".");
+                    return value;  // You can modify this further if needed
+                } else if (typeof value === 'string' && value.startsWith("$")) {
+                    value = value.replace("$", "USD");
+                    return value;
+                }
+            }
+            return value;
+        });
+    });
+
+    // Use jsPDF's autoTable plugin to generate the table in the PDF
+    doc.autoTable({
+        head: [headers],
+        body: formattedRowData,
+        startY: 40,  // Position below the logo
+        theme: 'grid',
+        margin: { top: 30, left: 20, right: 20 },
+        columnStyles: {
+            0: { cellWidth: 10 }, // Example: Adjust column width for column 0
+            1: { cellWidth: 25 }, // Example: Adjust column width for column 1
+            6: { cellWidth: 30 }, // Adjust name column width
+            10: { cellWidth: 20 }, // Adjust price column width
+            // Add more column widths as needed
+        },
+    });
+
+    // Save PDF with a custom name
+    doc.save('datatable_report_with_logo.pdf');
+} {% endcomment %}
+
+
+
 
   function deleteSelectedRows() {
     if (!table) {
@@ -400,7 +568,11 @@
     });
     // Trigger search on button click
     $("#searchButton").on("click", function () {
-      columnSearch();
+      // columnSearch();
+      console.log("Search column:", $('#columnFilter').val());
+      console.log("Search value:", $('#columnSearch').val());
+
+      table.ajax.reload();
     });
 
     // Reset search on button click
@@ -410,9 +582,15 @@
 
     // Function to perform column-specific search
     function columnSearch() {
-      var columnIndex = $("#columnFilter").val(); // Get the index of the selected column
-      var searchValue = $("#columnSearch").val().trim(); // Get the value of the search input and remove leading/trailing whitespace
-      table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
+        var columnIndex = $("#columnFilter").val(); // Get the index of the selected column
+        var searchValue = $("#columnSearch").val().trim(); // Get the value of the search input
+
+        // Reload the DataTable with the new search parameters
+        table.ajax.reload(null, false, function (settings, json) {
+            // Add the search_column and search_value to the request
+            settings.ajax.data.search_column = columnIndex;
+            settings.ajax.data.search_value = searchValue;
+        });
     }
     // Function to reset check duplicates button
     function resetFilterDuplicates() {

@@ -24,7 +24,7 @@ from django.contrib import messages
 from django.core import serializers
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-from django.db.models import Prefetch, Count, Sum
+from django.db.models import Prefetch, Count, Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
@@ -382,47 +382,66 @@ def item_list(request):
     draw = int(request.GET.get('draw', 1))
     start = int(request.GET.get('start', 0))
     length = int(request.GET.get('length', 10))
-    search_value = request.GET.get('search[value]', '')
+    search_column = request.GET.get('search_col[value]', '')
+    # search_column = request.GET.get('search_col')
+    # search_column = request.GET.get('columns[{}][data]'.format(request.GET.get('order[0][column]', '')), '')
+    search_value = request.GET.get('search_val')
 
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
 
+    print(search_column)
+    print(search_value)
+
     items = Items.objects.all()
 
+    # Date range filtering
     if start_date_str and end_date_str:
         start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
         end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
         items = items.filter(tanggal_pemesanan__range=[start_date, end_date])
 
-    if search_value:
-        items = items.filter(nama__icontains=search_value)
+    # Column-based search
+    if search_column and search_value:
+        column_fields = [
+            'SKU', 'Tanggal', 'catatan', 'category__name', 'customer__name', 'gambar', 'is_approved',
+            'nama', 'pic__name', 'price', 'quantity', 'tanggal_pemesanan', 'unit', 'upload_type'
+        ]
+        if int(search_column) < len(column_fields):
+            column_field = column_fields[int(search_column)]
+            items = items.filter(**{f"{column_field}__icontains": search_value})
 
+    # Ordering
     items = items.order_by('-tanggal_pemesanan')
+
+    # Pagination
     paginator = Paginator(items, length)
     page_number = (start // length) + 1
     page = paginator.get_page(page_number)
 
+    # Serialize data
     data = []
     for item in page:
-        
+        item_detail_url = reverse('item_detail', args=[item.SKU])
         data.append([
             item.upload_type,
             item.Tanggal.strftime('%Y/%m/%d') if item.Tanggal else 'None',
             item.tanggal_pemesanan.strftime('%Y/%m/%d') if item.tanggal_pemesanan else 'None',
-            str(item.customer),  # Convert customer to string
-            str(item.pic),
+            str(item.customer) if item.customer else 'None',
+            str(item.pic) if item.pic else 'None',
             item.SKU,
             item.nama,
-            item.catatan,
-            item.category.name,
+            item.catatan if item.catatan else 'None',
+            item.category.name if item.category else 'None',
             f"{item.quantity} {item.unit}",
             str(item.price),
-            f'<img src="{item.gambar.url}" alt="{item.nama}" />',
+            f'<img src="{item.gambar.url}" alt="{item.nama}" width="50" height="50" />' if item.gambar else 'None',
             ' '.join([f'<a href="{sumber.url}">{sumber.url[:20]}{"..." if len(sumber.url) > 20 else ""}</a>' for sumber in item.itemsumber_set.all() if sumber.url]) or 'None',
             'Yes' if item.is_approved else 'No',
-            f'<a href="{{% url "item_detail" item.SKU %}}">View</a>'
+            f'<a href="{item_detail_url}">View</a>'
         ])
 
+    # Prepare response
     response = {
         'draw': draw,
         'recordsTotal': items.count(),
@@ -434,6 +453,30 @@ def item_list(request):
 
 def display_item(request):
     return render(request, 'item/display_item.html')
+
+def export_pdf_view(request):
+    if request.method == "POST":
+        try:
+            # Parsing data JSON dari request body
+            data = json.loads(request.body)
+            selected_data = data.get("data", [])
+            visible_columns = data.get("columns", [])
+
+            if not selected_data or not visible_columns:
+                return JsonResponse({"error": "Data tidak valid"}, status=400)
+
+            # Simpan data ke session agar bisa diakses di halaman export_pdf.html
+            request.session["export_data"] = selected_data
+            request.session["export_columns"] = visible_columns
+
+            return JsonResponse({"pdf_url": reverse('export_pdf_page')})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Format JSON tidak valid"}, status=400)
+
+    # Untuk GET, render halaman PDF
+    return render(request, "export_pdf.html")
+
 
 # -------------------- Customer Functions -------------------- #
 @login_required
