@@ -1,5 +1,7 @@
-from django.urls import path
+from django.urls import path, include 
 from .views import *
+from django.contrib.auth import views as auth_views
+
 
 urlpatterns = [
     path('', home ,name='index'),
@@ -93,11 +95,18 @@ urlpatterns = [
     path('edit_supplier_alamat/<int:alamat_id>/', edit_supplier_alamat, name='edit_supplier_alamat'),
     path('delete_supplier_alamat/<int:alamat_id>/', delete_supplier_alamat, name='delete_supplier_alamat'),
     
-    # Login, Register, and Logout
+    # Login, Register, Logout
     path('login/',login_view, name="login"),
     path('register/',register_view, name="register"),
     path('logout/', logout_view, name='logout'),
-
+    
+    
+    #Forgot Password
+    path('password_reset/', auth_views.PasswordResetView.as_view(template_name='accounts/password_reset.html'), name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='accounts/password_reset_done.html'), name='password_reset_done'),
+    path('password_reset_confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='accounts/password_reset_confirm.html'), name='password_reset_confirm'),
+    path('password_reset_complete/', auth_views.PasswordResetCompleteView.as_view(template_name='accounts/password_reset_complete.html'), name='password_reset_complete'),
+    
     # User Action Log
     path('user_action_logs/', user_action_logs, name='user_action_logs'),
 
