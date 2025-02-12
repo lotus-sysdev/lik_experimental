@@ -128,6 +128,14 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #     'NAME': 'lotussolusindo',
+    #     'USER': 'sysdev_lotus',
+    #     'PASSWORD': 'tahunNAGA2024!',
+    #     'HOST': 'localhost',
+    #     'PORT': '5432',
+    # }
 }
 
 # Password validation

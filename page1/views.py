@@ -382,37 +382,63 @@ def item_list(request):
     draw = int(request.GET.get('draw', 1))
     start = int(request.GET.get('start', 0))
     length = int(request.GET.get('length', 10))
-    search_column = request.GET.get('search_col[value]', '')
-    # search_column = request.GET.get('search_col')
-    # search_column = request.GET.get('columns[{}][data]'.format(request.GET.get('order[0][column]', '')), '')
+    search_column = request.GET.get('search_col')
     search_value = request.GET.get('search_val')
 
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
-
-    print(search_column)
-    print(search_value)
-
+    
     items = Items.objects.all()
 
     # Date range filtering
     if start_date_str and end_date_str:
-        start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
-        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
         items = items.filter(tanggal_pemesanan__range=[start_date, end_date])
 
+    # Define the mapping outside the conditional block
+    mapping = {
+        '0': 'upload_type',
+        '1': 'Tanggal',
+        '2': 'tanggal_pemesanan',
+        '3': 'customer__nama_pt',
+        '4': 'pic__nama',
+        '5': 'SKU',
+        '6': 'nama',
+        '7': 'category__name',
+        '8': 'catatan',
+        '9': 'quantity',
+        '10': 'price',
+        '13': 'is_approved',
+    }
+
     # Column-based search
-    if search_column and search_value:
-        column_fields = [
-            'SKU', 'Tanggal', 'catatan', 'category__name', 'customer__name', 'gambar', 'is_approved',
-            'nama', 'pic__name', 'price', 'quantity', 'tanggal_pemesanan', 'unit', 'upload_type'
-        ]
-        if int(search_column) < len(column_fields):
-            column_field = column_fields[int(search_column)]
-            items = items.filter(**{f"{column_field}__icontains": search_value})
+    if search_value:
+        if search_column:
+            field = mapping.get(search_column)
+            if field:
+                if search_column in ['1', '2']:
+                    try:
+                        date_value = datetime.strptime(search_value, '%Y-%m-%d').date()
+                        items = items.filter(**{f"{field}": date_value})
+                    except ValueError:
+                        items = items.none()
+                else:
+                    filter_kwargs = {f"{field}__icontains": search_value}
+                    items = items.filter(**filter_kwargs)
+            else:
+                items = items.filter(Q(nama__icontains=search_value) | Q(SKU__icontains=search_value))
+        else:
+            items = items.filter(Q(nama__icontains=search_value) | Q(SKU__icontains=search_value))
 
     # Ordering
-    items = items.order_by('-tanggal_pemesanan')
+    order_column_index = int(request.GET.get('order[0][column]', 2))  # Default column to sort by is column 2 (tanggal_pemesanan)
+    order_direction = request.GET.get('order[0][dir]', 'desc')  # Default direction is descending
+    order_column = mapping.get(str(order_column_index), 'tanggal_pemesanan')
+    if order_direction == 'asc':
+        items = items.order_by(order_column)
+    else:
+        items = items.order_by(f'-{order_column}')
 
     # Pagination
     paginator = Paginator(items, length)
@@ -444,7 +470,7 @@ def item_list(request):
     # Prepare response
     response = {
         'draw': draw,
-        'recordsTotal': items.count(),
+        'recordsTotal': Items.objects.count(),
         'recordsFiltered': items.count(),
         'data': data,
     }
@@ -454,6 +480,11 @@ def item_list(request):
 def display_item(request):
     return render(request, 'item/display_item.html')
 
+
+def format_catatan(text):
+    
+    return text.replace("\n", "<br><br>")
+
 def export_pdf_view(request):
     if request.method == "POST":
         try:
@@ -462,10 +493,38 @@ def export_pdf_view(request):
             selected_data = data.get("data", [])
             visible_columns = data.get("columns", [])
 
+            ## DEBUGGING PURPOSE CHECKING CATATAN 
+            # **Cari indeks kolom "Catatan"**
+            # try:
+            #     catatan_index = visible_columns.index("Catatan")  # Cari posisi kolom "Catatan"
+            # except ValueError:
+            #     catatan_index = -1  # Jika tidak ditemukan, set -1
+
+            # # **Cek apakah kolom "Catatan" ada**
+            # if catatan_index != -1:
+            #     catatan_values = [row[catatan_index] for row in selected_data]  # Ambil hanya data di kolom "Catatan"
+            #     print("Kolom Catatan:", catatan_values)  # Debug: tampilkan data
+            # else:
+            #     print("Kolom 'Catatan' tidak ditemukan dalam data yang dikirim.")
+
+
+
+
             if not selected_data or not visible_columns:
                 return JsonResponse({"error": "Data tidak valid"}, status=400)
 
-            # Simpan data ke session agar bisa diakses di halaman export_pdf.html
+            # Cari indeks kolom "Catatan"
+            try:
+                catatan_index = visible_columns.index("Catatan")
+            except ValueError:
+                catatan_index = -1
+
+            # Format hanya kolom "Catatan"
+            if catatan_index != -1:
+                for row in selected_data:
+                    row[catatan_index] = format_catatan(row[catatan_index])
+
+            # Simpan data ke session agar bisa diakses di export_pdf.html
             request.session["export_data"] = selected_data
             request.session["export_columns"] = visible_columns
 
@@ -476,6 +535,7 @@ def export_pdf_view(request):
 
     # Untuk GET, render halaman PDF
     return render(request, "export_pdf.html")
+
 
 
 # -------------------- Customer Functions -------------------- #

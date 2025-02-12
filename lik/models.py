@@ -23,6 +23,7 @@ class Report(models.Model):
     og_foto = models.ImageField(upload_to = 'report_photos/', null=True, blank=True)
     #Timestamp
     date_time = models.DateTimeField(null = True)
+    tanda_transaksi = models.DateTimeField(null = True)
 
     def __str__ (self):
         return str(self.no_tiket)

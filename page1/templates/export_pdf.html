@@ -12,7 +12,46 @@
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid black; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
+        
+        
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 15mm;
+            }
+            
+            body {
+                font-size: 12px;
+            }
+
+            th, td {
+                border: 1px solid black;
+                padding: 5px;
+                text-align: left;
+                word-wrap: break-word;
+            }
+
+            /* Atur lebar minimum untuk setiap kolom */
+            th, td {
+                min-width: 50px; /* Semua kolom memiliki lebar minimum */
+                max-width: 150px; /* Batasi agar tidak terlalu besar */
+            }
+
+            /* Kolom "Catatan" diberi lebih banyak ruang */
+            th.catatan, td.catatan {
+                min-width: 200px;
+                max-width: 350px;
+            }
+
+            /* Hilangkan tombol saat dicetak */
+            .no-print {
+                display: none;
+            }
+        }
+
     </style>
+
+
 </head>
 <body>
     
@@ -33,40 +72,52 @@
 
     </div>
     <br>
-    <button id="downloadPdf">Download PDF</button>
+    {% comment %} <button onclick="window.print()" id="downloadPdf">Download PDF</button> {% endcomment %}
     
+    <button onclick="window.print()" class="no-print">Cetak PDF</button>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
          $(document).ready(function () {
-            // Ambil data dari session melalui Django template
-            var tableData = {{ request.session.export_data|safe }};
-            var columnNames = {{ request.session.export_columns|safe }};
+                // Ambil data dari session melalui Django template
+                var tableData = {{ request.session.export_data|safe }};
+                var columnNames = {{ request.session.export_columns|safe }};
 
-            if (tableData.length === 0) {
-                $("body").append("<p><strong>Tidak ada data yang dipilih.</strong></p>");
-            } else {
-                // Buat header tabel berdasarkan kolom yang terlihat
-                columnNames.forEach(column => {
-                    $("#tableHead").append("<th>" + column + "</th>");
+                if (!tableData.length || !columnNames.length) {
+                    $("body").append("<p><strong>Tidak ada data yang dipilih.</strong></p>");
+                    return;
+                }
+
+                // Buat header tabel
+                let headerRow = "";
+                columnNames.forEach((column, index) => {
+                    let className = column.toLowerCase() === "catatan" ? "class='catatan'" : "";
+                    headerRow += `<th ${className}>${column}</th>`;
                 });
+                $("#tableHead").append(headerRow);
 
-                // Isi tabel dengan data
+                // Tambahkan data ke tabel
                 tableData.forEach(rowData => {
-                    let rowHtml = "<tr>";
-                    rowData.forEach(cellData => {
-                        rowHtml += "<td>" + cellData + "</td>";
+                    let row = "<tr>";
+                    rowData.forEach((cellData, index) => {
+                        let className = columnNames[index].toLowerCase() === "catatan" ? "class='catatan'" : "";
+                        row += `<td ${className}>${cellData}</td>`;
                     });
-                    rowHtml += "</tr>";
-                    $("#tableBody").append(rowHtml);
+                    row += "</tr>";
+                    $("#tableBody").append(row);
                 });
-            }
+
+                // **Menyesuaikan ukuran kolom Catatan jika ada**
+                let catatanIndex = columnNames.indexOf("Catatan");
+                if (catatanIndex !== -1) {
+                    $("th:nth-child(" + (catatanIndex + 1) + "), td:nth-child(" + (catatanIndex + 1) + ")").css({
+                        "min-width": "200px",
+                        "max-width": "350px",
+                        "word-wrap": "break-word"
+                    });
+                }
 
 
-
-              // Tombol Download PDF
-            $("#downloadPdf").on("click", function () {
-                window.print();  // Cetak halaman sebagai PDF
-            });
 
             
         });
