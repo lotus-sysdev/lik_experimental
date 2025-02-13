@@ -122,7 +122,7 @@ WSGI_APPLICATION = 'LotusSolusindo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'local',
+        'NAME': 'local_env',
         'USER': 'postgres',
         'PASSWORD': 'root',
         'HOST': 'localhost',

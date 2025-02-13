@@ -31,6 +31,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import redirect, render, get_object_or_404
 from django.db.models.functions import ExtractDay, ExtractMonth, ExtractYear, Upper
+from datetime import datetime, timedelta
 
 
 # -------------------- Placeholder for homepage --------------------#

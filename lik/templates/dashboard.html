@@ -367,137 +367,115 @@
 
    
 
-      function renderTonaseChart(chartId, sender, tonaseCounts, startDate, endDate, dmy_tujuan) {
-          console.log(sender, tonaseCounts, dmy_tujuan);
+    function renderTonaseChart(chartId, sender, tonaseCounts, startDate, endDate, dmy_tujuan) {
+        console.log(sender, tonaseCounts, dmy_tujuan);
 
-          // Object untuk menyimpan data yang sudah dikelompokkan berdasarkan tanggal & tujuan
-          const groupedData = {};
+        const groupedData = {};
 
-          // Loop untuk mengelompokkan berat tonnase berdasarkan tanggal
-          tonaseCounts.forEach(item => {
-              const dateKey = `${item.year}-${item.month}-${item.day}`; // Format key: YYYY-MM-DD
+        // Loop untuk mengelompokkan tonase berdasarkan tanggal
+        tonaseCounts.forEach(item => {
+            const dateKey = `${item.year}-${item.month}-${item.day}`;
 
-              // Cari tujuan berdasarkan tanggal dari dmy_tujuan
-              const matchedDestination = dmy_tujuan.find(dest => 
-                  dest.year === item.year && 
-                  dest.month === item.month && 
-                  dest.day === item.day
-              );
+            // Cari tujuan berdasarkan tanggal dari dmy_tujuan
+            const matchedDestination = dmy_tujuan.find(dest => 
+                dest.year === item.year && dest.month === item.month && dest.day === item.day
+            );
 
-              const tujuan = matchedDestination ? matchedDestination.tujuan : "Tidak Diketahui"; 
+            const tujuan = matchedDestination ? matchedDestination.tujuan : "Tidak Diketahui"; 
 
-              // Jika belum ada entry untuk tanggal ini, inisialisasi
-              if (!groupedData[dateKey]) {
-                  groupedData[dateKey] = {
-                      day: item.day,
-                      month: item.month,
-                      year: item.year,
-                      totalBerat: 0,
-                      tujuan: {}
-                  };
-              }
+            // Jika belum ada entry, inisialisasi
+            if (!groupedData[dateKey]) {
+                groupedData[dateKey] = {
+                    day: item.day,
+                    month: item.month,
+                    year: item.year,
+                    totalBerat: 0,
+                    tujuan: {}
+                };
+            }
 
-              // Tambahkan berat tonase ke tanggal yang sesuai
-              groupedData[dateKey].totalBerat += item.berat;
+            // Tambahkan berat tonase ke tanggal yang sesuai
+            groupedData[dateKey].totalBerat += item.berat;
 
-              // Simpan data per tujuan
-              if (!groupedData[dateKey].tujuan[tujuan]) {
-                  groupedData[dateKey].tujuan[tujuan] = 0;
-              }
-              groupedData[dateKey].tujuan[tujuan] += item.berat;
-          });
+            // Simpan data per tujuan
+            if (!groupedData[dateKey].tujuan[tujuan]) {
+                groupedData[dateKey].tujuan[tujuan] = 0;
+            }
+            groupedData[dateKey].tujuan[tujuan] += item.berat;
+        });
 
-          // Membentuk array untuk labels (tanggal) dan data (total berat)
-          const labels = [];
-          const datasetMap = {}; // Untuk menyimpan data berdasarkan tujuan
+        // Urutkan tanggal ASCENDING (lama ke baru, kiri ke kanan)
+        const sortedDates = Object.keys(groupedData).sort((a, b) => {
+            const [yearA, monthA, dayA] = a.split('-').map(Number);
+            const [yearB, monthB, dayB] = b.split('-').map(Number);
+            return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
+        });
 
-          // Urutkan tanggal sebelum diproses agar tampil dari yang paling lama ke yang terbaru
-          Object.keys(groupedData)
-              .sort((a, b) => {
-                  const [yearA, monthA, dayA] = a.split('-').map(Number);
-                  const [yearB, monthB, dayB] = b.split('-').map(Number);
-                  return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
-                  // return new Date(yearB, monthB - 1, dayB) - new Date(yearA, monthA - 1, dayA);
+        const labels = [];
+        const datasetMap = {};
 
-              })
-              .forEach(dateKey => {
-                  const group = groupedData[dateKey];
+        sortedDates.forEach(dateKey => {
+            const group = groupedData[dateKey];
+            const formattedDate = `${group.day}-${group.month}-${group.year}`;
+            labels.push(formattedDate);
 
-                  // Format tanggal "DD-MM-YYYY"
-                  const formattedDate = `${group.day}-${group.month}-${group.year}`;
-                  labels.push(formattedDate);
+            Object.keys(group.tujuan).forEach(tujuan => {
+                if (!datasetMap[tujuan]) {
+                    datasetMap[tujuan] = [];
+                }
+                datasetMap[tujuan].push(group.tujuan[tujuan]);
+            });
+        });
 
-                  // Tambahkan data berdasarkan tujuan
-                  Object.keys(group.tujuan).forEach(tujuan => {
-                      if (!datasetMap[tujuan]) {
-                          datasetMap[tujuan] = [];
-                      }
-                      datasetMap[tujuan].push(group.tujuan[tujuan]);
-                  });
-              });
+        const datasets = Object.keys(datasetMap).map((tujuan, index) => ({
+            label: `Tonase ${tujuan}`,
+            data: datasetMap[tujuan],
+            borderColor: `hsl(${index * 60}, 70%, 50%)`,
+            fill: false,
+            tension: 0.1,
+            pointRadius: 5,
+        }));
+
+        if (labels.length === 0) {
+            labels.push('No Data Available');
+            datasets.push({
+                label: 'Tidak Ada Data',
+                data: [0],
+                borderColor: 'gray',
+                fill: false,
+                tension: 0.1,
+                pointRadius: 5,
+            });
+        }
+
+        const ctx = document.getElementById(chartId).getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Tanggal' } },
+                    y: { title: { display: true, text: 'Tonase (Berat)' }, beginAtZero: true }
+                },
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.raw} Tonase`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 
 
-          // Membentuk datasets untuk chart berdasarkan tujuan
-          const datasets = Object.keys(datasetMap).map((tujuan, index) => ({
-              label: `Tonase ${tujuan}`,
-              data: datasetMap[tujuan],
-              borderColor: `hsl(${index * 60}, 70%, 50%)`, // Warna unik untuk setiap tujuan
-              fill: false,
-              tension: 0.1,
-              pointRadius: 5,
-          }));
-
-          // Menangani kasus jika tidak ada data
-          if (labels.length === 0) {
-              labels.push('No Data Available');
-              datasets.push({
-                  label: 'Tidak Ada Data',
-                  data: [0],
-                  borderColor: 'gray',
-                  fill: false,
-                  tension: 0.1,
-                  pointRadius: 5,
-              });
-          }
-
-          // Render chart
-          const ctx = document.getElementById(chartId).getContext('2d');
-          new Chart(ctx, {
-              type: 'line',
-              data: {
-                  labels: labels,
-                  datasets: datasets
-              },
-              options: {
-                  responsive: true,
-                  scales: {
-                      x: {
-                          title: {
-                              display: true,
-                              text: 'Tanggal'
-                          }
-                      },
-                      y: {
-                          title: {
-                              display: true,
-                              text: 'Tonase (Berat)'
-                          },
-                          beginAtZero: true
-                      }
-                  },
-                  maintainAspectRatio: false,
-                  plugins: {
-                      tooltip: {
-                          callbacks: {
-                              label: function(tooltipItem) {
-                                  return `${tooltipItem.raw} Tonase`;
-                              }
-                          }
-                      }
-                  }
-              }
-          });
-      }
 
 
 

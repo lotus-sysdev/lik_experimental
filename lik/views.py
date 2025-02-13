@@ -113,7 +113,9 @@ def dashboard(request):
             day=ExtractDay('tanggal'),
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
-        ).values('day', 'month', 'year', 'tujuan').annotate(count=Count('id'))
+        ).values('day', 'month', 'year', 'tujuan')\
+        .annotate(count=Count('id'))\
+        .order_by('year', 'month', 'day') 
 
         # Serialize the counts data
         kayu_counts_serialized = json.dumps(list(kayu_counts))

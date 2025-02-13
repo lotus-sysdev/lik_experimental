@@ -6,10 +6,10 @@ from .models import *
 class ReportForm(forms.ModelForm):
     def clean_DO(self):
         do = str(self.cleaned_data['DO']).replace(" ", "")  # Convert to string
-        if len(do) !=6:
+        if len(do) !=10:
             raise forms.ValidationError("Nomor DO harus terdiri dari 6 karakter.")
         # Add spaces in the appropriate positions
-        return ' '.join([do[:3], do[3:]])
+        return ' '.join([do[:5], do[5:]])
 
     def clean_no_tiket(self):
         no_tiket = str(self.cleaned_data['no_tiket']).replace(" ", "")
