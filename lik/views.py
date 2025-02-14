@@ -154,8 +154,8 @@ def dashboard(request):
 
         plat_data = reports.annotate(
             upper_plat=Upper('plat')
-        ).values(   
-            'upper_plat', 'sender__first_name', 'driver', 'tujuan'
+        ).values(
+            'upper_plat', 'tanggal', 'sender__first_name', 'driver', 'tujuan'
         ).annotate(count=Count('id')).order_by('upper_plat')
 
         grouped_plat_data = []
