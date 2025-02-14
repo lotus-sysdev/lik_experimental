@@ -1,12 +1,10 @@
-{% extends 'base.html' %} {% load auth_extras %} 
-{% block title %}Item Data Table{% endblock %} 
-
-{% block content %}
+{% extends 'base.html' %} {% load auth_extras %} {% block title %}Item Data
+Table{% endblock %} {% block content %}
 <style>
   .custom-dropdown {
-    background-color: royalblue; /* Background color */
+    background-color: royalblue;
     color: white;
-    border-color: royalblue; /* Border color */
+    border-color: royalblue;
   }
 </style>
 <h1>Item List</h1>
@@ -16,6 +14,7 @@
 >
   <div class="form-inline mb-2">
     <select id="columnFilter" class="form-control btn-info">
+      <option value="">Select Column</option>
       <option value="0">Upload Type</option>
       <option value="1">Tanggal Input</option>
       <option value="2">Tanggal Pesan</option>
@@ -23,14 +22,12 @@
       <option value="4">PIC</option>
       <option value="5">SKU</option>
       <option value="6">Nama</option>
-      <option value="7">Kategori</option>
+      <option value="7">Category</option>
       <option value="8">Catatan</option>
-      <option value="9">Jumlah</option>
-      <option value="10">Harga</option>
-      <option value="12">Link</option>
+      <option value="9">Quantity</option>
+      <option value="10">Price</option>
       <option value="13">Approved</option>
-
-      <!-- Add more options for additional columns -->
+      <!-- Tambahkan opsi lain jika diperlukan -->
     </select>
     <input
       type="text"
@@ -51,12 +48,20 @@
 
   <div class="form-inline mb-2">
     <label class="mr-2" for="startDate">Start Date:</label>
-    <input type="date" id="startDate" class="form-control mr-1" style="width: 15%;" />
+    <input
+      type="date"
+      id="startDate"
+      class="form-control mr-1"
+      style="width: 15%"
+    />
     <label class="mr-2" for="endDate">End Date:</label>
-    <input type="date" id="endDate" class="form-control mr-1" style="width: 15%;" />
-
+    <input
+      type="date"
+      id="endDate"
+      class="form-control mr-1"
+      style="width: 15%"
+    />
     <button id="filterButton" class="btn btn-primary">Apply</button>
-
     <select id="dateRange" class="form-control ml-2 btn-info">
       <option value="">Select Date Range</option>
       <option value="7">Last 7 days</option>
@@ -67,7 +72,6 @@
       <option value="365">Last 1 year (365 days)</option>
       <option value="730">Last 2 years (730 days)</option>
     </select>
-
     <button id="resetButton" class="btn btn-secondary ml-1">Reset</button>
   </div>
 
@@ -91,9 +95,7 @@
       <th>Edit/Delete</th>
     </tr>
   </thead>
-  <tbody>
-    
-  </tbody>
+  <tbody></tbody>
 </table>
 <a href="/add_item">Add Item</a><br />
 
@@ -104,27 +106,27 @@
     table = new DataTable("#itemTable", {
       processing: true,
       serverSide: true,
+      searching: false,
       ajax: {
-        url: "{% url 'item_list' %}",
+        url: "{% url 'display_item' %}",
         type: "GET",
-        data: function(d) {
-          // Add the extra filters from the frontend
-          d.start_date = $('#startDate').val();        // Start date filter
-          d.end_date = $('#endDate').val();            // End date filter
+        data: function (d) {
+          d.search_value = $("#columnSearch").val();
+          d.column_filter = $("#columnFilter").val();
+          d.start_date = $("#startDate").val();
+          d.end_date = $("#endDate").val();
+          console.log("Sending Params:", d);
         },
-        dataSrc: function(json) {
-          // Log the JSON response to check if data is being received correctly
-          // console.log(json);
+        dataSrc: function (json) {
           return json.data;
-        }
+        },
       },
-      select: {
-        style: "multi",
-      },
+      select: { style: "multi" },
+      // Sesuaikan columnDefs jika diperlukan (misal: formatting price atau gambar)
       columnDefs: [
         {
           targets: 10,
-          render: function (data, type, row) {
+          render: function (data, type) {
             if (type === "display") {
               if (data.startsWith("IDR")) {
                 // Replace commas with periods and periods with commas
@@ -132,7 +134,7 @@
                   .replace(/,/g, "#")
                   .replace(/\./g, ",")
                   .replace(/#/g, ".");
-                data = data.substr(0, data.indexOf(",")); // Get substring until the first comma
+                data = data.substr(0, data.indexOf(","));
                 data = data.substr(0, 3) + " " + data.substr(3);
                 return data;
               } else if (data.startsWith("$")) {
@@ -149,23 +151,18 @@
         },
         {
           targets: [4],
-          render: function (data, type, row, meta) {
-            if (type === "display") {
-              if (data && data.includes("-")) {
-                var picName = data.split("-")[1]; // Extract "John" part
-                return picName.trim(); // Return the trimmed name
-              } else {
-                return data; // Return the original data if it's null or doesn't contain a hyphen
-              }
+          render: function (data, type) {
+            if (type === "display" && data && data.includes("-")) {
+              return data.split("-")[1].trim();
             }
             return data;
           },
         },
         {
-          targets: 13,  // Assuming the "is_approved" column is at index 13
-          render: function (data, type, row) {
+          targets: 13,
+          render: function (data, type) {
             if (type === "display") {
-              return data === 'Yes' ? 'Yes' : 'No';
+              return data === "Yes" ? "Yes" : "No";
             }
             return data;
           },
@@ -185,28 +182,25 @@
         { visible: true, width: "9%" },
         null,
         null,
-        { visible: true, width: "9%" },  // Ensure the "is_approved" column is visible
+        { visible: true, width: "9%" },
         null,
       ],
-      createdRow: function(row, data, dataIndex) {
-        if (data[13] === 'Yes') {  // Assuming the "is_approved" column is at index 13
-          $(row).css('background-color', '#ccffc7');  // Apply green background color
+      createdRow: function (row, data) {
+        if (data[13] === "Yes") {
+          $(row).css("background-color", "#ccffc7");
         }
       },
       lengthMenu: [
         [10, 25, 50, 100, -1],
         [10, 25, 50, 100, "All"],
       ],
-      dom: 'Bfrtip',
+      dom: "Bfrtip",
       buttons: [
         {
           text: "PDF",
           extend: "print",
           className: "btn-primary",
-          exportOptions: {
-            columns: ":visible",
-            stripHtml: false,
-          },
+          exportOptions: { columns: ":visible", stripHtml: false },
         },
         {
           text: "Upload Excel",
@@ -224,18 +218,15 @@
           extend: "copy",
           text: "Copy",
           className: "btn-warning",
-          header: false, // Disable export header tabla
-          exportOptions: {
-            columns: [6, 10], // Select columns to be exported
-          },
+          header: false,
+          exportOptions: { columns: [6, 10] },
           title: null,
         },
         {
           text: "{% if request.user|has_group:'Admin' %} Approve {% endif %}",
           className: "btn-success",
           action: approveRows,
-          init: function (api, node, config) {
-            // Hide the button if the user is not in the Admin group
+          init: function (api, node) {
             if (isAdmin === "False") {
               $(node).addClass("d-none");
             }
@@ -255,16 +246,15 @@
       .rows(".selected")
       .data()
       .toArray()
-      .map((row) => row[5]); // Get SKUs of selected rows using DataTables API
-    selectedIDs.forEach(function (value) {
-      console.log("selected_ids[]:", value);
-    });
+      .map(function (row) {
+        return row[5];
+      });
     if (selectedIDs.length === 0) {
       alert("Please select at least one row to delete.");
       return;
     }
     if (confirm("Are you sure you want to delete the selected rows?")) {
-      const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0]
+      var csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0]
         .value;
       $.ajax({
         url: '{% url "delete_selected_rows_item" %}',
@@ -273,10 +263,8 @@
         dataType: "json",
         success: function (response) {
           if (response.success) {
-            // Reload or update the table after successful deletion
-            location.reload(); // Assuming you're using AJAX to populate the table
-            // Optionally, provide feedback to the user
             alert("Selected rows deleted successfully.");
+            location.reload();
           } else {
             alert("Error deleting selected rows: " + response.error);
           }
@@ -297,18 +285,15 @@
       .rows(".selected")
       .data()
       .toArray()
-      .map((row) => row[5]); // Get SKUs of selected rows using DataTables API
-    console.log(selectedIDs);
-    selectedIDs.forEach(function (value) {
-      console.log("selected_ids[]:", value);
-    });
+      .map(function (row) {
+        return row[5];
+      });
     if (selectedIDs.length === 0) {
       alert("Please select at least one row to approve.");
       return;
     }
-
     if (confirm("Are you sure you want to approve the selected rows?")) {
-      const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0]
+      var csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0]
         .value;
       $.ajax({
         url: '{% url "approve_selected_rows" %}',
@@ -317,10 +302,8 @@
         dataType: "json",
         success: function (response) {
           if (response.success) {
-            // Reload or update the table after successful deletion
-            location.reload(); // Assuming you're using AJAX to populate the table
-            // Optionally, provide feedback to the user
             alert("Selected rows approved successfully.");
+            location.reload();
           } else {
             alert("Error approving selected rows: " + response.error);
           }
@@ -335,166 +318,104 @@
   $(document).ready(function () {
     initializeDataTable();
 
-   // Set initial date range values
-    // var initialStartDate = formatDate(new Date(new Date().setDate(new Date().getDate() - 29))); // Default to last 30 days
-    // var initialEndDate = formatDate(new Date()); // Today's date
+    $("#startDate").val("");
+    $("#endDate").val("");
 
-    // Set the date inputs to the initial values
-    $('#startDate').val('');
-    $('#endDate').val('');
-
-    // Trigger initial date range filtering
-    // filterByDateRange(initialStartDate, initialEndDate);
-
-    $("#filterDuplicatesButton").on("click", function () {
-      filterDuplicates();
-    });
-
-    function filterDuplicates() {
-      var rows = table.rows().nodes(); // Get all rows in the DataTable
-
-      var uniqueRows = {}; // Object to store unique rows
-      var duplicateRows = []; // Array to store duplicate row nodes
-
-      // Iterate through each row
-      rows.each(function (index, row) {
-        var rowData = table.row(row).data(); // Get data for the current row
-        var rowDataStr = JSON.stringify(excludeColumns(rowData)); // Convert row data to a string for comparison
-
-        // Check if the row data already exists in the uniqueRows object
-        if (uniqueRows[rowDataStr]) {
-          // Duplicate row found, add both the current row and the original reference row to the duplicateRows array
-          duplicateRows.push(row);
-          duplicateRows.push(uniqueRows[rowDataStr]);
-        } else {
-          // Unique row, add it to the uniqueRows object
-          uniqueRows[rowDataStr] = row;
-        }
+    $("#searchButton")
+      .off("click")
+      .on("click", function () {
+        console.log("Search clicked. Value:", $("#columnSearch").val());
+        table.ajax.reload();
       });
 
-      // Hide all rows
-      table.rows().nodes().to$().hide();
-
-      // Show only duplicate rows and their corresponding original reference rows
-      table.rows(duplicateRows).nodes().to$().show();
-
-      table.draw();
-    }
-
-    // Function to exclude multiple columns from row data
-    function excludeColumns(rowData) {
-      var excludedColumns = [1, 5, 11, 13, 14]; // Specify the indices of columns to be excluded (e.g., column index 3 and 5)
-      var rowDataCopy = rowData.slice(); // Create a copy of the row data array
-
-      // Set excluded column values to null
-      for (var i = 0; i < excludedColumns.length; i++) {
-        var columnIndex = excludedColumns[i];
-        rowDataCopy[columnIndex] = null;
+    $("#columnSearch").on("keypress", function (e) {
+      if (e.which === 13) {
+        table.ajax.reload();
       }
-
-      return rowDataCopy;
-    }
-
-    $("#resetFilterDuplicatesBtn").on("click", function () {
-      resetFilterDuplicates();
-    });
-    // Trigger search on button click
-    $("#searchButton").on("click", function () {
-      columnSearch();
     });
 
-    // Reset search on button click
-    $("#resetButtonCol").on("click", function () {
-      resetSearch();
-    });
+    $("#resetButtonCol")
+      .off("click")
+      .on("click", function () {
+        $("#columnSearch").val("");
+        table.ajax.reload();
+      });
 
-    // Function to perform column-specific search
-    function columnSearch() {
-      var columnIndex = $("#columnFilter").val(); // Get the index of the selected column
-      var searchValue = $("#columnSearch").val().trim(); // Get the value of the search input and remove leading/trailing whitespace
-      table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
-    }
-    // Function to reset check duplicates button
-    function resetFilterDuplicates() {
-      // Show all rows
-      table.rows().nodes().to$().show();
+    $("#filterButton")
+      .off("click")
+      .on("click", function () {
+        var startDate = $("#startDate").val();
+        var endDate = $("#endDate").val();
+        $("#startDate").val(startDate);
+        $("#endDate").val(endDate);
+        table.ajax.reload();
+      });
 
-      table.draw();
-    }
+    $("#resetButton")
+      .off("click")
+      .on("click", function () {
+        $("#startDate").val("");
+        $("#endDate").val("");
+        $("#dateRange").val("");
+        $("#columnSearch").val("");
+        table.ajax.reload();
+      });
 
-    // Function to reset search
-    function resetSearch() {
-      $("#columnSearch").val(""); // Clear the search input
-      table.search("").columns().search("").draw(); // Clear all column-specific searches and redraw the table
-    }
-
-    $("#filterButton").click(function () {
-      var startDate = $("#startDate").val();
-      var endDate = $("#endDate").val();
-      filterByDateRange(startDate, endDate);
-    });
-
-    $("#resetButton").click(function () {
-      $("#startDate").val("");
-      $("#endDate").val("");
-      $("#dateRange").val("");
-      filterByDateRange("", "");
-    });
-
-    $("#dateRange").change(function () {
-      var dateRange = $(this).val();
-      var startDate = "";
-      var endDate = "";
-
-      // Calculate start and end dates based on selected range
-      if (dateRange === "7") {
-        endDate = formatDate(new Date()); // Today's date
-        startDate = formatDate(
-          new Date(new Date().setDate(new Date().getDate() - 6))
-        ); // Date 7 days ago
-      } else if (dateRange === "30") {
-        endDate = formatDate(new Date()); // Today's date
-        startDate = formatDate(
-          new Date(new Date().setDate(new Date().getDate() - 29))
-        ); // Date 30 days ago
-      } else if (dateRange === "60") {
-        endDate = formatDate(new Date()); // Today's date
-        startDate = formatDate(
-          new Date(new Date().setDate(new Date().getDate() - 59))
-        ); // Date 60 days ago
-      } else if (dateRange === "90") {
-        endDate = formatDate(new Date()); // Today's date
-        startDate = formatDate(
-          new Date(new Date().setDate(new Date().getDate() - 89))
-        ); // Date 90 days ago
-      } else if (dateRange === "365") {
-        endDate = formatDate(new Date()); // Today's date
-        startDate = formatDate(
-          new Date(new Date().setDate(new Date().getDate() - 364))
-        ); // Date 365 days ago
-      } else if (dateRange === "730") {
-        endDate = formatDate(new Date()); // Today's date
-        startDate = formatDate(
-          new Date(new Date().setDate(new Date().getDate() - 729))
-        ); // Date 730 days ago
-      } else if (dateRange === "ytd") {
-        endDate = formatDate(new Date()); // Today's date
-        startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year
-        startDate = formatDate(startDate);
-      }
-      filterByDateRange(startDate, endDate);
-    });
+    $("#dateRange")
+      .off("change")
+      .on("change", function () {
+        var dateRange = $(this).val();
+        var startDate = "";
+        var endDate = "";
+        if (dateRange === "7") {
+          endDate = formatDate(new Date());
+          startDate = formatDate(
+            new Date(new Date().setDate(new Date().getDate() - 6))
+          );
+        } else if (dateRange === "30") {
+          endDate = formatDate(new Date());
+          startDate = formatDate(
+            new Date(new Date().setDate(new Date().getDate() - 29))
+          );
+        } else if (dateRange === "60") {
+          endDate = formatDate(new Date());
+          startDate = formatDate(
+            new Date(new Date().setDate(new Date().getDate() - 59))
+          );
+        } else if (dateRange === "90") {
+          endDate = formatDate(new Date());
+          startDate = formatDate(
+            new Date(new Date().setDate(new Date().getDate() - 89))
+          );
+        } else if (dateRange === "365") {
+          endDate = formatDate(new Date());
+          startDate = formatDate(
+            new Date(new Date().setDate(new Date().getDate() - 364))
+          );
+        } else if (dateRange === "730") {
+          endDate = formatDate(new Date());
+          startDate = formatDate(
+            new Date(new Date().setDate(new Date().getDate() - 729))
+          );
+        } else if (dateRange === "ytd") {
+          endDate = formatDate(new Date());
+          startDate = formatDate(new Date(new Date().getFullYear(), 0, 1));
+        }
+        $("#startDate").val(startDate);
+        $("#endDate").val(endDate);
+        table.ajax.reload();
+      });
 
     function formatDate(date) {
       var year = date.getFullYear();
-      var month = ("0" + (date.getMonth() + 1)).slice(-2); // Months are zero-based
+      var month = ("0" + (date.getMonth() + 1)).slice(-2);
       var day = ("0" + date.getDate()).slice(-2);
       return year + "-" + month + "-" + day;
     }
 
     function filterByDateRange(startDate, endDate) {
-      $('#startDate').val(startDate);
-      $('#endDate').val(endDate);
+      $("#startDate").val(startDate);
+      $("#endDate").val(endDate);
       table.ajax.reload();
     }
   });
