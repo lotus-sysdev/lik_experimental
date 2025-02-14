@@ -60,12 +60,14 @@ def dashboard(request):
         plat_data = reports.annotate(
             upper_plat=Upper('plat')
         ).values(
-            'upper_plat', 'sender__first_name', 'driver', 'tujuan'
-        ).annotate(count=Count('id')).order_by('upper_plat')
+            'upper_plat', 'tanggal', 'sender__first_name', 'driver', 'tujuan'
+        ).annotate(count=Count('id')).order_by('upper_plat', 'tanggal')
 
         grouped_plat_data = []
         for key, group in groupby(plat_data, key=itemgetter('upper_plat')):
             group_list = list(group)
+            earliest_date = group_list[0]['tanggal']
+
             tujuan_counter = defaultdict(int)
 
             for item in group_list:
@@ -78,10 +80,9 @@ def dashboard(request):
                 'count': sum(item['count'] for item in group_list),
                 'tujuan': list(tujuan_counter.keys()),
                 'tujuan_count': dict(tujuan_counter),
-            })
+                'earliest_date': earliest_date.isoformat(),            })
 
-        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
-
+        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['earliest_date'])
         tonase_counts = reports.values(
             'kayu',
             day=ExtractDay('tanggal'),
@@ -124,12 +125,14 @@ def dashboard(request):
         plat_data = reports.annotate(
             upper_plat=Upper('plat')
         ).values(
-            'upper_plat', 'sender__first_name', 'driver', 'tujuan'
+            'upper_plat', 'tanggal', 'sender__first_name', 'driver', 'tujuan'
         ).annotate(count=Count('id')).order_by('upper_plat')
 
         grouped_plat_data = []
-        for key, group in groupby(plat_data, key=itemgetter('upper_plat')):
+        for key, group in groupby(plat_data, key=itemgetter('upper_plat', 'tanggal')):
             group_list = list(group)
+            earliest_date = group_list[0]['tanggal']  
+
             tujuan_counter = defaultdict(int)
 
             for item in group_list:
@@ -142,9 +145,11 @@ def dashboard(request):
                 'count': sum(item['count'] for item in group_list),
                 'tujuan': list(tujuan_counter.keys()),
                 'tujuan_count': dict(tujuan_counter),
+                'earliest_date': earliest_date.isoformat(),
+                
             })
 
-        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
+        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['earliest_date'])
         tonase_counts = Report.objects.annotate(
             'kayu',
             day=ExtractDay('tanggal'),
