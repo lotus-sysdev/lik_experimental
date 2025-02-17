@@ -31,6 +31,7 @@
             <option value="12">Lokasi Potong</option>
             <option value="13">Pabrik Tujuan</option>
             <option value="14">Tanggal Keluar</option>
+            <option value="15">Completed</option>
             <!-- Add more options for additional columns -->
           </select>
           <input
@@ -110,37 +111,47 @@
             <span class="font-weight-bold" id="uniquePlatCount"></span>
           </p>
         </div>
+        
+        {% if user_is_admin %}
+        <button class="btn btn-secondary" onclick="Transfer()">Approve transfer</button>
+        {% endif %}
 
-        <thead class="thead-light">
+        <br>
+        <thead class="thead-dark">
           <tr>
-            <th>Timestamp</th>
-            {% comment %} <th>ID</th> {% endcomment %}
-            <th>Sender</th>
-            <th>ID Tiket</th>
-            <th>Plat Nomor</th>
-            <th>Driver</th>
-            <th>No. PO</th>
-            <th>No. DO</th>
-            <th>No. Tiket Timbang</th>
-            <th>Jenis Kayu</th>
-            <th>Berat Netto (Kg)</th>
-            <th>Reject (Kg)</th>
-            <th>Lokasi Potong</th>
-            <th>Tujuan Pabrik</th>
-            <th>Tanggal Keluar</th>
-            <th>Completed</th>
-            <th>Foto</th>
-            <th>Ubah</th>
+              <th>Timestamp</th>
+              <th>Sender</th>
+              <th>ID Tiket</th>
+              <th>Plat Nomor</th>
+              <th>Driver</th>
+              <th>No. PO</th>
+              <th>No. DO</th>
+              <th>No. Tiket Timbang</th>
+              <th>Jenis Kayu</th>
+              <th>Berat Netto (Kg)</th>
+              <th>Reject (Kg)</th>
+              <th>Lokasi Potong</th>
+              <th>Tujuan Pabrik</th>
+              <th>Tanggal Keluar</th>
+              <th>Completed</th>
+              <th>Tanda Transfer</th> 
+              <th>Foto</th>
+              <th>Ubah</th>
           </tr>
-        </thead>
+      </thead>
+
         <tbody class="tbody">
           {% comment %} loaded by ajax {% endcomment %}
          
         </tbody>
       </table>
     </div>
+    <script src="https://cdn.datatables.net/select/3.0.0/js/dataTables.select.js"></script>
+
     <script>
       var table;
+      
+      
       function initializeDataTable() {
         table = new DataTable("#likTable", {
           processing: true,
@@ -155,8 +166,8 @@
             },
             dataSrc: function(json) {
               // Update the totals using jQuery
-              $('#totalBerat').text(json.total_berat);
-              $('#totalReject').text(json.total_reject);
+              $('#totalBerat').text(json.total_berat.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+              $('#totalReject').text(json.total_reject.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
               $('#uniquePlatCount').text(json.unique_plat_count);
               // console.log(json);
 
@@ -164,16 +175,16 @@
             }
           },
           columns: [
-            { data: "date_time", render: function(data) { return data ? new Date(data).toLocaleString() : 'None'; } },
-            { data: "sender__first_name", defaultContent: "None" },
+            { data: "date_time",orderable: true ,render: function(data) { return data ? new Date(data).toLocaleString() : 'None'; } },
+            { data: "sender__first_name", defaultContent: "None", orderable: true }, 
             { data: "tiketId" },
             { data: "plat", render: function(data) { return data ? data.toUpperCase() : 'None'; } },
             { data: "driver" },
-            { data: "PO" },
+            { data: "PO", render: function(data) { return  'PO/'+ data } },
             { data: "DO", render: function(data) { return data ? data.replace(/\s+/g, '') : 'None'; } },
             { data: "no_tiket" },
             { data: "kayu" },
-            { data: "berat", render: function(data) { return (data / 10).toFixed(1) + ' kg'; } }, 
+            { data: "berat", render: function(data) { return (data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' Kg' )} }, 
             { data: "reject", render: function(data) { return data + ' kg'; } },
             { data: "lokasi" },
             { data: "tujuan" },
@@ -182,27 +193,54 @@
             { 
               data: "completed", 
               render: function(data) {
-                return data; // Directly return 'Yes' or 'No' from the backend
+                  return data ? "Yes" : "No";  // Menampilkan "Yes" jika True, "No" jika False
               } 
             },
-            
-            { data: "foto", render: function(data, type, row) {
-                if (row.og_foto) {
-                  return '<a href="' + row.og_foto.url + '" target="_blank"><img src="' + row.foto.url + '" alt="' + row.id + '"/></a>';
-                } else if (row.foto) {
-                  return '<img src="' + row.foto.url + '" alt="' + row.id + '"/>';
-                } else {
-                  return 'None';
+            { 
+                data: "tanda_transaksi", 
+                render: function(data) {
+                    if (data) {
+                        var date = new Date(data);
+                        date.setHours(date.getHours() + 7);
+
+                        var day = ("0" + date.getDate()).slice(-2);
+                        var month = ("0" + (date.getMonth() + 1)).slice(-2);
+                        var year = date.getFullYear();
+                        var hours = ("0" + date.getHours()).slice(-2); // Updated hours
+                        var minutes = ("0" + date.getMinutes()).slice(-2);
+                        var seconds = ("0" + date.getSeconds()).slice(-2);
+
+                        return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}` + ' WIB';
+                    } else {
+                        return '-';
+                    }
                 }
-              }
+
+            },            
+            { data: "foto", render: function(data, type, row) {
+                  if (row.og_foto) {
+                    return '<a href="' + row.og_foto.url + '" target="_blank"><img src="' + row.foto.url + '" alt="' + row.id + '"/></a>';
+                  } else if (row.foto) {
+                    return '<img src="' + row.foto.url + '" alt="' + row.id + '"/>';
+                  } else {
+                    return 'None';
+                  }
+                }
             },
+              
             { data: "id", render: function(data) { return '<a href="/api/report_detail/' + data + '">View</a>'; } },
           ],
           createdRow: function(row, data, dataIndex) {
-            if (data.completed === 'Yes') {  // Check if the "completed" column is "Yes"
-              $(row).css('background-color', '#ccffc7');  // Apply green background color
-            }
+              if (data.completed === true) {   
+                  $(row).css('background-color', '#ccffc7');   
+              } else if (data.completed === false ) {
+                  $(row).css('background-color', '#f8d7da');   
+              }
           },
+          order: [[1, "desc"]],  
+          columnDefs: [
+              { targets: [16], orderable: false },   
+          ],
           select: {
             style: "multi",
           },
@@ -228,8 +266,39 @@
                     className: "btn-danger",
                     action: deleteSelectedRows,
                   },
+                  {
+                      text: "Complete",
+                      className: "btn-success",
+                      action: function(e, dt, node, config) {
+                          var selectedRows = table.rows({ selected: true }).data();
+                          var ids = selectedRows.map(function(row) { return row.id; }).toArray();
+
+                          if (ids.length > 0) {
+                              updateStatus(ids, 'Yes');  // Send request to mark as completed
+                          } else {
+                              alert("Please select rows to mark as completed.");
+                          }
+                      }
+                  },
+                  {
+                      text: "Un-Completed",
+                      className: "btn-warning",
+                      action: function(e, dt, node, config) {
+                          var selectedRows = table.rows({ selected: true }).data();
+                          var ids = selectedRows.map(function(row) { return row.id; }).toArray();
+                          if (ids.length > 0) {
+                              updateStatus(ids, 'No');  // Send request to mark as un-completed
+                          } else {
+                              alert("Please select rows to mark as un-completed.");
+                          }
+                      }
+                  },
+                  
+
                   { extend: "colvis", className: "btn-info" },
                 ],
+                select: true,
+                
                 dom: {
                   button: {
                     className: "btn",
@@ -239,7 +308,84 @@
             },
           },
         });
+
+        
       }
+
+      var userIsAdmin = "{{ user_is_admin|yesno:'True,False' }}" === "True";
+      function Transfer() {
+          if (!userIsAdmin) {
+              alert("Anda tidak memiliki akses untuk mengaprove.");
+              return;
+          }
+
+          var selectedRows = table.rows({ selected: true }).data();
+          var ids = selectedRows.map(function(row) { return row.id; }).toArray();
+          if (ids.length > 0) {
+              approveTransfer(ids);  // Kirim permintaan untuk mengupdate datetime
+          } else {
+              alert("Please select rows to approve transfer.");
+          }
+      }      
+      
+      function approveTransfer(ids) {
+            $.ajax({
+                url: "{% url 'approve_transfer' %}",  // URL untuk mengirim permintaan ke backend
+                method: "POST",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    ids: ids
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Transfer approved and timestamp updated.');
+                        table.ajax.reload();  // Reload DataTable untuk menampilkan data terbaru
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Something went wrong. Please try again.');
+                }
+            });
+        }
+
+     // Function to update status of selected rows
+      function updateStatus(ids, status) {
+          var statusBoolean = status === 'Yes' ? true : false;
+
+          $.ajax({
+              url: '{% url "update_completed_status" %}',
+              method: 'POST',
+              data: {
+                  ids: ids,
+                  status: statusBoolean,  // Send True or False
+                  csrfmiddlewaretoken: '{{ csrf_token }}'
+              },
+              success: function(response) {
+                  // Update rows in DataTables after status is updated
+                  table.rows({ selected: true }).every(function(rowIdx, tableLoop, rowLoop) {
+                      var rowData = this.data();
+                      rowData.completed = statusBoolean;  // Update the "completed" field to True or False
+                      this.invalidate();  // Mark the row as invalid so DataTables updates it
+
+                      // Update background color based on the new 'completed' value
+                      if (rowData.completed === true) {
+                          $(this.node()).css('background-color', '#ccffc7');  // Green for 'Completed'
+                      } else {
+                          $(this.node()).css('background-color', '#f8d7da');  // Red for 'Pending'
+                      }
+                  });
+                  alert("Status updated successfully!");
+              },
+              error: function(xhr, status, error) {
+                  alert("Error updating status: " + error);
+              }
+          });
+      }
+
+
+
       
       function deleteSelectedRows() {
         if (!table) {
@@ -284,7 +430,9 @@
       }
 
       $(document).ready(function () {
+        
         initializeDataTable();
+        
         calculateStats();
 
         var searchTimeout;

@@ -28,6 +28,18 @@
       flex-direction: column;
       /* padding: 20px; */
     }
+    .cardy {
+      display: grid;
+      width: 80%; /* Lebarkan hingga 80% dari parent */
+      max-width: 900px; /* Maksimal lebar card */
+      margin: auto; /* Tengahkan card */
+      
+    }
+
+    .card-body {
+      height: 400px; /* Tambahkan tinggi agar chart lebih besar */
+    }
+
     .card-header {
       flex: 0 1 auto;
     }
@@ -157,60 +169,62 @@
     </div>
   </div>
 
-  <div class="dashboard-grid">
-    <div class="card">
-      <h4 class="text-center card-header">Tonase / Bulan</h4>
-      <div class="card-body">
-        <canvas id="tonaseMonthlyChart"></canvas>
+  <div class="container-fluid">
+    <div class="dashboard-grid">
+      <!-- Tonase / Bulan -->
+      <div class="card">
+        <h4 class="text-center card-header">Tonase / Bulan</h4>
+        <div class="card-body">
+          <canvas id="tonaseMonthlyChart"></canvas>
+        </div>
       </div>
-    </div>
-    <div class="card">
-      <h4 class="text-center card-header">
-        Jumlah Kendaraan Berdasarkan Jenis Kayu
-      </h4>
-      <div class="card-body">
-        <canvas id="vehicleKayuChart"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <h4 class="text-center card-header">
-        Jumlah Kendaraan berdasarkan Tujuan
-      </h4>
-      <div class="card-body">
-        <canvas id="uniqueVehicleChart"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <h4 class="text-center card-header">Distribusi Kendaraan</h4>
-      <div class="card-body scrollable-body">
-        <!-- <canvas id="platBarChart"></canvas> -->
-        {% for plat in plat_counts %}
-        <ul class="list-group">
-          <span
-            class="tt"
-            data-bs-placement="top"
-            title='Senders: {{ plat.senders|join:", " }} | Drivers: {{ plat.drivers|join:", " }}'
-          >
-            <li class="list-group-item">
-              <div class="row">
-                <!-- Left Section: upper_plat and count -->
-                <div class="col-md-3">
-                  <div class="font-weight-bold">{{ plat.upper_plat }}</div>
-                  <div>{{ plat.count }} Pengiriman</div>
-                </div>
 
-                <!-- Middle Section: senders and drivers -->
-                <div class="col-md-5">
-                  <div class="font-weight-bold">Senders:</div>
-                  <div>{{ plat.senders|join:", " }}</div>
-                  <div class="font-weight-bold">Drivers:</div>
-                  <div>{{ plat.drivers|join:", " }}</div>
-                </div>
+      <!-- Jumlah Kendaraan Berdasarkan Jenis Kayu -->
+      <div class="card">
+        <h4 class="text-center card-header">Jumlah Kendaraan Berdasarkan Jenis Kayu</h4>
+        <div class="card-body">
+          <canvas id="vehicleKayuChart"></canvas>
+        </div>
+      </div>
 
-                <!-- Right Section: tujuan_count -->
-                <div class="col-md-4">
-                  <div class="font-weight-bold">Tujuan:</div>
-                  <div>
+      <!-- Jumlah Kendaraan berdasarkan Tujuan -->
+      <div class="card">
+        <h4 class="text-center card-header">Jumlah Kendaraan berdasarkan Tujuan</h4>
+        <div class="card-body">
+          <canvas id="uniqueVehicleChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Distribusi Kendaraan -->
+      <div class="card">
+        <h4 class="text-center card-header">Distribusi Kendaraan</h4>
+        <div class="card-body scrollable-body">
+          {% for plat in plat_counts %}
+          <ul class="list-group">
+            <span
+              class="tt"
+              data-bs-placement="top"
+              title='Senders: {{ plat.senders|join:", " }} | Drivers: {{ plat.drivers|join:", " }}'
+            >
+              <li class="list-group-item">
+                <div class="row">
+                  <!-- Left Section: upper_plat and count -->
+                  <div class="col-md-3">
+                    <div class="font-weight-bold">{{ plat.upper_plat }}</div>
+                    <div>{{ plat.count }} Pengiriman</div>
+                  </div>
+
+                  <!-- Middle Section: senders and drivers -->
+                  <div class="col-md-5">
+                    <div class="font-weight-bold">Senders:</div>
+                    <div>{{ plat.senders|join:", " }}</div>
+                    <div class="font-weight-bold">Drivers:</div>
+                    <div>{{ plat.drivers|join:", " }}</div>
+                  </div>
+
+                  <!-- Right Section: tujuan_count -->
+                  <div class="col-md-4">
+                    <div class="font-weight-bold">Tujuan:</div>
                     <ul class="list-unstyled">
                       {% for tujuan, count in plat.tujuan_count.items %}
                       <li>{{ tujuan }}: {{ count }}</li>
@@ -218,26 +232,41 @@
                     </ul>
                   </div>
                 </div>
-              </div>
-            </li>
-          </span>
-        </ul>
-        {% endfor %}
+              </li>
+            </span>
+          </ul>
+          {% endfor %}
+        </div>
       </div>
-    </div>
-    <div class="card">
-      <h4 class="text-center card-header">Distribusi Sender</h4>
-      <div class="card-body">
-        <canvas id="senderPieChart"></canvas>
+
+      <!-- Distribusi Sender -->
+      <div class="card">
+        <h4 class="text-center card-header">Distribusi Sender</h4>
+        <div class="card-body">
+          <canvas id="senderPieChart"></canvas>
+        </div>
       </div>
-    </div>
-    <div class="card">
-      <h4 class="text-center card-header">Distribusi Jenis Kayu</h4>
-      <div class="card-body">
-        <canvas id="kayuPieChart"></canvas>
+
+      <!-- Distribusi Jenis Kayu -->
+      <div class="card">
+        <h4 class="text-center card-header">Distribusi Jenis Kayu</h4>
+        <div class="card-body">
+          <canvas id="kayuPieChart"></canvas>
+        </div>
+      </div>
+    </div> <!-- END .dashboard-grid -->
+
+    <!-- 🔹 Card Baru di Luar Dashboard Grid -->
+    <div class="container mt-4">
+      <div class="card">
+        <h4 class="text-center card-header">Distribusi Supplier</h4>
+        <div class="card-body">
+          <canvas id="TonaseLineChart"></canvas>
+        </div>
       </div>
     </div>
   </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -294,6 +323,12 @@
         "{{ unique_vehicle_counts | escapejs }}"
       );
 
+      var dmy_tujuan = JSON.parse(
+        "{{ data_AllTujuan_counts | escapejs}}"
+      )
+
+      
+
       renderColumnChart(
         "uniqueVehicleChart",
         uniqueVehicleCounts,
@@ -325,7 +360,125 @@
         endDate,
         "Total Kendaraan"
       );
+      
+      
+      renderTonaseChart('TonaseLineChart', "{{ sender_name }}", tonaseCounts, startDate, endDate, dmy_tujuan);
     });
+
+   
+
+    function renderTonaseChart(chartId, sender, tonaseCounts, startDate, endDate, dmy_tujuan) {
+        console.log(sender, tonaseCounts, dmy_tujuan);
+
+        const groupedData = {};
+
+        // Loop untuk mengelompokkan tonase berdasarkan tanggal
+        tonaseCounts.forEach(item => {
+            const dateKey = `${item.year}-${item.month}-${item.day}`;
+
+            // Cari tujuan berdasarkan tanggal dari dmy_tujuan
+            const matchedDestination = dmy_tujuan.find(dest => 
+                dest.year === item.year && dest.month === item.month && dest.day === item.day
+            );
+
+            const tujuan = matchedDestination ? matchedDestination.tujuan : "Tidak Diketahui"; 
+
+            // Jika belum ada entry, inisialisasi
+            if (!groupedData[dateKey]) {
+                groupedData[dateKey] = {
+                    day: item.day,
+                    month: item.month,
+                    year: item.year,
+                    totalBerat: 0,
+                    tujuan: {}
+                };
+            }
+
+            // Tambahkan berat tonase ke tanggal yang sesuai
+            groupedData[dateKey].totalBerat += item.berat;
+
+            // Simpan data per tujuan
+            if (!groupedData[dateKey].tujuan[tujuan]) {
+                groupedData[dateKey].tujuan[tujuan] = 0;
+            }
+            groupedData[dateKey].tujuan[tujuan] += item.berat;
+        });
+
+        // Urutkan tanggal ASCENDING (lama ke baru, kiri ke kanan)
+        const sortedDates = Object.keys(groupedData).sort((a, b) => {
+            const [yearA, monthA, dayA] = a.split('-').map(Number);
+            const [yearB, monthB, dayB] = b.split('-').map(Number);
+            return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
+        });
+
+        const labels = [];
+        const datasetMap = {};
+
+        sortedDates.forEach(dateKey => {
+            const group = groupedData[dateKey];
+            const formattedDate = `${group.day}-${group.month}-${group.year}`;
+            labels.push(formattedDate);
+
+            Object.keys(group.tujuan).forEach(tujuan => {
+                if (!datasetMap[tujuan]) {
+                    datasetMap[tujuan] = [];
+                }
+                datasetMap[tujuan].push(group.tujuan[tujuan]);
+            });
+        });
+
+        const datasets = Object.keys(datasetMap).map((tujuan, index) => ({
+            label: `Tonase ${tujuan}`,
+            data: datasetMap[tujuan],
+            borderColor: `hsl(${index * 60}, 70%, 50%)`,
+            fill: false,
+            tension: 0.1,
+            pointRadius: 5,
+        }));
+
+        if (labels.length === 0) {
+            labels.push('No Data Available');
+            datasets.push({
+                label: 'Tidak Ada Data',
+                data: [0],
+                borderColor: 'gray',
+                fill: false,
+                tension: 0.1,
+                pointRadius: 5,
+            });
+        }
+
+        const ctx = document.getElementById(chartId).getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Tanggal' } },
+                    y: { title: { display: true, text: 'Tonase (Berat)' }, beginAtZero: true }
+                },
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.raw} Tonase`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
+
+
+
 
     function renderPieChart(canvasId, data, labelKey, chartLabel) {
       var labels = [];
@@ -504,11 +657,13 @@
       endDate,
       dataType
     ) {
-      // console.log("Start Date:", startDate);
-      // console.log("End Date:", endDate);
+       console.log("Start Date:", startDate);
+       console.log("End Date:", endDate);
+       console.log("data:", data);
 
       var uniqueLabels = [];
       var uniqueColors = {};
+
 
       // Extract unique labels and assign colors
       data.forEach(function (item, index) {
@@ -522,7 +677,7 @@
           label = item.tujuan;
         }
         count = item.count;
-        console.log(item);
+        // console.log(item);
 
         if (!uniqueLabels.includes(label)) {
           uniqueLabels.push(label);

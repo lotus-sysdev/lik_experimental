@@ -24,17 +24,14 @@ from django.contrib import messages
 from django.core import serializers
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-from django.db.models import Prefetch, Count, Sum, Q
+from django.db.models import Prefetch, Count, Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import redirect, render, get_object_or_404
 from django.db.models.functions import ExtractDay, ExtractMonth, ExtractYear, Upper
-
 from datetime import datetime, timedelta
-from django.db.models import Q
-from django.core.paginator import Paginator
 
 
 # -------------------- Placeholder for homepage --------------------#
@@ -384,109 +381,164 @@ def display_supplier(request):
 
 @login_required
 @GA_required
-def display_item(request):
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        draw = int(request.GET.get('draw', 1))
-        start = int(request.GET.get('start', 0))
-        length = int(request.GET.get('length', 10))
-        
-        # Ambil nilai pencarian global dan filter kolom (dropdown)
-        search_value = request.GET.get('search_value', request.GET.get('search[value]', ''))
-        column_filter = request.GET.get('column_filter', '')
-        
-        # Ambil nilai filter tanggal
-        start_date_str = request.GET.get('start_date', '')
-        end_date_str = request.GET.get('end_date', '')
-        
-        queryset = Items.objects.all()
-        
-        # Filter berdasarkan rentang tanggal (menggunakan field tanggal_pemesanan)
-        if start_date_str and end_date_str:
-            try:
-                start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-                end_date   = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-                queryset = queryset.filter(tanggal_pemesanan__gte=start_date,
-                                           tanggal_pemesanan__lte=end_date)
-            except ValueError:
-                return JsonResponse({'error': 'Invalid date format'}, status=400)
-        
-        # Filter pencarian
-        if search_value:
-            if column_filter:
-                mapping = {
-                    '0': 'upload_type',
-                    '1': 'Tanggal',             
-                    '2': 'tanggal_pemesanan',   
-                    '3': 'customer__nama_pt',  
-                    '4': 'pic__nama',          
-                    '5': 'SKU',
-                    '6': 'nama',
-                    '7': 'category__name',
-                    '8': 'catatan',
-                    '9': 'quantity',
-                    '10': 'price',
-                    '13': 'is_approved',
-                }
-                field = mapping.get(column_filter)
-                if field:
-                    if column_filter in ['1', '2']:
-                        try:
-                            date_value = datetime.strptime(search_value, '%Y-%m-%d').date()
-                            queryset = queryset.filter(**{f"{field}": date_value})
-                        except ValueError:
-                            queryset = queryset.none()
-                    else:
-                        filter_kwargs = {f"{field}__icontains": search_value}
-                        queryset = queryset.filter(**filter_kwargs)
-                else:
-                    queryset = queryset.filter(Q(nama__icontains=search_value) | Q(SKU__icontains=search_value))
-            else:
-                queryset = queryset.filter(Q(nama__icontains=search_value) | Q(SKU__icontains=search_value))
-        
-        total_records = queryset.count()
-        queryset = queryset.order_by('-tanggal_pemesanan')
-        
-        paginator = Paginator(queryset, length)
-        page_number = (start // length) + 1
-        page = paginator.get_page(page_number)
-        
-        data = []
-        for item in page:
-            detail_url = reverse("item_detail", args=[item.SKU])
-            sumber_links = ' '.join([
-                f'<a href="{sumber.url}">{sumber.url[:20]}{"..." if len(sumber.url) > 20 else ""}</a>'
-                for sumber in item.itemsumber_set.all() if sumber.url
-            ]) or 'None'
-            
-            row = [
-                item.upload_type,
-                item.Tanggal.strftime('%Y/%m/%d') if item.Tanggal else 'None',
-                item.tanggal_pemesanan.strftime('%Y/%m/%d') if item.tanggal_pemesanan else 'None',
-                str(item.customer) if item.customer else '',
-                str(item.pic) if item.pic else '',
-                item.SKU,
-                item.nama,
-                item.catatan or '',
-                item.category.name if item.category else '',
-                f"{item.quantity} {item.unit}",
-                str(item.price),
-                f'<img src="{item.gambar.url}" alt="{item.nama}" />' if item.gambar else 'No Image',
-                sumber_links,
-                'Yes' if item.is_approved else 'No',
-                f'<a href="{detail_url}">View</a>'
-            ]
-            data.append(row)
-        
-        response = {
-            'draw': draw,
-            'recordsTotal': total_records,
-            'recordsFiltered': total_records,
-            'data': data,
-        }
-        
-        return JsonResponse(response)
+def item_list(request):
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_column = request.GET.get('search_col')
+    search_value = request.GET.get('search_val')
+
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
     
+    items = Items.objects.all()
+
+    # Date range filtering
+    if start_date_str and end_date_str:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
+        items = items.filter(tanggal_pemesanan__range=[start_date, end_date])
+
+    # Define the mapping outside the conditional block
+    mapping = {
+        '0': 'upload_type',
+        '1': 'Tanggal',
+        '2': 'tanggal_pemesanan',
+        '3': 'customer__nama_pt',
+        '4': 'pic__nama',
+        '5': 'SKU',
+        '6': 'nama',
+        '7': 'category__name',
+        '8': 'catatan',
+        '9': 'quantity',
+        '10': 'price',
+        '13': 'is_approved',
+    }
+
+    # Column-based search
+    if search_value:
+        if search_column:
+            field = mapping.get(search_column)
+            if field:
+                if search_column in ['1', '2']:
+                    try:
+                        date_value = datetime.strptime(search_value, '%Y-%m-%d').date()
+                        items = items.filter(**{f"{field}": date_value})
+                    except ValueError:
+                        items = items.none()
+                else:
+                    filter_kwargs = {f"{field}__icontains": search_value}
+                    items = items.filter(**filter_kwargs)
+            else:
+                items = items.filter(Q(nama__icontains=search_value) | Q(SKU__icontains=search_value))
+        else:
+            items = items.filter(Q(nama__icontains=search_value) | Q(SKU__icontains=search_value))
+
+    # Ordering
+    order_column_index = int(request.GET.get('order[0][column]', 2))  # Default column to sort by is column 2 (tanggal_pemesanan)
+    order_direction = request.GET.get('order[0][dir]', 'desc')  # Default direction is descending
+    order_column = mapping.get(str(order_column_index), 'tanggal_pemesanan')
+    if order_direction == 'asc':
+        items = items.order_by(order_column)
+    else:
+        items = items.order_by(f'-{order_column}')
+
+    # Pagination
+    paginator = Paginator(items, length)
+    page_number = (start // length) + 1
+    page = paginator.get_page(page_number)
+
+    # Serialize data
+    data = []
+    for item in page:
+        item_detail_url = reverse('item_detail', args=[item.SKU])
+        data.append([
+            item.upload_type,
+            item.Tanggal.strftime('%Y/%m/%d') if item.Tanggal else 'None',
+            item.tanggal_pemesanan.strftime('%Y/%m/%d') if item.tanggal_pemesanan else 'None',
+            str(item.customer) if item.customer else 'None',
+            str(item.pic) if item.pic else 'None',
+            item.SKU,
+            item.nama,
+            item.catatan if item.catatan else 'None',
+            item.category.name if item.category else 'None',
+            f"{item.quantity} {item.unit}",
+            str(item.price),
+            f'<img src="{item.gambar.url}" alt="{item.nama}" width="50" height="50" />' if item.gambar else 'None',
+            ' '.join([f'<a href="{sumber.url}">{sumber.url[:20]}{"..." if len(sumber.url) > 20 else ""}</a>' for sumber in item.itemsumber_set.all() if sumber.url]) or 'None',
+            'Yes' if item.is_approved else 'No',
+            f'<a href="{item_detail_url}">View</a>'
+        ])
+
+    # Prepare response
+    response = {
+        'draw': draw,
+        'recordsTotal': Items.objects.count(),
+        'recordsFiltered': items.count(),
+        'data': data,
+    }
+
+    return JsonResponse(response)
+
+def display_item(request):
     return render(request, 'item/display_item.html')
+
+
+def format_catatan(text):
+    
+    return text.replace("\n", "<br><br>")
+
+def export_pdf_view(request):
+    if request.method == "POST":
+        try:
+            # Parsing data JSON dari request body
+            data = json.loads(request.body)
+            selected_data = data.get("data", [])
+            visible_columns = data.get("columns", [])
+
+            ## DEBUGGING PURPOSE CHECKING CATATAN 
+            # **Cari indeks kolom "Catatan"**
+            # try:
+            #     catatan_index = visible_columns.index("Catatan")  # Cari posisi kolom "Catatan"
+            # except ValueError:
+            #     catatan_index = -1  # Jika tidak ditemukan, set -1
+
+            # # **Cek apakah kolom "Catatan" ada**
+            # if catatan_index != -1:
+            #     catatan_values = [row[catatan_index] for row in selected_data]  # Ambil hanya data di kolom "Catatan"
+            #     print("Kolom Catatan:", catatan_values)  # Debug: tampilkan data
+            # else:
+            #     print("Kolom 'Catatan' tidak ditemukan dalam data yang dikirim.")
+
+
+
+
+            if not selected_data or not visible_columns:
+                return JsonResponse({"error": "Data tidak valid"}, status=400)
+
+            # Cari indeks kolom "Catatan"
+            try:
+                catatan_index = visible_columns.index("Catatan")
+            except ValueError:
+                catatan_index = -1
+
+            # Format hanya kolom "Catatan"
+            if catatan_index != -1:
+                for row in selected_data:
+                    row[catatan_index] = format_catatan(row[catatan_index])
+
+            # Simpan data ke session agar bisa diakses di export_pdf.html
+            request.session["export_data"] = selected_data
+            request.session["export_columns"] = visible_columns
+
+            return JsonResponse({"pdf_url": reverse('export_pdf_page')})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Format JSON tidak valid"}, status=400)
+
+    # Untuk GET, render halaman PDF
+    return render(request, "export_pdf.html")
+
 
 
 # -------------------- Customer Functions -------------------- #

@@ -29,7 +29,9 @@ from django.http import JsonResponse
 from django.db.models import Count, Sum
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
+from django.views.decorators.csrf import csrf_exempt
+from pytz import timezone as pytz_timezone
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
@@ -53,6 +55,12 @@ def dashboard(request):
             reports = reports.filter(sender__username=sender)
         if start_date and end_date:
             reports = reports.filter(tanggal__range=[start_date, end_date])
+
+
+        sender_name = "All Senders" 
+        if sender:
+            sender = User.objects.get(username=sender)
+            sender_name = sender.first_name  
 
         kayu_counts = reports.values('kayu').annotate(count=Count('id'))
         sender_counts = reports.values('sender__first_name').annotate(count=Count('id'))
@@ -102,6 +110,13 @@ def dashboard(request):
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
         ).annotate(count=Count('upper_plat', distinct=True))
+        data_AllTujuan_counts = reports.values(
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).values('day', 'month', 'year', 'tujuan')\
+        .annotate(count=Count('id'))\
+        .order_by('year', 'month', 'day') 
 
         # Serialize the counts data
         kayu_counts_serialized = json.dumps(list(kayu_counts))
@@ -110,17 +125,33 @@ def dashboard(request):
         tonase_counts_serialized = json.dumps(list(tonase_counts))
         unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
         vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
+        data_dmy_tujuan = json.dumps(list(data_AllTujuan_counts))
 
         total_reports = reports.count()
         total_revised_reports = reports.filter(tiketId__icontains="R").count()
         total_tonase = reports.aggregate(total=Sum('berat'))['total'] or 0
         total_rejects = reports.aggregate(total=Sum('reject'))['total'] or 0
         total_unique_vehicles = reports.annotate(upper_plat=Upper('plat')).values('plat').distinct().count()
+        # tonase_counts = reports.annotate(
+        #     day=ExtractDay('tanggal'),
+        #     month=ExtractMonth('tanggal'),
+        #     year=ExtractYear('tanggal')
+        # ).values('day', 'month', 'year').annotate(
+        #     total_berat=Sum('berat')
+        # ).order_by('year', 'month', 'day')
+
+        # tonase_counts_serialized = json.dumps(list(tonase_counts))
+        
 
     else: 
         reports = Report.objects.all()
         kayu_counts = Report.objects.values('kayu').annotate(count=Count('id'))
         sender_counts = Report.objects.values('sender__first_name').annotate(count=Count('id'))
+
+        sender_name = "All Senders"  
+        if sender:
+            sender = User.objects.get(username=sender)
+            sender_name = sender.first_name 
 
         plat_data = reports.annotate(
             upper_plat=Upper('plat')
@@ -169,6 +200,11 @@ def dashboard(request):
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
         ).annotate(count=Count('upper_plat', distinct=True))
+        data_AllTujuan_counts = reports.values(
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).values('day', 'month', 'year', 'tujuan').annotate(count=Count('id'))
 
 
         kayu_counts_serialized = json.dumps(list(kayu_counts))
@@ -177,6 +213,17 @@ def dashboard(request):
         tonase_counts_serialized = json.dumps(list(tonase_counts))
         unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
         vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
+        data_dmy_tujuan = json.dumps(list(data_AllTujuan_counts))
+        # tonase_counts = reports.annotate(
+        #     day=ExtractDay('tanggal'),
+        #     month=ExtractMonth('tanggal'),
+        #     year=ExtractYear('tanggal')
+        # ).values('day', 'month', 'year').annotate(
+        #     total_berat=Sum('berat')
+        # ).order_by('year', 'month', 'day')
+
+       
+        # tonase_counts_serialized = json.dumps(list(tonase_counts))
         
         total_reports = Report.objects.count()
         total_revised_reports = reports.filter(tiketId__icontains="R").count()
@@ -186,14 +233,20 @@ def dashboard(request):
 
         print(grouped_plat_data)
 
+    
+
+    # Serialize the tonase data to JSON for frontend
+
     context = {
         'form' : form,
         'reports' : reports,
         'kayu_counts': kayu_counts_serialized,
+        'sender_name': sender_name,
         'sender_counts': sender_counts_serialized,
         'plat_counts': grouped_plat_data,
         'tonase_counts': tonase_counts_serialized,
         'unique_vehicle_counts': unique_vehicle_serialized,
+        'data_AllTujuan_counts' : data_dmy_tujuan,
         'vehicle_kayu_counts': vehicle_kayu_serialized,
         'total_revised_reports': total_revised_reports,
         'total_reports': total_reports,
@@ -282,6 +335,43 @@ def edit_entity(request, entity_model, entity_form, entity_id_field, entity_id):
 
     return render(request, 'edit_entity.html', {'form': form})
 
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def update_completed_status(request):
+    if request.method == 'POST':
+        ids = request.POST.getlist('ids[]')  # Get list of IDs
+        status = request.POST.get('status')  # This will be True or False
+
+        if not ids or status is None:
+            return JsonResponse({"error": "Invalid data"}, status=400)
+
+        # Convert status to a boolean (it might come as a string)
+        status = True if status == 'true' else False
+
+        # Update the 'completed' status for selected reports
+        updated_count = Report.objects.filter(id__in=ids).update(completed=status)
+
+        return JsonResponse({"success": True, "updated_count": updated_count})
+    return JsonResponse({"error": "Invalid method"}, status=405)
+
+def approve_transfer(request):
+    if request.user.groups.filter(name='Accounting').exists():  # Gantilah dengan grup yang sesuai
+        # Proses pembaruan datetime untuk baris yang dipilih
+        selected_ids = request.POST.getlist('ids[]')
+        if selected_ids:
+            # Set the timezone to Asia/Jakarta (Indonesia timezone)
+            jakarta_timezone = pytz_timezone('Asia/Jakarta')
+            for report_id in selected_ids:
+                report = Report.objects.get(id=report_id)
+                # Memperbarui datetime dengan waktu Jakarta
+                report.tanda_transaksi = timezone.now().astimezone(jakarta_timezone)
+                report.save()
+            return JsonResponse({"status": "success"})
+        return JsonResponse({"status": "error", "message": "No reports selected."})
+    else:
+        return JsonResponse({"status": "error", "message": "You don't have permission to approve transfers."})
+
 
 # -------------------- Report Functions --------------------#
 @login_required
@@ -293,26 +383,53 @@ def display_report_items(request):
 
     if start_date_str and end_date_str:
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-        end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
         entities = Report.objects.filter(tanggal__range=[start_date, end_date])
     else:
         entities = Report.objects.all()
 
+    # Filtering search columns
     if search_column and search_value:
         column_fields = [
             'date_time', 'id', 'sender__first_name', 'tiketId', 'plat', 'driver', 
             'PO', 'DO', 'no_tiket', 'kayu', 'berat', 'reject', 'lokasi', 'tujuan', 
-            'tanggal', 'completed', 'foto', 'og_foto'
+            'tanggal', 'completed', 'foto', 'og_foto', 'tanda_transaksi'
         ]
-        column_field = column_fields[int(search_column)]
-        entities = entities.filter(**{f"{column_field}__icontains": search_value})
+        
+        if 0 <= int(search_column) < len(column_fields):
+            column_field = column_fields[int(search_column)]
+            # Check if the column is 'completed' and handle Yes/No properly
+            if column_field == 'completed':
+                if search_value == 'Yes':
+                    entities = entities.filter(completed=True)
+                elif search_value == 'No':
+                    entities = entities.filter(completed=False)
+            else:
+                entities = entities.filter(**{f"{column_field}__icontains": search_value})
 
-    entities = entities.order_by('-date_time')
+    # Get ordering parameters from DataTables
+    order_column_index = int(request.GET.get('order[0][column]', 0))  # Default column to sort by is column 0
+    order_direction = request.GET.get('order[0][dir]', 'desc')  # Default direction is descending
+
+    # Map column index to actual field name
+    column_fields = [
+        'date_time', 'id', 'sender__first_name', 'tiketId', 'plat', 'driver', 
+        'PO', 'DO', 'no_tiket', 'kayu', 'berat', 'reject', 'lokasi', 'tujuan', 
+        'tanggal', 'completed', 'foto', 'og_foto', 'tanda_transaksi'
+    ]
+    order_field = column_fields[order_column_index]
+    
+    # Apply the order_by clause based on the direction
+    if order_direction == 'asc':
+        entities = entities.order_by(order_field)
+    else:
+        entities = entities.order_by(f'-{order_field}')
 
     total_berat = entities.aggregate(Sum('berat'))['berat__sum'] or 0
     total_reject = entities.aggregate(Sum('reject'))['reject__sum'] or 0
-    unique_plat_count = entities.values('plat').distinct().count()
+    unique_plat_count = entities.values('plat').count()
 
+    # Pagination
     draw = int(request.GET.get('draw', 1))
     start = int(request.GET.get('start', 0))
     length = int(request.GET.get('length', 25))
@@ -330,11 +447,11 @@ def display_report_items(request):
     data = list(entities_page.object_list.values(
         'date_time', 'id', 'sender__first_name', 'tiketId', 'plat', 'driver', 
         'PO', 'DO', 'no_tiket', 'kayu', 'berat', 'reject', 'lokasi', 'tujuan', 
-        'tanggal', 'completed', 'foto', 'og_foto'
+        'tanggal', 'completed', 'foto', 'og_foto', 'tanda_transaksi'
     ))
 
     for item in data:
-        item['completed'] = 'Yes' if item['completed'] else 'No'
+        item['completed'] = item['completed']  
 
     response = {
         'draw': draw,
@@ -348,8 +465,12 @@ def display_report_items(request):
 
     return JsonResponse(response)
 
+
 def display_report(request):
-    return render(request, 'Report/display_report.html')
+    user_is_admin = request.user.groups.filter(name='Accounting').exists() if request.user.is_authenticated else False
+    return render(request, 'Report/display_report.html', {'user_is_admin': user_is_admin})
+
+
 
 @login_required
 def delete_selected_rows_report(request):

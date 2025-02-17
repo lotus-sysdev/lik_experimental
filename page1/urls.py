@@ -48,6 +48,10 @@ urlpatterns = [
     path('delete_item/<str:SKU>/', delete_item, name='delete_item'),
     # path('upload_csv/', upload_csv, name='upload_csv'),
     path('upload_excel/', upload_excel, name='upload_excel'),
+
+
+    # export endpoint 
+    path('export-pdf/', export_pdf_view, name='export_pdf_page'),  
     
     # Deletion of multiple rows
     path('delete_selected_rows_item/', delete_selected_rows_item, name='delete_selected_rows_item'),
