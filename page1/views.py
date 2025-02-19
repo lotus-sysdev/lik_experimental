@@ -3,7 +3,7 @@ import os
 import re
 import csv
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta 
 
 # Third-Party Imports
 import requests
@@ -376,6 +376,8 @@ def display_customer(request):
 @GA_required
 def display_supplier(request):
     return display_entities(request, Supplier, 'supplier/display_supplier.html')
+
+
 
 @login_required
 @GA_required
