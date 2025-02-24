@@ -218,15 +218,22 @@
 
             },            
             {
-              data: "og_foto", 
-              render: function(data, type, row) {
-                  if (data) {
-                      return '<a href="media/' + data + '" target="_blank"><img src="media/' + data + '" alt="' + row.id + '" /></a>';
-                  } else {
-                      return 'None';
-                  }
-              }
+                data: "og_foto",
+                render: function(data, type, row) {
+                    if (data) {
+                        // Assuming the og_foto holds the relative path to the image for the link
+                        var imagePath = "/api/display_foto/media/" + data;  // URL for the full image
+                        
+                        // Assuming row.foto holds the relative path for the image to display
+                        var imgSrc = "/media/" + row.foto;  // The actual image source
+                        
+                        return '<a href="' + imagePath + '" target="_blank"><img src="' + imgSrc + '" alt="' + row.id + '" style="max-width: 100px; max-height: 100px;" /></a>';
+                    } else {
+                        return 'None';
+                    }
+                }
             },
+
 
               
             { data: "id", render: function(data) { return '<a href="/api/report_detail/' + data + '">View</a>'; } },
