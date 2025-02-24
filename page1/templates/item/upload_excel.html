@@ -217,28 +217,29 @@
       </tr>
     </thead>
     <tbody>
-      {% for item in processed_items %}
+     {% for item in processed_items %}
       <tr>
-        <td>{{ item.instance.nama }}</td>
-        <td>{{ item.instance.catatan }}</td>
-        <td>{{ item.instance.category }}</td>
-        <td>{{ item.instance.quantity }}</td>
-        <td>{{ item.instance.unit }}</td>
-        <td>{{ item.instance.price }}</td>
-        <td>{{ item.instance.price_currency }}</td>
-        <!-- Display image if available -->
+        <td>{{ item.nama }}</td>
+        <td>{{ item.catatan }}</td>
+        <td>{{ item.category.name }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.unit }}</td>
+        <td>{{ item.price }}</td>
+        <td>{{ item.price_currency }}</td>
         <td>
-          {% if item.instance.gambar %}
-          <img src="{{ item.instance.gambar.url }}" width="100" height="100" />
-          {% else %} No image available {% endif %}
+          {% if item.gambar %}
+            <img src="{{ MEDIA_URL }}{{ item.gambar }}" width="100" height="100" />
+          {% else %}
+            No image available
+          {% endif %}
         </td>
-        <td>{{ item.instance.tanggal_pemesanan }}</td>
-        <td>{{ item.instance.customer }}</td>
-        <td>{{ item.url }}</td>
-        <td>{{ item.instance.pic }}</td>
+        <td>{{ item.tanggal_pemesanan }}</td>
+        <td>{{ item.customer.nama_pt }}</td>
+        <td>{{ item.itemsumber.url }}</td>
+        <td>{{ item.pic.nama }}</td>
       </tr>
-      {% endfor %}
-    </tbody>
+    {% endfor %}
+
   </table>
 
   {% endblock %}

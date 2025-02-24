@@ -1220,8 +1220,7 @@ def upload_excel(request):
     categories = Category.objects.all()
     customers = Customer.objects.all()
     customer_pics = CustomerPIC.objects.all()
-    pic = CustomerPIC.objects.all()
-    
+
     if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
         if form.is_valid():
@@ -1230,138 +1229,126 @@ def upload_excel(request):
                 wb = openpyxl.load_workbook(excel_file)
                 worksheet = wb.active
 
-                # Get column titles from the first row
+                if worksheet.max_row < 2:
+                    raise ValueError("File Excel tidak memiliki data yang cukup!")
+
+                # Ambil header kolom
                 header_row = next(worksheet.iter_rows(values_only=True))
                 column_titles = [str(cell).strip().lower() for cell in header_row]
 
-                
-                # Get column indices based on titles
-                tanggal_pemesanan_index = column_titles.index('tanggal_pemesanan') if 'tanggal_pemesanan' in column_titles else None
-                nama_index = column_titles.index('nama') if 'nama' in column_titles else None
-                catatan_index = column_titles.index('catatan') if 'catatan' in column_titles else None
-                category_index = column_titles.index('category') if 'category' in column_titles else None
-                customer_index = column_titles.index('customer') if 'customer' in column_titles else None
-                quantity_index = column_titles.index('quantity') if 'quantity' in column_titles else None
-                unit_index = column_titles.index('unit') if 'unit' in column_titles else None
-                price_index = column_titles.index('price') if 'price' in column_titles else None
-                price_currency_index = column_titles.index('price_currency') if 'price_currency' in column_titles else None
-                jenis_sumber_index = column_titles.index('jenis_sumber') if 'jenis_sumber' in column_titles else None
-                link_index = column_titles.index('link') if 'link' in column_titles else None
-                telp_sumber_index = column_titles.index('telp_sumber') if 'telp_sumber' in column_titles else None
-                email_sumber_index = column_titles.index('email_sumber') if 'email_sumber' in column_titles else None
-                nama_sumber_index = column_titles.index('nama_sumber') if 'nama_sumber' in column_titles else None
-                pic_index = column_titles.index('pic') if 'pic' in column_titles else None
-                # Find the row containing the 'Gambar' column title
+                # Mapping kolom
+                column_indices = {
+                    col: column_titles.index(col) if col in column_titles else None
+                    for col in [
+                        'tanggal_pemesanan', 'nama', 'catatan', 'category', 'customer',
+                        'quantity', 'unit', 'price', 'price_currency', 'jenis_sumber',
+                        'link', 'telp_sumber', 'email_sumber', 'nama_sumber', 'pic', 'gambar'
+                    ]
+                }
+
+                # Cek jika kolom wajib tidak ada
+                required_columns = ['nama', 'category', 'customer', 'quantity', 'unit', 'price']
+                missing_columns = [col for col in required_columns if column_indices[col] is None]
+
+                if missing_columns:
+                    raise ValueError(f"Kolom wajib berikut tidak ditemukan di file Excel: {', '.join(missing_columns)}")
+
+                # Temukan baris pertama yang memiliki "gambar"
                 gambar_row_index = None
                 for row_index, row in enumerate(worksheet.iter_rows(values_only=True)):
                     if 'gambar' in [str(cell).strip().lower() for cell in row]:
                         gambar_row_index = row_index
                         break
 
-                if gambar_row_index is not None:
-                    # Load image from the 'Gambar' column for each row
-                    image_loader = SheetImageLoader(worksheet)
-                    for row_index, row in enumerate(worksheet.iter_rows(min_row=gambar_row_index + 2, values_only=True)):
-                        if all(index is not None for index in [nama_index, category_index, customer_index, quantity_index, unit_index, price_index]):
-                            try: 
-                                # print(f"Processing Row {row_index}: {row}")
-                                # Extract category information
-                                category_name = row[category_index] if category_index is not None else ''
-                                category_instance, _ = Category.objects.get_or_create(name=category_name)
+                if gambar_row_index is None:
+                    raise ValueError("Kolom 'gambar' tidak ditemukan dalam file Excel!")
 
-                                customer_name = row[customer_index] if customer_index is not None else ''
-                                customer_instance, _ = Customer.objects.get_or_create(nama_pt=customer_name)
-                                
-                                # print(pic_index)
-                                pic_name = row[pic_index] if pic_index is not None else ''
-                                pic_instance, _ = CustomerPIC.objects.get_or_create(customer_id=customer_instance, nama = pic_name)
-                                
-                                # Load image from specified cell
-                                image_cell = chr(65 + column_titles.index('gambar')) + str(row_index + 2)
+                # Load image dari worksheet
+                image_loader = SheetImageLoader(worksheet)
+
+                for row_index, row in enumerate(worksheet.iter_rows(min_row=gambar_row_index + 2, values_only=True)):
+                    try:
+                        category_instance, _ = Category.objects.get_or_create(name=row[column_indices['category']])
+                        customer_instance, _ = Customer.objects.get_or_create(nama_pt=row[column_indices['customer']])
+                        pic_instance, _ = CustomerPIC.objects.get_or_create(
+                            customer_id=customer_instance, nama=row[column_indices['pic']]
+                        )
+
+                        # Ambil tanggal pemesanan atau gunakan tanggal sekarang
+                        tanggal_pemesanan = row[column_indices['tanggal_pemesanan']] if column_indices['tanggal_pemesanan'] is not None else datetime.datetime.now().strftime('%Y-%m-%d')
+
+                        # Load gambar jika ada
+                        filename = ""
+                        if column_indices['gambar'] is not None:
+                            image_cell = chr(65 + column_titles.index('gambar')) + str(row_index + 2)
+                            try:
                                 image = image_loader.get(image_cell)
-
                                 image = image.resize((100, 100), Image.Resampling.LANCZOS)
-                                regex_pattern = r'[\\/:"*?<>|\']'
-                                replacement_string = '-'
-                                
-                                # Generate filename including item name, upload date, and row index
-                                item_name = row[nama_index] if nama_index is not None else ''
-                                item_name_cleaned = re.sub(regex_pattern, replacement_string, item_name)
-                                upload_date = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
-                                filename = f"media_bulk_{item_name_cleaned}_{upload_date}_{row_index}.png"
-                                
-                                # Specify the full path including the media directory
+
+                                item_name = re.sub(r'[\\/:"*?<>|\']', '-', row[column_indices['nama']])
+                                upload_date = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                                filename = f"media_bulk_{item_name}_{upload_date}_{row_index}.png"
                                 image_path = os.path.join(settings.MEDIA_ROOT, filename)
                                 
-                                # Save the image to the media directory
+                                os.makedirs(settings.MEDIA_ROOT, exist_ok=True)  # Pastikan folder media ada
                                 image.save(image_path)
+                            except Exception as img_error:
+                                print(f"Error loading image at {image_cell}: {img_error}")
+                                filename = ""
 
-                                # Extract price currency or use default value 'IDR'
-                                price_currency = row[price_currency_index] if price_currency_index is not None else 'IDR'
+                        instance = Items.objects.create(
+                            tanggal_pemesanan=tanggal_pemesanan,
+                            nama=row[column_indices['nama']],
+                            catatan=row[column_indices['catatan']] if column_indices['catatan'] is not None else '',
+                            category=category_instance,
+                            customer=customer_instance,
+                            pic=pic_instance,
+                            quantity=row[column_indices['quantity']],
+                            unit=row[column_indices['unit']],
+                            price=row[column_indices['price']],
+                            price_currency=row[column_indices['price_currency']] if column_indices['price_currency'] is not None else 'IDR',
+                            gambar=filename,
+                            upload_type="bulk"
+                        )
 
-                                # Create and save instance with image path
-                                instance = Items(
-                                    tanggal_pemesanan = row[tanggal_pemesanan_index] if tanggal_pemesanan_index is not None else upload_date,
-                                    nama=row[nama_index] if nama_index is not None else '',
-                                    catatan=row[catatan_index] if catatan_index is not None else '',
-                                    category=category_instance,
-                                    customer=customer_instance,
-                                    pic = pic_instance,
-                                    quantity=row[quantity_index] if quantity_index is not None else 0,
-                                    unit=row[unit_index] if unit_index is not None else '',
-                                    price=row[price_index] if price_index is not None else 0,
-                                    price_currency=price_currency,
-                                    gambar=filename,
-                                    upload_type="bulk"
-                                )
-                                instance.save() 
-                                # processed_items.append(instance)
-                                # print(f"Processed Items: {processed_items}")
-                                
-                                item_sumber_instance = ItemSumber.objects.create(
-                                    item=instance,
-                                    # Assuming you have corresponding columns for other fields
-                                    jenis_sumber=row[nama_sumber_index] if nama_sumber_index is not None else 'Online Store',
-                                    nama_perusahaan=row[nama_sumber_index] if nama_sumber_index is not None else 'Empty Name',
-                                    telp=row[telp_sumber_index] if telp_sumber_index is not None else '',
-                                    email=row[email_sumber_index] if email_sumber_index is not None else '',
-                                    url=row[link_index] if link_index is not None else ''
-                                )
-                                item_sumber_instance.save()
+                        ItemSumber.objects.create(
+                            item=instance,
+                            jenis_sumber=row[column_indices['jenis_sumber']] if column_indices['jenis_sumber'] is not None else 'Online Store',
+                            nama_perusahaan=row[column_indices['nama_sumber']] if column_indices['nama_sumber'] is not None else 'Unknown',
+                            telp=row[column_indices['telp_sumber']] if column_indices['telp_sumber'] is not None else '',
+                            email=row[column_indices['email_sumber']] if column_indices['email_sumber'] is not None else '',
+                            url=row[column_indices['link']] if column_indices['link'] is not None else ''
+                        )
 
-                                processed_items.append({
-                                    'instance': instance,
-                                    'url': item_sumber_instance.url if link_index is not None else ''
-                                })
-                                print(f"Processed Items: {processed_items}")
+                        processed_items.append(instance)
+                    except Exception as row_error:
+                        print(f"Error processing row {row_index + 2}: {row_error}")
 
-                            except Exception as e:
-                                if "NOT NULL constraint failed: page1_category.name" not in str(e):
-                                    error_message.append(f"Error on cell {row_index + 1}: {str(e)}")
-                                # print(processed_items)
-                                continue
-                        else:
-                            error_message.append(f"Error on cell {row_index + 1}: Required column(s) not found.")   
-                else:
-                    # Handle case where 'Gambar' column title is not found
-                    raise ValueError("'gambar' column title not found in the Excel file")
-                
-                return render(request, 'item/upload_excel.html', {'form': form, 'pic' : pic, 'categories': categories, 'customers': customers, 'customerPIC': customer_pics, 'error_message': error_message, 'processed_items': processed_items})
-                
+                return render(request, 'item/upload_excel.html', {
+                    'form': form,
+                    'categories': categories,
+                    'customers': customers,
+                    'customerPIC': customer_pics,
+                    'processed_items': processed_items
+                })
+
             except openpyxl.utils.exceptions.InvalidFileException:
-                error_message = "Invalid Excel file format. Please upload a valid Excel file."
+                error_message.append("Format file tidak valid. Harap unggah file Excel yang benar.")
             except ValueError as e:
-                error_message = str(e)
+                error_message.append(str(e))
         else:
-            error_message = "Invalid form data. Please check your input and try again."
+            error_message.append("Data form tidak valid. Harap periksa kembali input Anda.")
 
     else:
         form = ExcelUploadForm()
-    
-    # print("Processed Items:", processed_items)
-    # Render the upload form template
-    return render(request, 'item/upload_excel.html', {'form': form, 'categories': categories, 'customers': customers, 'customerPIC': customer_pics, 'error_message': error_message})
 
+    return render(request, 'item/upload_excel.html', {
+        'form': form,
+        'categories': categories,
+        'customers': customers,
+        'customerPIC': customer_pics,
+        'error_message': error_message
+    })
 
 # -------------------- Delete multiple items -------------------- #
 @login_required
