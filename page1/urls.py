@@ -21,7 +21,6 @@ urlpatterns = [
     path('display_item/', display_item, name="display_item"),
     path('item_list/',item_list, name='item_list'),
 
-
     # display purchase and work
     path('display_purchase/',display_purchase, name='display_purchase'),
     path('display_work/',display_work, name='display_work'),

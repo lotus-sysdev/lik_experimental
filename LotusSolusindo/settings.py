@@ -9,10 +9,12 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+ 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+from dotenv import load_dotenv 
+from django.urls import reverse_lazy
+
 
 load_dotenv()
 
@@ -27,14 +29,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 # DEBUG = False
 
 
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
-from django.urls import reverse_lazy
 LOGIN_URL = reverse_lazy('login')
 
 # Application definition
@@ -117,6 +118,9 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', ''),
     }
 }
+
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -370,7 +374,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = 'idneva28@gmail.com'  # Ganti dengan email kamu
-EMAIL_HOST_PASSWORD = 'zpjoswghcmqvmwpu'  # Gunakan App Password (tanpa spasi)
+EMAIL_HOST_USER = os.getenv ('EMAIL_HOST_USER')  
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')  
 
-DEFAULT_FROM_EMAIL = 'idneva28@gmail.com'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+

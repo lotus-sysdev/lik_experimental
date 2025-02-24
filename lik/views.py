@@ -68,14 +68,12 @@ def dashboard(request):
         plat_data = reports.annotate(
             upper_plat=Upper('plat')
         ).values(
-            'upper_plat', 'tanggal', 'sender__first_name', 'driver', 'tujuan'
-        ).annotate(count=Count('id')).order_by('upper_plat', 'tanggal')
+            'upper_plat', 'sender__first_name', 'driver', 'tujuan'
+        ).annotate(count=Count('id')).order_by('upper_plat')
 
         grouped_plat_data = []
         for key, group in groupby(plat_data, key=itemgetter('upper_plat')):
             group_list = list(group)
-            earliest_date = group_list[0]['tanggal']
-
             tujuan_counter = defaultdict(int)
 
             for item in group_list:
@@ -88,9 +86,10 @@ def dashboard(request):
                 'count': sum(item['count'] for item in group_list),
                 'tujuan': list(tujuan_counter.keys()),
                 'tujuan_count': dict(tujuan_counter),
-                'earliest_date': earliest_date.isoformat(),            })
+            })
 
-        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['earliest_date'])
+        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
+
         tonase_counts = reports.values(
             'kayu',
             day=ExtractDay('tanggal'),
@@ -155,15 +154,13 @@ def dashboard(request):
 
         plat_data = reports.annotate(
             upper_plat=Upper('plat')
-        ).values(
-            'upper_plat', 'tanggal', 'sender__first_name', 'driver', 'tujuan'
+        ).values(   
+            'upper_plat', 'sender__first_name', 'driver', 'tujuan'
         ).annotate(count=Count('id')).order_by('upper_plat')
 
         grouped_plat_data = []
-        for key, group in groupby(plat_data, key=itemgetter('upper_plat', 'tanggal')):
+        for key, group in groupby(plat_data, key=itemgetter('upper_plat')):
             group_list = list(group)
-            earliest_date = group_list[0]['tanggal']  
-
             tujuan_counter = defaultdict(int)
 
             for item in group_list:
@@ -176,11 +173,9 @@ def dashboard(request):
                 'count': sum(item['count'] for item in group_list),
                 'tujuan': list(tujuan_counter.keys()),
                 'tujuan_count': dict(tujuan_counter),
-                'earliest_date': earliest_date.isoformat(),
-                
             })
 
-        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['earliest_date'])
+        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
         tonase_counts = Report.objects.annotate(
             'kayu',
             day=ExtractDay('tanggal'),
@@ -627,10 +622,6 @@ class add_report_mobile(generics.CreateAPIView):
             # os.remove(os.path.join(settings.MEDIA_ROOT, 'report_photos', image_name))
             serializer.validated_data['og_foto'] = os.path.join('report_photos', og_image_name)
             serializer.validated_data['foto'] = os.path.join('report_photos', resized_image_name)
-        
-        # Set the upload_date to the current date
-        serializer.validated_data['upload_date'] = timezone.now().date()
-        
         # Call the serializer's save method to create the Report instance
         serializer.save()
 
