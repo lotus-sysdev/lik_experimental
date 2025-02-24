@@ -217,16 +217,17 @@
                 }
 
             },            
-            { data: "foto", render: function(data, type, row) {
-                  if (row.og_foto) {
-                    return '<a href="' + row.og_foto.url + '" target="_blank"><img src="' + row.foto.url + '" alt="' + row.id + '"/></a>';
-                  } else if (row.foto) {
-                    return '<img src="' + row.foto.url + '" alt="' + row.id + '"/>';
+            {
+              data: "og_foto", 
+              render: function(data, type, row) {
+                  if (data) {
+                      return '<a href="media/' + data + '" target="_blank"><img src="media/' + data + '" alt="' + row.id + '" /></a>';
                   } else {
-                    return 'None';
+                      return 'None';
                   }
-                }
+              }
             },
+
               
             { data: "id", render: function(data) { return '<a href="/api/report_detail/' + data + '">View</a>'; } },
           ],
