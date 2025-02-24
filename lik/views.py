@@ -622,6 +622,10 @@ class add_report_mobile(generics.CreateAPIView):
             # os.remove(os.path.join(settings.MEDIA_ROOT, 'report_photos', image_name))
             serializer.validated_data['og_foto'] = os.path.join('report_photos', og_image_name)
             serializer.validated_data['foto'] = os.path.join('report_photos', resized_image_name)
+                
+        # Set the upload_date to the current date
+        serializer.validated_data['upload_date'] = timezone.now().date()
+        
         # Call the serializer's save method to create the Report instance
         serializer.save()
 

@@ -278,27 +278,37 @@
     });
     // LOAD PIE CHART
     document.addEventListener("DOMContentLoaded", function () {
-      // Get the serialized kayu counts data passed from the view
+      // Get the serialized data passed from the view
       var kayuCounts = JSON.parse("{{ kayu_counts | escapejs }}");
       var senderCounts = JSON.parse("{{ sender_counts | escapejs }}");
 
+      // Function to format numbers with commas
+      function formatNumberWithCommas(number) {
+          return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      // Format the numbers on the page
+      const totalReports = document.querySelector('.top-card-body');
+      totalReports.textContent = formatNumberWithCommas(totalReports.textContent);
+
+      const totalTonase = document.querySelectorAll('.top-card-body')[1];
+      totalTonase.textContent = formatNumberWithCommas(totalTonase.textContent);
+
+      const totalRejects = document.querySelectorAll('.top-card-body')[2];
+      totalRejects.textContent = formatNumberWithCommas(totalRejects.textContent);
+
+      const totalUniqueVehicles = document.querySelectorAll('.top-card-body')[3];
+      totalUniqueVehicles.textContent = formatNumberWithCommas(totalUniqueVehicles.textContent);
+
+      // Render the pie charts
       renderPieChart("kayuPieChart", kayuCounts, "kayu", "Jenis Kayu");
-      renderPieChart(
-        "senderPieChart",
-        senderCounts,
-        "sender__first_name",
-        "Sender"
-      );
+      renderPieChart("senderPieChart", senderCounts, "sender__first_name", "Sender");
 
-      // var platCounts = JSON.parse("{{ plat_counts | escapejs }}");
+      // Example data for tonase and vehicleKayu counts
+      var tonaseCounts = JSON.parse("{{ tonase_counts | escapejs }}");
+      var vehicleKayuCounts = JSON.parse("{{ vehicle_kayu_counts | escapejs }}");
 
-      // renderBarChart(
-      //   "platBarChart",
-      //   platCounts,
-      //   "upper_plat",
-      //   "License Plates"
-      // );
-
+      // Date logic (use start and end dates from form)
       var startDateInput = document.getElementById("id_start_date");
       var endDateInput = document.getElementById("id_end_date");
       var startDate = new Date(startDateInput.value);
@@ -306,69 +316,45 @@
 
       // Check if the dates are valid, otherwise default to the current year
       if (isNaN(startDate.getTime())) {
-        startDate = new Date(new Date().getFullYear(), 0, 1); // Default to January 1st of the current year
+          startDate = new Date(new Date().getFullYear(), 0, 1); // Default to January 1st
       } else {
-        startDate.setHours(0, 0, 0, 0);
+          startDate.setHours(0, 0, 0, 0);
       }
+
       if (isNaN(endDate.getTime())) {
-        endDate = new Date(); // Default to today
+          endDate = new Date(); // Default to today
       } else {
-        endDate.setHours(23, 59, 59, 999);
+          endDate.setHours(23, 59, 59, 999);
       }
 
       // Generate dynamic labels based on the date range
       var labels = generateLabels(startDate, endDate);
 
-      var uniqueVehicleCounts = JSON.parse(
-        "{{ unique_vehicle_counts | escapejs }}"
-      );
+      // Render charts based on the dynamic data and date range
+      var uniqueVehicleCounts = JSON.parse("{{ unique_vehicle_counts | escapejs }}");
+      var dmy_tujuan = JSON.parse("{{ data_AllTujuan_counts | escapejs }}");
 
-      var dmy_tujuan = JSON.parse(
-        "{{ data_AllTujuan_counts | escapejs}}"
-      )
+      renderColumnChart("uniqueVehicleChart", uniqueVehicleCounts, labels, startDate, endDate, "uniquevehicle");
+      renderMixedChart("tonaseMonthlyChart", tonaseCounts, labels, startDate, endDate, "Total Tonase", true);
+      renderMixedChart("vehicleKayuChart", vehicleKayuCounts, labels, startDate, endDate, "Total Kendaraan");
 
-      
-
-      renderColumnChart(
-        "uniqueVehicleChart",
-        uniqueVehicleCounts,
-        labels,
-        startDate,
-        endDate,
-        "uniquevehicle"
-      );
-
-      var tonaseCounts = JSON.parse("{{ tonase_counts | escapejs }}");
-      var vehicleKayuCounts = JSON.parse(
-        "{{ vehicle_kayu_counts | escapejs }}"
-      );
-
-      renderMixedChart(
-        "tonaseMonthlyChart",
-        tonaseCounts,
-        labels,
-        startDate,
-        endDate,
-        "Total Tonase",
-        true
-      );
-      renderMixedChart(
-        "vehicleKayuChart",
-        vehicleKayuCounts,
-        labels,
-        startDate,
-        endDate,
-        "Total Kendaraan"
-      );
-      
-      
       renderTonaseChart('TonaseLineChart', "{{ sender_name }}", tonaseCounts, startDate, endDate, dmy_tujuan);
-    });
+  });
 
+    const kayuColorPalette = {
+      'Karet R2 OKI': 'rgba(37, 22, 255, 0.6)', // Dark Blue
+      'Karet R2': 'rgba(255, 0, 0, 0.6)', // Light Purple
+      'Racuk R2': 'rgba(255, 0, 191, 0.6)', // Dark Green
+      'Karet R1': 'rgba(20, 96, 182, 0.6)', // Dark Teal
+      'Karet HL': 'rgb(255, 196, 0)', // Dark Orange-Red
+      'Log': 'rgba(0, 255, 136, 0.6)', // Bright Red
+      'Karet R2 ME': 'rgb(255, 136, 0)', // Yellow
+      'Racuk R2 ME': 'rgba(0, 250, 0, 0.87)' // Light Blue
+    };
    
 
     function renderTonaseChart(chartId, sender, tonaseCounts, startDate, endDate, dmy_tujuan) {
-        console.log(sender, tonaseCounts, dmy_tujuan);
+        // console.log(sender, tonaseCounts, dmy_tujuan);
 
         const groupedData = {};
 
@@ -480,84 +466,119 @@
 
 
 
-    function renderPieChart(canvasId, data, labelKey, chartLabel) {
-      var labels = [];
-      var dataValues = [];
+   // Function to generate a unique color based on a string (e.g., sender's name)
+  {% comment %} function generateColorFromString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash << 5) - hash + str.charCodeAt(i);
+    }
 
-      data.forEach(function (item) {
-        if (item.hasOwnProperty(labelKey)) {
-          labels.push(item[labelKey]);
+    // Generate RGB values from the hash
+    const r = (hash & 0xFF0000) >> 16;
+    const g = (hash & 0x00FF00) >> 8;
+    const b = hash & 0x0000FF;
+
+    // Ensure color values are within the range [0, 255]
+    return `rgba(${(r + 255) % 255}, ${(g + 255) % 255}, ${(b + 255) % 255}, 0.6)`;
+  } {% endcomment %}
+
+  function renderPieChart(canvasId, data, labelKey, chartLabel) {
+    var labels = [];
+    var dataValues = [];
+    var colors = []; // To store colors for each label
+
+    // Centralized palette for Kayu (predefined colors)
+    
+
+    const SenderColorPalette = {
+      'Gufta': 'rgb(37, 22, 255)', // Dark Blue
+      'Rengky': 'rgb(255, 0, 0)', // Red
+      'Khoiril': 'rgb(212, 89, 243)', // Purple
+      'Hengki': 'rgba(45, 255, 17, 0.6)', // Green
+      'Dedi': 'rgb(255, 170, 11)', // Blue
+      'Datuk': 'rgb(84, 255, 232)', // Violet
+      'Meggy': 'rgb(180, 134, 189)', // Orange
+      'Yuhdian': 'rgba(37, 39, 38, 0.6)', // Light Green
+      'Surya': 'rgb(255, 251, 0)', // Pink
+      'Jerri': 'rgb(245, 12, 175)', // Lime Green
+      'Zunipa': 'rgb(141, 139, 177)', // Light Green
+      'Hasan': 'rgba(230, 112, 13, 0.6)' // Orange-Yellow
+  };
+
+
+    data.forEach(function (item) {
+      if (item.hasOwnProperty(labelKey)) {
+        labels.push(item[labelKey]);
+
+        // For Kayu data, use the predefined colors from kayuColorPalette
+        if (kayuColorPalette[item[labelKey]]) {
+          colors.push(kayuColorPalette[item[labelKey]]);
         } else {
-          // Fallback to a default label key if the specified key doesn't exist
-          labels.push(item.defaultLabelKey);
+          // For sender or non-Kayu data, generate a unique color dynamically
+          colors.push(SenderColorPalette[item[labelKey]] || 'rgba(0, 0, 0, 0.6)');
         }
-        dataValues.push(item.count);
-      });
+      } else {
+        // Fallback for missing labels
+        labels.push(item.defaultLabelKey || "Unknown");
+        colors.push('rgba(0, 0, 0, 0.6)'); // Default to black if not found
+      }
+      dataValues.push(item.count);
+    });
 
-      var ctx = document.getElementById(canvasId).getContext("2d");
-      new Chart(ctx, {
-        type: "pie",
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              data: dataValues,
-              backgroundColor: [
-                "rgba(28, 22, 120, 0.8)", // Dark Blue
-                "rgba(133, 118, 255, 0.8)", // Light Purple
-                "rgba(0, 128, 0, 0.8)", // Dark Green
-                "rgba(1, 123, 148, 0.8)", // Dark Teal
-                "rgba(255, 99, 71, 0.8)", // Dark Orange-Red
-                "rgba(245, 55, 12, 0.8)", // Bright Red
-              ],
-              borderColor: [
-                "rgba(28, 22, 120, 1)",
-                "rgba(133, 118, 255, 1)",
-                "rgba(0, 128, 0, 1)",
-                "rgba(1, 123, 148, 1)",
-                "rgba(255, 99, 71, 1)",
-                "rgba(245, 55, 12, 1)",
-              ],
-              borderWidth: 1,
+    var ctx = document.getElementById(canvasId).getContext("2d");
+
+    new Chart(ctx, {
+      type: "pie",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            data: dataValues,
+            backgroundColor: colors, // Use dynamically assigned colors
+            borderColor: colors.map(color => color.replace('0.8', '1')), // Adjust border colors if needed
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+          },
+          title: {
+            display: true,
+            text: chartLabel,
+          },
+          datalabels: {
+            formatter: (value, ctx) => {
+              let sum = 0;
+              let dataArr = ctx.chart.data.datasets[0].data;
+              dataArr.forEach((data) => {
+                sum += data;
+              });
+              let percentage = ((value / sum) * 100).toFixed(2) + "%";
+              return percentage;
             },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: true, // Enable the legend
+            color: "white",
+            font: {
+              weight: "bold",
             },
-            title: {
-              display: true,
-              text: chartLabel,
+            backgroundColor: function (context) {
+              return context.dataset.backgroundColor[context.dataIndex];
             },
-            datalabels: {
-              formatter: (value, ctx) => {
-                let sum = 0;
-                let dataArr = ctx.chart.data.datasets[0].data;
-                dataArr.forEach((data) => {
-                  sum += data;
-                });
-                let percentage = ((value / sum) * 100).toFixed(2) + "%";
-                return percentage;
-              },
-              color: "white",
-              font: {
-                weight: "bold",
-              },
-              backgroundColor: function (context) {
-                return context.dataset.backgroundColor[context.dataIndex];
-              },
-              borderRadius: 4,
-              padding: 6,
-            },
+            borderRadius: 4,
+            padding: 6,
           },
         },
-        plugins: [ChartDataLabels],
-      });
-    }
+      },
+      plugins: [ChartDataLabels],
+    });
+  }
+
+
+
 
     function renderBarChart(canvasId, data, labelKey, chartLabel) {
       var labels = [];
@@ -657,13 +678,13 @@
       endDate,
       dataType
     ) {
-       console.log("Start Date:", startDate);
-       console.log("End Date:", endDate);
-       console.log("data:", data);
-
       var uniqueLabels = [];
-      var uniqueColors = {};
-
+      var uniqueColors = {
+        'Cipta Mandala': 'rgb(247, 197, 36)', // Light Blue
+        'Hijau Lestari': 'rgb(48, 224, 25)', // Orange
+        'Sumatra Prima Fibreboard': 'rgb(245, 0, 0)', // Teal
+        'PT Sumatera Prima Fibreboard': 'rgb(0, 45, 247)' // Purple
+      };
 
       // Extract unique labels and assign colors
       data.forEach(function (item, index) {
@@ -677,11 +698,12 @@
           label = item.tujuan;
         }
         count = item.count;
-        // console.log(item);
 
         if (!uniqueLabels.includes(label)) {
           uniqueLabels.push(label);
-          uniqueColors[label] = getRandomColor(index);
+          if (!uniqueColors[label]) {
+            uniqueColors[label] = 'rgba(0, 0, 0, 0.6)'; // Default color if not defined
+          }
         }
       });
 
@@ -704,8 +726,6 @@
         count = item.count;
 
         var itemDate = new Date(item.year, item.month - 1, item.day);
-        // console.log("Item Date:", itemDate);
-        // console.log(item.unique_vehicles);
 
         if (
           !isNaN(itemDate.getTime()) &&
@@ -717,14 +737,10 @@
             (itemDate.getFullYear() - startDate.getFullYear()) * 12 +
             (itemDate.getMonth() - startDate.getMonth());
 
-          // console.log("Month Index:", monthIndex);
-
           var labelIndex = uniqueLabels.indexOf(label);
-          // console.log("Label Index:", labelIndex);
 
           if (labelIndex >= 0 && monthIndex >= 0) {
             dataCounts[labelIndex][monthIndex] += count;
-            // console.log("Updated dataCounts:", dataCounts);
           }
         }
       });
@@ -785,15 +801,15 @@
       isTonnage = false
     ) {
       var kayuLabels = [];
-      var kayuColors = {};
 
-      data.forEach(function (item, index) {
+      // Loop through the data to identify unique kayu labels
+      data.forEach(function (item) {
         if (!kayuLabels.includes(item.kayu)) {
           kayuLabels.push(item.kayu);
-          kayuColors[item.kayu] = getRandomColor(index);
         }
       });
 
+      // Prepare the data structure for the chart
       var totalMonths =
         (endDate.getFullYear() - startDate.getFullYear()) * 12 +
         (endDate.getMonth() - startDate.getMonth()) +
@@ -806,7 +822,6 @@
 
       data.forEach(function (item) {
         var itemDate = new Date(item.year, item.month - 1, item.day);
-
         if (
           !isNaN(itemDate.getTime()) &&
           itemDate >= startDate &&
@@ -815,21 +830,21 @@
           var monthIndex =
             (itemDate.getFullYear() - startDate.getFullYear()) * 12 +
             (itemDate.getMonth() - startDate.getMonth());
-
           var kayuIndex = kayuLabels.indexOf(item.kayu);
 
           if (kayuIndex >= 0 && monthIndex >= 0 && monthIndex < totalMonths) {
             if (isTonnage) {
-              kayuData[kayuIndex][monthIndex] += item.berat; // Use item.berat for tonnage
-              tonnageData[monthIndex] += item.berat; // Sum of tonnage
+              kayuData[kayuIndex][monthIndex] += item.berat;
+              tonnageData[monthIndex] += item.berat;
             } else {
-              kayuData[kayuIndex][monthIndex] += item.count; // Use item.berat for tonnage
-              tonnageData[monthIndex] += item.count; // Sum of tonnage
+              kayuData[kayuIndex][monthIndex] += item.count;
+              tonnageData[monthIndex] += item.count;
             }
           }
         }
       });
 
+      // Create the chart
       var ctx = document.getElementById(canvasId).getContext("2d");
       var mixedChart = new Chart(ctx, {
         type: "bar",
@@ -841,7 +856,7 @@
                 type: "bar",
                 label: label,
                 data: kayuData[index],
-                backgroundColor: kayuColors[label],
+                backgroundColor: kayuColorPalette[label] || 'rgba(0, 0, 0, 0.6)', // Consistent color assignment
                 borderColor: "rgba(0, 0, 0, 1)",
                 borderWidth: 1,
                 datalabels: {
@@ -908,6 +923,9 @@
         plugins: [ChartDataLabels],
       });
     }
+
+
+    
 
     // Function to generate consistent colors for kayu types
     function getRandomColor(index) {
