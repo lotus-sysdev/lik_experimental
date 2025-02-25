@@ -356,7 +356,7 @@ def update_completed_status(request):
     return JsonResponse({"error": "Invalid method"}, status=405)
 
 def approve_transfer(request):
-    if request.user.groups.filter(name='Accounting').exists():  # Gantilah dengan grup yang sesuai
+    if request.user.groups.filter(name__in=['Accounting', 'GA']).exists():
         # Proses pembaruan datetime untuk baris yang dipilih
         selected_ids = request.POST.getlist('ids[]')
         if selected_ids:

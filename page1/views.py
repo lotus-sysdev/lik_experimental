@@ -417,7 +417,13 @@ def item_list(request):
         if search_column:
             field = mapping.get(search_column)
             if field:
-                if search_column in ['1', '2']:
+                if search_column == '13':  # Handle the 'is_approved' column search
+                    # Handle "Yes" and "No" filtering based on the approved status
+                    if search_value.lower() == 'yes':
+                        items = items.filter(is_approved=True)
+                    elif search_value.lower() == 'no':
+                        items = items.filter(is_approved=False)
+                elif search_column in ['1', '2']:  # Handle date columns
                     try:
                         date_value = datetime.strptime(search_value, '%Y-%m-%d').date()
                         items = items.filter(**{f"{field}": date_value})
