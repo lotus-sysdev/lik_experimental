@@ -467,7 +467,7 @@ def display_report_items(request):
 
 
 def display_report(request):
-    user_is_admin = request.user.groups.filter(name='Accounting').exists() if request.user.is_authenticated else False
+    user_is_admin = request.user.groups.filter(name__in=['Accounting', 'GA']).exists() if request.user.is_authenticated else False
     return render(request, 'Report/display_report.html', {'user_is_admin': user_is_admin})
 
 
