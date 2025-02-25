@@ -9,7 +9,7 @@ import requests
 import openpyxl
 from PIL import Image
 from openpyxl_image_loader import SheetImageLoader
-
+from datetime import datetime, timedelta
 # Local Imports
 from .models import *
 from .forms import *
@@ -1272,16 +1272,23 @@ def upload_excel(request):
 
                 for row_index, row in enumerate(worksheet.iter_rows(min_row=gambar_row_index + 2, values_only=True)):
                     try:
-                        category_instance, _ = Category.objects.get_or_create(name=row[column_indices['category']])
+                        # Ensure category is not empty
+                        category_name = row[column_indices['category']] if column_indices['category'] is not None else None
+                        if not category_name:
+                            raise ValueError(f"Category is missing for row {row_index + 2}")
+
+                        category_instance, _ = Category.objects.get_or_create(name=category_name)
+
+                        # Handle customer and PIC
                         customer_instance, _ = Customer.objects.get_or_create(nama_pt=row[column_indices['customer']])
                         pic_instance, _ = CustomerPIC.objects.get_or_create(
                             customer_id=customer_instance, nama=row[column_indices['pic']]
                         )
 
-                        # Ambil tanggal pemesanan atau gunakan tanggal sekarang
-                        tanggal_pemesanan = row[column_indices['tanggal_pemesanan']] if column_indices['tanggal_pemesanan'] is not None else datetime.datetime.now().strftime('%Y-%m-%d')
+                        # Set the order date to the current date if it's missing
+                        tanggal_pemesanan = row[column_indices['tanggal_pemesanan']] if column_indices['tanggal_pemesanan'] is not None else datetime.now().strftime('%Y-%m-%d')
 
-                        # Load gambar jika ada
+                        # Load image if there's one
                         filename = ""
                         if column_indices['gambar'] is not None:
                             image_cell = chr(65 + column_titles.index('gambar')) + str(row_index + 2)
@@ -1290,16 +1297,17 @@ def upload_excel(request):
                                 image = image.resize((100, 100), Image.Resampling.LANCZOS)
 
                                 item_name = re.sub(r'[\\/:"*?<>|\']', '-', row[column_indices['nama']])
-                                upload_date = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                                upload_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
                                 filename = f"media_bulk_{item_name}_{upload_date}_{row_index}.png"
                                 image_path = os.path.join(settings.MEDIA_ROOT, filename)
-                                
-                                os.makedirs(settings.MEDIA_ROOT, exist_ok=True)  # Pastikan folder media ada
+
+                                os.makedirs(settings.MEDIA_ROOT, exist_ok=True)  # Ensure the media folder exists
                                 image.save(image_path)
                             except Exception as img_error:
                                 print(f"Error loading image at {image_cell}: {img_error}")
                                 filename = ""
-
+                        # print(filename)
+                        # Create the Items instance
                         instance = Items.objects.create(
                             tanggal_pemesanan=tanggal_pemesanan,
                             nama=row[column_indices['nama']],
@@ -1315,6 +1323,7 @@ def upload_excel(request):
                             upload_type="bulk"
                         )
 
+                        # Create the associated ItemSumber
                         ItemSumber.objects.create(
                             item=instance,
                             jenis_sumber=row[column_indices['jenis_sumber']] if column_indices['jenis_sumber'] is not None else 'Online Store',
@@ -1327,7 +1336,6 @@ def upload_excel(request):
                         processed_items.append(instance)
                     except Exception as row_error:
                         print(f"Error processing row {row_index + 2}: {row_error}")
-
                 return render(request, 'item/upload_excel.html', {
                     'form': form,
                     'categories': categories,

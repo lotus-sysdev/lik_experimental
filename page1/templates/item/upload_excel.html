@@ -228,7 +228,7 @@
         <td>{{ item.price_currency }}</td>
         <td>
           {% if item.gambar %}
-            <img src="{{ MEDIA_URL }}{{ item.gambar }}" width="100" height="100" />
+            <img src="{{ item.gambar.url }}" width="100" height="100" />
           {% else %}
             No image available
           {% endif %}
