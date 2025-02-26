@@ -460,7 +460,7 @@ def item_list(request):
             item.Tanggal.strftime('%Y/%m/%d') if item.Tanggal else 'None',
             item.tanggal_pemesanan.strftime('%Y/%m/%d') if item.tanggal_pemesanan else 'None',
             str(item.customer) if item.customer else 'None',
-            str(item.pic) if item.pic else 'None',
+            str(item.pic.nama) if item.pic else 'None',
             item.SKU,
             item.nama,
             item.catatan if item.catatan else 'None',
@@ -489,7 +489,7 @@ def display_item(request):
 
 def format_catatan(text):
     
-    return text.replace("\n", "<br><br>")
+    return text.replace("\n", "<br>")
 
 def export_pdf_view(request):
     if request.method == "POST":

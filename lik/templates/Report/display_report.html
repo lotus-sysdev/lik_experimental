@@ -113,7 +113,11 @@
         </div>
         
         {% if user_is_admin %}
-        <button class="btn btn-secondary" onclick="Transfer()">Approve transfer</button>
+            <label class="mr-2" for="transferDate">Select transfer date:</label>
+            <div class="form-inline mb-2">
+              <input type="date" id="transferDate" class="form-control mr-2" style="width: 10%;">
+              <button class="btn btn-secondary" onclick="Transfer()">Approve transfer</button>
+            </div>
         {% endif %}
 
         <br>
@@ -193,7 +197,7 @@
             { 
               data: "completed", 
               render: function(data) {
-                  return data ? "Yes" : "No";  // Menampilkan "Yes" jika True, "No" jika False
+                  return data ? "Yes" : "No";  
               } 
             },
             { 
@@ -327,22 +331,30 @@
               return;
           }
 
+          // Get the selected date from the input field
+          var selectedDate = document.getElementById('transferDate').value;
+          if (!selectedDate) {
+              alert("Please select a date.");
+              return;
+          }
+
           var selectedRows = table.rows({ selected: true }).data();
           var ids = selectedRows.map(function(row) { return row.id; }).toArray();
           if (ids.length > 0) {
-              approveTransfer(ids);  // Kirim permintaan untuk mengupdate datetime
+              approveTransfer(ids, selectedDate); 
           } else {
               alert("Please select rows to approve transfer.");
           }
       }      
       
-      function approveTransfer(ids) {
+      function approveTransfer(ids, date) {
             $.ajax({
                 url: "{% url 'approve_transfer' %}",  // URL untuk mengirim permintaan ke backend
                 method: "POST",
                 data: {
                     csrfmiddlewaretoken: '{{ csrf_token }}',
-                    ids: ids
+                    ids: ids,
+                    transfer_date: date  // Send the selected date
                 },
                 success: function(response) {
                     if (response.status === 'success') {

@@ -2,6 +2,7 @@
 import os
 import json
 import uuid
+import pytz
 from datetime import datetime, timedelta
 
 # Third-party imports
@@ -359,19 +360,18 @@ def approve_transfer(request):
     if request.user.groups.filter(name__in=['Accounting', 'GA']).exists():
         # Proses pembaruan datetime untuk baris yang dipilih
         selected_ids = request.POST.getlist('ids[]')
-        if selected_ids:
-            # Set the timezone to Asia/Jakarta (Indonesia timezone)
-            jakarta_timezone = pytz_timezone('Asia/Jakarta')
+        transfer_date_str = request.POST.get('transfer_date')
+        if selected_ids and transfer_date_str:
+            jakarta_timezone = pytz.timezone('Asia/Jakarta')
+            transfer_date = datetime.strptime(transfer_date_str, '%Y-%m-%d').astimezone(jakarta_timezone)
             for report_id in selected_ids:
-                report = Report.objects.get(id=report_id)
-                # Memperbarui datetime dengan waktu Jakarta
-                report.tanda_transaksi = timezone.now().astimezone(jakarta_timezone)
+                report = Report.objects.get(id=report_id)                
+                report.tanda_transaksi = transfer_date.replace(hour=timezone.now().hour, minute=timezone.now().minute, second=timezone.now().second)
                 report.save()
             return JsonResponse({"status": "success"})
         return JsonResponse({"status": "error", "message": "No reports selected."})
     else:
         return JsonResponse({"status": "error", "message": "You don't have permission to approve transfers."})
-
 
 # -------------------- Report Functions --------------------#
 @login_required
