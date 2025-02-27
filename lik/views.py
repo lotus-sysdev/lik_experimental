@@ -4,6 +4,7 @@ import json
 import uuid
 import pytz
 from datetime import datetime, timedelta
+import logging
 
 # Third-party imports
 from itertools import groupby
@@ -22,7 +23,10 @@ from .forms import *
 from .models import *
 from .serializers import *
 
-# Django imports
+
+
+# Set up logger
+logger = logging.getLogger(__name__)
 from django.conf import settings
 from django.utils import timezone
 from django.db import transaction
@@ -356,22 +360,47 @@ def update_completed_status(request):
         return JsonResponse({"success": True, "updated_count": updated_count})
     return JsonResponse({"error": "Invalid method"}, status=405)
 
+
 def approve_transfer(request):
-    if request.user.groups.filter(name__in=['Accounting', 'GA']).exists():
-        # Proses pembaruan datetime untuk baris yang dipilih
-        selected_ids = request.POST.getlist('ids[]')
-        transfer_date_str = request.POST.get('transfer_date')
-        if selected_ids and transfer_date_str:
+    try:
+        if request.user.groups.filter(name__in=['Accounting', 'GA']).exists():
+            # Get selected report IDs and transfer date with time
+            selected_ids = request.POST.getlist('ids[]')
+            transfer_date_str = request.POST.get('transfer_date')
+
+            if not selected_ids:
+                return JsonResponse({"status": "error", "message": "No reports selected."})
+
+            if not transfer_date_str:
+                return JsonResponse({"status": "error", "message": "No transfer date provided."})
+
+            # Attempt to parse the combined date and time
             jakarta_timezone = pytz.timezone('Asia/Jakarta')
-            transfer_date = datetime.strptime(transfer_date_str, '%Y-%m-%d').astimezone(jakarta_timezone)
+
+            try:
+                transfer_date = datetime.fromisoformat(transfer_date_str)  # Parse ISO datetime string (YYYY-MM-DDTHH:MM)
+            except ValueError as e:
+                logger.error(f"Invalid transfer date format: {e}")
+                return JsonResponse({"status": "error", "message": "Invalid date format."})
+
+            # Ensure the parsed datetime is timezone-aware
+            if transfer_date.tzinfo is None:
+                transfer_date = jakarta_timezone.localize(transfer_date)  # Localize to Asia/Jakarta timezone
+
+            # Set the exact time (including the time zone) if it's already aware
             for report_id in selected_ids:
-                report = Report.objects.get(id=report_id)                
-                report.tanda_transaksi = transfer_date.replace(hour=timezone.now().hour, minute=timezone.now().minute, second=timezone.now().second)
+                report = Report.objects.get(id=report_id)
+                report.tanda_transaksi = transfer_date  # Store the timezone-aware datetime object
                 report.save()
+
             return JsonResponse({"status": "success"})
-        return JsonResponse({"status": "error", "message": "No reports selected."})
-    else:
-        return JsonResponse({"status": "error", "message": "You don't have permission to approve transfers."})
+        else:
+            return JsonResponse({"status": "error", "message": "You don't have permission to approve transfers."})
+
+    except Exception as e:
+        logger.error(f"Error in approve_transfer view: {e}")
+        return JsonResponse({"status": "error", "message": "An unexpected error occurred."})
+
 
 # -------------------- Report Functions --------------------#
 @login_required

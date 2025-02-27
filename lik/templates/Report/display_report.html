@@ -113,10 +113,11 @@
         </div>
         
         {% if user_is_admin %}
-            <label class="mr-2" for="transferDate">Select transfer date:</label>
+            <label class="mr-2" for="transferDate">Select transfer date and time:</label>
             <div class="form-inline mb-2">
-              <input type="date" id="transferDate" class="form-control mr-2" style="width: 10%;">
-              <button class="btn btn-secondary" onclick="Transfer()">Approve transfer</button>
+                <input type="date" id="transferDate" class="form-control mr-2" style="width: 10%;">
+                <input type="time" id="transferTime" class="form-control mr-2" style="width: 10%;">
+                <button class="btn btn-secondary" onclick="Transfer()">Approve transfer</button>
             </div>
         {% endif %}
 
@@ -185,7 +186,19 @@
             { data: "plat", render: function(data) { return data ? data.toUpperCase() : 'None'; } },
             { data: "driver" },
             { data: "PO", render: function(data) { return  'PO/'+ data } },
-            { data: "DO", render: function(data) { return data ? data.replace(/\s+/g, '') : 'None'; } },
+            {
+                data: "DO",
+                render: function(data) {
+                    if (data) {
+                        if (data.length == 11) {
+                            return data.replace(/\s+/g, ''); 
+                        } else {
+                            return data.replace(/\s+/g, ' '); 
+                        }
+                    }
+                    return 'None'; 
+                }
+            },
             { data: "no_tiket" },
             { data: "kayu" },
             { data: "berat", render: function(data) { return (data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' Kg' )} }, 
@@ -205,16 +218,16 @@
                 render: function(data) {
                     if (data) {
                         var date = new Date(data);
-                        date.setHours(date.getHours() + 7);
+                        // date.setHours(date.getHours() + 7);
 
                         var day = ("0" + date.getDate()).slice(-2);
                         var month = ("0" + (date.getMonth() + 1)).slice(-2);
                         var year = date.getFullYear();
                         var hours = ("0" + date.getHours()).slice(-2); // Updated hours
                         var minutes = ("0" + date.getMinutes()).slice(-2);
-                        var seconds = ("0" + date.getSeconds()).slice(-2);
+                        // var seconds = ("0" + date.getSeconds()).slice(-2);
 
-                        return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}` + ' WIB';
+                        return `${day}/${month}/${year} ${hours}:${minutes}` + ' WIB';
                     } else {
                         return '-';
                     }
@@ -331,44 +344,49 @@
               return;
           }
 
-          // Get the selected date from the input field
+          // Get the selected date and time from the input fields
           var selectedDate = document.getElementById('transferDate').value;
-          if (!selectedDate) {
-              alert("Please select a date.");
+          var selectedTime = document.getElementById('transferTime').value;
+
+          if (!selectedDate || !selectedTime) {
+              alert("Please select a date and time.");
               return;
           }
 
           var selectedRows = table.rows({ selected: true }).data();
           var ids = selectedRows.map(function(row) { return row.id; }).toArray();
           if (ids.length > 0) {
-              approveTransfer(ids, selectedDate); 
+              var fullDateTime = selectedDate + 'T' + selectedTime; // Combine date and time
+              approveTransfer(ids, fullDateTime); 
           } else {
               alert("Please select rows to approve transfer.");
           }
-      }      
-      
-      function approveTransfer(ids, date) {
-            $.ajax({
-                url: "{% url 'approve_transfer' %}",  // URL untuk mengirim permintaan ke backend
-                method: "POST",
-                data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    ids: ids,
-                    transfer_date: date  // Send the selected date
-                },
-                success: function(response) {
-                    if (response.status === 'success') {
-                        alert('Transfer approved and timestamp updated.');
-                        table.ajax.reload();  // Reload DataTable untuk menampilkan data terbaru
-                    } else {
-                        alert('Error: ' + response.message);
-                    }
-                },
-                error: function() {
-                    alert('Something went wrong. Please try again.');
-                }
-            });
-        }
+      }
+
+
+      function approveTransfer(ids, dateTime) {
+          $.ajax({  
+              url: "{% url 'approve_transfer' %}",
+              method: "POST",
+              data: {
+                  csrfmiddlewaretoken: '{{ csrf_token }}',
+                  ids: ids,
+                  transfer_date: dateTime  // Send the formatted date and time
+              },
+              success: function(response) {
+                  if (response.status === 'success') {
+                      alert('Transfer approved and timestamp updated.');
+                      table.ajax.reload();  // Reload DataTable to show the latest data
+                  } else {
+                      alert('Error: ' + response.message);
+                  }
+              },
+              error: function() {
+                  alert('Something went wrong. Please try again.');
+              }
+          });
+      }
+
 
      // Function to update status of selected rows
       function updateStatus(ids, status) {
