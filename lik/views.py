@@ -22,7 +22,9 @@ from rest_framework.decorators import api_view, permission_classes
 from .forms import *
 from .models import *
 from .serializers import *
-
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+import traceback
 
 
 # Set up logger
@@ -631,37 +633,50 @@ class add_report_mobile(generics.CreateAPIView):
     parser_classes = (MultiPartParser, FormParser)
 
     def perform_create(self, serializer):
-        # Get the image data from request.FILES
-        image_data = self.request.FILES.get('foto')
-        print(image_data)
-        if image_data:
-            # Open the image using PIL
-            image = Image.open(image_data)
-            image_name = str(image_data)
-            
-            og_image = image.resize((500, 500), Image.Resampling.LANCZOS)
-            upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-            og_image_name = f'original-{upload_date}-{image_name}'
-            og_image_path = os.path.join(settings.MEDIA_ROOT,'report_photos', og_image_name)
-            
-            og_image.save(og_image_path, optimize = True, quality= 95)
-            # image.save(og_image_path)
+        try:
+            # Get image from request
+            image_data = self.request.FILES.get('foto')
 
-            resized_image = image.resize((100, 100))  # Change the dimensions as needed
-            resized_image_name = f'resized-{upload_date}-{image_name}'
-            resized_image_path = os.path.join(settings.MEDIA_ROOT, 'report_photos', resized_image_name)
-            resized_image.save(resized_image_path)
-            
-            # Delete the original image file
-            # os.remove(os.path.join(settings.MEDIA_ROOT, 'report_photos', image_name))
-            serializer.validated_data['og_foto'] = os.path.join('report_photos', og_image_name)
-            serializer.validated_data['foto'] = os.path.join('report_photos', resized_image_name)
-                
-        # Set the upload_date to the current date
-        serializer.validated_data['upload_date'] = timezone.now().date()
-        
-        # Call the serializer's save method to create the Report instance
-        serializer.save()
+            if not image_data:
+                raise ValueError("No image provided")
+
+            print("Received Image:", image_data.name)
+
+            # Open image using PIL
+            image = Image.open(image_data)
+            upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+
+            # Generate new file names
+            og_image_name = f'original-{upload_date}-{image_data.name}'
+            resized_image_name = f'resized-{upload_date}-{image_data.name}'
+
+            # Paths for saving images
+            og_image_path = os.path.join('report_photos', og_image_name)
+            resized_image_path = os.path.join('report_photos', resized_image_name)
+
+            # Resize and save original image
+            og_image = image.resize((500, 500), Image.Resampling.LANCZOS)
+            og_image_io = ContentFile(b"")
+            og_image.save(og_image_io, format='JPEG', optimize=True, quality=95)
+            og_image_file = default_storage.save(og_image_path, og_image_io)
+
+            # Resize and save resized image
+            resized_image = image.resize((100, 100))
+            resized_image_io = ContentFile(b"")
+            resized_image.save(resized_image_io, format='JPEG')
+            resized_image_file = default_storage.save(resized_image_path, resized_image_io)
+
+            # Assign file paths to serializer
+            serializer.validated_data['og_foto'] = og_image_file
+            serializer.validated_data['foto'] = resized_image_file
+
+            # Save to DB
+            serializer.save()
+
+        except Exception as e:
+            print("Error processing image:", str(e))
+            traceback.print_exc()  # Print full error traceback
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
