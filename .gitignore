@@ -45,3 +45,4 @@ lik/migrations/*
 **/migrations/*.pyo
 
 logs
+LotusSolusindo/settings.py
