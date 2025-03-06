@@ -8,7 +8,7 @@
     <img src="static/favicon/favicon.ico" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">Lotus SolusindoO</h3>
+  <h3 align="center">Lotus Solusindo</h3>
 
   <p align="center">
     <br />
