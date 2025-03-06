@@ -27,7 +27,7 @@ static/*
 !static/image/*
 
 # Media Folder
-media/*
+media/
 !media/.gitkeep
 
 # Migrations
