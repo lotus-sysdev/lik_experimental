@@ -23,7 +23,8 @@ local_settings.py
 
 # Static files
 # /staticfiles/
-# static/*
+static/*
+!static/image/*
 
 # Media Folder
 media/*
