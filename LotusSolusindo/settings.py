@@ -9,10 +9,12 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+ 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+from dotenv import load_dotenv 
+from django.urls import reverse_lazy
+
 
 load_dotenv()
 
@@ -24,17 +26,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-rj@lh5#&q==hsgz0-_+p!v0dykoosn!^4%nxyj)-j^&uhy1r*w'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 # DEBUG = False
 
 
 
-ALLOWED_HOSTS = ["159.223.33.190", "127.0.0.1", "localhost", "192.168.1.62", "192.168.1.56", "192.168.140.200"]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
-from django.urls import reverse_lazy
 LOGIN_URL = reverse_lazy('login')
 
 # Application definition
@@ -88,7 +89,7 @@ ROOT_URLCONF = 'LotusSolusindo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, "templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -107,23 +108,19 @@ WSGI_APPLICATION = 'LotusSolusindo.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        # 'NAME': os.getenv('DB_NAME'),
-        # 'USER': os.getenv('DB_USER'),
-        # 'PASSWORD': os.getenv('DB_PASSWORD'),
-        # 'HOST': os.getenv('DB_HOST'),
-        # 'PORT': os.getenv('DB_PORT', ''),
-#     }
-# }
-
 DATABASES = {
-    'default':{
-        'ENGINE' :'django.db.backends.sqlite3',
-        'NAME' : BASE_DIR / 'db.sqlite3',
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT', ''),
     }
 }
+
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -171,7 +168,7 @@ STATICFILES_DIRS = [
 # STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, '/home/justin/Lotus-Solusindo/media/')
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
@@ -373,12 +370,12 @@ ADMIN_REORDER = (
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
-EMAIL_HOST = 'smtp.office365.com'
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_USER = os.getenv ('EMAIL_HOST_USER')  
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')  
 
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+

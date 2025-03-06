@@ -2,7 +2,9 @@
 import os
 import json
 import uuid
+import pytz
 from datetime import datetime, timedelta
+import logging
 
 # Third-party imports
 from itertools import groupby
@@ -20,14 +22,23 @@ from rest_framework.decorators import api_view, permission_classes
 from .forms import *
 from .models import *
 from .serializers import *
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+import traceback
 
-# Django imports
+
+# Set up logger
+logger = logging.getLogger(__name__)
 from django.conf import settings
 from django.utils import timezone
 from django.db import transaction
 from django.http import JsonResponse
 from django.db.models import Count, Sum
-from django.contrib.auth.models import User
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import JsonResponse
+from django.contrib.auth.models import User, Group
+from django.views.decorators.csrf import csrf_exempt
+from pytz import timezone as pytz_timezone
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
@@ -52,18 +63,26 @@ def dashboard(request):
         if start_date and end_date:
             reports = reports.filter(tanggal__range=[start_date, end_date])
 
+
+        sender_name = "All Senders" 
+        if sender:
+            sender = User.objects.get(username=sender)
+            sender_name = sender.first_name  
+
         kayu_counts = reports.values('kayu').annotate(count=Count('id'))
         sender_counts = reports.values('sender__first_name').annotate(count=Count('id'))
 
         plat_data = reports.annotate(
             upper_plat=Upper('plat')
         ).values(
-            'upper_plat', 'sender__first_name', 'driver', 'tujuan'
-        ).annotate(count=Count('id')).order_by('upper_plat')
+            'upper_plat', 'tanggal', 'sender__first_name', 'driver', 'tujuan'
+        ).annotate(count=Count('id')).order_by('upper_plat', 'tanggal')
 
         grouped_plat_data = []
         for key, group in groupby(plat_data, key=itemgetter('upper_plat')):
             group_list = list(group)
+            earliest_date = group_list[0]['tanggal']
+
             tujuan_counter = defaultdict(int)
 
             for item in group_list:
@@ -76,10 +95,9 @@ def dashboard(request):
                 'count': sum(item['count'] for item in group_list),
                 'tujuan': list(tujuan_counter.keys()),
                 'tujuan_count': dict(tujuan_counter),
-            })
+                'earliest_date': earliest_date.isoformat(),            })
 
-        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
-
+        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['earliest_date'])
         tonase_counts = reports.values(
             'kayu',
             day=ExtractDay('tanggal'),
@@ -99,6 +117,13 @@ def dashboard(request):
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
         ).annotate(count=Count('upper_plat', distinct=True))
+        data_AllTujuan_counts = reports.values(
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).values('day', 'month', 'year', 'tujuan')\
+        .annotate(count=Count('id'))\
+        .order_by('year', 'month', 'day') 
 
         # Serialize the counts data
         kayu_counts_serialized = json.dumps(list(kayu_counts))
@@ -107,27 +132,45 @@ def dashboard(request):
         tonase_counts_serialized = json.dumps(list(tonase_counts))
         unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
         vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
+        data_dmy_tujuan = json.dumps(list(data_AllTujuan_counts))
 
         total_reports = reports.count()
         total_revised_reports = reports.filter(tiketId__icontains="R").count()
         total_tonase = reports.aggregate(total=Sum('berat'))['total'] or 0
         total_rejects = reports.aggregate(total=Sum('reject'))['total'] or 0
         total_unique_vehicles = reports.annotate(upper_plat=Upper('plat')).values('plat').distinct().count()
+        # tonase_counts = reports.annotate(
+        #     day=ExtractDay('tanggal'),
+        #     month=ExtractMonth('tanggal'),
+        #     year=ExtractYear('tanggal')
+        # ).values('day', 'month', 'year').annotate(
+        #     total_berat=Sum('berat')
+        # ).order_by('year', 'month', 'day')
+
+        # tonase_counts_serialized = json.dumps(list(tonase_counts))
+        
 
     else: 
         reports = Report.objects.all()
         kayu_counts = Report.objects.values('kayu').annotate(count=Count('id'))
         sender_counts = Report.objects.values('sender__first_name').annotate(count=Count('id'))
 
+        sender_name = "All Senders"  
+        if sender:
+            sender = User.objects.get(username=sender)
+            sender_name = sender.first_name 
+
         plat_data = reports.annotate(
             upper_plat=Upper('plat')
         ).values(
-            'upper_plat', 'sender__first_name', 'driver', 'tujuan'
+            'upper_plat', 'tanggal', 'sender__first_name', 'driver', 'tujuan'
         ).annotate(count=Count('id')).order_by('upper_plat')
 
         grouped_plat_data = []
-        for key, group in groupby(plat_data, key=itemgetter('upper_plat')):
+        for key, group in groupby(plat_data, key=itemgetter('upper_plat', 'tanggal')):
             group_list = list(group)
+            earliest_date = group_list[0]['tanggal']  
+
             tujuan_counter = defaultdict(int)
 
             for item in group_list:
@@ -140,9 +183,11 @@ def dashboard(request):
                 'count': sum(item['count'] for item in group_list),
                 'tujuan': list(tujuan_counter.keys()),
                 'tujuan_count': dict(tujuan_counter),
+                'earliest_date': earliest_date.isoformat(),
+                
             })
 
-        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['count'], reverse=True)
+        grouped_plat_data = sorted(grouped_plat_data, key=lambda x: x['earliest_date'])
         tonase_counts = Report.objects.annotate(
             'kayu',
             day=ExtractDay('tanggal'),
@@ -162,6 +207,11 @@ def dashboard(request):
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
         ).annotate(count=Count('upper_plat', distinct=True))
+        data_AllTujuan_counts = reports.values(
+            day=ExtractDay('tanggal'),
+            month=ExtractMonth('tanggal'),
+            year=ExtractYear('tanggal')
+        ).values('day', 'month', 'year', 'tujuan').annotate(count=Count('id'))
 
 
         kayu_counts_serialized = json.dumps(list(kayu_counts))
@@ -170,6 +220,17 @@ def dashboard(request):
         tonase_counts_serialized = json.dumps(list(tonase_counts))
         unique_vehicle_serialized = json.dumps(list(unique_vehicle_counts))
         vehicle_kayu_serialized = json.dumps(list(vehicle_kayu_counts))
+        data_dmy_tujuan = json.dumps(list(data_AllTujuan_counts))
+        # tonase_counts = reports.annotate(
+        #     day=ExtractDay('tanggal'),
+        #     month=ExtractMonth('tanggal'),
+        #     year=ExtractYear('tanggal')
+        # ).values('day', 'month', 'year').annotate(
+        #     total_berat=Sum('berat')
+        # ).order_by('year', 'month', 'day')
+
+       
+        # tonase_counts_serialized = json.dumps(list(tonase_counts))
         
         total_reports = Report.objects.count()
         total_revised_reports = reports.filter(tiketId__icontains="R").count()
@@ -179,14 +240,20 @@ def dashboard(request):
 
         print(grouped_plat_data)
 
+    
+
+    # Serialize the tonase data to JSON for frontend
+
     context = {
         'form' : form,
         'reports' : reports,
         'kayu_counts': kayu_counts_serialized,
+        'sender_name': sender_name,
         'sender_counts': sender_counts_serialized,
         'plat_counts': grouped_plat_data,
         'tonase_counts': tonase_counts_serialized,
         'unique_vehicle_counts': unique_vehicle_serialized,
+        'data_AllTujuan_counts' : data_dmy_tujuan,
         'vehicle_kayu_counts': vehicle_kayu_serialized,
         'total_revised_reports': total_revised_reports,
         'total_reports': total_reports,
@@ -275,35 +342,166 @@ def edit_entity(request, entity_model, entity_form, entity_id_field, entity_id):
 
     return render(request, 'edit_entity.html', {'form': form})
 
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def update_completed_status(request):
+    if request.method == 'POST':
+        ids = request.POST.getlist('ids[]')  # Get list of IDs
+        status = request.POST.get('status')  # This will be True or False
+
+        if not ids or status is None:
+            return JsonResponse({"error": "Invalid data"}, status=400)
+
+        # Convert status to a boolean (it might come as a string)
+        status = True if status == 'true' else False
+
+        # Update the 'completed' status for selected reports
+        updated_count = Report.objects.filter(id__in=ids).update(completed=status)
+
+        return JsonResponse({"success": True, "updated_count": updated_count})
+    return JsonResponse({"error": "Invalid method"}, status=405)
+
+
+def approve_transfer(request):
+    try:
+        if request.user.groups.filter(name__in=['Accounting', 'GA']).exists():
+            # Get selected report IDs and transfer date with time
+            selected_ids = request.POST.getlist('ids[]')
+            transfer_date_str = request.POST.get('transfer_date')
+
+            if not selected_ids:
+                return JsonResponse({"status": "error", "message": "No reports selected."})
+
+            if not transfer_date_str:
+                return JsonResponse({"status": "error", "message": "No transfer date provided."})
+
+            # Attempt to parse the combined date and time
+            jakarta_timezone = pytz.timezone('Asia/Jakarta')
+
+            try:
+                transfer_date = datetime.fromisoformat(transfer_date_str)  # Parse ISO datetime string (YYYY-MM-DDTHH:MM)
+            except ValueError as e:
+                logger.error(f"Invalid transfer date format: {e}")
+                return JsonResponse({"status": "error", "message": "Invalid date format."})
+
+            # Ensure the parsed datetime is timezone-aware
+            if transfer_date.tzinfo is None:
+                transfer_date = jakarta_timezone.localize(transfer_date)  # Localize to Asia/Jakarta timezone
+
+            # Set the exact time (including the time zone) if it's already aware
+            for report_id in selected_ids:
+                report = Report.objects.get(id=report_id)
+                report.tanda_transaksi = transfer_date  # Store the timezone-aware datetime object
+                report.save()
+
+            return JsonResponse({"status": "success"})
+        else:
+            return JsonResponse({"status": "error", "message": "You don't have permission to approve transfers."})
+
+    except Exception as e:
+        logger.error(f"Error in approve_transfer view: {e}")
+        return JsonResponse({"status": "error", "message": "An unexpected error occurred."})
+
 
 # -------------------- Report Functions --------------------#
 @login_required
-def display_report(request):
+def display_report_items(request):
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
+    search_column = request.GET.get('search_column')
+    search_value = request.GET.get('search_value')
 
-    start_date_str_ts = request.GET.get('start_date_ts')
-    end_date_str_ts = request.GET.get('end_date_ts')
-
-    if start_date_str_ts and end_date_str_ts:
-        # Parse the date strings into naive datetime objects
-        start_date_naive = datetime.strptime(start_date_str_ts, '%Y-%m-%d')
-        end_date_naive = datetime.strptime(end_date_str_ts, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
-        # Make the naive datetime objects timezone-aware
-        start_date = timezone.make_aware(start_date_naive, timezone.get_current_timezone())
-        end_date = timezone.make_aware(end_date_naive, timezone.get_current_timezone())
-        print(start_date, end_date)
-
-        # Filter reports based on the timezone-aware datetime range
-        entities = Report.objects.filter(date_time__range=(start_date, end_date))
-    elif start_date_str and end_date_str:
+    if start_date_str and end_date_str:
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-        end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
         entities = Report.objects.filter(tanggal__range=[start_date, end_date])
     else:
         entities = Report.objects.all()
 
-    return render(request, 'Report/display_report.html', {'entities': entities})
+    # Filtering search columns
+    if search_column and search_value:
+        column_fields = [
+            'date_time', 'id', 'sender__first_name', 'tiketId', 'plat', 'driver', 
+            'PO', 'DO', 'no_tiket', 'kayu', 'berat', 'reject', 'lokasi', 'tujuan', 
+            'tanggal', 'completed', 'foto', 'og_foto', 'tanda_transaksi'
+        ]
+        
+        if 0 <= int(search_column) < len(column_fields):
+            column_field = column_fields[int(search_column)]
+            # Check if the column is 'completed' and handle Yes/No properly
+            if column_field == 'completed':
+                if search_value == 'Yes':
+                    entities = entities.filter(completed=True)
+                elif search_value == 'No':
+                    entities = entities.filter(completed=False)
+            else:
+                entities = entities.filter(**{f"{column_field}__icontains": search_value})
+
+    # Get ordering parameters from DataTables
+    order_column_index = int(request.GET.get('order[0][column]', 0))  # Default column to sort by is column 0
+    order_direction = request.GET.get('order[0][dir]', 'desc')  # Default direction is descending
+
+    # Map column index to actual field name
+    column_fields = [
+        'date_time', 'id', 'sender__first_name', 'tiketId', 'plat', 'driver', 
+        'PO', 'DO', 'no_tiket', 'kayu', 'berat', 'reject', 'lokasi', 'tujuan', 
+        'tanggal', 'completed', 'foto', 'og_foto', 'tanda_transaksi'
+    ]
+    order_field = column_fields[order_column_index]
+    
+    # Apply the order_by clause based on the direction
+    if order_direction == 'asc':
+        entities = entities.order_by(order_field)
+    else:
+        entities = entities.order_by(f'-{order_field}')
+
+    total_berat = entities.aggregate(Sum('berat'))['berat__sum'] or 0
+    total_reject = entities.aggregate(Sum('reject'))['reject__sum'] or 0
+    unique_plat_count = entities.values('plat').count()
+
+    # Pagination
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 25))
+
+    paginator = Paginator(entities, length)
+    page_number = (start // length) + 1
+
+    try:
+        entities_page = paginator.page(page_number)
+    except PageNotAnInteger:
+        entities_page = paginator.page(1)
+    except EmptyPage:
+        entities_page = paginator.page(paginator.num_pages)
+
+    data = list(entities_page.object_list.values(
+        'date_time', 'id', 'sender__first_name', 'tiketId', 'plat', 'driver', 
+        'PO', 'DO', 'no_tiket', 'kayu', 'berat', 'reject', 'lokasi', 'tujuan', 
+        'tanggal', 'completed', 'foto', 'og_foto', 'tanda_transaksi'
+    ))
+
+    for item in data:
+        item['completed'] = item['completed']  
+
+    response = {
+        'draw': draw,
+        'recordsTotal': paginator.count,
+        'recordsFiltered': paginator.count,
+        'data': data,
+        'total_berat': total_berat,
+        'total_reject': total_reject,
+        'unique_plat_count': unique_plat_count,
+    }
+
+    return JsonResponse(response)
+
+
+def display_report(request):
+    user_is_admin = request.user.groups.filter(name__in=['Accounting', 'GA']).exists() if request.user.is_authenticated else False
+    return render(request, 'Report/display_report.html', {'user_is_admin': user_is_admin})
+
+
 
 @login_required
 def delete_selected_rows_report(request):
@@ -435,33 +633,50 @@ class add_report_mobile(generics.CreateAPIView):
     parser_classes = (MultiPartParser, FormParser)
 
     def perform_create(self, serializer):
-        # Get the image data from request.FILES
-        image_data = self.request.FILES.get('foto')
-        print(image_data)
-        if image_data:
-            # Open the image using PIL
-            image = Image.open(image_data)
-            image_name = str(image_data)
-            
-            og_image = image.resize((500, 500), Image.Resampling.LANCZOS)
-            upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-            og_image_name = f'original-{upload_date}-{image_name}'
-            og_image_path = os.path.join(settings.MEDIA_ROOT,'report_photos', og_image_name)
-            
-            og_image.save(og_image_path, optimize = True, quality= 95)
-            # image.save(og_image_path)
+        try:
+            # Get image from request
+            image_data = self.request.FILES.get('foto')
 
-            resized_image = image.resize((100, 100))  # Change the dimensions as needed
-            resized_image_name = f'resized-{upload_date}-{image_name}'
-            resized_image_path = os.path.join(settings.MEDIA_ROOT, 'report_photos', resized_image_name)
-            resized_image.save(resized_image_path)
-            
-            # Delete the original image file
-            # os.remove(os.path.join(settings.MEDIA_ROOT, 'report_photos', image_name))
-            serializer.validated_data['og_foto'] = os.path.join('report_photos', og_image_name)
-            serializer.validated_data['foto'] = os.path.join('report_photos', resized_image_name)
-        # Call the serializer's save method to create the Report instance
-        serializer.save()
+            if not image_data:
+                raise ValueError("No image provided")
+
+            print("Received Image:", image_data.name)
+
+            # Open image using PIL
+            image = Image.open(image_data)
+            upload_date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+
+            # Generate new file names
+            og_image_name = f'original-{upload_date}-{image_data.name}'
+            resized_image_name = f'resized-{upload_date}-{image_data.name}'
+
+            # Paths for saving images
+            og_image_path = os.path.join('report_photos', og_image_name)
+            resized_image_path = os.path.join('report_photos', resized_image_name)
+
+            # Resize and save original image
+            og_image = image.resize((500, 500), Image.Resampling.LANCZOS)
+            og_image_io = ContentFile(b"")
+            og_image.save(og_image_io, format='JPEG', optimize=True, quality=95)
+            og_image_file = default_storage.save(og_image_path, og_image_io)
+
+            # Resize and save resized image
+            resized_image = image.resize((100, 100))
+            resized_image_io = ContentFile(b"")
+            resized_image.save(resized_image_io, format='JPEG')
+            resized_image_file = default_storage.save(resized_image_path, resized_image_io)
+
+            # Assign file paths to serializer
+            serializer.validated_data['og_foto'] = og_image_file
+            serializer.validated_data['foto'] = resized_image_file
+
+            # Save to DB
+            serializer.save()
+
+        except Exception as e:
+            print("Error processing image:", str(e))
+            traceback.print_exc()  # Print full error traceback
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])

@@ -24,24 +24,24 @@
                     {% endfor %}
         </div> -->
       <div class="form-group">
-        {{form.email.label_tag}} {{form.email}} 
-        {% for error in form.email.errors %}
-        <p class="text-danger">{{error}}</p>
+        <label for="{{ form.email.id_for_label }}">Email</label>
+        {{ form.email }} {% for error in form.email.errors %}
+        <p class="text-danger">{{ error }}</p>
         {% endfor %}
       </div>
       <div class="form-group">
-        {{ form.password.label_tag }} {{ form.password }} 
-        {% for error in form.password.errors %}
+        <label for="{{ form.password.id_for_label }}">Password</label>
+        {{ form.password }} {% for error in form.password.errors %}
         <p class="text-danger">{{ error }}</p>
         {% endfor %}
       </div>
       {% if form.non_field_errors %}
-        <div class="form-group">
-          <div class="alert alert-danger" role="alert">
-            <strong>Error:</strong> 
-            {{ form.non_field_errors }}
-          </div>
+      <div class="form-group">
+        <div class="alert alert-danger" role="alert">
+          <strong>Error:</strong>
+          {{ form.non_field_errors }}
         </div>
+      </div>
       {% endif %}
       <div class="text-center pt-1 mb-5 pb-1">
         <button
@@ -50,7 +50,9 @@
         >
           Login
         </button>
-        <a class="link-primary" href="#!">Forgot password?</a>
+        <a class="link-primary" href="{% url 'password_reset' %}"
+          >Forgot password?</a
+        >
       </div>
 
       <div class="d-flex align-items-center justify-content-center pb-4">

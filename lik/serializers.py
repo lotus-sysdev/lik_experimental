@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-
+from django.utils import timezone
 from .models import Report, Lokasi, Tujuan, Kayu
 
 
@@ -10,6 +10,17 @@ class ReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
         fields = '__all__'
+
+        
+    def validate(self, data):
+        upload_date = data.get('upload_date')
+        current_date = timezone.now().date()
+
+        if upload_date and upload_date != current_date:
+            raise serializers.ValidationError("The upload date must match the current date.")
+
+        return data
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

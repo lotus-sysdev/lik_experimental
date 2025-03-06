@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% load auth_extras %}
 
 <html>
 
@@ -178,7 +178,13 @@
                               {% endfor %}
                             </div>
                         </div>
-                    </div>              
+                    </div> 
+                    {% if request.user|has_group:'GA' or request.user|has_group:'Admin' %}
+                    <div class="form-group">
+                        <label for="{{ form.completed.id_for_label }}">Completed</label>
+                        {{ form.completed }}
+                    </div>
+                    {% endif %}
                     <button type="submit" class="btn btn-primary">Update</button>
                 </form>
                 <form id="deleteForm" method="post" action="{% url 'delete_report' entity.id %}"
@@ -193,8 +199,25 @@
               {% endif %}
             </div>
         </div>
-        <script>
-        
+         <script>
+            document.getElementById('editForm').addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+                var form = event.target;
+                var formData = new FormData(form);
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', form.action, true);
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                xhr.onload = function() {
+                    if (xhr.status >= 200 && xhr.status < 400) {
+                        
+                        window.location.href = '/api/display_report';
+                    } else {
+                        
+                        console.error(xhr.responseText);
+                    }
+                };
+                xhr.send(formData);
+            });
         </script>
         {% endblock %}
 </body>

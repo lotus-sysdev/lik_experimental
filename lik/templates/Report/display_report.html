@@ -7,7 +7,7 @@
   </head>
   <body>
     {% block content %}
-    <h1>Report List</h1>
+    <h1>Report List Tes</h1>
     {% csrf_token %}
     <div>
       <table
@@ -31,6 +31,7 @@
             <option value="12">Lokasi Potong</option>
             <option value="13">Pabrik Tujuan</option>
             <option value="14">Tanggal Keluar</option>
+            <option value="15">Completed</option>
             <!-- Add more options for additional columns -->
           </select>
           <input
@@ -110,107 +111,169 @@
             <span class="font-weight-bold" id="uniquePlatCount"></span>
           </p>
         </div>
+        
+        {% if user_is_admin %}
+            <label class="mr-2" for="transferDate">Select transfer date and time:</label>
+            <div class="form-inline mb-2">
+                <input type="date" id="transferDate" class="form-control mr-2" style="width: 10%;">
+                <input type="time" id="transferTime" class="form-control mr-2" style="width: 10%;">
+                <button class="btn btn-secondary" onclick="Transfer()">Approve transfer</button>
+            </div>
+        {% endif %}
 
-        <thead class="thead-light">
+        <br>
+        <thead class="thead-dark">
           <tr>
-            <th>Timestamp</th>
-            <th>ID</th>
-            <th>Sender</th>
-            <th>ID Tiket</th>
-            <th>Plat Nomor</th>
-            <th>Driver</th>
-            <th>No. PO</th>
-            <th>No. DO</th>
-            <th>No. Tiket Timbang</th>
-            <th>Jenis Kayu</th>
-            <th>Berat Netto (Kg)</th>
-            <th>Reject (Kg)</th>
-            <th>Lokasi Potong</th>
-            <th>Tujuan Pabrik</th>
-            <th>Tanggal Keluar</th>
-            <th>Foto</th>
-            <th>Ubah</th>
+              <th>Timestamp</th>
+              <th>Sender</th>
+              <th>ID Tiket</th>
+              <th>Plat Nomor</th>
+              <th>Driver</th>
+              <th>No. PO</th>
+              <th>No. DO</th>
+              <th>No. Tiket Timbang</th>
+              <th>Jenis Kayu</th>
+              <th>Berat Netto (Kg)</th>
+              <th>Reject (Kg)</th>
+              <th>Lokasi Potong</th>
+              <th>Tujuan Pabrik</th>
+              <th>Tanggal Keluar</th>
+              <th>Completed</th>
+              <th>Tanda Transfer</th> 
+              <th>Foto</th>
+              <th>Ubah</th>
           </tr>
-        </thead>
+      </thead>
+
         <tbody class="tbody">
-          {% for report in entities %}
-          <tr>
-            {% if report.date_time %}
-            <td>{{ report.date_time|date:"Y/m/d H:i:s" }}</td>
-            {% else %}
-            <td>None</td>
-            {% endif %}
-            <td>{{ report.id }}</td>
-            {% if report.sender.first_name %}
-            <td>{{ report.sender.first_name }}</td>
-            {% elif report.sender %}
-            <td>{{report.sender}}</td>
-            {% else %}
-            <td>None</td>
-            {% endif %}
-            <td>{{ report.tiketId }}</td>
-            <td>{{ report.plat|upper }}</td>
-            <td>{{ report.driver }}</td>
-            <td>{{ report.PO }}</td>
-            <td>{{ report.DO|strip_spaces }}</td>
-            <td>{{ report.no_tiket }}</td>
-            <td>{{ report.kayu }}</td>
-            <td>{{ report.berat }} kg</td>
-            <td>{{ report.reject }} kg</td>
-            <td>{{ report.lokasi }}</td>
-            <td>{{ report.tujuan }}</td>
-            <td>{{ report.tanggal|date:"Y/m/d" }}</td>
-            <td>
-              {% if report.og_foto and report.og_foto %}
-              <a
-                href="{% url 'display_foto' report.og_foto.url %}"
-                target="_blank"
-                ><img src="{{ report.foto.url }}" alt="{{ report.id }}"
-              /></a>
-              {% elif report.foto %}
-              <!-- Display resized image if og_foto is empty but foto exists -->
-              <img src="{{ report.foto.url }}" alt="{{ report.id }}" />
-              {% endif %}
-            </td>
-            <td>
-              <a href="{% url 'report_detail' report.id %}">View</a>
-            </td>
-          </tr>
-          {% endfor %}
+          {% comment %} loaded by ajax {% endcomment %}
+         
         </tbody>
       </table>
     </div>
+    <script src="https://cdn.datatables.net/select/3.0.0/js/dataTables.select.js"></script>
+
     <script>
       var table;
+      
+      
       function initializeDataTable() {
         table = new DataTable("#likTable", {
+          processing: true,
+          serverSide: true,
+          ajax: {
+            url: "{% url 'display_report_items' %}",  // URL to fetch data
+            data: function(d) {
+              d.start_date = $('#startDate').val();
+              d.end_date = $('#endDate').val();
+              d.search_column = $('#columnFilter').val();  // Add search column
+              d.search_value = $('#columnSearch').val().trim();
+            },
+            dataSrc: function(json) {
+              // Update the totals using jQuery
+              $('#totalBerat').text(json.total_berat.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+              $('#totalReject').text(json.total_reject.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+              $('#uniquePlatCount').text(json.unique_plat_count);
+              // console.log(json);
+
+              return json.data;
+            }
+          },
+          columns: [
+            { data: "date_time",orderable: true ,render: function(data) { return data ? new Date(data).toLocaleString() : 'None'; } },
+            { data: "sender__first_name", defaultContent: "None", orderable: true }, 
+            { data: "tiketId" },
+            { data: "plat", render: function(data) { return data ? data.toUpperCase() : 'None'; } },
+            { data: "driver" },
+            { data: "PO", render: function(data) { return  'PO/'+ data } },
+            {
+                data: "DO",
+                render: function(data) {
+                    if (data) {
+                        if (data.length == 11) {
+                            return data.replace(/\s+/g, ''); 
+                        } else {
+                            return data.replace(/\s+/g, ' '); 
+                        }
+                    }
+                    return 'None'; 
+                }
+            },
+            { data: "no_tiket" },
+            { data: "kayu" },
+            { data: "berat", render: function(data) { return (data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' Kg' )} }, 
+            { data: "reject", render: function(data) { return data + ' kg'; } },
+            { data: "lokasi" },
+            { data: "tujuan" },
+            { data: "tanggal", render: function(data) { return data ? new Date(data).toLocaleDateString() : 'None'; } },
+            // { data: "completed", render: function(data) { return data ? 'Yes' : 'No'; } },
+            { 
+              data: "completed", 
+              render: function(data) {
+                  return data ? "Yes" : "No";  
+              } 
+            },
+            { 
+                data: "tanda_transaksi", 
+                render: function(data) {
+                    if (data) {
+                        var date = new Date(data);
+                        // date.setHours(date.getHours() + 7);
+
+                        var day = ("0" + date.getDate()).slice(-2);
+                        var month = ("0" + (date.getMonth() + 1)).slice(-2);
+                        var year = date.getFullYear();
+                        var hours = ("0" + date.getHours()).slice(-2); // Updated hours
+                        var minutes = ("0" + date.getMinutes()).slice(-2);
+                        // var seconds = ("0" + date.getSeconds()).slice(-2);
+
+                        return `${day}/${month}/${year} ${hours}:${minutes}` + ' WIB';
+                    } else {
+                        return '-';
+                    }
+                }
+
+            },            
+            {
+                data: "og_foto",
+                render: function(data, type, row) {
+                    if (data) {
+                        // Assuming the og_foto holds the relative path to the image for the link
+                        var imagePath = "/api/display_foto/media/" + data;  // URL for the full image
+                        
+                        // Assuming row.foto holds the relative path for the image to display
+                        var imgSrc = "/media/" + row.foto;  // The actual image source
+                        
+                        return '<a href="' + imagePath + '" target="_blank"><img src="' + imgSrc + '" alt="' + row.id + '" style="max-width: 100px; max-height: 100px;" /></a>';
+                    } else {
+                        return 'None';
+                    }
+                }
+            },
+
+
+              
+            { data: "id", render: function(data) { return '<a href="/api/report_detail/' + data + '">View</a>'; } },
+          ],
+          createdRow: function(row, data, dataIndex) {
+              if (data.completed === true) {   
+                  $(row).css('background-color', '#ccffc7');   
+              } else if (data.completed === false ) {
+                  $(row).css('background-color', '#f8d7da');   
+              }
+          },
+          order: [[1, "desc"]],  
+          columnDefs: [
+              { targets: [16], orderable: false },   
+          ],
           select: {
             style: "multi",
           },
-
-          columns: [
-            null,
-            { visible: false },
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-          ],
           lengthMenu: [
             [10, 25, 50, 100, -1],
             [10, 25, 50, 100, "All"],
           ],
+          pageLength: 25,
           layout: {
             top2Start: {
               buttons: {
@@ -228,8 +291,39 @@
                     className: "btn-danger",
                     action: deleteSelectedRows,
                   },
+                  {
+                      text: "Complete",
+                      className: "btn-success",
+                      action: function(e, dt, node, config) {
+                          var selectedRows = table.rows({ selected: true }).data();
+                          var ids = selectedRows.map(function(row) { return row.id; }).toArray();
+
+                          if (ids.length > 0) {
+                              updateStatus(ids, 'Yes');  // Send request to mark as completed
+                          } else {
+                              alert("Please select rows to mark as completed.");
+                          }
+                      }
+                  },
+                  {
+                      text: "Un-Completed",
+                      className: "btn-warning",
+                      action: function(e, dt, node, config) {
+                          var selectedRows = table.rows({ selected: true }).data();
+                          var ids = selectedRows.map(function(row) { return row.id; }).toArray();
+                          if (ids.length > 0) {
+                              updateStatus(ids, 'No');  // Send request to mark as un-completed
+                          } else {
+                              alert("Please select rows to mark as un-completed.");
+                          }
+                      }
+                  },
+                  
+
                   { extend: "colvis", className: "btn-info" },
                 ],
+                select: true,
+                
                 dom: {
                   button: {
                     className: "btn",
@@ -237,10 +331,99 @@
                 },
               },
             },
-            // top2Start:'pageLength'
           },
         });
+
+        
       }
+
+      var userIsAdmin = "{{ user_is_admin|yesno:'True,False' }}" === "True";
+      function Transfer() {
+          if (!userIsAdmin) {
+              alert("Anda tidak memiliki akses untuk mengaprove.");
+              return;
+          }
+
+          // Get the selected date and time from the input fields
+          var selectedDate = document.getElementById('transferDate').value;
+          var selectedTime = document.getElementById('transferTime').value;
+
+          if (!selectedDate || !selectedTime) {
+              alert("Please select a date and time.");
+              return;
+          }
+
+          var selectedRows = table.rows({ selected: true }).data();
+          var ids = selectedRows.map(function(row) { return row.id; }).toArray();
+          if (ids.length > 0) {
+              var fullDateTime = selectedDate + 'T' + selectedTime; // Combine date and time
+              approveTransfer(ids, fullDateTime); 
+          } else {
+              alert("Please select rows to approve transfer.");
+          }
+      }
+
+
+      function approveTransfer(ids, dateTime) {
+          $.ajax({  
+              url: "{% url 'approve_transfer' %}",
+              method: "POST",
+              data: {
+                  csrfmiddlewaretoken: '{{ csrf_token }}',
+                  ids: ids,
+                  transfer_date: dateTime  // Send the formatted date and time
+              },
+              success: function(response) {
+                  if (response.status === 'success') {
+                      alert('Transfer approved and timestamp updated.');
+                      table.ajax.reload();  // Reload DataTable to show the latest data
+                  } else {
+                      alert('Error: ' + response.message);
+                  }
+              },
+              error: function() {
+                  alert('Something went wrong. Please try again.');
+              }
+          });
+      }
+
+
+     // Function to update status of selected rows
+      function updateStatus(ids, status) {
+          var statusBoolean = status === 'Yes' ? true : false;
+
+          $.ajax({
+              url: '{% url "update_completed_status" %}',
+              method: 'POST',
+              data: {
+                  ids: ids,
+                  status: statusBoolean,  // Send True or False
+                  csrfmiddlewaretoken: '{{ csrf_token }}'
+              },
+              success: function(response) {
+                  // Update rows in DataTables after status is updated
+                  table.rows({ selected: true }).every(function(rowIdx, tableLoop, rowLoop) {
+                      var rowData = this.data();
+                      rowData.completed = statusBoolean;  // Update the "completed" field to True or False
+                      this.invalidate();  // Mark the row as invalid so DataTables updates it
+
+                      // Update background color based on the new 'completed' value
+                      if (rowData.completed === true) {
+                          $(this.node()).css('background-color', '#ccffc7');  // Green for 'Completed'
+                      } else {
+                          $(this.node()).css('background-color', '#f8d7da');  // Red for 'Pending'
+                      }
+                  });
+                  alert("Status updated successfully!");
+              },
+              error: function(xhr, status, error) {
+                  alert("Error updating status: " + error);
+              }
+          });
+      }
+
+
+
       
       function deleteSelectedRows() {
         if (!table) {
@@ -285,7 +468,9 @@
       }
 
       $(document).ready(function () {
+        
         initializeDataTable();
+        
         calculateStats();
 
         var searchTimeout;
@@ -376,7 +561,7 @@
         function columnSearch() {
           var columnIndex = $("#columnFilter").val(); // Get the index of the selected column
           var searchValue = $("#columnSearch").val().trim(); // Get the value of the search input and remove leading/trailing whitespace
-          table.column(columnIndex).search(searchValue).draw(); // Apply search to the selected column
+          table.ajax.reload(); // Reload the DataTable with the new search parameters
           updateStatsAfterSearch();
         }
 
@@ -599,49 +784,16 @@
         }
 
         function filterByDateRange(startDate, endDate) {
-          $.ajax({
-            url: '{% url "display_report" %}',
-            type: "GET",
-            data: {
-              start_date: startDate,
-              end_date: endDate,
-            },
-            success: function (response) {
-              console.log("Success");
-              $("#likTable").html($(response).find("#likTable").html());
-              if (table) {
-                table.destroy();
-              }
-              initializeDataTable();
-              calculateStats();
-            },
-            error: function (xhr, status, error) {
-              console.error("Error filtering data:", error);
-            },
-          });
+            
+          $('#startDate').val(startDate);
+          $('#endDate').val(endDate);
+          table.ajax.reload();
         }
 
         function filterByTimestamp(startDate, endDate) {
-          $.ajax({
-            url: '{% url "display_report" %}',
-            type: "GET",
-            data: {
-              start_date_ts: startDate,
-              end_date_ts: endDate,
-            },
-            success: function (response) {
-              console.log("Success");
-              $("#likTable").html($(response).find("#likTable").html());
-              if (table) {
-                table.destroy();
-              }
-              initializeDataTable();
-              calculateStats();
-            },
-            error: function (xhr, status, error) {
-              console.error("Error filtering data:", error);
-            },
-          });
+          $('#startDate').val(startDate);
+          $('#endDate').val(endDate);
+          table.ajax.reload();
         }
       });
     </script>
