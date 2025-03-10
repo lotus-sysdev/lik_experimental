@@ -180,7 +180,27 @@
             }
           },
           columns: [
-            { data: "date_time",orderable: true ,render: function(data) { return data ? new Date(data).toLocaleString() : 'None'; } },
+            { 
+                data: "date_time",
+                orderable: true,
+                render: function(data) {
+                    if (data) {
+                        var date = new Date(data);
+                        var year = date.getFullYear();
+                        var month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, pad with leading zero
+                        var day = date.getDate().toString().padStart(2, '0'); // Pad with leading zero
+                        var hours = date.getHours();
+                        var minutes = date.getMinutes().toString().padStart(2, '0'); // Pad with leading zero
+                        var seconds = date.getSeconds().toString().padStart(2, '0'); // Pad with leading zero
+                        var ampm = hours >= 12 ? 'PM' : 'AM';
+                        hours = hours % 12;
+                        hours = hours ? hours : 12; // the hour '0' should be '12'
+                        var formattedDate = year + '-' + month + '-' + day + ', ' + hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+                        return formattedDate;
+                    }
+                    return 'None';
+                }
+            },
             { data: "sender__first_name", defaultContent: "None", orderable: true }, 
             { data: "tiketId" },
             { data: "plat", render: function(data) { return data ? data.toUpperCase() : 'None'; } },
