@@ -119,6 +119,7 @@
                 d.end_date = $('#endDate').val();            // End date filter
                 d.search_col = $('#columnFilter').val();  // Add search column
                 d.search_val = $('#columnSearch').val().trim();
+                d.search_value = d.search.value; 
             },
             dataSrc: function(json) {
                 // Log the JSON response to check if data is being received correctly

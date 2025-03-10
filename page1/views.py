@@ -384,6 +384,7 @@ def item_list(request):
     length = int(request.GET.get('length', 10))
     search_column = request.GET.get('search_col')
     search_value = request.GET.get('search_val')
+    s_value = request.GET.get('search_value')  # Global search value
 
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
@@ -396,7 +397,7 @@ def item_list(request):
         end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
         items = items.filter(tanggal_pemesanan__range=[start_date, end_date])
 
-    # Define the mapping outside the conditional block
+    # Define the mapping of column indices to field names
     mapping = {
         '0': 'upload_type',
         '1': 'Tanggal',
@@ -412,30 +413,30 @@ def item_list(request):
         '13': 'is_approved',
     }
 
-    # Column-based search
-    if search_value:
-        if search_column:
-            field = mapping.get(search_column)
-            if field:
-                if search_column == '13':  # Handle the 'is_approved' column search
-                    # Handle "Yes" and "No" filtering based on the approved status
-                    if search_value.lower() == 'yes':
-                        items = items.filter(is_approved=True)
-                    elif search_value.lower() == 'no':
-                        items = items.filter(is_approved=False)
-                elif search_column in ['1', '2']:  # Handle date columns
-                    try:
-                        date_value = datetime.strptime(search_value, '%Y-%m-%d').date()
-                        items = items.filter(**{f"{field}": date_value})
-                    except ValueError:
-                        items = items.none()
-                else:
-                    filter_kwargs = {f"{field}__icontains": search_value}
-                    items = items.filter(**filter_kwargs)
+    # Global search (apply search across multiple columns)
+    if s_value:
+        # Ensure the global search is applied to the full string, not just the first 3 digits.
+        items = items.filter(Q(nama__icontains=s_value) | Q(SKU__icontains=s_value))
+
+    # Column-based search (apply search only on the specified column)
+    if search_value and search_column:
+        field = mapping.get(search_column)
+        if field:
+            # Handle specific cases (such as 'is_approved' column, date columns, etc.)
+            if search_column == '13':  # Special handling for 'is_approved' column
+                if search_value.lower() == 'yes':
+                    items = items.filter(is_approved=True)
+                elif search_value.lower() == 'no':
+                    items = items.filter(is_approved=False)
+            elif search_column in ['1', '2']:  # Special handling for date columns
+                try:
+                    date_value = datetime.strptime(search_value, '%Y-%m-%d').date()
+                    items = items.filter(**{f"{field}": date_value})
+                except ValueError:
+                    items = items.none()  # If invalid date format, return no results
             else:
-                items = items.filter(Q(nama__icontains=search_value) | Q(SKU__icontains=search_value))
-        else:
-            items = items.filter(Q(nama__icontains=search_value) | Q(SKU__icontains=search_value))
+                # Ensure full string search is applied across the entire field
+                items = items.filter(**{f"{field}__icontains": search_value})
 
     # Ordering
     order_column_index = int(request.GET.get('order[0][column]', 2))  # Default column to sort by is column 2 (tanggal_pemesanan)
