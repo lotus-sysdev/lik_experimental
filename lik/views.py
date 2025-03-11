@@ -3,7 +3,6 @@ import os
 import json
 import uuid
 import pytz
-from datetime import datetime, timedelta
 import logging
 
 # Third-party imports
@@ -38,7 +37,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
 from django.contrib.auth.models import User, Group
 from django.views.decorators.csrf import csrf_exempt
-from pytz import timezone as pytz_timezone
+from django.utils.timezone import make_aware
+from datetime import datetime, timedelta
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
@@ -407,19 +407,54 @@ def approve_transfer(request):
 # -------------------- Report Functions --------------------#
 @login_required
 def display_report_items(request):
+    # Dapatkan parameter untuk pencarian
+    search_date = request.GET.get('search_date')
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
+
+    # Ambil data dari model Report
+    queryset = Report.objects.all()
+
+    # Pencarian berdasarkan tanggal (search_date)
+    if search_date:
+        try:
+            # Mengubah string tanggal menjadi objek datetime
+            search_date = datetime.strptime(search_date, '%Y-%m-%d').date()
+
+            # Membuat waktu mulai dan berakhir untuk hari tersebut
+            start_of_day = datetime.combine(search_date, datetime.min.time())  # 00:00:00
+            end_of_day = start_of_day + timedelta(days=1) - timedelta(seconds=1)  # 23:59:59
+
+            # Pastikan waktu berada di zona waktu Asia/Jakarta
+            jakarta_timezone = pytz.timezone('Asia/Jakarta')
+
+            # Konversi start_of_day dan end_of_day ke waktu lokal Jakarta
+            start_of_day = jakarta_timezone.localize(start_of_day)  
+            end_of_day = jakarta_timezone.localize(end_of_day)  
+
+            # Gunakan `date_time__date` untuk memfilter berdasarkan tanggal tanpa memperhatikan waktu
+            queryset = queryset.filter(date_time__date=search_date)
+
+        except ValueError:
+            pass  # Tangani error jika format tanggal salah
+
+    # Pencarian berdasarkan rentang tanggal start_date_str dan end_date_str
+    if start_date_str and end_date_str:
+        try:
+            # Mengubah string tanggal menjadi objek datetime
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+
+            # Filter rentang tanggal
+            queryset = queryset.filter(tanggal__range=[start_date, end_date])
+
+        except ValueError:
+            pass  # Tangani error jika format tanggal salah
+
+    # Filtering berdasarkan kolom pencarian lainnya
     search_column = request.GET.get('search_column')
     search_value = request.GET.get('search_value')
 
-    if start_date_str and end_date_str:
-        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-        end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
-        entities = Report.objects.filter(tanggal__range=[start_date, end_date])
-    else:
-        entities = Report.objects.all()
-
-    # Filtering search columns
     if search_column and search_value:
         column_fields = [
             'date_time', 'id', 'sender__first_name', 'tiketId', 'plat', 'driver', 
@@ -429,43 +464,41 @@ def display_report_items(request):
         
         if 0 <= int(search_column) < len(column_fields):
             column_field = column_fields[int(search_column)]
-            # Check if the column is 'completed' and handle Yes/No properly
             if column_field == 'completed':
                 if search_value == 'Yes':
-                    entities = entities.filter(completed=True)
+                    queryset = queryset.filter(completed=True)
                 elif search_value == 'No':
-                    entities = entities.filter(completed=False)
+                    queryset = queryset.filter(completed=False)
             else:
-                entities = entities.filter(**{f"{column_field}__icontains": search_value})
+                queryset = queryset.filter(**{f"{column_field}__icontains": search_value})
 
-    # Get ordering parameters from DataTables
-    order_column_index = int(request.GET.get('order[0][column]', 0))  # Default column to sort by is column 0
-    order_direction = request.GET.get('order[0][dir]', 'desc')  # Default direction is descending
+    # Penerapan sorting berdasarkan kolom
+    order_column_index = int(request.GET.get('order[0][column]', 0))
+    order_direction = request.GET.get('order[0][dir]', 'desc')
 
-    # Map column index to actual field name
     column_fields = [
         'date_time', 'id', 'sender__first_name', 'tiketId', 'plat', 'driver', 
         'PO', 'DO', 'no_tiket', 'kayu', 'berat', 'reject', 'lokasi', 'tujuan', 
         'tanggal', 'completed', 'foto', 'og_foto', 'tanda_transaksi'
     ]
     order_field = column_fields[order_column_index]
-    
-    # Apply the order_by clause based on the direction
-    if order_direction == 'asc':
-        entities = entities.order_by(order_field)
-    else:
-        entities = entities.order_by(f'-{order_field}')
 
-    total_berat = entities.aggregate(Sum('berat'))['berat__sum'] or 0
-    total_reject = entities.aggregate(Sum('reject'))['reject__sum'] or 0
-    unique_plat_count = entities.values('plat').count()
+    if order_direction == 'asc':
+        queryset = queryset.order_by(order_field)
+    else:
+        queryset = queryset.order_by(f'-{order_field}')
+
+    # Kalkulasi total
+    total_berat = queryset.aggregate(Sum('berat'))['berat__sum'] or 0
+    total_reject = queryset.aggregate(Sum('reject'))['reject__sum'] or 0
+    unique_plat_count = queryset.values('plat').count()
 
     # Pagination
     draw = int(request.GET.get('draw', 1))
     start = int(request.GET.get('start', 0))
     length = int(request.GET.get('length', 25))
 
-    paginator = Paginator(entities, length)
+    paginator = Paginator(queryset, length)
     page_number = (start // length) + 1
 
     try:
@@ -482,7 +515,7 @@ def display_report_items(request):
     ))
 
     for item in data:
-        item['completed'] = item['completed']  
+        item['completed'] = item['completed']
 
     response = {
         'draw': draw,
@@ -495,7 +528,6 @@ def display_report_items(request):
     }
 
     return JsonResponse(response)
-
 
 def display_report(request):
     user_is_admin = request.user.groups.filter(name__in=['Accounting', 'GA']).exists() if request.user.is_authenticated else False

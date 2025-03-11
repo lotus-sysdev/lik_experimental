@@ -168,6 +168,7 @@
               d.end_date = $('#endDate').val();
               d.search_column = $('#columnFilter').val();  // Add search column
               d.search_value = $('#columnSearch').val().trim();
+              d.search_date = $('#columnFilter').val() === '0' ? $('#columnSearch').val().trim() : null;
             },
             dataSrc: function(json) {
               // Update the totals using jQuery
