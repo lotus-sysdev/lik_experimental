@@ -428,15 +428,27 @@ def display_report_items(request):
         ]
         
         if 0 <= int(search_column) < len(column_fields):
-            column_field = column_fields[int(search_column)]
+            column_field = column_fields[int(search_column)]            
             # Check if the column is 'completed' and handle Yes/No properly
             if column_field == 'completed':
                 if search_value == 'Yes':
                     entities = entities.filter(completed=True)
                 elif search_value == 'No':
                     entities = entities.filter(completed=False)
+            elif column_field == 'date_time':
+                # Handle date_time field (timestamp) to search only by date part
+                try:
+                    # Try to parse the search_value into a date format (yyyy-mm-dd)
+                    search_date = datetime.strptime(search_value, '%Y-%m-%d').date()
+                    # Filter the date_time field to match only the date part (ignoring time)
+                    entities = entities.filter(date_time__date=search_date)
+                except ValueError:
+                    # If search_value is not in a valid date format, don't apply the filter
+                    pass
             else:
+                # For other fields, filter using icontains (case-insensitive search)
                 entities = entities.filter(**{f"{column_field}__icontains": search_value})
+
 
     # Get ordering parameters from DataTables
     order_column_index = int(request.GET.get('order[0][column]', 0))  # Default column to sort by is column 0
