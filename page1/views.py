@@ -384,7 +384,7 @@ def item_list(request):
     length = int(request.GET.get('length', 10))
     search_column = request.GET.get('search_col')
     search_value = request.GET.get('search_val')
-    s_value = request.GET.get('search[value]')  # Global search value
+    s_value = request.GET.get('search_value')  # Global search value
 
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
@@ -413,21 +413,10 @@ def item_list(request):
         '13': 'is_approved',
     }
 
+    # Global search (apply search across multiple columns)
     if s_value:
-        items = items.filter(
-            Q(upload_type__icontains=s_value) |
-            Q(Tanggal__icontains=s_value) |
-            Q(tanggal_pemesanan__icontains=s_value) |
-            Q(customer__nama_pt__icontains=s_value) |
-            Q(pic__nama__icontains=s_value) |
-            Q(SKU__icontains=s_value) |
-            Q(nama__icontains=s_value) |
-            Q(category__name__icontains=s_value) |
-            Q(catatan__icontains=s_value) |
-            Q(quantity__icontains=s_value) |
-            Q(price__icontains=s_value) |
-            Q(is_approved__icontains=s_value)
-        )
+        # Ensure the global search is applied to the full string, not just the first 3 digits.
+        items = items.filter(Q(nama__icontains=s_value) | Q(SKU__icontains=s_value))
 
     # Column-based search (apply search only on the specified column)
     if search_value and search_column:
