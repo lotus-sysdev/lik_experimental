@@ -219,7 +219,18 @@
                     return 'None'; 
                 }
             },
-            { data: "no_tiket" },
+            { 
+              data: "no_tiket",
+              render: function(data){
+                if (data){
+                  if (data.length ==  13){
+                    return data.replace(/\s+/g, ' '); 
+                  } else {
+                    return data.replace(/\s+/g, ''); 
+                  }
+                }                
+              }
+            },
             { data: "kayu" },
             { data: "berat", render: function(data) { return (data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' Kg' )} }, 
             { data: "reject", render: function(data) { return data + ' kg'; } },
