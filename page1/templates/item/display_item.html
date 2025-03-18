@@ -266,46 +266,48 @@
     });
 
    $("#exportPdfBtn").on("click", function () {
-        var selectedData = table.rows({ selected: true }).data().toArray();
+        var selectedData = table.rows({ selected: true }).data().toArray(); //
         var visibleColumns = [];
         var visibleColumnIndexes = [];
 
-        // Ambil hanya kolom yang terlihat
         table.columns(":visible").every(function (index) {
             visibleColumns.push($(this.header()).text().trim());
             visibleColumnIndexes.push(index);
         });
 
-        // Filter hanya kolom yang terlihat
+        if (selectedData.length === 0) {
+            selectedData = table.rows({ search: "applied" }).data().toArray(); //
+        }
+
         var filteredData = selectedData.map(row =>
             visibleColumnIndexes.map(index => row[index])
         );
 
+        
         if (filteredData.length > 0 && visibleColumns.length > 0) {
-            var csrfToken = $("input[name='csrfmiddlewaretoken']").val(); // Ambil CSRF token dari halaman
+            var csrfToken = $("input[name='csrfmiddlewaretoken']").val(); 
 
             $.ajax({
                 url: "/export-pdf/",
                 type: "POST",
-                headers: { "X-CSRFToken": csrfToken }, // Tambahkan CSRF token di header
+                headers: { "X-CSRFToken": csrfToken }, 
                 data: JSON.stringify({
                     data: filteredData,
                     columns: visibleColumns,
                 }),
                 contentType: "application/json",
                 success: function (response) {
-                    window.location.href = response.pdf_url;  // Arahkan ke halaman PDF
+                    window.location.href = response.pdf_url; 
                 },
                 error: function (xhr, status, error) {
                     console.error("Export failed:", error);
-                    alert("Gagal mengekspor PDF.");
+                    alert("Failed to export PDF.");
                 }
             });
         } else {
-            alert("Silakan pilih minimal satu baris untuk diekspor.");
+            alert("No data available to export.");
         }
     });
-
 
 
 
