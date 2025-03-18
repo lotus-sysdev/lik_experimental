@@ -6,7 +6,7 @@ from .models import *
 class ReportForm(forms.ModelForm):
     def clean_DO(self):
         do = str(self.cleaned_data['DO']).replace(" ", "")  
-        if len(do) == 11:
+        if len(do) <= 11:
             return do
         elif len(do) == 8:
             return ' '.join([do[:4], do[4:]])
