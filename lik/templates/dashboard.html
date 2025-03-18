@@ -106,10 +106,11 @@
           <option value="21-eom">21- End of this month</option>
           <option value="7">Last 7 days</option>
           <option value="30">Last 30 days</option>
-          <option value="60">Last 60 days</option>
-          <option value="90">Last 90 days</option>
+          {% comment %} <option value="60">Last 60 days</option> {% endcomment %}
+          {% comment %} <option value="90">Last 90 days</option> {% endcomment %}
           <option value="365">Last 365 days</option>
-          <option value="730">Last 730 days</option>
+          <option value="mtd">Month to date</option>
+          {% comment %} <option value="730">Last 730 days</option> {% endcomment %}
           <option value="ytd">Year to Date</option>
         </select>
       </div>
@@ -352,7 +353,12 @@
       'Racuk R2 ME': 'rgba(0, 250, 0, 0.87)' // Light Blue
     };
    
-
+    var uniqueColors = {
+        'Cipta Mandala': 'rgb(247, 197, 36)', // Light Blue
+        'Hijau Lestari': 'rgb(48, 224, 25)', // Orange
+        'Sumatra Prima Fibreboard': 'rgb(245, 0, 0)', // Teal
+      'PT Sumatera Prima Fibreboard': 'rgb(0, 45, 247)' // Purple
+      };
     function renderTonaseChart(chartId, sender, tonaseCounts, startDate, endDate, dmy_tujuan) {
         // console.log(sender, tonaseCounts, dmy_tujuan);
 
@@ -362,7 +368,7 @@
         tonaseCounts.forEach(item => {
             const dateKey = `${item.year}-${item.month}-${item.day}`;
 
-            // Cari tujuan berdasarkan tanggal dari dmy_tujuan
+            // Cari tujuan berdasarkan tanggal dari dm   y_tujuan
             const matchedDestination = dmy_tujuan.find(dest => 
                 dest.year === item.year && dest.month === item.month && dest.day === item.day
             );
@@ -1011,7 +1017,23 @@
         startDate = formatDate(
           new Date(new Date().setDate(new Date().getDate() - 729))
         ); // Date 730 days ago
-      } else if (dateRange === "ytd") {
+      }else if (dateRange === "mtd") {
+      // End date is today's date
+      endDate = formatDate(new Date()); // Today's date
+
+      // Get the current date
+      const currentDate = new Date();
+
+      const startDateObj = new Date();
+      startDateObj.setMonth(startDateObj.getMonth() - 1); // Set to previous month
+      startDateObj.setDate(1); // Set to the 1st of that month
+
+
+      startDate = formatDate(startDateObj);
+
+}
+
+      else if (dateRange === "ytd") {
         endDate = formatDate(new Date()); // Today's date
         startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year
         startDate = formatDate(startDate);
