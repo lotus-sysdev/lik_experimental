@@ -161,6 +161,7 @@
         table = new DataTable("#likTable", {
           processing: true,
           serverSide: true,
+          ordering: true,
           ajax: {
             url: "{% url 'display_report_items' %}",  // URL to fetch data
             data: function(d) {
@@ -278,14 +279,15 @@
           createdRow: function(row, data, dataIndex) {
               if (data.completed === true) {   
                   $(row).css('background-color', '#ccffc7');   
-              } else if (data.completed === false ) {
-                  $(row).css('background-color', '#f8d7da');   
               }
+              // else if (data.completed === false ) {
+                 // $(row).css('background-color', '#f8d7da');   
+              //}
           },
-          order: [[1, "desc"]],  
-          columnDefs: [
-              { targets: [16], orderable: false },   
-          ],
+          // order: [[1, "desc"]],  
+          // columnDefs: [
+            //  { targets: [8], orderable: false },   
+          // ],
           select: {
             style: "multi",
           },

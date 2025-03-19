@@ -102,8 +102,9 @@ def dashboard(request):
             'kayu',
             day=ExtractDay('tanggal'),
             month=ExtractMonth('tanggal'),
-            year=ExtractYear('tanggal')
-        ).annotate(berat=Sum('berat'))
+            year=ExtractYear('tanggal') 
+        ).annotate(berat=Sum('berat'))\
+        .order_by('year', 'month', 'day') 
         unique_vehicle_counts = reports.values(
             upper_plat=Upper('plat'),
             day=ExtractDay('tanggal'),
@@ -122,8 +123,8 @@ def dashboard(request):
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
         ).values('day', 'month', 'year', 'tujuan')\
-        .annotate(count=Count('id'))\
-        .order_by('year', 'month', 'day') 
+        .annotate(count=Count('id'), berat=Sum('berat'))\
+        .order_by('year', 'month', 'day', 'tujuan') 
 
         # Serialize the counts data
         kayu_counts_serialized = json.dumps(list(kayu_counts))
@@ -193,7 +194,8 @@ def dashboard(request):
             day=ExtractDay('tanggal'),
             month=ExtractMonth('tanggal'),
             year=ExtractYear('tanggal')
-        ).annotate(berat=Sum('berat'))
+        ).annotate(berat=Sum('berat'))\
+        .values('year', 'month', 'day')
         unique_vehicle_counts = Report.objects.annotate(
             upper_plat=Upper('plat'),
             day=ExtractDay('tanggal'),
@@ -208,10 +210,12 @@ def dashboard(request):
             year=ExtractYear('tanggal')
         ).annotate(count=Count('upper_plat', distinct=True))
         data_AllTujuan_counts = reports.values(
-            day=ExtractDay('tanggal'),
-            month=ExtractMonth('tanggal'),
-            year=ExtractYear('tanggal')
-        ).values('day', 'month', 'year', 'tujuan').annotate(count=Count('id'))
+            'tanggal', 'tujuan'
+        ).annotate(
+            count=Count('id'),
+            berat=Sum('berat')
+        ).order_by('tanggal', 'tujuan')
+
 
 
         kayu_counts_serialized = json.dumps(list(kayu_counts))
@@ -452,7 +456,7 @@ def display_report_items(request):
 
     # Get ordering parameters from DataTables
     order_column_index = int(request.GET.get('order[0][column]', 0))  # Default column to sort by is column 0
-    order_direction = request.GET.get('order[0][dir]', 'desc')  # Default direction is descending
+    order_direction = request.GET.get('order[1][dir]', 'desc')  # Default direction is descending
 
     # Map column index to actual field name
     column_fields = [

@@ -339,7 +339,8 @@
       renderMixedChart("tonaseMonthlyChart", tonaseCounts, labels, startDate, endDate, "Total Tonase", true);
       renderMixedChart("vehicleKayuChart", vehicleKayuCounts, labels, startDate, endDate, "Total Kendaraan");
 
-      renderTonaseChart('TonaseLineChart', "{{ sender_name }}", tonaseCounts, startDate, endDate, dmy_tujuan);
+      //console.log(dmy_tujuan);
+      renderTonaseChart('TonaseLineChart', "{{ sender_name }}", startDate, endDate, dmy_tujuan);
   });
 
     const kayuColorPalette = {
@@ -354,118 +355,142 @@
     };
    
     var uniqueColors = {
-        'Cipta Mandala': 'rgb(247, 197, 36)', // Light Blue
-        'Hijau Lestari': 'rgb(48, 224, 25)', // Orange
-        'Sumatra Prima Fibreboard': 'rgb(245, 0, 0)', // Teal
-      'PT Sumatera Prima Fibreboard': 'rgb(0, 45, 247)' // Purple
-      };
-    function renderTonaseChart(chartId, sender, tonaseCounts, startDate, endDate, dmy_tujuan) {
-        // console.log(sender, tonaseCounts, dmy_tujuan);
+    'Cipta Mandala':  'rgb(247, 197, 36)',  // Red
+    'Hijau Lestari': 'rgb(48, 224, 25)',   // Green
+    'Sumatera Prima Fibreboard': 'rgb(245, 0, 0)',  // Yellow
+    
+};
 
-        const groupedData = {};
+function renderTonaseChart(chartId, sender, startDate, endDate, dmy_tujuan) {
+    // Convert startDate and endDate to Date objects
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
-        // Loop untuk mengelompokkan tonase berdasarkan tanggal
-        tonaseCounts.forEach(item => {
-            const dateKey = `${item.year}-${item.month}-${item.day}`;
+    // Filter dmy_tujuan to only include records within the given date range (startDate to endDate)
+    const filteredData = dmy_tujuan.filter(item => {
+        const recordDate = new Date(item.year, item.month - 1, item.day); // month is 0-indexed
+        return recordDate >= start && recordDate <= end;
+    });
 
-            // Cari tujuan berdasarkan tanggal dari dm   y_tujuan
-            const matchedDestination = dmy_tujuan.find(dest => 
-                dest.year === item.year && dest.month === item.month && dest.day === item.day
-            );
+    const groupedData = {};
 
-            const tujuan = matchedDestination ? matchedDestination.tujuan : "Tidak Diketahui"; 
+    // Loop through the filtered dmy_tujuan data to create grouped data by date and tujuan
+    filteredData.forEach(item => {
+        const dateKey = `${item.year}-${item.month}-${item.day}`;
 
-            // Jika belum ada entry, inisialisasi
-            if (!groupedData[dateKey]) {
-                groupedData[dateKey] = {
-                    day: item.day,
-                    month: item.month,
-                    year: item.year,
-                    totalBerat: 0,
-                    tujuan: {}
-                };
+        // Initialize the group for this date if it doesn't exist
+        if (!groupedData[dateKey]) {
+            groupedData[dateKey] = {
+                day: item.day,
+                month: item.month,
+                year: item.year,
+                totalBerat: 0,
+                tujuan: {}
+            };
+        }
+
+        // Add the tonase (weight) for this date
+        const tujuan = item.tujuan || "Tidak Diketahui";  // Default to "Tidak Diketahui" if no tujuan
+        if (!groupedData[dateKey].tujuan[tujuan]) {
+            groupedData[dateKey].tujuan[tujuan] = 0;
+        }
+        groupedData[dateKey].tujuan[tujuan] += item.berat; // Sum berat for this tujuan on this date
+    });
+
+    // Sort dates in ascending order
+    const sortedDates = [];
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const dateKey = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+        sortedDates.push(dateKey);
+    }
+
+    const labels = [];
+    const datasetMap = {};
+
+    sortedDates.forEach(dateKey => {
+        const group = groupedData[dateKey] || { tujuan: {} };  // If no data, initialize an empty group
+        const formattedDate = `${group.day}-${group.month}-${group.year}`;
+
+        labels.push(formattedDate);
+
+        // If no data for this date, set all tujuan to 0
+        Object.keys(group.tujuan).forEach(tujuan => {
+            if (!datasetMap[tujuan]) {
+                datasetMap[tujuan] = [];
             }
+            datasetMap[tujuan].push(group.tujuan[tujuan]); // Push the summed berat for this tujuan
+        });
 
-            // Tambahkan berat tonase ke tanggal yang sesuai
-            groupedData[dateKey].totalBerat += item.berat;
-
-            // Simpan data per tujuan
-            if (!groupedData[dateKey].tujuan[tujuan]) {
-                groupedData[dateKey].tujuan[tujuan] = 0;
+        // For tujuan that doesn't exist in this date, push 0
+        Object.keys(datasetMap).forEach(tujuan => {
+            if (!group.tujuan[tujuan]) {
+                datasetMap[tujuan].push(0);  // If no data, push 0 tonnage
             }
-            groupedData[dateKey].tujuan[tujuan] += item.berat;
         });
+    });
 
-        // Urutkan tanggal ASCENDING (lama ke baru, kiri ke kanan)
-        const sortedDates = Object.keys(groupedData).sort((a, b) => {
-            const [yearA, monthA, dayA] = a.split('-').map(Number);
-            const [yearB, monthB, dayB] = b.split('-').map(Number);
-            return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
-        });
-
-        const labels = [];
-        const datasetMap = {};
-
-        sortedDates.forEach(dateKey => {
-            const group = groupedData[dateKey];
-            const formattedDate = `${group.day}-${group.month}-${group.year}`;
-            labels.push(formattedDate);
-
-            Object.keys(group.tujuan).forEach(tujuan => {
-                if (!datasetMap[tujuan]) {
-                    datasetMap[tujuan] = [];
-                }
-                datasetMap[tujuan].push(group.tujuan[tujuan]);
-            });
-        });
-
-        const datasets = Object.keys(datasetMap).map((tujuan, index) => ({
+    // Create the datasets for the chart
+    const datasets = Object.keys(datasetMap).map((tujuan, index) => {
+        const color = uniqueColors[tujuan] || 'gray'; // Use a unique color for each tujuan
+        return {
             label: `Tonase ${tujuan}`,
             data: datasetMap[tujuan],
-            borderColor: `hsl(${index * 60}, 70%, 50%)`,
+            borderColor: color,
             fill: false,
             tension: 0.1,
             pointRadius: 5,
-        }));
+        };
+    });
 
-        if (labels.length === 0) {
-            labels.push('No Data Available');
-            datasets.push({
-                label: 'Tidak Ada Data',
-                data: [0],
-                borderColor: 'gray',
-                fill: false,
-                tension: 0.1,
-                pointRadius: 5,
-            });
-        }
+    // Handle case when there's no data
+    if (labels.length === 0) {
+        labels.push('No Data Available');
+        datasets.push({
+            label: 'Tidak Ada Data',
+            data: [0],
+            borderColor: 'gray',
+            fill: false,
+            tension: 0.1,
+            pointRadius: 5,
+        });
+    }
 
-        const ctx = document.getElementById(chartId).getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: datasets
+    // Create the chart
+    const ctx = document.getElementById(chartId).getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { title: { display: true, text: 'Tanggal' } },
+                y: { title: { display: true, text: 'Tonase (Berat)' }, beginAtZero: true }
             },
-            options: {
-                responsive: true,
-                scales: {
-                    x: { title: { display: true, text: 'Tanggal' } },
-                    y: { title: { display: true, text: 'Tonase (Berat)' }, beginAtZero: true }
-                },
-                maintainAspectRatio: false,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(tooltipItem) {
-                                return `${tooltipItem.raw} Tonase`;
-                            }
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            return `${tooltipItem.raw} Tonase`;
                         }
                     }
                 }
             }
-        });
-    }
+        }
+    });
+}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1025,7 +1050,7 @@
       const currentDate = new Date();
 
       const startDateObj = new Date();
-      startDateObj.setMonth(startDateObj.getMonth() - 1); // Set to previous month
+      startDateObj.setMonth(startDateObj.getMonth()); // Set to previous month
       startDateObj.setDate(1); // Set to the 1st of that month
 
 
