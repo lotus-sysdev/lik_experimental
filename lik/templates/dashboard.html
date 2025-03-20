@@ -1043,22 +1043,13 @@ function renderTonaseChart(chartId, sender, startDate, endDate, dmy_tujuan) {
           new Date(new Date().setDate(new Date().getDate() - 729))
         ); // Date 730 days ago
       }else if (dateRange === "mtd") {
-      // End date is today's date
-      endDate = formatDate(new Date()); // Today's date
-
-      // Get the current date
-      const currentDate = new Date();
-
-      const startDateObj = new Date();
-      startDateObj.setMonth(startDateObj.getMonth()); // Set to previous month
-      startDateObj.setDate(1); // Set to the 1st of that month
-
-
-      startDate = formatDate(startDateObj);
-
-}
-
-      else if (dateRange === "ytd") {
+            endDate = formatDate(new Date()); 
+            const currentDate = new Date();
+            const startDateObj = new Date();
+            startDateObj.setMonth(startDateObj.getMonth()); 
+            startDateObj.setDate(1); 
+            startDate = formatDate(startDateObj);
+      } else if (dateRange === "ytd") {
         endDate = formatDate(new Date()); // Today's date
         startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year
         startDate = formatDate(startDate);

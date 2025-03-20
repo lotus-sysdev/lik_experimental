@@ -61,14 +61,11 @@
     <select id="dateRange" class="form-control ml-2 btn-info">
       <option value="">Select Date Range</option>
       <option value="7">Last 7 days</option>
-      <option value="30">Last 30 days</option>
-      <option value="60">Last 60 days</option>
-      <option value="90">Last 90 days</option>
-      <option value="ytd">Current year to date</option>
+      <option value="30">Last 30 days</option>      
       <option value="365">Last 1 year (365 days)</option>
-      <option value="730">Last 2 years (730 days)</option>
+      <option value="mtd">Month to date</option>      
+      <option value="ytd">Current year to date</option>
     </select>
-
     <button id="resetButton" class="btn btn-secondary ml-1">Reset</button>
   </div>
 
@@ -315,105 +312,7 @@
 
   }
 
-  {% comment %} function exportPDFWithLogo(table) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    // Add logo
-    const logoUrl = "{% static 'image/header.png' %}";  // Replace with the URL or path to your logo
-    const logoWidth = 50;  // Width of the logo
-    const logoHeight = 20; // Height of the logo
-    const pageWidth = doc.internal.pageSize.width;  // Get the page width
-    const logoX = (pageWidth - logoWidth) / 2;  // Calculate center position
-
-
-
-    // Add the logo to the top-center of the page
-    doc.addImage(logoUrl, 'PNG', logoX, 10, logoWidth, logoHeight);
-
-    // Add title
-    doc.setFontSize(16);
-
-    // Get selected rows
-    const selectedRows = table.rows({ selected: true }).data();
-
-
-    const selectedRowData = [];
-    selectedRows.each(function(rowData) {
-        const row = [];
-        rowData.forEach(function(cellData) {
-            row.push(cellData); // Add each cell's data to the row
-        });
-        selectedRowData.push(row);
-    });
-
-    console.log(selectedRows);
-
-    // Get visible columns
-    const visibleColumns = [];
-    table.columns().every(function(index) {
-        if (this.visible()) {
-            visibleColumns.push(index);  // Store the index of visible columns
-        }
-    });
-
-    console.log(table)
-
-    // Get column headers dynamically from DataTable for visible columns
-    const headers = [];
-    visibleColumns.forEach(function(colIndex) {
-        const headerText = table.column(colIndex).header().textContent.trim();
-        headers.push(headerText); // Add the header text for visible columns
-    });
-
-    // Define column widths (adjust based on your specific needs)
-    const columnWidths = visibleColumns.map((colIndex) => {
-        if (colIndex === 6) {
-            return 30; // Example for name column
-        }
-        if (colIndex === 10) {
-            return 20; // Example for price column
-        }
-        return 30; // Default width for other columns
-    });
-
-    // Format data (for example, format price values or date)
-    const formattedRowData = selectedRowData.map(function(rowData) {
-        return visibleColumns.map(function(colIndex) {
-            let value = rowData[colIndex];
-            if (colIndex === 10) { // Assuming price is in column 10
-                // Format price values (e.g., add currency symbol and format)
-                if (typeof value === 'string' && value.startsWith("IDR")) {
-                    value = value.replace(/,/g, "#").replace(/\./g, ",").replace(/#/g, ".");
-                    return value;  // You can modify this further if needed
-                } else if (typeof value === 'string' && value.startsWith("$")) {
-                    value = value.replace("$", "USD");
-                    return value;
-                }
-            }
-            return value;
-        });
-    });
-
-    // Use jsPDF's autoTable plugin to generate the table in the PDF
-    doc.autoTable({
-        head: [headers],
-        body: formattedRowData,
-        startY: 40,  // Position below the logo
-        theme: 'grid',
-        margin: { top: 30, left: 20, right: 20 },
-        columnStyles: {
-            0: { cellWidth: 10 }, // Example: Adjust column width for column 0
-            1: { cellWidth: 25 }, // Example: Adjust column width for column 1
-            6: { cellWidth: 30 }, // Adjust name column width
-            10: { cellWidth: 20 }, // Adjust price column width
-            // Add more column widths as needed
-        },
-    });
-
-    // Save PDF with a custom name
-    doc.save('datatable_report_with_logo.pdf');
-} {% endcomment %}
+  
 
 
 
@@ -659,6 +558,10 @@
         startDate = formatDate(
           new Date(new Date().setDate(new Date().getDate() - 729))
         ); // Date 730 days ago
+      } else if (dateRange === "mtd") {
+        endDate = formatDate(new Date()); // Today's date
+        startDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1); // 1st day of current month
+        startDate = formatDate(startDate);
       } else if (dateRange === "ytd") {
         endDate = formatDate(new Date()); // Today's date
         startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year
