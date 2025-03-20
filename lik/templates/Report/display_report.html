@@ -86,12 +86,10 @@
             <option value="11-20">11-20 of This Month</option>
             <option value="21-eom">21 to End of This Month</option>
             <option value="7">Last 7 days</option>
-            <option value="30">Last 30 days</option>
-            <option value="60">Last 60 days</option>
-            <option value="90">Last 90 days</option>
-            <option value="ytd">Current year to date</option>
+            <option value="30">Last 30 days</option>      
             <option value="365">Last 1 year (365 days)</option>
-            <option value="730">Last 2 years (730 days)</option>
+            <option value="mtd">Month to date</option>      
+            <option value="ytd">Current year to date</option>
           </select>
 
           <button id="resetButton" class="btn btn-secondary ml-2">Reset</button>
@@ -716,6 +714,10 @@
             startDate = formatDate(
               new Date(new Date().setDate(new Date().getDate() - 729))
             ); // Date 365 days ago
+          }  else if (dateRange === "mtd") {
+            endDate = formatDate(new Date()); // Today's date
+            startDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1); // 1st day of current month
+            startDate = formatDate(startDate);
           } else if (dateRange === "ytd") {
             endDate = formatDate(new Date()); // Today's date
             startDate = new Date(new Date().getFullYear(), 0, 1); // 1st January of current year
